@@ -525,10 +525,12 @@ function advCtx(){const now=new Date(),cm=curM();const a=inMonth(cm);const inc=s
   return{now,cm,a,inc,exp,prev,avgInc,avgExp,dim,day,st,G,baseInc:Math.max(inc,avgInc),refExp:avgExp||exp,B:+S.settings.monthlyBudget||0,gs:goalsSummary(),Ds:debts().filter(d=>+d.balance>0)}}
 function advLastBackup(){try{return localStorage.getItem('masareef:lastBackup')||''}catch(e){return ''}}
 function advPriorities(c){const P=[];const add=(w,ic,t,s,act,kind)=>P.push({w,ic,t,s,act,kind:kind||''});
-  const late=c.st.R.filter(i=>!i.isPaid&&c.day>i.day);
+  const td=today(),dd=i=>dueOf(i,c.cm);
+  const late=c.st.R.filter(i=>!i.isPaid&&td>dd(i));
   if(late.length)add(100,'bills',countWord(late.length,'دفعة متأخرة','دفعتان متأخرتان','دفعات متأخرة','دفعة متأخرة')+': '+late.slice(0,3).map(i=>esc(i.name)).join('، '),'المجموع <b class="num">'+amtH(late.reduce((s,i)=>s+i.amount-(i.paidAmt||0),0))+'</b>. ادفعها أولًا لتتجنب الغرامات.',['افتح الشهرية','data-tab="monthly"'],'bill');
-  const soon=c.st.R.filter(i=>!i.isPaid&&i.day>=c.day&&i.day-c.day<=3);
-  if(soon.length)add(70,'cal','قريبًا خلال 3 أيام: '+soon.slice(0,3).map(i=>esc(i.name)).join('، '),'جهّز <b class="num">'+money(soon.reduce((s,i)=>s+i.amount-(i.paidAmt||0),0))+'</b> '+CUR+'.',['الشهرية','data-tab="monthly"'],'bill');
+  const soon=c.st.R.filter(i=>!i.isPaid&&dd(i)>=td&&dDiff(td,dd(i))<=3);
+  if(soon.length){const need=soon.reduce((s,i)=>s+i.amount-(i.paidAmt||0),0);const dpl=dailyPlan();const short=dpl.has&&dpl.inc-dpl.spent<need-0.0005;
+    add(short?88:70,'cal','قريبًا خلال 3 أيام: '+soon.slice(0,3).map(i=>esc(i.name)).join('، '),'جهّز <b class="num">'+money(need)+'</b> '+CUR+'. '+(short?'<b class="amt-exp">المتبقي معك أقل من هذا المبلغ</b>، رتّب الأولويات قبل الموعد.':'تأكد من توفر المبلغ قبل موعد الدفع.'),['الشهرية','data-tab="monthly"'],'bill');}
   trustAlertList().slice(0,3).forEach(x=>add(x.level==='late'?88:62,'trust',esc(x.title),esc(x.when),['الأمانات','data-tab="trusts"'],'trust'));
   carAlertList().slice(0,3).forEach(x=>add(x.level==='late'?95:60,'car',esc(x.title),esc(x.when),['السيارات','data-tab="cars"'],'car'));
   docAlertList().slice(0,3).forEach(x=>add(x.level==='late'?90:55,'doc',esc(x.title),esc(x.when),['مستنداتي','data-tab="docs"'],'doc'));
@@ -550,7 +552,7 @@ function advPriorities(c){const P=[];const add=(w,ic,t,s,act,kind)=>P.push({w,ic
   if(c.prev.length){const avg={};c.prev.forEach(x=>x.filter(t=>t.type==='exp').forEach(t=>avg[t.cat]=(avg[t.cat]||0)+(+t.amount)/c.prev.length));const now={};c.a.filter(t=>t.type==='exp').forEach(t=>now[t.cat]=(now[t.cat]||0)+(+t.amount));
     Object.entries(now).filter(([k,v])=>avg[k]&&v>avg[k]*1.4&&v-avg[k]>=10).sort((x,y)=>(y[1]-avg[y[0]])-(x[1]-avg[x[0]])).slice(0,2).forEach(([k,v])=>add(50,'up','صرفك على «'+esc(catOf(k).n)+'» ارتفع','هذا الشهر <b class="num">'+amtH(v)+'</b> ومعدلك <b class="num">'+amtH(avg[k])+'</b> (أعلى بـ <span dir="ltr">'+Math.round((v/avg[k]-1)*100)+'%</span>).',['السجل','data-tab="log"']))}
   if(!c.inc&&c.day>=7&&c.avgInc>0)add(45,'bulb','لم تسجّل دخل هذا الشهر','سجّل راتبك ليكون التحليل دقيقًا.',['سجّل الدخل','data-advinc="1"']);
-  proAdvice(add);
+  proAdvice(add);moreAdvice(add);
   return P.sort((a,b)=>b.w-a.w)}
 function advChecklist(c){const L=[];const add=(done,t,s,act)=>L.push({done:!!done,t,s,act});const has=k=>c.G.some(x=>x.g.kind===k);
   const em=c.G.find(x=>x.g.kind==='emergency');
@@ -757,31 +759,35 @@ function askAnswer(kind,arg){const d=dailyPlan();
   if(kind==='newinst'){const A=arg.amt;const inc=d.inc;if(!inc)return '<p>سجّل دخلك أولًا لأقدّر أثر القسط الجديد.</p>';const cur=debts().filter(x=>+x.balance>0.0005).reduce((s,x)=>s+debtInst(x),0);
     const r0=Math.round(cur/inc*100),r1=Math.round((cur+A)/inc*100);const sur=avgSurplus();const lv=r1<=30&&(sur===null||sur-A>0)?'ok':r1<=40&&(sur===null||sur-A>-0.0005)?'mid':'bad';
     return `<div class="verdict ${lv}">${lv==='ok'?'يبدو محتملًا':lv==='mid'?'ممكن لكنه سيضغطك':'لا أنصح به الآن'}</div><p>أقساطك الحالية <b class="num">${amtH(cur)}</b> (<span dir="ltr">${r0}%</span> من دخلك). مع قسط <b class="num">${amtH(A)}</b> تصير <span dir="ltr">${r1}%</span>، والأفضل أن تبقى أقل من 40%.${sur!==null?' ومتوسط ما يتبقى لك شهريًا <b class="num">'+amtH(sur)+'</b>، فيصير بعده <b class="num">'+(sur-A<0?'−':'')+amtH(Math.abs(sur-A))+'</b>.':''}</p><p class="note">تقدير من بياناتك المسجّلة فقط، ولا يشمل شروط التمويل ورسومه.</p>`}
+  if(kind==='split')return splitAnswer();
+  if(kind==='extra')return arg.amt>0?extraAnswer(arg.amt):'<p>اكتب المبلغ الإضافي، مثل: «معي 100 زيادة، للدين أم للطوارئ؟»</p>';
   if(kind==='buy')return affordReply(arg.amt,arg.item,'now');
   if(kind==='next')return affordReply(arg.amt,arg.item,'next');
   return '<p>اكتب المبلغ وما تريد شراءه، مثل: «جوال 250» أو «هل أقدر أشتري ساعة بـ 80؟»، أو اختر سؤالًا من الأزرار.</p>'}
-function openAsk(){const L=document.getElementById('layer');const msgs=[];
+function openAsk(init){const L=document.getElementById('layer');const msgs=[];
   const say=(who,html)=>{msgs.push({who,html});paint()};
   const paint=()=>{const box=document.getElementById('askLog');if(!box)return;box.innerHTML=msgs.map(m=>`<div class="bub ${m.who}">${m.html}</div>`).join('');box.scrollTop=box.scrollHeight;
     const s=L.querySelector('.sheet');if(s)s.scrollTop=s.scrollHeight};
   const ask=(q,kind,arg)=>{say('me',esc(q));setTimeout(()=>say('bot',askAnswer(kind,arg)),120)};
-  const free=q=>{const p=parseAsk(q);const t=q.replace(/[أإآ]/g,'ا');if(p.amt>0&&/قسط/.test(t))return ask(q,'newinst',p);if(p.amt>0&&/دين|ديون|اضافي/.test(t))return ask(q,'debtx',p);if(p.amt>0)return ask(q,'buy',p);
-    if(/اليوم/.test(t))return ask(q,'today');if(/اسبوع|الويكند|العطله|العطلة|نهايه|نهاية/.test(t))return ask(q,'week');if(/اوفر|توفير|وفر/.test(t))return ask(q,'save');if(/حساب|البنك|رصيد/.test(t))return ask(q,'bank');if(/الشهر|باقي|متبقي|كم/.test(t))return ask(q,'month');return ask(q,'help')};
+  const free=q=>{const p=parseAsk(q);const t=q.replace(/[أإآ]/g,'ا');if(p.amt>0&&/طوارئ|فائض|زياده|زيادة|زايد|فاضل/.test(t))return ask(q,'extra',p);if(p.amt>0&&/قسط/.test(t))return ask(q,'newinst',p);if(p.amt>0&&/دين|ديون|اضافي/.test(t))return ask(q,'debtx',p);if(p.amt>0)return ask(q,'buy',p);
+    if(/اليوم/.test(t))return ask(q,'today');if(/اسبوع|الويكند|العطله|العطلة|نهايه|نهاية/.test(t))return ask(q,'week');if(/وزع|توزيع|اقسم|تقسيم/.test(t))return ask(q,'split');if(/اوفر|توفير|وفر|خفض|تخفيض|اقلل|اقلل|اقلل/.test(t))return ask(q,'save');if(/حساب|البنك|رصيد/.test(t))return ask(q,'bank');if(/الشهر|باقي|متبقي|كم/.test(t))return ask(q,'month');return ask(q,'help')};
   const d=dailyPlan();
   L.innerHTML=`${sheetTop('اسأل المستشار')}
    <div class="backrow" style="margin:0 0 8px"><h2 style="margin:0">اسأل المستشار</h2><span class="note">من بياناتك داخل هاتفك</span></div>
    <div class="asklog" id="askLog"></div>
-   <div class="chips askq"><button class="chip" data-askq="today">كم أقدر أصرف اليوم؟</button><button class="chip" data-askq="week">حتى نهاية الأسبوع؟</button><button class="chip" data-askq="month">كم باقي لي هذا الشهر؟</button><button class="chip" data-askq="save">وين أقدر أوفّر؟</button><button class="chip" data-askq="bank">كم المفروض في حسابي؟</button><button class="chip" data-askq="debtx:20">ماذا لو دفعت 20 إضافية للدين؟</button><button class="chip" data-askq="short">ماذا لو لم يكفِ المال؟</button></div>
+   <div class="chips askq"><button class="chip" data-askq="today">كم أقدر أصرف اليوم؟</button><button class="chip" data-askq="week">حتى نهاية الأسبوع؟</button><button class="chip" data-askq="month">كم باقي لي هذا الشهر؟</button><button class="chip" data-askq="split">كيف أوزع المبلغ المتبقي معي؟</button><button class="chip" data-askq="save">ما المصروفات التي أستطيع تخفيضها؟</button><button class="chip" data-askq="bank">كم المفروض في حسابي؟</button><button class="chip" data-askq="debtx:20">ماذا لو دفعت 20 إضافية للدين؟</button><button class="chip" data-askq="short">ماذا لو لم يكفِ المال؟</button></div>
    <div class="askin"><input class="inp" id="askTx" placeholder="مثال: جوال 250 أو هل أقدر أشتري ساعة بـ 80؟" autocomplete="off"><button class="btn" id="askGo" aria-label="إرسال">اسأل</button></div>
    <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
   say('bot',`${advGreet()}! ${d.has?`مصروفك اليوم <b class="num">${amtH(d.daily)}</b> وباقٍ منه <b class="num">${amtH(Math.max(0,d.todayLeft))}</b>. `:''}اكتب ما تريد شراءه ومبلغه، وأقول لك هل يرهقك حتى نهاية الشهر وما البدائل.`);
+  if(init){const [k,a]=String(init).split(':');const Q={split:'كيف أوزع المبلغ المتبقي معي؟',extra:'معي '+money(+a||0)+' زيادة: للدين أم للطوارئ؟'};setTimeout(()=>ask(Q[k]||k,k,{amt:+a||0}),60)}
   const sendTx=()=>{const i=document.getElementById('askTx');const q=i.value.trim();if(!q)return;i.value='';free(q)};
   L.oninput=L.onchange=null;
   L.onkeydown=e=>{if(e.target.id==='askTx'&&e.key==='Enter'){e.preventDefault();sendTx()}};
   L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;
     if(x.hasAttribute('data-close')){L.innerHTML='';L.onkeydown=null;return}
     if(x.id==='askGo'){sendTx();return}
-    if(x.dataset.askq){const [k,a,it]=x.dataset.askq.split(':');const lab={today:'كم أقدر أصرف اليوم؟',week:'كم أقدر أصرف حتى نهاية الأسبوع؟',month:'كم باقي لي هذا الشهر؟',save:'وين أقدر أوفّر؟',bank:'كم المفروض في حسابي اليوم؟'};
+    if(x.dataset.askq){const [k,a,it]=x.dataset.askq.split(':');const lab={today:'كم أقدر أصرف اليوم؟',week:'كم أقدر أصرف حتى نهاية الأسبوع؟',month:'كم باقي لي هذا الشهر؟',save:'ما المصروفات التي أستطيع تخفيضها؟',bank:'كم المفروض في حسابي اليوم؟',split:'كيف أوزع المبلغ المتبقي معي؟'};
+      if(k==='extra')return ask('معي '+money(+a)+' زيادة: للدين أم للطوارئ؟','extra',{amt:+a});
       if(k==='short'){L.innerHTML='';L.onkeydown=null;openShortfall();return}if(k==='debtx')return ask('ماذا لو دفعت '+money(+a)+' إضافية للدين؟','debtx',{amt:+a});
       if(k==='next')return ask('ماذا لو اشتريتها الشهر القادم؟','next',{amt:+a,item:it});if(k==='buy')return ask('ماذا لو كانت '+money(+a)+'؟','buy',{amt:+a,item:it});return ask(lab[k],k)}
     if(x.dataset.askbuy){L.innerHTML='';L.onkeydown=null;openSheet(null,{type:'exp',amount:r3(+x.dataset.askbuy),note:x.dataset.item||''});return}
@@ -845,7 +851,7 @@ function vHome(){
   return `${duaTickerHtml()}${spiritHtml('top')}${rzHtml('top')}<section class="hero"><div class="lbl">${pc?'المتبقي من راتب هذه الدورة':'المتبقي في '+esc(mShort(m))}</div>
    <div class="big"><span class="num">${left<0?'−':''}${money(Math.abs(left))}</span> <small>${CUR}</small></div>
    <div class="row"><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M7 9v8h8"/></svg></span>الدخل</span><b class="num">${amtH(inc)}</b></div><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>المصاريف</span><b class="num">${amtH(exp)}</b></div></div>${pc?`<div class="lbl" style="margin-top:10px;font-size:12.5px">دورة الراتب: ${fmtD(pc.start)} – ${fmtD(pc.end)}</div>`:''}</section>
-   ${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${todayHtml()}${finStatusHtml()}
+   ${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${todayHtml()}${smartAlertsHtml()}${finStatusHtml()}
    ${pendHtml()||billAlertsHtml()||trustAlertsHtml()||carAlertsHtml()||docAlertsHtml()?'<div style="margin-top:14px">'+pendHtml()+billAlertsHtml()+trustAlertsHtml()+carAlertsHtml()+docAlertsHtml()+'</div>':''}${spiritHtml('mid')}${rzHtml('mid')}${widgetNudgeHtml()}${empty}${advHomeHtml()}${plansHomeHtml()}${repHomeHtml()}
    ${recent.length?`<h2>آخر العمليات</h2><div class="panel" style="padding:6px 10px">${recent.map(txRow).join('')}</div><div style="margin-top:8px"><button class="chip" data-tab="log">عرض كل العمليات</button></div>`:''}${debtsBrowseHtml()}${spiritHtml('bottom')}${rzHtml('bottom')}`;
 }
@@ -1118,7 +1124,7 @@ function migrateRecs(){const R=S.settings.recurring||[];let ch=0;R.forEach(r=>{i
   debts().forEach(d=>{(d.pays||[]).forEach(p=>{if(!p.id){p.id=uidGen();ch=1}});if(!d.start){d.start=debtStart(d);ch=1}if(!(+d.balance>0.0005)&&!d.closed){debtSync(d);ch=1}});if(ch)putSettings()}
 function remindDay(r){return Math.min(31,Math.max(1,+r.remind||Math.max(1,(+r.day||1)-2)))}
 /* تنبيهات الفواتير: من يوم التذكير الذي تحدده حتى تُدفع */
-function billAlertList(){const m=curM(),td=today();const out=[];
+function billAlertList(){const m=curM(),td=today();const out=[];if(!alertCfg().bills.on)return out;
   monthItems(m).filter(i=>i.kind==='rec'&&!i.isPaid).forEach(i=>{const r=i.ref;const dd=dueOf(i,m);const rdD=addDays(dd,-Math.max(0,(+i.day||1)-remindDay(r)));const later=(r.later||{})[m];if(later&&i.paidAmt>0){if(td<later)return}else if(td<rdD&&td<=dd)return;
     const due=i.amount-(i.paidAmt||0);const late=td>dd;const L=billLedger(r,m);const dleft=Math.round((new Date(dd+'T12:00')-new Date(td+'T12:00'))/864e5);
     out.push({ref:'bill:'+r.id+':'+m,id:r.id,level:late?'late':'warn',days:dleft,title:(i.paidAmt>0?'باقي '+r.name+' ':(late?'تأخر دفع ':'ادفع ')+r.name+' ')+money(due)+' '+CUR,
@@ -1777,7 +1783,7 @@ function carIcs(c){const now=new Date().toISOString().replace(/[-:]/g,'').slice(
     ev.push(['BEGIN:VEVENT','UID:'+c.id+'-'+k+'-'+icsDate(e)+'@masareef','DTSTAMP:'+now,'DTSTART;VALUE=DATE:'+icsDate(e),'DTEND;VALUE=DATE:'+icsDate(isoD(d)),'SUMMARY:'+title,'DESCRIPTION:تذكير من تطبيق إدارة شؤوني'+(c[k+'Cost']?' - المبلغ المتوقع '+money(c[k+'Cost'])+' ر.ع.':''),...al,'END:VEVENT'].join('\r\n'))});
   if(!ev.length)return '';return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//masareef//AR','CALSCALE:GREGORIAN',...ev,'END:VCALENDAR'].join('\r\n')+'\r\n'}
 async function notifyCarAlerts(){try{if(!('Notification' in window)||Notification.permission!=='granted')return;const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
-  const day=today();for(const a of carAlertList().concat(billAlertList(),trustAlertList())){const key='masareef:nt:'+a.ref+':'+day;let seen=null;try{seen=localStorage.getItem(key)}catch(e){}if(seen)continue;
+  const day=today();for(const a of carAlertList().concat(billAlertList(),trustAlertList(),smartAlertList().filter(x=>x.level!=='info'||x.kind==='monthEnd'))){const key='masareef:nt:'+a.ref+':'+day;let seen=null;try{seen=localStorage.getItem(key)}catch(e){}if(seen)continue;
     const opt={body:a.when,icon:'icon-192.png',tag:a.ref,lang:'ar',dir:'rtl'};
     if(reg&&reg.showNotification)await reg.showNotification(a.title,opt);else new Notification(a.title,opt);
     try{localStorage.setItem(key,'1')}catch(e){}}}catch(e){}}
@@ -3133,8 +3139,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.28.0';
+const APP_VERSION='2.29.0';
 const CHANGELOG=[
+ {v:'2.29.0',d:'2026-10-15',items:['نظام التنبيهات الذكي في الرئيسية: موعد القسط، والدين أو الالتزام المتأخر، وتجاوز الميزانية، وانخفاض المتاح للصرف، والمصروف غير المعتاد، ونهاية الشهر، ونزول الراتب','⚙️ الضبط ← التنبيهات: تفعيل كل نوع أو إيقافه، وكم يومًا قبل القسط، وحد الخطر للمتاح، وإشعارات الهاتف','تقرير الشهر الشامل: الدخل والمصروفات والصافي، والالتزامات والديون المسددة، والادخار، وأين ذهبت أموالك، مع المقارنة بالشهر السابق','المستشار: تنبيه انخفاض الدخل عن المعتاد، والمبلغ غير المخصص مع مقارنة الدين والطوارئ، والمصروف غير المعتاد، والقسط القريب مع التأكد من توفر المبلغ','اسأل المستشار: «كيف أوزع المبلغ المتبقي معي؟»، و«معي 100 زيادة: للدين أم للطوارئ؟»، و«ما المصروفات التي أستطيع تخفيضها؟»، مع توضيح الافتراضات','إصلاح: المتأخر والقريب في المستشار صار يُحسب بتاريخ الاستحقاق، فيعمل صحيحًا مع الشهر المالي حسب الراتب']},
  {v:'2.28.0',d:'2026-10-15',items:['الشهر المالي حسب الراتب (من «إدارة الراتب»): يصير الشهر من يوم نزول الراتب حتى اليوم الذي قبل الراتب التالي، ويظهر باسم الشهرين مثل «سبتمبر – أكتوبر»','تتبعه كل الأقسام: الرئيسية والسجل والالتزامات الشهرية والتقارير والتقويم والمستشار والميزانيات','الالتزامات والأقساط تُحسب في الشهر المالي الذي يقع فيه موعدها، والتقويم يعرض الأيام من الراتب إلى الراتب']},
  {v:'2.27.0',d:'2026-10-15',items:['«وضعي المالي» في الرئيسية: الأموال المتوفرة في حساباتك، والدخل، والمصروفات، والمستحق ولم يُدفع، والمتبقي بعد الالتزامات، والديون المتبقية ونسبة سدادها','المؤشرات المالية: تغطية الالتزامات، ونسبة الدخل المخصص للديون، والمصروفات المتغيرة، والسيولة المتاحة','«ماذا أفعل إذا لم يكفِ المال؟»: يحسب العجز المتوقع، ويرتب الالتزامات غير المدفوعة حسب الأولوية (المتأخر والسكن والخدمات أولًا)، ويبين ما يغطيه المتوفر وما لا يغطيه، مع خطوات عملية','مقارنة المبلغ الإضافي للديون: الأعلى فائدة أولًا أو الأصغر أولًا، بموعد الانتهاء والفوائد وأول دين يُغلق','المستشار: تنبيه إذا كانت وتيرة إنفاقك في فئة ستتجاوز حدّها قبل نهاية الشهر، وتنبيه العجز','اسأل المستشار: «ماذا لو دفعت 20 إضافية للدين؟»، و«هل أستطيع تحمل قسط جديد؟» (اكتب: قسط 50)','تشفير ملف المزامنة بكلمة سر من ⚙️ الضبط: يُشفَّر على هاتفك قبل رفعه إلى Google Drive، ولا يُرفع شيء من جهاز لا يعرف الكلمة حتى لا تُستبدل البيانات']},
  {v:'2.26.0',d:'2026-10-15',items:['«ديوني» أُعيد تنظيمه وتوزيعه: التصفح في «الرئيسية» (الملخص ونسبة السداد ويوم التحرر، الأقسام والترتيب، بطاقة كل دين بسجله ومستنداته وكشفه، والديون المنتهية، وخطة التخلص من الديون)','إدارة الديون من «إدارة البيانات»: الإضافة والتعديل والأيقونات، وملفات كل دين (الدفعات والسجل والمستندات والكشف)، والديون المنتهية، وطريقة السداد والمبلغ الإضافي، والطباعة وExcel','دفع الأقساط من «الالتزامات الشهرية»: زر «💳 الدفع» في بطاقة الدين بالرئيسية يأخذك لقسطه مباشرة، وبعد دفع قسط الشهر يظهر زر «+ دفعة إضافية» للسداد المبكر','أُزيل مربع «ديوني» من «أقسامي»، والروابط القديمة إلى ديوني تفتح قسمه في الرئيسية','تغيير الصورة أو الأيقونة قبل أي اسم من «إدارة البيانات»: اضغط على الأيقونة (عليها ✎) واختر أيقونة بلون، أو رمزًا، أو صورة/شعارًا من جهازك','يشمل: الأشخاص، الجهات، الحسابات، الالتزامات الشهرية، الديون، والفئات (قسم جديد «🏷️ الفئات»)','تتحدث تلقائيًا في كل الصفحات: الشهرية، الديون، السجل، الأهل والبيت، وغيرها، وتنتقل لأجهزتك بالمزامنة','الصورة تُقصّ وتُصغَّر تلقائيًا، وزر «إرجاع الأيقونة الأصلية»','سؤال «هل توجد متأخرات لم تُدفع من الأشهر الماضية؟» عند إضافة أو تعديل التزام أو دين: المتأخرات تُضاف لمستحق الشهر حتى تُسدَّد، وتظهر «+ متأخرات» في الشهرية','زر «🔄 تحديث البيانات» في التقارير وقاعدة البيانات: يعيد حساب كل الأقسام ومطابقة قاعدة البيانات الداخلية وفحص السلامة','الديون: قسم جديد «📅 متابعة الدفع في التطبيق» في نموذج الدين: تاريخ بداية الدين الفعلي، وتاريخ بدء المتابعة في التطبيق تحدده أنت، والأشهر قبله تُعتبر مدفوعة ولا تظهر كمتأخرة','عدد الأقساط الكلي، وعدد الأقساط التي دفعتها قبل المتابعة (يُحسب تلقائيًا من الفرق بين التاريخين إن تركته فارغًا)، ورقم العقد/القرض، وملاحظة','بطاقة الدين تعرض: المتابعة من، الأقساط (مثلًا 21 من 60)، الأقساط الباقية، ورقم العقد، وكل دفعة من التطبيق تُحسب قسطًا','شبكة السنة تُظهر الأشهر قبل المتابعة «قبل المتابعة» بدل اعتبارها غير مدفوعة','ملف Excel للديون فيه الأعمدة الجديدة للتعديل والاستيراد']},
@@ -3767,6 +3774,7 @@ function vSettings(){const c=lockCfg(),af=c&&c.after!=null?+c.after:60;setTimeou
    ${c.pos!=='hide'?`<div class="setrow col"><div><b>مكان الزر</b></div><div class="seg rzposseg">${RZ_POS.filter(x=>x[0]!=='hide').map(([v,n])=>`<button class="n" data-rzpos="${v}" aria-pressed="${c.pos===v}">${n}</button>`).join('')}</div></div>`:''}
    <div class="setrow"><div><b>فتح الأدعية الآن</b></div><button class="chip" data-rizq="1">💰 فتح</button></div>
    <div class="setrow col"><div><b>لون خلفية صفحات القراءة</b><small>سورة الملك والأذكار والأدعية · خاص بهذا الجهاز</small></div>${rdSwatches()}</div></div>`})()}
+  <h2>🔔 التنبيهات</h2>${alertsSetHtml()}
   <h2>🔒 قفل الدفع قبل الموعد</h2>${payLockHtml()}
   <h2>☁️ المزامنة مع Google Drive</h2><div id="syncBox">${syncHtml()}</div>
   <h2>🛡️ وضع المدير</h2>${admHtml()}
@@ -4254,6 +4262,87 @@ function openSyncEnc(){const L=document.getElementById('layer');
       if(p1.length<8){er.textContent='كلمة السر 8 أحرف على الأقل';return}if(p1!==p2){er.textContent='الكلمتان غير متطابقتين';return}
       x.disabled=true;x.textContent='جارٍ التشفير…';const ok=await Sync.setPass(p1,true);L.innerHTML='';render();toast(ok?'صار ملف المزامنة مشفّرًا. اكتب نفس الكلمة على أجهزتك الأخرى':'تعذّر التشفير الآن، حاول مرة أخرى',null,7000)}}}
 
+
+/* ---------- 28د. نظام التنبيهات الذكي والمستشار المطوّر ---------- */
+/* إعدادات التنبيهات: كل نوع يُفعَّل أو يُوقف من ⚙️ الضبط، وتُحفظ مع بياناتك */
+const ALERT_T=[['inst','موعد قسط','تنبيه قبل تاريخ استحقاق القسط'],['bills','مواعيد الفواتير','من يوم التذكير الذي تحدده لكل فاتورة حتى تُدفع'],['late','دين أو التزام متأخر','إبراز ما فات موعده ولم يُدفع'],['budget','تجاوز الميزانية','عند تجاوز السقف الشهري أو حد فئة'],['low','انخفاض المتاح','عندما يصل المتاح للصرف حتى الراتب إلى حد الخطر'],['unusual','مصروف غير معتاد','عملية أكبر بكثير من معدل فئتها'],['monthEnd','نهاية الشهر','تقرير شامل عن الدخل والمصروفات والديون'],['payday','نزول الراتب','خطة توزيع الدخل عند تسجيل الراتب']];
+function alertCfg(){const d={inst:{on:true,days:3},bills:{on:true},late:{on:true},budget:{on:true},low:{on:true,min:20},unusual:{on:true},monthEnd:{on:true},payday:{on:true}};const s=S.settings.alerts||{};
+  Object.keys(d).forEach(k=>d[k]=Object.assign(d[k],s[k]||{}));return d}
+function alertSet(k,o){const A=Object.assign({},S.settings.alerts||{});A[k]=Object.assign({},alertCfg()[k],o);S.settings.alerts=A;putSettings();render()}
+function adisGet(){try{return JSON.parse(localStorage.getItem('masareef:adis')||'{}')||{}}catch(e){return {}}}
+function adisSet(ref){const o=adisGet();o[ref]=today();Object.keys(o).forEach(k=>{if(o[k]<addDays(today(),-90))delete o[k]});try{localStorage.setItem('masareef:adis',JSON.stringify(o))}catch(e){}}
+const dDiff=(a,b)=>Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5);
+/* مصروفات غير معتادة: عملية أكبر من 2.5 ضعف معدل عمليات فئتها في آخر 3 أشهر */
+function unusualTx(){const P=pastMonths(3);if(!P.length)return [];const st={};P.forEach(a=>a.filter(t=>t.type==='exp'&&!isFixedTx(t)).forEach(t=>{const x=st[t.cat]||(st[t.cat]={n:0,s:0});x.n++;x.s+=+t.amount}));
+  const from=addDays(today(),-7);return inMonth(curM()).filter(t=>t.type==='exp'&&!isFixedTx(t)&&t.date>=from).map(t=>{const x=st[t.cat];const avg=x&&x.n>=3?x.s/x.n:null;return{t,avg}})
+    .filter(o=>o.avg&&+o.t.amount>=Math.max(20,o.avg*2.5)).map(o=>Object.assign(o,{x:+o.t.amount/o.avg}))}
+function smartAlertList(){const C=alertCfg(),m=curM(),td=today(),out=[];const dis=adisGet();
+  const push=o=>{if(!dis[o.ref])out.push(o)};
+  if(C.inst.on||C.late.on)recStatus(m).R.filter(i=>i.kind==='debt'&&!i.isPaid).forEach(i=>{const dd=dueOf(i,m),n=dDiff(td,dd),need=r3(i.amount-(i.paidAmt||0));
+    if(n<0&&C.late.on)out.push({ref:'late:'+i.id+':'+m,kind:'late',level:'late',days:n,title:'تأخر '+i.name+' '+money(need)+' '+CUR,when:'كان موعده '+dmy(dd)+'. ادفعه أو تواصل مع الجهة مبكرًا',act:['الدفع','data-dgopay="'+esc(i.id)+'"']});
+    else if(n>=0&&n<=(+C.inst.days||0)&&C.inst.on)out.push({ref:'inst:'+i.id+':'+m,kind:'inst',level:n<=1?'late':'warn',days:n,title:i.name+' '+money(need)+' '+CUR,when:(n===0?'موعده اليوم':'بعد '+countWord(n,'يوم واحد','يومين','أيام','يومًا'))+'. تأكد من توفر المبلغ قبل موعد الدفع',act:['الدفع','data-dgopay="'+esc(i.id)+'"']})});
+  if(C.late.on){const pm=shiftMonth(m,-1);recStatus(pm).R.filter(i=>i.kind==='rec'&&!i.tracked&&!i.isPaid&&i.amount-(i.paidAmt||0)>0.0005&&(!i.ref.since||pm>=i.ref.since)&&(!i.ref.start||pm>=i.ref.start)).forEach(i=>out.push({ref:'latep:'+i.id+':'+pm,kind:'late',level:'late',days:-30,title:i.name+' من '+mShort(pm)+' لم يُدفع',when:'المتبقي '+money(i.amount-(i.paidAmt||0))+' '+CUR,act:['افتح','data-gomm="'+pm+'"']}))}
+  if(C.budget.on){const B=+S.settings.monthlyBudget||0,exp=sum(inMonth(m),'exp');if(B&&exp>B)out.push({ref:'bud:'+m,kind:'budget',level:'late',days:0,title:'تجاوزت سقفك الشهري بـ '+money(exp-B)+' '+CUR,when:'صرفت '+money(exp)+' من '+money(B),act:['الميزانية','data-tab="budget"']});
+    capAlerts().filter(a=>a.pct>=100).forEach(a=>out.push({ref:'cap:'+a.c+':'+m,kind:'budget',level:'warn',days:0,title:'تجاوزت حد «'+catOf(a.c).n+'»',when:'صرفت '+money(a.s)+' من '+money(a.v)+' ('+a.pct+'%)',act:['الميزانية','data-tab="budget"']}))}
+  if(C.low.on){const d=dailyPlan();const liq=r3(d.avail+d.spentToday),min=+C.low.min||0;if(d.has&&liq<min)out.push({ref:'low:'+m+':'+(liq<0?'neg':'low'),kind:'low',level:'late',days:0,title:liq<0?'المتاح لا يكفي التزاماتك':'المتاح للصرف منخفض: '+money(liq)+' '+CUR,when:liq<0?'العجز '+money(-liq)+' '+CUR+' '+periodTo(d):'أقل من حد الخطر '+money(min)+' · باقٍ '+countWord(d.left,'يوم واحد','يومان','أيام','يومًا')+' '+periodTo(d),act:['ماذا أفعل؟','data-shortfall="1"']})}
+  if(C.unusual.on)unusualTx().slice(0,2).forEach(o=>push({ref:'unu:'+o.t.id,kind:'unusual',level:'warn',days:1,title:'مصروف غير معتاد: '+money(o.t.amount)+' على «'+catOf(o.t.cat).n+'»',when:(o.t.note?o.t.note+' · ':'')+fmtD(o.t.date)+' · أعلى '+o.x.toFixed(1)+' مرة من معدل عملياتك فيها','dis':1,act:['عرض','data-edit="'+esc(o.t.id)+'"']}));
+  if(C.monthEnd.on){const md=mDays();if(md.left<=2)push({ref:'mend:'+m,kind:'monthEnd',level:'info',days:2,title:'شهر '+mShort(m)+' يقترب من نهايته',when:'اطّلع على ملخصه قبل أن يبدأ الشهر الجديد','dis':1,act:['التقرير','data-mrep="'+m+'"']});
+    else if(md.day<=5){const pm=shiftMonth(m,-1);if(inMonth(pm).length)push({ref:'mrep:'+pm,kind:'monthEnd',level:'info',days:3,title:'تقرير شهر '+mShort(pm)+' جاهز',when:'الدخل والمصروفات والديون والادخار في صفحة واحدة','dis':1,act:['افتح التقرير','data-mrep="'+pm+'"']})}}
+  if(C.payday.on){const s=inMonth(m).filter(t=>t.type==='inc'&&t.cat==='salary').sort((a,b)=>b.date.localeCompare(a.date))[0];if(s&&dDiff(s.date,td)<=4)push({ref:'pay:'+s.id,kind:'payday',level:'good',days:-1,title:'نزل راتبك '+money(s.amount)+' '+CUR,when:'وزّعه الآن على الالتزامات والادخار والمصروف قبل أن يُصرف','dis':1,act:['خطة التوزيع','data-askopen="split"']})}
+  return out.sort((a,b)=>a.days-b.days)}
+function smartAlertsHtml(){if(S.month!==curM())return '';const A=smartAlertList();if(!A.length)return '';
+  return `<div class="alertbox"><div class="alerthead"><b>🔔 التنبيهات</b><span class="pill ${A.some(a=>a.level==='late')?'late':'paid'}">${A.length}</span></div>${A.map(a=>`<div class="alertrow ${a.level==='late'?'late':a.level==='good'?'good':'warn'}"><span class="adot"></span><div style="min-width:0"><b>${esc(a.title)}</b><small>${esc(a.when)}</small></div><div class="aacts"><button class="chip${a.level==='good'?' pay':''}" ${a.act[1]}>${a.act[0]}</button>${a.dis?`<button class="chip adis" data-adis="${esc(a.ref)}" aria-label="إخفاء">✕</button>`:''}</div></div>`).join('')}</div>`}
+function alertsSetHtml(){const C=alertCfg();const notif=('Notification' in window)?Notification.permission:'na';
+  return `<div class="panel stack setbox">${ALERT_T.map(([k,n,d])=>`<div class="setrow"><div><b>${n}</b><small>${d}</small></div><button class="tgl${C[k].on?' on':''}" data-alt="${k}" role="switch" aria-checked="${C[k].on}" aria-label="${n}"></button></div>
+   ${k==='inst'&&C.inst.on?`<div class="setrow col"><div><b>التنبيه قبل موعد القسط</b></div><div class="seg">${[[1,'بيوم'],[3,'بـ3 أيام'],[7,'بأسبوع']].map(([v,t])=>`<button class="n" data-altdays="${v}" aria-pressed="${+C.inst.days===v}">${t}</button>`).join('')}</div></div>`:''}
+   ${k==='low'&&C.low.on?`<div class="setrow col"><div><b>حد الخطر (${CUR})</b><small>يُنبّهك إذا صار المتاح للصرف حتى الراتب أقل منه</small></div><div class="capin"><input class="inp num" id="altMin" inputmode="decimal" value="${amtIn(+C.low.min||0)}" style="text-align:left" enterkeyhint="done"><button class="btn" id="altMinSave">حفظ</button></div></div>`:''}`).join('')}
+   <div class="setrow"><div><b>إشعارات الهاتف</b><small>${notif==='granted'?'مفعّلة: تصلك التنبيهات المفعّلة كإشعار عند فتح التطبيق':notif==='denied'?'مرفوضة: فعّلها من إعدادات الهاتف':notif==='na'?'غير مدعومة هنا. ثبّت التطبيق على الشاشة الرئيسية':'التنبيهات تظهر داخل التطبيق، ويمكن أن تصلك كإشعار أيضًا'}</small></div>${notif==='default'?'<button class="chip pay" id="askNotify">تفعيل</button>':''}</div>
+   <span class="note">التطبيق يعمل داخل هاتفك بلا خادم، فالإشعارات تُفحص عند فتحه أو الرجوع إليه، ولا تصل وهو مغلق تمامًا. لمواعيد مضمونة أضف الأقساط للتقويم.</span></div>`}
+/* تقرير الشهر الشامل */
+function openMonthReport(m){const L=document.getElementById('layer');const a=inMonth(m),pa=inMonth(shiftMonth(m,-1));const inc=sum(a,'inc'),exp=sum(a,'exp'),pexp=sum(pa,'exp');
+  const st=recStatus(m);const dp=debts().reduce((s,d)=>s+debtPaidIn(d,m),0);const G=S.settings.goals||[];const sv=G.reduce((s,g)=>s+(+((g.log||{})[m])||0),0);
+  const cats={};a.filter(t=>t.type==='exp').forEach(t=>cats[t.cat]=(cats[t.cat]||0)+(+t.amount));const top=Object.entries(cats).sort((x,y)=>y[1]-x[1]).slice(0,4);
+  const rem=r3(debts().reduce((s,d)=>s+(+d.balance||0),0));const vs=pexp?Math.round((exp/pexp-1)*100):null;
+  const row=(l,v,c)=>`<div class="sumrow"><span>${l}</span><b class="num ${c||''}">${v}</b></div>`;
+  L.innerHTML=`${sheetTop('تقرير الشهر')}<h2 style="margin-top:0">📊 تقرير شهر ${esc(monthName(m))}</h2>
+   <div class="panel paybk">${row('الدخل',amtH(inc),'amt-inc')}${row('المصروفات',amtH(exp),'amt-exp')}<div class="sumrow total"><span>الصافي</span><b class="num ${inc-exp<0?'amt-exp':'amt-inc'}">${inc-exp<0?'−':''}${amtH(Math.abs(inc-exp))}</b></div>
+    ${vs!==null?row('مقارنة بالشهر السابق','<span dir="ltr">'+(vs>0?'+':'')+vs+'%</span> مصروفات',vs>0?'amt-exp':'amt-inc'):''}</div>
+   <h3>الالتزامات والديون</h3><div class="panel paybk">${row('الالتزامات المدفوعة',st.paid.length+' من '+st.R.length)}${st.dueLeft>0.0005?row('لم يُدفع منها',amtH(st.dueLeft),'amt-exp'):''}${dp?row('سدّدت من الديون',amtH(dp),'amt-inc'):''}${rem?row('الديون المتبقية الآن',amtH(rem)):''}</div>
+   ${sv?`<h3>الادخار</h3><div class="panel paybk">${row('أودعت في خططك',amtH(sv),'amt-inc')}${inc?row('نسبة الادخار من الدخل','<span dir="ltr">'+Math.round(sv/inc*100)+'%</span>'):''}</div>`:''}
+   ${top.length?`<h3>أين ذهبت أموالك</h3><div class="panel paybk">${top.map(([k,v])=>row(esc(catOf(k).n),amtH(v)+(exp?' <small class="note">('+Math.round(v/exp*100)+'%)</small>':''))).join('')}</div>`:''}
+   <div class="actions"><div class="row2"><button class="btn" data-gomonth="${m}" data-tab="reports">التقرير الكامل</button><button class="btn ghost" data-close>إغلاق</button></div></div></div></div>`;
+  L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.dataset.gomonth){L.innerHTML='';S.month=x.dataset.gomonth;S.tab='reports';render();window.scrollTo(0,0);return}if(x.hasAttribute('data-close'))L.innerHTML=''}}
+/* المستشار: ما لم يُخصَّص بعد = المتاح بعد الالتزامات والخطط − ما يُتوقع صرفه يوميًا حسب معدلك */
+function freeMoney(d){d=d||dailyPlan();const avgDay=d.avgDay||0;const need=avgDay*d.left;return{need:r3(need),free:r3(d.avail+d.spentToday-need),avgDay}}
+function emergCover(){const ae=avgExpense();const em=(S.settings.goals||[]).find(g=>g.kind==='emergency');const sv=em?goalCalc(em).sv:0;return{ae,sv,em,months:ae?sv/ae:null}}
+/* مبلغ دفعة واحدة على الدين: الأعلى فائدة أولًا */
+function lumpDebt(X){const Ds=debts().filter(d=>+d.balance>0.0005);if(!Ds.length)return null;const P=debtPlan();const C=Ds.map(d=>Object.assign({},d));let left=X;
+  C.filter(d=>d.mode!=='once').sort((a,b)=>(+b.rate||0)-(+a.rate||0)||(+a.balance)-(+b.balance)).forEach(d=>{const x=Math.min(left,+d.balance);d.balance=r3(+d.balance-x);left-=x});
+  const b=simDebts(Ds,P.extra,P.strategy,true),p=simDebts(C,P.extra,P.strategy,true);const tgt=Ds.filter(d=>d.mode!=='once').sort((a,b)=>(+b.rate||0)-(+a.rate||0)||(+a.balance)-(+b.balance))[0];
+  return{b,p,tgt,maxRate:Math.max(...Ds.map(d=>+d.rate||0)),closes:C.filter(d=>d.balance<=0.0005).map(d=>d.name)}}
+function extraAnswer(X){const L=lumpDebt(X),E=emergCover();const parts=[];
+  let rec='';const lowE=E.ae&&(E.months===null||E.months<1);
+  if(L&&!L.b.stuck&&!L.p.stuck){parts.push(`<li><b>على الدين</b> (${esc(L.tgt?L.tgt.name:'')}${L.maxRate?'، فائدته '+L.maxRate+'%':''}): ${L.closes.length?'يُغلق «'+L.closes.map(esc).join('، ')+'» ويتحرر قسطه، و':''}تنتهي ديونك في ${monthLabel(L.p.months)} بدل ${monthLabel(L.b.months)}${L.b.interest-L.p.interest>0.5?'، وتوفّر فوائد تقارب <b class="num">'+amtH(L.b.interest-L.p.interest)+'</b>':''}.</li>`)}
+  else if(!L)parts.push('<li>لا ديون مسجّلة، فالخيار بين الطوارئ وخططك الأخرى.</li>');
+  if(E.ae)parts.push(`<li><b>للطوارئ</b>: يصير احتياطيك <b class="num">${amtH(E.sv+X)}</b>، أي يغطي ${(((E.sv+X)/E.ae)).toFixed(1)} شهر من مصاريفك بدل ${(E.sv/E.ae).toFixed(1)}. والأمان المقترح 3 أشهر.</li>`);
+  if(lowE&&L)rec='احتياطي الطوارئ عندك أقل من شهر، فالأسلم أن تبدأ به ولو بجزء من المبلغ، لأن أي طارئ بدون احتياطي قد يقودك إلى دين جديد.';
+  else if(L&&L.maxRate>=5)rec='احتياطيك مقبول وأعلى فائدة عندك '+L.maxRate+'%، فتوجيهه للدين يوفّر عليك أكثر.';
+  else if(L)rec='فوائد ديونك منخفضة، فالفرق بين الخيارين صغير. يمكنك تقسيمه بينهما.';
+  else if(E.ae&&E.months<3)rec='بدون ديون، أكمل احتياطي الطوارئ حتى 3 أشهر.';
+  return `<p>عندك <b class="num">${amtH(X)}</b> إضافية. هذه مقارنة الخيارين:</p><ul class="tips">${parts.join('')}</ul>${rec?`<p>💡 ${rec}</p>`:''}<p class="note">الافتراضات: الأرصدة والفوائد والأقساط المسجّلة، ومعدل مصاريفك في آخر 3 أشهر${E.em?'':' (ولا توجد خطة طوارئ مسجّلة)'}. القرار لك.</p>`}
+function splitAnswer(){const d=dailyPlan();const F=freeMoney(d);const have=r3(d.inc-d.spent);
+  const rows=[['التزامات وأقساط لم تُدفع',d.unpaid],['ادخار خططك',d.save],d.buffer?['احتياطي تحدده لنفسك',d.buffer]:null,['مصروفك المتوقع '+daysWord(d.left)+' × '+money(F.avgDay),F.need]].filter(x=>x&&x[1]>0.0005);
+  let tail='';
+  if(F.free<-0.0005)tail=`<div class="warnbox" style="margin:6px 0">لا يكفي ما معك بمعدل صرفك المعتاد، ينقصك <b class="num">${amtH(-F.free)}</b>. خفّف المصروف اليومي إلى <b class="num">${amtH(Math.max(0,d.avail+d.spentToday)/Math.max(1,d.left))}</b> أو راجع خطة العجز.</div><div class="chips"><button class="chip pay" data-askq="short">ماذا لو لم يكفِ المال؟</button><button class="chip" data-askq="save">ما المصروفات التي أستطيع تخفيضها؟</button></div>`;
+  else if(F.free>=1){const E=emergCover(),Ds=debts().filter(x=>+x.balance>0.0005);const lowE=E.ae&&(E.months===null||E.months<1);const a=Math.floor(F.free*(Ds.length?(lowE?0.6:0.3):0.7));const b=Ds.length?Math.floor(F.free*(lowE?0.3:0.6)):0;const c=r3(F.free-a-b);
+    tail=`<p>ويبقى <b class="num amt-inc">${amtH(F.free)}</b> غير مخصص. اقتراحي:</p><ul class="tips"><li>للطوارئ: <b class="num">${amtH(a)}</b></li>${b?`<li>دفعة إضافية للدين: <b class="num">${amtH(b)}</b></li>`:''}<li>هامش لما لا تتوقعه: <b class="num">${amtH(c)}</b></li></ul><div class="chips"><button class="chip" data-askq="extra:${Math.floor(F.free)}">قارن: للدين أم للطوارئ؟</button></div>`}
+  return `<p>معك ${periodTo(d)} <b class="num">${amtH(have)}</b> (${d.expected?'الدخل المتوقع':'الدخل'} ناقص ما صرفته). توزيعه المقترح:</p><div class="panel paybk">${rows.map(([n,v])=>`<div class="sumrow"><span>${n}</span><b class="num">${amtH(v)}</b></div>`).join('')}</div>${tail}
+   <p class="note">الافتراضات: ${d.expected?'راتبك لم يُسجَّل فاستخدمت معدل دخلك، و':''}معدل صرفك اليومي من آخر الأشهر <b class="num">${money(F.avgDay)}</b>${F.avgDay?'':' (لا بيانات سابقة كافية)'}. لا أعرف إلا ما سجّلته.</p>`}
+function moreAdvice(add){const c=advCtx(),d=dailyPlan();
+  if(c.inc>0&&c.avgInc>0&&c.inc<c.avgInc*0.85&&c.a.some(t=>t.type==='inc'&&t.cat==='salary'))add(84,'warn','دخلك هذا الشهر أقل من المعتاد','سجّلت <b class="num">'+amtH(c.inc)+'</b> ومعدلك <b class="num">'+amtH(c.avgInc)+'</b> (أقل بـ <span dir="ltr">'+Math.round((1-c.inc/c.avgInc)*100)+'%</span>). أعد ترتيب ميزانيتك: الأساسيات والالتزامات الحرجة أولًا، وتواصل مع الجهات الدائنة مبكرًا إذا توقعت عدم القدرة على السداد.',['رتّب الأولويات','data-shortfall="1"']);
+  if(d.has&&c.day>=3){const F=freeMoney(d);if(F.avgDay&&F.free>=20)add(57,'bulb','لديك مبلغ غير مخصص تقريبًا '+money(Math.floor(F.free))+' '+CUR,'بعد الالتزامات والخطط ومعدل صرفك اليومي. قارن بين تقليل الدين والاحتفاظ به للطوارئ قبل القرار.',['قارن الخيارات','data-askopen="extra:'+Math.floor(F.free)+'"'])}
+  const u=unusualTx()[0];if(u)add(48,'up','مصروف غير معتاد: '+money(u.t.amount)+' على «'+esc(catOf(u.t.cat).n)+'»','أعلى '+u.x.toFixed(1)+' مرة من معدل عملياتك في هذه الفئة. تأكد أنه مسجّل صحيحًا، وإن كان ضروريًا فخفّف بقية الشهر.',['عرض','data-edit="'+esc(u.t.id)+'"'])}
+
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 document.addEventListener('click',async e=>{
   {const rt=e.target.closest('[data-rtog]');if(rt&&!e.target.closest('button,a,summary,details')){const row=rt.closest('.recrow');const on=!row.classList.contains('open');row.classList.toggle('open',on);rt.setAttribute('aria-expanded',on);S.recOpen=S.recOpen||{};if(on)S.recOpen[rt.dataset.rtog]=1;else delete S.recOpen[rt.dataset.rtog];return}}
@@ -4345,6 +4434,13 @@ document.addEventListener('click',async e=>{
   if(b.id==='quickPrint'){quickPrint();return}
   if(b.id==='checkUpd'){if(!('serviceWorker' in navigator)){toast('أنت على آخر إصدار');return}toast('جارٍ البحث عن تحديث…');try{const r=await navigator.serviceWorker.getRegistration();if(r){await r.update();if(r.installing||r.waiting){toast('وُجد تحديث، جارٍ تحميله…');return}}toast('أنت على آخر إصدار ('+APP_VERSION+')')}catch(e){toast('تعذّر البحث، تأكد من الإنترنت')}return}
   if(b.dataset.shortfall){openShortfall();return}
+  if(b.dataset.askopen){openAsk(b.dataset.askopen);return}
+  if(b.dataset.mrep){openMonthReport(b.dataset.mrep);return}
+  if(b.dataset.adis){adisSet(b.dataset.adis);render();return}
+  if(b.dataset.gomm){S.month=b.dataset.gomm;S.tab='monthly';render();window.scrollTo(0,0);return}
+  if(b.dataset.alt){const k=b.dataset.alt;alertSet(k,{on:!alertCfg()[k].on});return}
+  if(b.dataset.altdays){alertSet('inst',{days:+b.dataset.altdays});return}
+  if(b.id==='altMinSave'){const v=parseAmt(String(document.getElementById('altMin').value||'0'));if(v===null||isNaN(v)||v<0){toast('اكتب مبلغًا صحيحًا');return}alertSet('low',{min:v});toast('حُفظ حد الخطر');return}
   if(b.id==='syncEncOn'){openSyncEnc();return}
   if(b.id==='syncEncOff'){if(!confirm('إيقاف التشفير؟ سيُرفع ملف المزامنة غير مشفّر من الآن.'))return;b.disabled=true;const ok=await Sync.encOff();render();toast(ok?'أُوقف تشفير ملف المزامنة':'تعذّر الإيقاف الآن، حاول مرة أخرى');return}
   if(b.id==='syncPassGo'){const v=document.getElementById('syncPass').value;if(!v){toast('اكتب كلمة السر');return}b.disabled=true;b.textContent='جارٍ الفتح…';const ok=await Sync.setPass(v,false);render();toast(ok?'فُتحت المزامنة المشفّرة':'كلمة السر غير صحيحة، أو تعذّر الاتصال');return}
