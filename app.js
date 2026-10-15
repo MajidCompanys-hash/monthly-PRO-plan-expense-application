@@ -850,7 +850,7 @@ function vHome(){
   const lastInc=!pc&&!inc&&!payMode()?list().filter(t=>t.type==='inc'&&t.date<m+'-01'&&t.date>=shiftMonth(m,-1)+'-15').sort((x,y)=>y.date.localeCompare(x.date))[0]:null;
   const recent=a.slice().sort((x,y)=>(y.date+y.createdAt).localeCompare(x.date+x.createdAt)).slice(0,5);
   const empty=!list().length?`<div class="panel empty"><b>ابدأ بتسجيل أول عملية</b>اضغط زر + في الأسفل وسجّل راتبك أو أول مصروف. يمكنك أيضًا تجربة التطبيق ببيانات مثال ثم حذفها.<div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" data-open-add>إضافة عملية</button><button class="btn ghost" id="loadSample">تجربة ببيانات مثال</button></div></div>`:'';
-  return `${duaTickerHtml()}${spiritHtml('top')}${rzHtml('top')}<section class="hero"><div class="lbl">${pc?'المتبقي من راتب هذه الدورة':'المتبقي في '+esc(mShort(m))}</div>
+  return `${homeDuaHtml()}${spiritHtml('top')}${rzHtml('top')}<section class="hero"><div class="lbl">${pc?'المتبقي من راتب هذه الدورة':'المتبقي في '+esc(mShort(m))}</div>
    <div class="big"><span class="num">${left<0?'−':''}${money(Math.abs(left))}</span> <small>${CUR}</small></div>
    <div class="row"><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M7 9v8h8"/></svg></span>الدخل</span><b class="num">${amtH(inc)}</b></div><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>المصاريف</span><b class="num">${amtH(exp)}</b></div></div>${pc?`<div class="lbl" style="margin-top:10px;font-size:12.5px">دورة الراتب: ${fmtD(pc.start)} – ${fmtD(pc.end)}</div>`:''}${heroDebtHtml(m,pc,left)}</section>
    ${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${todayHtml()}${rescueHomeHtml()}
@@ -3162,8 +3162,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.30.2';
+const APP_VERSION='2.31.0';
 const CHANGELOG=[
+ {v:'2.31.0',d:'2026-10-16',items:['شريط متحرك تلقائي لأدعية الرزق والبركة أعلى الرئيسية، باضغطة تقرأها كاملة','⚙️ الضبط ← شريط الأدعية المتحرك: إظهاره أو إخفاؤه، وسرعته، وإضافة أدعية «ديوني» إليه، وتعديل القائمة: حذف وترتيب وإضافة من المقترحات أو دعاء من عندك، واستعادة الافتراضية']},
  {v:'2.30.2',d:'2026-10-16',items:['ديوني داخل بطاقة «المتبقي من الراتب»: الديون المتبقية ونسبة السداد وموعد الانتهاء، وأقساط هذه الدورة وما دُفع منها وما بقي، وكم يبقى لك بعد الأقساط، مع زر لتفاصيل ديوني']},
  {v:'2.30.1',d:'2026-10-15',items:['إصلاح: شريط سورة الملك وأدعية الرزق رجع إلى مكانه السابق، والتنبيهات الذكية و«وضعي المالي» والرصيد المتوقع صارت بعده']},
  {v:'2.30.0',d:'2026-10-15',items:['المستشار يشرح كل توصية: زر «لماذا؟ وكيف حسبت؟» تحت كل أولوية يعرض الأرقام والمعادلة','🔮 التنبؤ بالرصيد يومًا بيوم حتى نهاية الشهر برسم وجدول، ويحذّرك إذا توقع انخفاض رصيدك قبل موعد التزام','🛟 «ساعدني على تنظيم وضعي المالي»: خطة مؤقتة للثلاثين يومًا تعدّلها قبل اعتمادها، ثم تتابعها من الرئيسية','الديون: ثلاثة أوضاع للسداد (كرة الثلج، الانهيار الجليدي، التوازن المالي) ومقارنة بينها','التقويم المالي تفاعلي: مستحق قريبًا ومتوقع وانتهاء الديون، وكل موعد يفتح تفاصيله','مؤشر الصحة المالية الجديد من 100 مع شرح كل جزء، ويظهر «أولي» إذا كانت البيانات غير كافية','خطط جديدة: سداد دين، رأس مال مشروع، صيانة السيارة، مصروفات الأسرة','الحسابات: محفظة رقمية، ومخصص لفواتير، وأموال المشروع، مع التمييز بين الرصيد الإجمالي والمتاح فعلًا للإنفاق','تنبيه عند تسجيل عملية مكررة بنفس المبلغ في نفس اليوم','📜 سجل التغييرات: الديون والدفعات والميزانيات والخطط والحذف والاستعادة بالقيمة قبل وبعد','التقارير (PDF وExcel): الميزانية مقابل الفعلي، والديون في بداية الفترة ونهايتها، والالتزامات القادمة','الضبط: تعديل أسماء الفئات، ونسبة التنبيه من حد كل فئة']},
@@ -3804,6 +3805,7 @@ function vSettings(){const c=lockCfg(),af=c&&c.after!=null?+c.after:60;setTimeou
    <div class="setrow"><div><b>فتح الأدعية الآن</b></div><button class="chip" data-rizq="1">💰 فتح</button></div>
    <div class="setrow col"><div><b>لون خلفية صفحات القراءة</b><small>سورة الملك والأذكار والأدعية · خاص بهذا الجهاز</small></div>${rdSwatches()}</div></div>`})()}
   <h2>🔔 التنبيهات</h2>${alertsSetHtml()}
+  <h2>🤲 شريط الأدعية المتحرك</h2>${duaBarSetHtml()}
   <h2>🔒 قفل الدفع قبل الموعد</h2>${payLockHtml()}
   <h2>🏷️ أسماء الفئات</h2><details class="panel"><summary class="note" style="cursor:pointer">تعديل أسماء فئات الدخل والمصروفات</summary><div style="margin-top:10px">${catNamesHtml()}</div></details>
   <h2>📜 سجل التغييرات</h2><div class="panel stack"><span class="note">كل إضافة أو تعديل للديون والدفعات والميزانيات والخطط، وحذف العمليات، واستعادة النسخ، بوقته والقيمة قبل وبعد.</span><button class="btn ghost block" data-audit="1">فتح سجل التغييرات (${audGet().length})</button></div>
@@ -4549,6 +4551,46 @@ function applyCatNames(){const N=S.settings.catNames||{};EXP_CATS.concat(INC_CAT
 function catNamesHtml(){return `<div class="panel stack setbox"><span class="note">غيّر اسم أي فئة كما تحب، ويظهر الاسم الجديد في كل مكان وفي التقارير. اتركه فارغًا لترجع للاسم الأصلي.</span>
   ${EXP_CATS.concat(INC_CATS).map(c=>`<div class="rscat"><span><b style="color:${c.c}">●</b> <small class="note">${esc(c.n0||c.n)}</small></span><input class="inp" data-catn="${c.id}" value="${esc((S.settings.catNames||{})[c.id]||'')}" placeholder="${esc(c.n0||c.n)}" maxlength="30" style="max-width:170px"></div>`).join('')}</div>`}
 
+
+/* ===== شريط أدعية الرزق والبركة المتحرك في الرئيسية (يُعدَّل من ⚙️ الضبط) ===== */
+const DB_SPEED={slow:['بطيء',0.42],mid:['متوسط',0.28],fast:['سريع',0.17]};
+function rzItemTxt(x){const t=String(x.q||x.t||'').replace(/\s*﴿[٠-٩0-9]+﴾\s*/g,' • ').replace(/\s*•\s*$/,'').trim();return (x.q?'﴿'+t+'﴾':'«'+t.replace(/[.،]$/,'')+'»')+(x.r?' ('+x.r+')':'')}
+function rzAll(){const out=[];Object.values(RZ_PAGES).forEach(a=>(a||[]).forEach(x=>{if((x.q||x.t))out.push(rzItemTxt(x))}));return [...new Set(out)]}
+function duaBarDef(){const R=[];['sal','rizq'].forEach(k=>(RZ_PAGES[k]||[]).forEach(x=>{const t=rzItemTxt(x);if(t.length<=170&&!/مَالَهُ وَوَلَدَهُ/.test(t))R.push(t)}));return [...new Set(R)]}
+function duaBar(){return Object.assign({on:true,speed:'mid',debt:true,items:null},S.settings.duaBar||{})}
+function duaBarItems(){const c=duaBar();const L=(c.items||duaBarDef()).slice();if(c.debt)debtNoteParts().map(p=>p.replace(/\s*\n\s*/g,' ')).forEach(p=>{if(!L.includes(p))L.push(p)});return L}
+function duaBarSet(o){S.settings.duaBar=Object.assign(duaBar(),o);putSettings();render()}
+function homeDuaHtml(){const c=duaBar();if(!c.on)return '';const P=duaBarItems();if(!P.length)return '';
+  const st=Math.floor(Date.now()/864e5)%P.length;const L=P.slice(st).concat(P.slice(0,st));const one=L.map(p=>`<span>${esc(p)}</span>`).join('<i>✦</i>');
+  const dur=Math.max(25,Math.round(L.join('').length*(DB_SPEED[c.speed]||DB_SPEED.mid)[1]));
+  return `<button class="ticker tk-home" data-duabar="1" aria-label="أدعية الرزق والبركة، اضغط لقراءتها كاملة"><span class="tk-ic">🤲</span><span class="tk-win"><span class="tk-run" style="animation-duration:${dur}s">${one}<i>✦</i>${one}<i>✦</i></span></span></button>`}
+function openDuaBarRead(){const P=duaBarItems();const L=document.getElementById('layer');
+  L.innerHTML=`${sheetTop('الأدعية')}<h2 style="margin-top:0">🤲 أدعية الرزق والبركة</h2><div class="duaread">${P.map(p=>`<p>${esc(p)}</p>`).join('')}</div>
+   <div class="actions"><div class="row2"><button class="btn" id="dbEditGo">✎ تعديل الأدعية</button><button class="btn ghost" data-close>إغلاق</button></div></div></div></div>`;
+  L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.id==='dbEditGo'){L.innerHTML='';openDuaBarEdit();return}if(x.hasAttribute('data-close'))L.innerHTML=''}}
+function duaBarSetHtml(){const c=duaBar();const n=(c.items||duaBarDef()).length;
+  return `<div class="panel stack setbox">
+   <div class="setrow"><div><b>إظهار الشريط في الرئيسية</b><small>${c.on?'يتحرك تلقائيًا أعلى الصفحة الرئيسية، واضغط عليه لقراءة الأدعية كاملة':'مخفي'}</small></div><button class="tgl${c.on?' on':''}" id="dbOn" role="switch" aria-checked="${c.on}" aria-label="إظهار شريط الأدعية"></button></div>
+   ${c.on?`<div class="setrow col"><div><b>سرعة الحركة</b></div><div class="seg seg3">${Object.entries(DB_SPEED).map(([k,v])=>`<button class="n" data-dbspeed="${k}" aria-pressed="${c.speed===k}">${v[0]}</button>`).join('')}</div></div>
+   <div class="setrow"><div><b>إضافة أدعية «${esc(lbl('sec.debts'))}»</b><small>أدعية التيسير وقضاء الدين التي كتبتها في قسم الديون</small></div><button class="tgl${c.debt?' on':''}" id="dbDebt" role="switch" aria-checked="${c.debt}" aria-label="إضافة أدعية الديون"></button></div>
+   <div class="setrow"><div><b>الأدعية في الشريط</b><small>${countWord(n,'دعاء واحد','دعاءان','أدعية','دعاءً')}${c.items?' (معدّلة)':' (الافتراضية)'}</small></div><button class="chip pay" id="dbEdit">✎ تعديل</button></div>`:''}</div>`}
+function openDuaBarEdit(){const L=document.getElementById('layer');let items=(duaBar().items||duaBarDef()).slice();let txt='';
+  const draw=()=>{const all=rzAll().filter(x=>!items.includes(x));
+   L.innerHTML=`${sheetTop('تعديل الأدعية')}<h2 style="margin-top:0">✎ أدعية الشريط المتحرك</h2>
+    <div class="panel" style="padding-block:4px">${items.length?items.map((t,i)=>`<div class="dbitem"><span>${esc(t)}</span><div class="dbbtn">${i?`<button class="chip" data-dbup="${i}" aria-label="أعلى">↑</button>`:''}<button class="chip" data-dbdel="${i}" aria-label="حذف">✕</button></div></div>`).join(''):'<p class="note">لا أدعية. أضف من المقترحات أو اكتب دعاءك.</p>'}</div>
+    <div class="field" style="margin-top:12px"><label for="dbNew">إضافة دعاء من عندك</label><textarea class="inp" id="dbNew" rows="3" maxlength="400" placeholder="اكتب الدعاء، ويمكنك ذكر مصدره بين قوسين">${esc(txt)}</textarea></div><button class="btn ghost block" id="dbAdd">+ إضافة</button>
+    ${all.length?`<h3>مقترحات من «أدعية الرزق»</h3><div class="dnsug">${all.map(t=>`<button class="dnchip" data-dbsug="${esc(t)}"><span>${esc(t)}</span></button>`).join('')}</div>`:''}
+    <div class="actions"><button class="btn block" id="dbSave">حفظ</button><div class="row2"><button class="btn ghost" id="dbReset">استعادة الافتراضية</button><button class="btn ghost" data-close>إلغاء</button></div></div></div></div>`};
+  draw();L.onchange=null;L.oninput=e=>{if(e.target.id==='dbNew')txt=e.target.value};
+  const keep=fn=>{const y=L.querySelector('.sheet');const sc=y?y.scrollTop:0;fn();draw();const y2=L.querySelector('.sheet');if(y2)y2.scrollTop=sc};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+    if(x.dataset.dbdel!==undefined){keep(()=>items.splice(+x.dataset.dbdel,1));return}
+    if(x.dataset.dbup!==undefined){const i=+x.dataset.dbup;keep(()=>{[items[i-1],items[i]]=[items[i],items[i-1]]});return}
+    if(x.dataset.dbsug!==undefined){keep(()=>items.push(x.dataset.dbsug));toast('أُضيف، اضغط «حفظ»');return}
+    if(x.id==='dbAdd'){const t=txt.replace(/\s+/g,' ').trim();if(!t){toast('اكتب الدعاء أولًا');return}if(items.includes(t)){toast('موجود مسبقًا');return}keep(()=>{items.push(t);txt=''});return}
+    if(x.id==='dbReset'){if(!confirm('استعادة الأدعية الافتراضية؟ ستُحذف تعديلاتك على القائمة.'))return;S.settings.duaBar=Object.assign(duaBar(),{items:null});await putSettings();L.innerHTML='';render();toast('رجعت الأدعية الافتراضية');return}
+    if(x.id==='dbSave'){S.settings.duaBar=Object.assign(duaBar(),{items:items.slice(0,60)});await putSettings();L.innerHTML='';render();toast('حُفظت أدعية الشريط')}}}
+
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 document.addEventListener('click',async e=>{
   {const rt=e.target.closest('[data-rtog]');if(rt&&!e.target.closest('button,a,summary,details')){const row=rt.closest('.recrow');const on=!row.classList.contains('open');row.classList.toggle('open',on);rt.setAttribute('aria-expanded',on);S.recOpen=S.recOpen||{};if(on)S.recOpen[rt.dataset.rtog]=1;else delete S.recOpen[rt.dataset.rtog];return}}
@@ -4642,6 +4684,11 @@ document.addEventListener('click',async e=>{
   if(b.dataset.shortfall){openShortfall();return}
   if(b.dataset.askopen){openAsk(b.dataset.askopen);return}
   if(b.dataset.bfopen){openForecast();return}
+  if(b.dataset.duabar){openDuaBarRead();return}
+  if(b.id==='dbOn'){duaBarSet({on:!duaBar().on});return}
+  if(b.id==='dbDebt'){duaBarSet({debt:!duaBar().debt});return}
+  if(b.dataset.dbspeed){duaBarSet({speed:b.dataset.dbspeed});return}
+  if(b.id==='dbEdit'){openDuaBarEdit();return}
   if(b.dataset.rescue){openRescue();return}
   if(b.dataset.rsend){if(!confirm('إنهاء خطة الثلاثين يومًا؟'))return;delete S.settings.rescue;await putSettings();render();toast('أُنهيت الخطة');return}
   if(b.dataset.audit){openAudit();return}
