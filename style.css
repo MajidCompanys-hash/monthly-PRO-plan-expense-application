@@ -956,3 +956,16 @@ details.dmcards>summary{cursor:pointer;font-weight:600}
 .audrow{padding:9px 0;border-top:1px solid var(--line)}.audrow:first-child{border-top:0}
 .audrow small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
 .audfv{font-size:12.5px;margin-top:4px;line-height:1.7}.audf{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}.audv{color:var(--fg);font-weight:600}
+
+/* 2.30.2 — ديوني داخل بطاقة المتبقي */
+.hero .hdebt{margin-top:14px;background:rgb(255 255 255 / .12);border:1px solid rgb(255 255 255 / .16);border-radius:14px;padding:12px}
+.hero .hd-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hero .hd-top span{font-size:12.5px;opacity:.9}.hero .hd-top b{font-family:var(--f-display);font-size:20px;font-weight:700}
+.hero .hd-top small{font-size:11.5px;opacity:.85;margin-inline-start:auto}
+.hero .hd-bar{height:6px;border-radius:99px;background:rgb(255 255 255 / .2);margin:8px 0 10px;overflow:hidden}
+.hero .hd-bar i{display:block;height:100%;border-radius:99px;background:#fff}
+.hero .hd-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px}
+.hero .hd-row>div{display:flex;flex-direction:column;min-width:0;background:rgb(255 255 255 / .1);border-radius:10px;padding:8px}
+.hero .hd-row span{font-size:11px;opacity:.85}.hero .hd-row b{font-family:var(--f-display);font-size:15px;font-weight:600}
+.hero .hd-row small{font-size:10.5px;opacity:.8}.hero .hd-row .hd-due{background:rgb(255 255 255 / .2)}
+.hero .hd-go{margin-top:10px;width:100%;border:0;border-radius:10px;padding:9px;background:rgb(255 255 255 / .18);color:#fff;font:inherit;font-weight:600;font-size:13px;cursor:pointer}
