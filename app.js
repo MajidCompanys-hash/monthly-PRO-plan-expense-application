@@ -91,7 +91,7 @@ function parseAmt(s){s=String(s||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩
 function monthName(m){const [y,mm]=m.split('-');if(payMode()){const n=shiftMonth(m,1),[y2,m2]=n.split('-');return MONTHS[+mm-1]+(y2!==y?' '+y:'')+' – '+MONTHS[+m2-1]+' '+y2}return MONTHS[+mm-1]+' '+y}
 /* ===== الشهر المالي: من يوم الراتب إلى اليوم الذي قبل الراتب التالي =====
  * عند تفعيله، «شهر سبتمبر» = من راتب سبتمبر (مثلًا 23 سبتمبر) إلى 22 أكتوبر، ويظهر «سبتمبر – أكتوبر». */
-function payMode(){return !!(S.settings.payMonth&&+S.settings.payday)}
+function payMode(){return +S.settings.payday>0&&S.settings.payMonth!==false}
 function mStart(m){if(!payMode())return m+'-01';const [y,mm]=m.split('-').map(Number);return isoD(payDate(y,mm-1))}
 function mEnd(m){if(!payMode()){const [y,mm]=m.split('-').map(Number);return m+'-'+String(new Date(y,mm,0).getDate()).padStart(2,'0')}return addDays(mStart(shiftMonth(m,1)),-1)}
 function mOf(iso){if(!iso)return '';const k=String(iso).slice(0,7);if(!payMode()||String(iso).length<10)return k;return iso<mStart(k)?shiftMonth(k,-1):k}
@@ -853,7 +853,7 @@ function vHome(){
   return `${homeDuaHtml()}${spiritHtml('top')}${rzHtml('top')}<section class="hero"><div class="lbl">${pc?'المتبقي من راتب هذه الدورة':'المتبقي في '+esc(mShort(m))}</div>
    <div class="big"><span class="num">${left<0?'−':''}${money(Math.abs(left))}</span> <small>${CUR}</small></div>
    <div class="row"><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M7 9v8h8"/></svg></span>الدخل</span><b class="num">${amtH(inc)}</b></div><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>المصاريف</span><b class="num">${amtH(exp)}</b></div></div>${pc?`<div class="lbl" style="margin-top:10px;font-size:12.5px">دورة الراتب: ${fmtD(pc.start)} – ${fmtD(pc.end)}</div>`:''}${heroDebtHtml(m,pc,left)}</section>
-   ${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${todayHtml()}${rescueHomeHtml()}
+   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${todayHtml()}${rescueHomeHtml()}
    ${pendHtml()||billAlertsHtml()||trustAlertsHtml()||carAlertsHtml()||docAlertsHtml()?'<div style="margin-top:14px">'+pendHtml()+billAlertsHtml()+trustAlertsHtml()+carAlertsHtml()+docAlertsHtml()+'</div>':''}${spiritHtml('mid')}${rzHtml('mid')}${smartAlertsHtml()}${bfHomeHtml()}${finStatusHtml()}${widgetNudgeHtml()}${empty}${advHomeHtml()}${plansHomeHtml()}${repHomeHtml()}
    ${recent.length?`<h2>آخر العمليات</h2><div class="panel" style="padding:6px 10px">${recent.map(txRow).join('')}</div><div style="margin-top:8px"><button class="chip" data-tab="log">عرض كل العمليات</button></div>`:''}${debtsBrowseHtml()}${spiritHtml('bottom')}${rzHtml('bottom')}`;
 }
@@ -974,7 +974,7 @@ function render(){applyCatNames();admChip();applyTabLabels();setTimeout(()=>fill
   const v=document.getElementById('view');
   const keepQ=document.activeElement&&document.activeElement.id==='q';
   const focusedB=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.bcat;
-  if(S.tab==='budget'&&(focusedB||['mb','salAmt'].includes(document.activeElement?.id)))return; // don't clobber typing
+  if(S.tab==='budget'&&Date.now()-lastTap>400&&(focusedB||['mb','salAmt'].includes(document.activeElement?.id)))return; // لا نمسح ما تكتبه، إلا إذا ضغطت زرًا
   v.innerHTML=S.tab==='home'?vHome():S.tab==='log'?vLog():S.tab==='budget'?vBudget():S.tab==='house'?vHouse():S.tab==='monthly'?vMonthly():S.tab==='cars'?vCars():S.tab==='docs'?vDocs():S.tab==='advisor'?vAdvisor():S.tab==='trusts'?vTrusts():S.tab==='settings'?vSettings():vReports();
   if(S.tab==='docs')setTimeout(hydrateDocs,0);
   document.querySelectorAll('nav.tabs [data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===S.tab?'page':'false'));
@@ -1156,7 +1156,7 @@ function vMonthly(){
   const PD={};list().forEach(t=>{if(t.rec&&t.date){const k=t.rec+'|'+mOf(t.date);(PD[k]=PD[k]||[]).push(t.date)}});
   const Y=m.slice(0,4),YM={};for(let k=1;k<=12;k++){const mm=Y+'-'+String(k).padStart(2,'0');YM[mm]={};monthItems(mm).forEach(x=>YM[mm][x.kind+x.id]=x)}
   /* تفاصيل الدفع لكل أشهر السنة: الموعد والمبلغ وتاريخ الدفع، أخضر = مدفوع، أحمر = غير مدفوع */
-  const yearGridHtml=i=>{const td=today();const cells=Object.keys(YM).map(mm=>{const x=YM[mm][i.kind+i.id];const mn=MONTHS[+mm.slice(5)-1];
+  const yearGridHtml=i=>{const td=today();const cells=Object.keys(YM).map(mm=>{const x=YM[mm][i.kind+i.id];const mn=MONTHS[+(payMode()&&x?dueOf(x,mm):mm).slice(5,7)-1];
       if(!x){const tf=i.kind==='debt'&&i.ref.trackFrom&&mm<mOf(i.ref.trackFrom);return `<div class="yg-c off${tf?' pre':''}"><b>${mn}</b><small>${tf?'قبل المتابعة':'—'}</small></div>`}
       const du=dueOf(x,mm),pd=(x.kind==='rec'?(PD[x.id+'|'+mm]||[]):(x.ref.pays||[]).filter(p=>p.date&&mOf(p.date)===mm).map(p=>p.date)).sort().pop();
       const cls=x.isPaid?'ok':du<=td?'bad':x.paidAmt?'part':'up';
@@ -3162,8 +3162,10 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.31.0';
+const APP_VERSION='2.31.2';
 const CHANGELOG=[
+ {v:'2.31.2',d:'2026-10-16',items:['إصلاح: أزرار صفحة «إدارة البيانات» كانت لا تستجيب في الآيفون بعد الكتابة في حقل (مبلغ الراتب، السقف الشهري، حدود الفئات)']},
+ {v:'2.31.1',d:'2026-10-16',items:['الشهر من الراتب إلى الراتب صار مفعّلًا تلقائيًا بمجرد تحديد يوم الراتب، فيظهر شريط التاريخ في كل الصفحات مثل «سبتمبر – أكتوبر 2026». ويمكن الرجوع لشهر التقويم من «إدارة الراتب»','جدول «تفاصيل الدفع للسنة» في الشهرية يسمّي كل شهر باسم شهر موعد الدفع','تنبيه في الرئيسية لتحديد يوم الراتب إن لم يكن محددًا']},
  {v:'2.31.0',d:'2026-10-16',items:['شريط متحرك تلقائي لأدعية الرزق والبركة أعلى الرئيسية، باضغطة تقرأها كاملة','⚙️ الضبط ← شريط الأدعية المتحرك: إظهاره أو إخفاؤه، وسرعته، وإضافة أدعية «ديوني» إليه، وتعديل القائمة: حذف وترتيب وإضافة من المقترحات أو دعاء من عندك، واستعادة الافتراضية']},
  {v:'2.30.2',d:'2026-10-16',items:['ديوني داخل بطاقة «المتبقي من الراتب»: الديون المتبقية ونسبة السداد وموعد الانتهاء، وأقساط هذه الدورة وما دُفع منها وما بقي، وكم يبقى لك بعد الأقساط، مع زر لتفاصيل ديوني']},
  {v:'2.30.1',d:'2026-10-15',items:['إصلاح: شريط سورة الملك وأدعية الرزق رجع إلى مكانه السابق، والتنبيهات الذكية و«وضعي المالي» والرصيد المتوقع صارت بعده']},
@@ -4011,7 +4013,7 @@ function salMgmtHtml(){const now=new Date(),cm=curM(),pc=payCycle(),a=pc?inRange
    <div class="setrow col"><div><b>الراتب المعتاد</b><small>يُقترح عند تسجيل الراتب، وإن تركته فارغًا يُستخدم آخر راتب سجّلته</small></div><div class="capin"><input class="inp num" id="salAmt" inputmode="decimal" placeholder="0.000" value="${+S.settings.salaryAmt?amtIn(S.settings.salaryAmt):''}" style="text-align:left" enterkeyhint="done"><button class="btn" id="salAmtSave">حفظ</button></div></div>
    <div class="setrow col"><div><b>يوم نزول الراتب</b><small>${pd?'تُحسب الرئيسية من يوم نزوله حتى الراتب القادم':'غير محدد: تُحسب الرئيسية حتى نهاية الشهر'}</small></div><select class="inp" id="payDay"><option value="0" ${!pd?'selected':''}>غير محدد</option>${[...Array(31)].map((_,i)=>`<option value="${i+1}" ${pd===i+1?'selected':''}>يوم ${i+1}</option>`).join('')}</select></div>
    ${pd?`<div class="setrow col"><div><b>إذا صادف جمعة أو سبت</b></div><div class="seg seg3">${[['none','في موعده'],['before','ينزل قبلها'],['after','ينزل بعدها']].map(([v,n])=>`<button class="n" data-prule="${v}" aria-pressed="${rule===v}">${n}</button>`).join('')}</div></div>`:''}
-   ${pd?`<div class="setrow col"><div><b>الشهر المالي حسب الراتب</b><small>${S.settings.payMonth?'مفعّل: الشهر من يوم '+pd+' حتى يوم '+(pd>1?pd-1:'آخر الشهر')+' من الشهر التالي، مثل «سبتمبر – أكتوبر»':'الأشهر والتقارير حسب التقويم من 1 إلى آخر الشهر'}</small></div><div class="seg"><button class="n" data-pmonth="0" aria-pressed="${!S.settings.payMonth}">شهر التقويم</button><button class="n" data-pmonth="1" aria-pressed="${!!S.settings.payMonth}">من الراتب للراتب</button></div></div>`:''}
+   ${pd?`<div class="setrow col"><div><b>الشهر المالي حسب الراتب</b><small>${payMode()?'مفعّل: الشهر من يوم '+pd+' حتى يوم '+(pd>1?pd-1:'آخر الشهر')+' من الشهر التالي، مثل «سبتمبر – أكتوبر»':'الأشهر والتقارير حسب التقويم من 1 إلى آخر الشهر'}</small></div><div class="seg"><button class="n" data-pmonth="0" aria-pressed="${!payMode()}">شهر التقويم</button><button class="n" data-pmonth="1" aria-pressed="${payMode()}">من الراتب للراتب</button></div></div>`:''}
    <div class="row2"><button class="btn ghost" data-dayplan="1">📅 خطة الصرف اليومية</button><button class="btn ghost" data-tab="home">🏠 عرض في الرئيسية</button></div></div>`}
 function vMaster(){const P=people(),Y=payees(),A=accList(),R=recs(),D=debts();
   const row=(t,s,attr,ico)=>`<div class="mdrow">${ico?`<button class="mdico" data-icoedit="${ico[0]}" data-iconame="${t}" aria-label="تغيير صورة ${t}">${ico[1]}<span class="mdico-e">✎</span></button>`:''}<div><b>${t}</b>${s?`<small>${s}</small>`:''}</div>${attr?`<button class="chip" ${attr}><span class="lk">🔒 </span>تعديل</button>`:''}</div>`;
@@ -4592,6 +4594,11 @@ function openDuaBarEdit(){const L=document.getElementById('layer');let items=(du
     if(x.id==='dbSave'){S.settings.duaBar=Object.assign(duaBar(),{items:items.slice(0,60)});await putSettings();L.innerHTML='';render();toast('حُفظت أدعية الشريط')}}}
 
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
+/* في الآيفون لا ينتقل التركيز إلى الزر عند الضغط عليه، فيبقى الحقل الذي كتبت فيه «نشطًا» وتتوقف الصفحة عن التحديث.
+ * لذلك نُخرج التركيز من الحقل عند الضغط على أي زر (ويُحفظ ما كتبته كما هو) */
+let lastTap=0;
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button,[data-tab]');if(!b)return;lastTap=Date.now();
+  const a=document.activeElement;if(a&&a!==b&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&!b.contains(a)){try{a.blur()}catch(x){}}},true);
 document.addEventListener('click',async e=>{
   {const rt=e.target.closest('[data-rtog]');if(rt&&!e.target.closest('button,a,summary,details')){const row=rt.closest('.recrow');const on=!row.classList.contains('open');row.classList.toggle('open',on);rt.setAttribute('aria-expanded',on);S.recOpen=S.recOpen||{};if(on)S.recOpen[rt.dataset.rtog]=1;else delete S.recOpen[rt.dataset.rtog];return}}
   const b=e.target.closest('button');if(!b||b.closest('#layer'))return;
@@ -4761,7 +4768,7 @@ document.addEventListener('click',async e=>{
   if(b.id==='savBal'){openSavBalance();return}
   if(b.id==='savSplit'){openSavDeposit(+b.dataset.amt,true);return}
   if(b.dataset.gnext){nextCycle(b.dataset.gnext);return}
-  if(b.dataset.pmonth!==undefined){const on=b.dataset.pmonth==='1';if(!!S.settings.payMonth===on)return;S.settings.payMonth=on;await putSettings();S.month=curM();render();toast(on?'صار الشهر يُحسب من الراتب إلى الراتب، مثل «'+monthName(curM())+'»':'رجعت الأشهر حسب التقويم');return}
+  if(b.dataset.pmonth!==undefined){const on=b.dataset.pmonth==='1';if(payMode()===on)return;S.settings.payMonth=on;await putSettings();S.month=curM();render();toast(on?'صار الشهر يُحسب من الراتب إلى الراتب، مثل «'+monthName(curM())+'»':'رجعت الأشهر حسب التقويم');return}
   if(b.id==='mPrev'){S.month=shiftMonth(S.month,-1);render();return}
   if(b.id==='mNext'){S.month=shiftMonth(S.month,1);render();return}
   if(b.dataset.edit){openSheet(S.tx[b.dataset.edit]);return}
