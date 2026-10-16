@@ -853,7 +853,7 @@ function vHome(){
   return `${homeDuaHtml()}${spiritHtml('top')}${rzHtml('top')}<section class="hero"><div class="lbl">${pc?'المتبقي من راتب هذه الدورة':'المتبقي في '+esc(mShort(m))}</div>
    <div class="big"><span class="num">${left<0?'−':''}${money(Math.abs(left))}</span> <small>${CUR}</small></div>
    <div class="row"><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M7 9v8h8"/></svg></span>الدخل</span><b class="num">${amtH(inc)}</b></div><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>المصاريف</span><b class="num">${amtH(exp)}</b></div></div>${pc?`<div class="lbl" style="margin-top:10px;font-size:12.5px">دورة الراتب: ${fmtD(pc.start)} – ${fmtD(pc.end)}</div>`:''}${heroDebtHtml(m,pc,left)}</section>
-   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${spendBtnHtml()}${todayHtml()}${rescueHomeHtml()}
+   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${spendBtnHtml()}${todayHtml()}${rescueHomeHtml()}${xpHomeHtml()}
    ${pendHtml()||billAlertsHtml()||trustAlertsHtml()||carAlertsHtml()||docAlertsHtml()?'<div style="margin-top:14px">'+pendHtml()+billAlertsHtml()+trustAlertsHtml()+carAlertsHtml()+docAlertsHtml()+'</div>':''}${spiritHtml('mid')}${rzHtml('mid')}${smartAlertsHtml()}${bfHomeHtml()}${finStatusHtml()}${widgetNudgeHtml()}${empty}${advHomeHtml()}${plansHomeHtml()}${repHomeHtml()}
    ${recent.length?`<h2>آخر العمليات</h2><div class="panel" style="padding:6px 10px">${recent.map(txRow).join('')}</div><div style="margin-top:8px"><button class="chip" data-tab="log">عرض كل العمليات</button></div>`:''}${debtsBrowseHtml()}${spiritHtml('bottom')}${rzHtml('bottom')}`;
 }
@@ -3168,8 +3168,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.34.0';
+const APP_VERSION='2.35.0';
 const CHANGELOG=[
+ {v:'2.35.0',d:'2026-10-16',items:['«الخطة المالية الاستثنائية»: زر في الرئيسية يفتح صفحة مستقلة لإعادة توزيع مدفوعات شهر صعب، وتُستورد فواتيرك وأقساطك المسجّلة تلقائيًا','لكل التزام: دفع كامل أو جزء أو تأجيل كامل أو استبعاد، مع تاريخ مقترح وحالة موافقة الجهة الدائنة، وإضافة التزامات للخطة فقط','حسابات فورية: المستحق والمخطط والمؤجَّل والسيولة المتبقية، وتنبيه إذا تجاوز الدفع المستحق أو السيولة','«مقارنة الخطة الأصلية بالاستثنائية»: ما تدفعه الآن، وما يتراكم للشهر القادم، وأثره على موعد التخلص من الديون والفوائد','توقع الشهر القادم وشهرين بعده: الدخل والالتزامات الأصلية والمرحَّل (مرة واحدة فقط) والمصروفات الأساسية والعجز أو الفائض','حماية الخطة الأصلية: لا تتغير الديون ولا الأقساط إلا بتسجيل دفعة فعلية، والحالة تُقرأ من الدفعات الفعلية، والموعد الأصلي يبقى معتمدًا حتى توافق الجهة','حفظ كمسودة واعتماد وإغلاق الشهر ومقارنة المخطط بالفعلي، ثم إعداد خطة الشهر التالي','سجل نسخ مع الرجوع لنسخة سابقة دون المساس بالدفعات، وكل تعديل يُسجّل في سجل التغييرات','تقرير A4 للطباعة وPDF وExcel ومشاركة']},
  {v:'2.34.0',d:'2026-10-16',items:['زر «💰 كم أستطيع أن أنفق اليوم؟» في الرئيسية: يبدأ من رصيدك الفعلي في حساباتك، ويطرح الأقساط والفواتير قبل الراتب ومبالغ خططك واحتياطي الطوارئ، ثم يقسم المتاح على الأيام حتى الراتب','يعرض ميزانية اليوم وما صرفته وما بقي، وميزانية 7 أيام، والمبلغ الذي تحتفظ به، وطريقة الحساب خطوة بخطوة','«حدّث المتبقي اليوم» بعد تسجيل مصروفاتك، واحتياطي طوارئ تحدده بنفسك','وضع «الصرف الآمن»: يطلب التأكد من الرصيد والفواتير والاحتياجات غير المسجّلة قبل اعتماد ميزانية كل دورة، ويحتفظ بهامش 10% حتى تعتمدها']},
  {v:'2.33.0',d:'2026-10-16',items:['زر «سورة الملك» صار «التلاوات القرآنية» بأيقونة مصحف، في نفس مكانه، ويفتح صفحة فيها سور الملك والواقعة ويس','قراءة كل سورة بالرسم العثماني من مشروع تنزيل، مع تكبير وتصغير الخط، والقراءة الليلية، وحفظ آخر آية وصلت إليها تلقائيًا، وزر «متابعة القراءة»','الاستماع إلى التلاوة بصوت مشاري راشد العفاسي: تشغيل وإيقاف، وشريط للموضع، والصوت، ومؤشر التقدم، ورسالة واضحة إذا تعذّر التحميل. لا يُشغَّل أي صوت تلقائيًا','ورد سورة الملك اليومي («أتممت القراءة») والأدعية بعدها بقيت كما هي']},
  {v:'2.32.1',d:'2026-10-16',items:['مراجعة شاملة: فُحص كل زر في كل صفحة ونافذة (أكثر من 4,000 ضغطة) بالشهر العادي وحسب الراتب وببيانات فارغة، بلا أي خطأ','التحقق من الحفظ: بعد إعادة الفتح، وبعد مسح ذاكرة المتصفح (تُستعاد من قاعدة البيانات الداخلية)، والنسخ الاحتياطي والاستعادة، والحذف، والمزامنة','مطابقة الأرقام بين الرئيسية والشهرية والتقارير والطباعة وExcel','أسرع: الرئيسية أسرع بمرتين والمستشار بثلاث مرات ونصف مع البيانات الكبيرة']},
@@ -4276,6 +4277,7 @@ function finStatusHtml(){if(S.month!==curM())return '';if(!list().length&&!debts
    ${F.after<0||F.liquid<0?`<div class="warnbox" style="margin:0">التزاماتك ومصروفاتك أكبر من دخلك ${periodTo(F.dp)} بـ <b class="num">${amtH(Math.abs(Math.min(F.after,F.liquid)))}</b>.</div>`:''}
    <div class="chips">${F.after<0||F.liquid<0?'<button class="chip pay" data-shortfall="1">ماذا أفعل إذا لم يكفِ المال؟</button>':'<button class="chip" data-shortfall="1">خطة الالتزامات المتبقية</button>'}<button class="chip" data-bfopen="1">🔮 الرصيد المتوقع</button><button class="chip" data-accopen="1">حساباتي</button></div>
    ${rescueCfg()&&today()<=rescueCfg().to?'':`<button class="btn ghost block" data-rescue="1">🛟 ساعدني على تنظيم وضعي المالي</button>`}
+   <button class="btn ghost block" data-xplans="1">🗓️ الخطة المالية الاستثنائية</button>
    <p class="note" style="margin:0">مؤشرات لمتابعة وضعك من بياناتك المسجّلة فقط، وليست تقييمًا ائتمانيًا رسميًا.</p></div>`}
 /* أولوية الالتزام عند العجز: المتأخر وذو العواقب أولًا */
 function sfPriority(i,date){const k=i.ref&&i.ref.kind,late=date<today();
@@ -4815,6 +4817,210 @@ function openSpendToday(manual){const L=document.getElementById('layer');let mb=
     if(x.id==='spHoldSave'){const v=parseAmt(String(document.getElementById('spHold').value||'0'));if(v===null||isNaN(v)||v<0){toast('اكتب مبلغًا صحيحًا');return}S.settings.safeHold={c:spendCycleKey(),amt:v};await putSettings();draw();render();toast(v?'حُجز المبلغ حتى الراتب':'أُلغي الحجز');return}
     if(x.id==='spOk'){S.settings.safeOk=spendCycleKey();await putSettings();draw();render();toast('اعتُمدت ميزانية هذه الدورة');return}}}
 
+
+/* ===== الخطة المالية الاستثنائية: إعادة توزيع مدفوعات شهر واحد دون المساس بالخطة الأصلية =====
+ * القواعد: الخطة لا تغيّر الديون ولا الالتزامات ولا الأرصدة. الحالة تُقرأ من الدفعات الفعلية فقط.
+ * المؤجَّل يُحفظ داخل الخطة مرتبطًا بالالتزام الأصلي، ويُضاف إلى الشهر القادم مرة واحدة (بعد استبعاد المتأخرات المحسوبة أصلًا). */
+const XP_MODE={full:'دفع كامل',part:'دفع جزء',defer:'تأجيل كامل',exclude:'استبعاد'};
+const XP_CRED={none:'لم أطلب التأجيل',pending:'بانتظار موافقة الجهة',approved:'معتمد من الجهة'};
+const XP_ST={draft:['مسودة','warn'],approved:['معتمدة','good'],closed:['مغلقة','muted']};
+function xplans(){return S.settings.xplans||[]}
+function xpById(id){return xplans().find(p=>p.id===id)}
+function xpClone(o){return JSON.parse(JSON.stringify(o))}
+/* الالتزامات الحالية للشهر من بيانات التطبيق (فواتير وأقساط) */
+function xpRowsFor(m){return monthItems(m).map(i=>({key:i.kind+':'+i.id,src:i.kind,refId:i.id,name:i.name,mode:'full',pay:null,propDate:'',cred:'none',note:''}))}
+/* الأرقام الحية لكل بند: المستحق والمدفوع فعليًا والتاريخ والحالة */
+function xpLive(r,m){if(r.src==='manual'){const paid=r3((r.txs||[]).reduce((s,id)=>s+(S.tx[id]?+S.tx[id].amount:0),0));return{due:r3(+r.due||0),paid,date:r.dueDate||'',rem:r3(Math.max(0,(+r.due||0)-paid)),isPaid:paid>=(+r.due||0)-0.0005&&(+r.due||0)>0,bal:null,found:true}}
+  const it=monthItems(m).find(i=>i.kind+':'+i.id===r.key);if(!it)return{due:0,paid:0,rem:0,date:'',isPaid:true,found:false,bal:null};
+  const bal=r.src==='debt'?r3(+(debts().find(d=>d.id===r.refId)||{}).balance||0):null;
+  return{due:r3(it.amount),paid:r3(Math.min(it.amount,it.paidAmt||0)),rem:r3(Math.max(0,it.amount-(it.paidAmt||0))),date:dueOf(it,m),isPaid:!!it.isPaid,prev:r3(it.prev||0),bal,found:true}}
+function xpRowPlan(r,L){/* «المخطط» = كل ما يُدفع لهذا الالتزام في الشهر (يشمل المدفوع فعلًا)، والمرحَّل = المستحق − المخطط */
+  if(r.mode==='exclude')return{pay:0,def:0,err:''};if(r.mode==='defer')return{pay:L.paid,def:r3(L.due-L.paid),err:''};if(r.mode==='full')return{pay:L.due,def:0,err:''};
+  const v=+r.pay;if(r.pay===null||r.pay===''||!isFinite(v))return{pay:L.paid,def:r3(L.due-L.paid),err:'اكتب المبلغ الذي ستدفعه'};if(v<0)return{pay:L.paid,def:r3(L.due-L.paid),err:'المبلغ لا يكون سالبًا'};
+  if(v>L.due+0.0005)return{pay:r3(v),def:0,err:'أكبر من المستحق ('+money(L.due)+')'};if(v+0.0005<L.paid)return{pay:L.paid,def:r3(L.due-L.paid),err:'أقل مما دفعته فعلًا ('+money(L.paid)+')'};return{pay:r3(v),def:r3(L.due-v),err:''}}
+function xpStatus(r,L,P){const td=today(),out=[];if(!L.found)return[['لم يعد مستحقًا','muted']];
+  if(L.isPaid)out.push(['مدفوعة بالكامل','good']);else if(L.paid>0.0005)out.push(['مدفوعة جزئيًا','warn']);else out.push(['غير مدفوعة','muted']);
+  if(!L.isPaid&&L.date&&L.date<td)out.push(['متأخرة عن موعدها','bad']);
+  if(r.mode!=='exclude'&&P.def>0.0005&&!L.isPaid)out.push(r.cred==='approved'?['تأجيل معتمد من الجهة','good']:r.cred==='pending'?['بانتظار موافقة الجهة','warn']:['مؤجلة ضمن الخطة المقترحة','warn']);
+  if(r.mode==='exclude')out.push(['مستبعدة (تبقى ضمن الالتزامات الأصلية)','muted']);return out}
+/* الحسابات الفورية */
+function xpCalc(p){const rows=p.rows.map(r=>{const L=xpLive(r,p.month),P=xpRowPlan(r,L);return{r,L,P,st:xpStatus(r,L,P)}});const inc=rows.filter(x=>x.r.mode!=='exclude');
+  const t={due:r3(inc.reduce((s,x)=>s+x.L.due,0)),paid:r3(inc.reduce((s,x)=>s+x.L.paid,0)),rem:r3(inc.reduce((s,x)=>s+x.L.rem,0)),pay:r3(inc.reduce((s,x)=>s+x.P.pay,0)),def:r3(inc.reduce((s,x)=>s+x.P.def,0)),
+    nDef:inc.filter(x=>x.P.def>0.0005).length,errs:rows.filter(x=>x.P.err&&x.r.mode==='part').length,n:inc.length};
+  t.avail=r3(+p.avail||0);t.ess=r3(+p.ess||0);t.left=r3(t.avail-t.ess-t.pay);t.over=t.left<-0.0005;return{rows,t}}
+/* الشهر القادم والأشهر اللاحقة: الالتزامات الأصلية بدون المتأخرات + المرحّل مرة واحدة */
+function xpOrig(m){return r3(monthItems(m).reduce((s,i)=>s+Math.max(0,i.amount-(i.prev||0)),0))}
+function xpNext(p,C){const ess=r3(+p.essNext||0),inc=r3(+p.inc||0);const out=[];let carry=C.t.def;
+  for(let k=0;k<3;k++){const m=shiftMonth(p.toMonth,k);const orig=xpOrig(m);const c=r3(carry);const left=r3(inc-orig-c-ess);out.push({m,inc,orig,carry:c,ess,left});carry=left<0?-left:0}
+  const review=C.rows.filter(x=>x.r.mode!=='exclude'&&x.P.def>0.0005).map(x=>({name:x.r.name,def:x.P.def,prop:x.r.propDate,cred:x.r.cred}));return{months:out,review}}
+/* مقارنة الخطة الأصلية بالاستثنائية، ومنها أثر التأجيل على موعد التخلص من الديون */
+function xpCompare(p,C,N){const n0=N.months[0];const origNextLeft=r3(n0.inc-n0.orig-n0.ess);
+  const Ds=debts().filter(d=>+d.balance>0.0005);const P=debtPlan();let debt=null;
+  if(Ds.length){const base=simDebts(Ds,P.extra,P.strategy,true);const defBy={};C.rows.filter(x=>x.r.src==='debt'&&x.r.mode!=='exclude'&&x.P.def>0.0005).forEach(x=>defBy[x.r.refId]=(defBy[x.r.refId]||0)+x.P.def);
+    const dsum=r3(Object.values(defBy).reduce((s,v)=>s+v,0));const extraInt=r3(Ds.reduce((s,d)=>s+(defBy[d.id]||0)*(+d.rate||0)/1200,0));
+    const B=Ds.map(d=>Object.assign({},d,{balance:r3(+d.balance+(defBy[d.id]||0))}));const late=dsum?simDebts(B,P.extra,P.strategy,true):base;
+    debt={dsum,base,late,extraInt,baseLbl:base.stuck?'لا ينتهي':monthLabel(base.months),lateLbl:late.stuck?'لا ينتهي':monthLabel(late.months),delay:!base.stuck&&!late.stuck?late.months-base.months:null,intDiff:!base.stuck&&!late.stuck?r3(late.interest-base.interest):null}}
+  return{rows:[['تدفعه هذا الشهر',C.t.due,C.t.pay],['السيولة المتبقية هذا الشهر',r3(C.t.avail-C.t.ess-C.t.due),C.t.left],['التزامات الشهر القادم',n0.orig,r3(n0.orig+n0.carry)],['المتبقي في الشهر القادم',origNextLeft,n0.left]],debt}}
+function xpNew(m){m=m||curM();const sp=(()=>{try{const R=spendToday();return R&&!R.need?R.bal:null}catch(e){return null}})();
+  const p={id:'xp'+uidGen(),name:'الخطة الاستثنائية لشهر '+monthName(m),month:m,toMonth:shiftMonth(m,1),avail:sp!==null?r3(Math.max(0,sp)):r3(Math.max(0,dailyPlan().inc-dailyPlan().spent)),inc:r3(salAmt()||avgSurplus()||0),
+    reason:'',notes:'',ess:0,essNext:r3(pastAvg(varSpend)||0),status:'draft',created:new Date().toISOString(),updated:'',rows:xpRowsFor(m),hist:[]};
+  if(sp!==null&&m===curM())p.avail=r3(p.avail+p.rows.reduce((s,r)=>s+xpLive(r,m).paid,0));return p}
+function xpSnap(p,label){return{at:new Date().toISOString(),label,status:p.status,f:{name:p.name,month:p.month,toMonth:p.toMonth,avail:p.avail,inc:p.inc,reason:p.reason,notes:p.notes,ess:p.ess,essNext:p.essNext},rows:xpClone(p.rows)}}
+async function xpSave(p,label){const old=xpById(p.id);p.updated=new Date().toISOString();
+  try{if(!old)aud('xplan','إنشاء خطة استثنائية «'+p.name+'»','',monthName(p.month));else{
+    if(old.status!==p.status)aud('xplan','حالة الخطة «'+p.name+'»',XP_ST[old.status][0],XP_ST[p.status][0]);
+    p.rows.forEach(r=>{const o=old.rows.find(x=>x.key===r.key);const L=xpLive(r,p.month);const a=o?xpRowPlan(o,L):null,b=xpRowPlan(r,L);
+      if(!o)aud('xplan','إضافة «'+r.name+'» إلى الخطة','',money(b.pay));else if(o.mode!==r.mode||Math.abs(a.pay-b.pay)>0.0005)aud('xplan','تعديل «'+r.name+'» في الخطة',XP_MODE[o.mode]+' '+money(a.pay),XP_MODE[r.mode]+' '+money(b.pay)+(b.def>0.0005?' · يُرحَّل '+money(b.def):''))});
+    old.rows.filter(o=>!p.rows.some(r=>r.key===o.key)).forEach(o=>aud('xplan','إزالة «'+o.name+'» من الخطة','',''))}}catch(e){}
+  p.hist=(p.hist||[]).concat([xpSnap(p,label)]).slice(-25);const L=xplans().filter(x=>x.id!==p.id).concat([xpClone(p)]);S.settings.xplans=L;await putSettings()}
+/* قائمة الخطط */
+function openXPlans(){const L=document.getElementById('layer');const P=xplans().slice().sort((a,b)=>b.month.localeCompare(a.month)||(b.updated||'').localeCompare(a.updated||''));
+  L.innerHTML=`${sheetTop('الخطط الاستثنائية')}<h2 style="margin-top:0">🗓️ الخطة المالية الاستثنائية</h2>
+   <p class="note" style="margin-top:0">لإعادة توزيع مدفوعات شهر صعب: تختار ما تدفعه كاملًا أو جزئيًا وما تؤجله، وترى أثره على الشهر القادم وعلى موعد التخلص من ديونك، دون أن تتغير خطتك الأصلية أو ديونك.</p>
+   ${P.length?`<div class="stack">${P.map(p=>{const C=xpCalc(p);return `<button class="xpcard" data-xpopen="${esc(p.id)}"><div><b>${esc(p.name)}</b><small>${esc(monthName(p.month))} → ${esc(monthName(p.toMonth))}${p.reason?' · '+esc(p.reason):''}</small></div><div class="xpc-n"><span class="pill ${XP_ST[p.status][1]}">${XP_ST[p.status][0]}</span><small>تدفع ${money(C.t.pay)} · يُرحَّل ${money(C.t.def)}</small></div></button>`}).join('')}</div>`:'<div class="panel empty"><b>لا خطط بعد</b>أنشئ خطة لشهر محدد، وستُستورد فواتيرك وأقساطك المسجّلة تلقائيًا.</div>'}
+   <div class="actions"><button class="btn block" id="xpNew">+ خطة جديدة لشهر ${esc(monthName(curM()))}</button><div class="row2"><button class="btn ghost" id="xpNewNext">+ خطة لشهر ${esc(monthName(shiftMonth(curM(),1)))}</button><button class="btn ghost" data-close>إغلاق</button></div></div></div></div>`;
+  L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+    if(x.dataset.xpopen){openXPlan(x.dataset.xpopen);return}
+    if(x.id==='xpNew'||x.id==='xpNewNext'){const m=x.id==='xpNew'?curM():shiftMonth(curM(),1);const ex=xplans().find(p=>p.month===m&&p.status!=='closed');if(ex&&!confirm('توجد خطة لهذا الشهر «'+ex.name+'». إنشاء خطة أخرى؟')){openXPlan(ex.id);return}openXPlan(null,xpNew(m))}}}
+/* محرر الخطة */
+function openXPlan(id,fresh){const L=document.getElementById('layer');let p=fresh?fresh:xpClone(xpById(id));if(!p)return;let dirty=!!fresh;
+  const ro=()=>p.status==='closed';
+  const rowHtml=(x,k)=>{const r=x.r,Lv=x.L,P=x.P;const dis=ro()?'disabled':'';
+    return `<div class="xprow${r.mode==='exclude'?' ex':''}${P.err&&r.mode==='part'?' err':''}" data-xprow="${k}">
+     <div class="xpr-h"><div><b>${esc(r.name)}</b><small>${r.src==='debt'?'قسط دين':r.src==='rec'?'فاتورة/التزام':'التزام أضفته للخطة'}${Lv.date?' · موعده '+dmy(Lv.date):''}${Lv.bal!==null?' · الدين المتبقي '+money(Lv.bal):''}</small></div>
+      <div class="xpr-st">${x.st.map(([t,c])=>`<span class="pill ${c}">${t}</span>`).join('')}</div></div>
+     <div class="xpr-n"><div><span>المستحق</span><b class="num">${money(Lv.due)}</b></div><div><span>دُفع فعلًا</span><b class="num">${money(Lv.paid)}</b></div><div><span>المخطط دفعه</span><b class="num amt-inc">${money(P.pay)}</b></div><div><span>يُرحَّل</span><b class="num ${P.def>0.0005?'amt-exp':''}">${money(P.def)}</b></div></div>
+     <div class="seg xpseg">${Object.entries(XP_MODE).map(([m,n])=>`<button class="n" data-xpmode="${k}:${m}" aria-pressed="${r.mode===m}" ${dis}>${n}</button>`).join('')}</div>
+     ${r.mode==='part'?`<div class="field"><label>المبلغ الذي ستدفعه (${CUR})</label><input class="inp num" data-xppay="${k}" inputmode="decimal" value="${r.pay!==null&&r.pay!==''?amtIn(+r.pay):''}" placeholder="0.000" style="text-align:left" ${dis}><small class="xperr">${P.err?esc(P.err):''}</small></div>`:''}
+     ${P.def>0.0005&&r.mode!=='exclude'?`<div class="row2"><div class="field"><label>تاريخ الدفع المقترح للمؤجَّل</label><input class="inp" type="date" data-xpprop="${k}" value="${esc(r.propDate||'')}" ${dis}></div><div class="field"><label>موافقة الجهة الدائنة</label><select class="inp" data-xpcred="${k}" ${dis}>${Object.entries(XP_CRED).map(([c,n])=>`<option value="${c}" ${r.cred===c?'selected':''}>${n}</option>`).join('')}</select></div></div>
+      ${r.cred!=='approved'?`<small class="note">الموعد الأصلي ${Lv.date?dmy(Lv.date):''} يبقى هو المعتمد حتى توافق الجهة الدائنة على التأجيل.</small>`:''}`:''}
+     <div class="field"><input class="inp" data-xpnote="${k}" value="${esc(r.note||'')}" placeholder="ملاحظة على هذا الالتزام (اختياري)" maxlength="200" ${dis}></div>
+     ${!ro()?`<div class="chips">${!Lv.isPaid&&Lv.found&&r.mode!=='exclude'?`<button class="chip pay" data-xppaynow="${k}">سجّل الدفع الفعلي</button>`:''}${r.src==='manual'?`<button class="chip" data-xpdel="${k}">إزالة من الخطة</button>`:''}</div>`:''}</div>`};
+  const sumHtml=C=>{const t=C.t;return `<div class="xpsum"><div><span>إجمالي المستحق</span><b class="num">${amtH(t.due)}</b></div><div><span>دُفع فعلًا</span><b class="num">${amtH(t.paid)}</b></div><div><span>إجمالي الدفع المخطط</span><b class="num amt-inc">${amtH(t.pay)}</b></div><div><span>إجمالي المؤجَّل</span><b class="num amt-exp">${amtH(t.def)}</b></div><div><span>السيولة المتبقية</span><b class="num ${t.over?'amt-exp':''}">${t.left<0?'−':''}${amtH(Math.abs(t.left))}</b></div><div><span>بنود مؤجلة</span><b>${t.nDef} من ${t.n}</b></div></div>
+    <small class="note">السيولة المتبقية = المتاح ${money(t.avail)} − مصروفات أساسية محجوزة ${money(t.ess)} − الدفع المخطط ${money(t.pay)}</small>
+    ${t.over?`<div class="warnbox" style="margin:8px 0 0">⚠️ المدفوعات المخططة أكبر من السيولة المتاحة بـ <b class="num">${amtH(-t.left)}</b>. قلّل بعض المدفوعات أو أجّل جزءًا منها.</div>`:''}
+    ${t.errs?`<div class="warnbox" style="margin:8px 0 0">⚠️ ${countWord(t.errs,'بند واحد فيه','بندان فيهما','بنود فيها','بندًا فيها')} مبلغ غير صحيح. صحّحه قبل الاعتماد.</div>`:''}`};
+  const nextHtml=(N)=>`<table class="cmptbl xpnext"><thead><tr><th></th>${N.months.map(x=>`<th>${esc(mShort(x.m))}</th>`).join('')}</tr></thead><tbody>
+    <tr><td>الدخل المتوقع</td>${N.months.map(x=>`<td class="num">${money(x.inc)}</td>`).join('')}</tr>
+    <tr><td>الالتزامات الأصلية</td>${N.months.map(x=>`<td class="num">${money(x.orig)}</td>`).join('')}</tr>
+    <tr><td>المرحَّل إليه</td>${N.months.map(x=>`<td class="num ${x.carry>0.0005?'amt-exp':''}">${money(x.carry)}</td>`).join('')}</tr>
+    <tr><td>مصروفات أساسية</td>${N.months.map(x=>`<td class="num">${money(x.ess)}</td>`).join('')}</tr>
+    <tr class="tot"><td>${'المتبقي'}</td>${N.months.map(x=>`<td class="num ${x.left<0?'amt-exp':'amt-inc'}">${x.left<0?'−':''}${money(Math.abs(x.left))}</td>`).join('')}</tr></tbody></table>
+    ${N.months[0].left<0?`<div class="warnbox" style="margin:8px 0 0">⚠️ المبالغ المرحّلة ستسبب عجزًا في ${esc(monthName(N.months[0].m))} قدره <b class="num">${amtH(-N.months[0].left)}</b>${N.months[1].carry>0.0005?'، ويمتد أثره إلى '+esc(monthName(N.months[1].m)):''}. راجع الخطة الحالية: ادفع جزءًا أكبر الآن أو خفّف المصروفات.</div>`:`<div class="okbox" style="margin:8px 0 0">الشهر القادم يتحمّل المبالغ المرحّلة بحسب الأرقام المسجّلة.</div>`}
+    ${N.review.length?`<h4>تحتاج مراجعة قبل موعدها</h4><ul class="tips">${N.review.map(v=>`<li>${esc(v.name)}: <b class="num">${money(v.def)}</b>${v.prop?' · مقترح '+dmy(v.prop):' · لم تحدد موعدًا'} · ${XP_CRED[v.cred]}</li>`).join('')}</ul>`:''}`;
+  const cmpHtml=(K)=>`<table class="cmptbl xpcmp"><thead><tr><th></th><th>الخطة الأصلية</th><th>الخطة الاستثنائية</th><th>الفرق</th></tr></thead><tbody>${K.rows.map(([n,a,b])=>`<tr><td>${n}</td><td class="num">${a<0?'−':''}${money(Math.abs(a))}</td><td class="num">${b<0?'−':''}${money(Math.abs(b))}</td><td class="num ${b-a<0?'amt-exp':b-a>0?'amt-inc':''}">${b-a>0?'+':b-a<0?'−':''}${money(Math.abs(b-a))}</td></tr>`).join('')}
+    ${K.debt?`<tr><td>التخلص من الديون</td><td>${esc(K.debt.baseLbl)}</td><td>${K.debt.dsum?esc(K.debt.baseLbl)+'<small class="note" style="display:block">إذا سدّدت المؤجَّل الشهر القادم</small>':'بدون تغيير'}</td><td>${K.debt.dsum?'فائدة إضافية ≈ '+money(K.debt.extraInt):'—'}</td></tr>
+     ${K.debt.dsum?`<tr><td></td><td></td><td>${esc(K.debt.lateLbl)}<small class="note" style="display:block">إذا أُضيف المؤجَّل إلى رصيد الدين</small></td><td class="${K.debt.delay>0?'amt-exp':''}">${K.debt.delay===null?'—':K.debt.delay>0?'تأخير '+monthsWord(K.debt.delay):'بدون تأخير'}${K.debt.intDiff>0.5?' · فوائد +'+money(K.debt.intDiff):''}</td></tr>`:''}`:''}</tbody></table>
+    ${p.base?`<small class="note">الخطة الأصلية محفوظة منذ اعتماد الخطة في ${fmtD(p.base.at.slice(0,10))}: التخلص من الديون ${esc(p.base.payoff)}، والتزامات الشهر القادم ${money(p.base.origNext)}.</small>`:''}
+    <small class="note" style="display:block">ديونك وأقساطك وخطة سدادها لا تتغير بإعداد هذه الخطة. يتغير رصيد الدين فقط عند تسجيل دفعة فعلية.</small>`;
+  const refresh=()=>{const C=xpCalc(p),N=xpNext(p,C),K=xpCompare(p,C,N);const s=document.getElementById('xpSum');if(s)s.innerHTML=sumHtml(C);const n=document.getElementById('xpNext');if(n)n.innerHTML=nextHtml(N);const k=document.getElementById('xpCmp');if(k)k.innerHTML=cmpHtml(K);
+    C.rows.forEach((x,i)=>{const el=L.querySelector('[data-xprow="'+i+'"]');if(!el)return;const nn=el.querySelectorAll('.xpr-n b');if(nn.length===4){nn[2].textContent=money(x.P.pay);nn[3].textContent=money(x.P.def);nn[3].className='num '+(x.P.def>0.0005?'amt-exp':'')}
+      const er=el.querySelector('.xperr');if(er)er.textContent=x.P.err||'';el.classList.toggle('err',!!x.P.err&&x.r.mode==='part')})};
+  const draw=()=>{const C=xpCalc(p),N=xpNext(p,C),K=xpCompare(p,C,N);const dis=ro()?'disabled':'';const msel=(id,v)=>{const o=[];for(let k=-1;k<=3;k++)o.push(shiftMonth(curM(),k));if(!o.includes(v))o.unshift(v);return `<select class="inp" id="${id}" ${dis}>${o.map(m=>`<option value="${m}" ${m===v?'selected':''}>${esc(monthName(m))}</option>`).join('')}</select>`};
+   L.innerHTML=`${sheetTop('الخطة الاستثنائية')}<div class="xphead"><h2 style="margin:0">🗓️ ${esc(p.name)}</h2><span class="pill ${XP_ST[p.status][1]}">${XP_ST[p.status][0]}${dirty?' · غير محفوظة':''}</span></div>
+    ${ro()?'<div class="infobox" style="margin:8px 0"><span>أُغلقت هذه الخطة. تستطيع مراجعتها وطباعتها، ولا يمكن تعديلها.</span></div>':''}
+    <h3>1. بيانات الخطة</h3><div class="panel stack">
+     <div class="field"><label for="xpName">اسم الخطة</label><input class="inp" id="xpName" value="${esc(p.name)}" maxlength="80" ${dis}></div>
+     <div class="row2"><div class="field"><label for="xpMonth">الشهر الاستثنائي</label>${msel('xpMonth',p.month)}</div><div class="field"><label for="xpTo">شهر ترحيل المبالغ</label>${msel('xpTo',p.toMonth)}</div></div>
+     <div class="row2"><div class="field"><label for="xpAvail">المبلغ المتوفر لهذا الشهر (${CUR})</label><input class="inp num" id="xpAvail" inputmode="decimal" value="${amtIn(+p.avail||0)}" style="text-align:left" ${dis}></div><div class="field"><label for="xpEss">مصروفات أساسية محجوزة (${CUR})</label><input class="inp num" id="xpEss" inputmode="decimal" value="${amtIn(+p.ess||0)}" style="text-align:left" ${dis}></div></div>
+     <div class="row2"><div class="field"><label for="xpInc">الدخل المتوقع في الشهر القادم (${CUR})</label><input class="inp num" id="xpInc" inputmode="decimal" value="${amtIn(+p.inc||0)}" style="text-align:left" ${dis}></div><div class="field"><label for="xpEssN">مصروفات أساسية متوقعة شهريًا (${CUR})</label><input class="inp num" id="xpEssN" inputmode="decimal" value="${amtIn(+p.essNext||0)}" style="text-align:left" ${dis}></div></div>
+     <div class="field"><label for="xpReason">سبب الخطة</label><input class="inp" id="xpReason" value="${esc(p.reason||'')}" placeholder="مثل: تنظيم السيولة وسداد الديون" maxlength="120" ${dis}></div>
+     <div class="field"><label for="xpNotes">ملاحظات وشروط</label><textarea class="inp" id="xpNotes" rows="2" maxlength="600" ${dis}>${esc(p.notes||'')}</textarea></div>
+     <small class="note">المتوفر = كل ما لديك لهذا الشهر، شاملًا ما دفعته فعلًا من هذه الالتزامات. اقترحته من رصيد حساباتك مع ما دفعته، والدخل من راتبك المعتاد، والمصروفات الأساسية من معدلك. عدّلها كما تشاء.</small></div>
+    <div class="backrow"><h3 style="margin:0">2. الفواتير والديون (${p.rows.length})</h3>${!ro()?'<button class="chip" id="xpImport">⟳ استيراد من المسجّل</button>':''}</div>
+    <div class="stack">${C.rows.map(rowHtml).join('')||'<p class="note">لا التزامات مسجّلة لهذا الشهر. أضف التزامًا.</p>'}</div>
+    ${!ro()?`<div class="panel stack xpadd"><b>+ إضافة التزام لهذه الخطة فقط</b><div class="row2"><input class="inp" id="xpAN" placeholder="الجهة أو الشخص" maxlength="60"><input class="inp num" id="xpAA" inputmode="decimal" placeholder="المستحق" style="text-align:left"></div><div class="row2"><input class="inp" type="date" id="xpAD"><button class="btn" id="xpAdd">إضافة</button></div><small class="note">لا يُضاف إلى سجلك الأصلي، ويظهر في هذه الخطة فقط.</small></div>`:''}
+    <h3>3. ملخص الخطة</h3><div class="panel" id="xpSum">${sumHtml(C)}</div>
+    <h3>4. مقارنة الخطة الأصلية بالاستثنائية</h3><div class="panel" id="xpCmp">${cmpHtml(K)}</div>
+    <h3>5. الشهر القادم والأشهر اللاحقة</h3><div class="panel" id="xpNext">${nextHtml(N)}</div>
+    ${p.close?`<h3>نتيجة الشهر</h3><div class="panel paybk">${p.close.rows.map(r=>`<div class="sumrow"><span>${esc(r.name)}<small class="note" style="display:block">خُطط ${money(r.plan)}</small></span><b class="num ${r.actual+0.0005<r.plan?'amt-exp':'amt-inc'}">دُفع ${money(r.actual)}</b></div>`).join('')}<div class="sumrow total"><span>المخطط ${money(p.close.totPlan)}</span><b class="num">المنفَّذ ${money(p.close.totActual)}</b></div></div>`:''}
+    <h3>التقرير والإجراءات</h3><div class="stack xptools">
+     <div class="row2"><button class="btn ghost" id="xpPrint">🖨️ طباعة / PDF</button><button class="btn ghost" id="xpXlsx">📊 Excel</button></div>
+     <div class="row2"><button class="btn ghost" id="xpShare">مشاركة التقرير</button><button class="btn ghost" id="xpHist">سجل النسخ (${(p.hist||[]).length})</button></div>
+     ${p.status==='approved'?'<button class="btn ghost block" id="xpClose">إغلاق الشهر ومقارنة الخطة بالفعلي</button>':''}
+     ${p.status==='closed'?'<button class="btn block" id="xpNextPlan">إعداد خطة الشهر التالي</button>':''}
+     <div class="row2"><button class="btn ghost" id="xpBack">‹ الخطط</button>${xpById(p.id)?'<button class="btn ghost" id="xpDel">حذف الخطة</button>':'<button class="btn ghost" data-close>إغلاق</button>'}</div>
+     <p class="note" style="margin:0">أُنشئت ${fmtD(p.created.slice(0,10))}${p.updated?' · آخر تحديث '+fmtD(p.updated.slice(0,10)):''}</p></div>
+    ${!ro()?`<div class="actions"><div class="row2"><button class="btn ghost" id="xpDraft">حفظ كمسودة</button><button class="btn" id="xpApprove">${p.status==='approved'?'حفظ التعديلات':'اعتماد الخطة'}</button></div></div>`:''}</div></div>`};
+  const num=v=>{const n=parseAmt(String(v||'0'));return n===null||isNaN(n)?null:n};
+  const leave=()=>!dirty||confirm('لم تحفظ تعديلاتك على الخطة. الخروج بدون حفظ؟');
+  draw();
+  L.oninput=e=>{const t=e.target;if(ro())return;const fm={xpName:'name',xpReason:'reason',xpNotes:'notes'};if(fm[t.id]){p[fm[t.id]]=t.value;dirty=true;return}
+    const nm={xpAvail:'avail',xpEss:'ess',xpInc:'inc',xpEssN:'essNext'};if(nm[t.id]){const v=num(t.value);t.classList.toggle('bad',v===null||v<0);if(v!==null&&v>=0){p[nm[t.id]]=v;dirty=true;refresh()}return}
+    if(t.dataset.xppay!==undefined){const r=p.rows[+t.dataset.xppay];const v=t.value.trim()===''?'':num(t.value);r.pay=v===null?'x':v;dirty=true;refresh();return}
+    if(t.dataset.xpnote!==undefined){p.rows[+t.dataset.xpnote].note=t.value;dirty=true;return}};
+  L.onchange=e=>{const t=e.target;if(ro())return;if(t.id==='xpMonth'){if(t.value!==p.month&&confirm('تغيير الشهر يعيد استيراد التزامات '+monthName(t.value)+'. متابعة؟')){p.month=t.value;p.toMonth=shiftMonth(t.value,1);p.rows=xpRowsFor(t.value).concat(p.rows.filter(r=>r.src==='manual'));dirty=true}draw();return}
+    if(t.id==='xpTo'){p.toMonth=t.value;dirty=true;draw();return}
+    if(t.dataset.xpprop!==undefined){p.rows[+t.dataset.xpprop].propDate=t.value;dirty=true;return}
+    if(t.dataset.xpcred!==undefined){p.rows[+t.dataset.xpcred].cred=t.value;dirty=true;draw();return}};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;
+    if(x.hasAttribute('data-close')){if(!leave())return;L.innerHTML='';render();return}
+    if(x.id==='xpBack'){if(!leave())return;openXPlans();return}
+    if(x.dataset.xpmode){const [k,m]=x.dataset.xpmode.split(':');const r=p.rows[+k];r.mode=m;if(m==='part'&&(r.pay===null||r.pay===''))r.pay=xpLive(r,p.month).due;dirty=true;const y=L.querySelector('.sheet').scrollTop;draw();L.querySelector('.sheet').scrollTop=y;return}
+    if(x.dataset.xpdel){p.rows.splice(+x.dataset.xpdel,1);dirty=true;draw();return}
+    if(x.id==='xpImport'){const have=new Set(p.rows.map(r=>r.key));const add=xpRowsFor(p.month).filter(r=>!have.has(r.key));p.rows=p.rows.concat(add);dirty=dirty||add.length>0;draw();toast(add.length?'أُضيف '+countWord(add.length,'التزام واحد','التزامان','التزامات','التزامًا'):'كل الالتزامات المسجّلة موجودة في الخطة');return}
+    if(x.id==='xpAdd'){const n=document.getElementById('xpAN').value.trim(),a=num(document.getElementById('xpAA').value),d=document.getElementById('xpAD').value;
+      if(!n){toast('اكتب اسم الجهة');return}if(a===null||a<=0){toast('اكتب مبلغًا صحيحًا أكبر من صفر');return}p.rows.push({key:'manual:'+uidGen(),src:'manual',refId:'',name:n,due:a,dueDate:d,mode:'full',pay:null,propDate:'',cred:'none',note:'',txs:[]});dirty=true;draw();return}
+    if(x.dataset.xppaynow){const r=p.rows[+x.dataset.xppaynow];if(dirty){await xpSave(p,'حفظ قبل تسجيل دفعة');dirty=false}
+      if(r.src==='rec'){L.innerHTML='';payRec(r.refId,p.month);return}
+      if(r.src==='debt'){L.innerHTML='';openDebtPay(r.refId);return}
+      const Lv=xpLive(r,p.month),P=xpRowPlan(r,Lv);const amt=P.pay-Lv.paid>0.0005?r3(P.pay-Lv.paid):Lv.rem;if(!confirm('تسجيل دفع '+money(amt)+' '+CUR+' لـ«'+r.name+'» كمصروف فعلي اليوم؟'))return;
+      const t={id:uidGen(),type:'exp',amount:amt,cat:'other',date:today(),method:'transfer',note:r.name,createdAt:new Date().toISOString()};await putTx(t);r.txs=(r.txs||[]).concat([t.id]);await xpSave(p,'تسجيل دفعة «'+r.name+'»');dirty=false;draw();toast('سُجّلت الدفعة الفعلية');return}
+    if(x.id==='xpDraft'){await xpSave(p,'حفظ مسودة');dirty=false;draw();toast('حُفظت المسودة');return}
+    if(x.id==='xpApprove'){const C=xpCalc(p);if(C.t.errs){toast('صحّح المبالغ غير الصحيحة أولًا');return}
+      if(C.t.over&&!confirm('المدفوعات المخططة أكبر من السيولة المتاحة بـ '+money(-C.t.left)+' '+CUR+'. اعتماد الخطة رغم ذلك؟'))return;
+      const pend=C.rows.filter(z=>z.P.def>0.0005&&z.r.mode!=='exclude'&&z.r.cred!=='approved').length;if(pend&&p.status!=='approved'&&!confirm(countWord(pend,'بند مؤجَّل واحد','بندان مؤجَّلان','بنود مؤجَّلة','بندًا مؤجَّلًا')+' بدون موافقة الجهة الدائنة بعد، وسيبقى موعده الأصلي هو المعتمد. متابعة؟'))return;
+      if(p.status!=='approved'){const N=xpNext(p,C),K=xpCompare(p,C,N);p.base={at:new Date().toISOString(),payoff:K.debt?K.debt.baseLbl:'لا ديون',months:K.debt&&!K.debt.base.stuck?K.debt.base.months:null,origNext:N.months[0].orig,rem:C.t.rem}}
+      const was=p.status;p.status='approved';await xpSave(p,was==='approved'?'تعديل خطة معتمدة':'اعتماد الخطة');dirty=false;draw();toast(was==='approved'?'حُفظت التعديلات':'اعتُمدت الخطة. سجّل الدفعات الفعلية عند تنفيذها');return}
+    if(x.id==='xpPrint'){xpPrint(p);return}
+    if(x.id==='xpXlsx'){xpXlsx(p);return}
+    if(x.id==='xpShare'){xpShare(p);return}
+    if(x.id==='xpHist'){openXPHist(p,np=>{p=np;dirty=true;draw()});return}
+    if(x.id==='xpDel'){if(!confirm('حذف الخطة «'+p.name+'»؟ لن تتأثر ديونك ولا دفعاتك المسجّلة.'))return;S.settings.xplans=xplans().filter(z=>z.id!==p.id);try{aud('xplan','حذف خطة استثنائية «'+p.name+'»','','')}catch(er){}await putSettings();openXPlans();toast('حُذفت الخطة');return}
+    if(x.id==='xpClose'){const C=xpCalc(p);if(!confirm('إغلاق الشهر؟ ستُقارن الخطة بالدفعات الفعلية، ولن يمكن تعديلها بعد ذلك.'))return;
+      p.close={at:new Date().toISOString(),rows:C.rows.filter(z=>z.r.mode!=='exclude').map(z=>({name:z.r.name,plan:z.P.pay,actual:z.L.paid,def:z.P.def})),totPlan:C.t.pay,totActual:C.t.paid};p.status='closed';await xpSave(p,'إغلاق الشهر');dirty=false;draw();toast('أُغلق الشهر');return}
+    if(x.id==='xpNextPlan'){const C=xpCalc(p);const np=xpNew(p.toMonth);np.name='الخطة الاستثنائية لشهر '+monthName(p.toMonth);np.reason=p.reason;np.inc=p.inc;np.essNext=p.essNext;
+      C.rows.filter(z=>z.r.mode!=='exclude'&&z.r.src!=='debt').forEach(z=>{const unpaid=r3(Math.max(0,z.L.rem));if(unpaid<0.0005)return;
+        if(z.r.src==='manual'){np.rows.push({key:'manual:'+uidGen(),src:'manual',refId:'',name:z.r.name+' (مرحّل من '+monthName(p.month)+')',due:unpaid,dueDate:z.r.propDate||'',mode:'full',pay:null,propDate:'',cred:z.r.cred,note:'',txs:[]});return}
+        const nx=monthItems(p.toMonth).find(i=>i.kind+':'+i.id===z.r.key);const covered=nx?(nx.prev||0):0;const extra=r3(unpaid-covered);if(extra>0.0005)np.rows.push({key:'manual:'+uidGen(),src:'manual',refId:'',name:z.r.name+' (مرحّل من '+monthName(p.month)+')',due:extra,dueDate:z.r.propDate||'',mode:'full',pay:null,propDate:'',cred:z.r.cred,note:'',txs:[]})});
+      openXPlan(null,np);toast('أُعدّت خطة الشهر التالي: الأقساط المتأخرة تظهر في مبالغها تلقائيًا، وأضفت ما لا يُرحّل تلقائيًا مرة واحدة');return}}}
+function openXPHist(p,onRestore){const L=document.getElementById('layer');const H=(p.hist||[]).slice().reverse();
+  L.innerHTML=`${sheetTop('سجل النسخ')}<h2 style="margin-top:0">سجل نسخ «${esc(p.name)}»</h2><p class="note">الرجوع إلى نسخة سابقة يعيد أرقام الخطة فقط. الدفعات الفعلية المسجّلة لا تُحذف ولا يتغير تاريخها.</p>
+   <div class="panel" style="padding-block:4px">${H.length?H.map((h,i)=>{const d=new Date(h.at);return `<div class="audrow"><div><b>${esc(h.label)}</b><small>${dmy(isoD(d))} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} · ${XP_ST[h.status][0]} · ${countWord(h.rows.length,'بند واحد','بندان','بنود','بندًا')}</small></div>${p.status!=='closed'&&i>0?`<button class="chip" data-xph="${(p.hist.length-1-i)}">الرجوع إليها</button>`:''}</div>`}).join(''):'<p class="note">لم تُحفظ أي نسخة بعد.</p>'}</div>
+   <div class="actions"><button class="btn ghost block" id="xphBack">‹ رجوع إلى الخطة</button></div></div></div>`;
+  L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')||x.id==='xphBack'){openXPlan(null,p);return}
+    if(x.dataset.xph){const h=p.hist[+x.dataset.xph];if(!confirm('الرجوع إلى نسخة «'+h.label+'»؟ احفظ بعدها لتعتمدها.'))return;const np=Object.assign(xpClone(p),h.f,{rows:xpClone(h.rows)});
+      np.rows.forEach(r=>{const cur=p.rows.find(c=>c.key===r.key);if(cur&&cur.txs)r.txs=cur.txs.slice()});openXPlan(null,np);toast('رجعت الأرقام إلى النسخة المختارة. اضغط حفظ لاعتمادها')}}}
+/* تقرير الخطة: طباعة وPDF وExcel ومشاركة */
+function xpReport(p){const C=xpCalc(p),N=xpNext(p,C),K=xpCompare(p,C,N);const now=new Date();const T=(h,r,cls)=>`<table${cls?' class="'+cls+'"':''}><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${r.join('')}</tbody></table>`;const n=v=>`<span class="n">${v<0?'−':''}${money(Math.abs(v))}</span>`;
+  const warn=[];if(C.t.over)warn.push('المدفوعات المخططة أكبر من السيولة المتاحة بـ '+money(-C.t.left)+' ر.ع.');if(N.months[0].left<0)warn.push('عجز متوقع في '+monthName(N.months[0].m)+' قدره '+money(-N.months[0].left)+' ر.ع. بسبب المبالغ المرحّلة.');
+  C.rows.filter(z=>z.P.def>0.0005&&z.r.mode!=='exclude'&&z.r.cred!=='approved').forEach(z=>warn.push('تأجيل «'+z.r.name+'» غير معتمد من الجهة الدائنة بعد، والموعد الأصلي '+(z.L.date?dmy(z.L.date):'')+' هو المعتمد.'));
+  C.rows.filter(z=>z.st.some(s=>s[0]==='متأخرة عن موعدها')).forEach(z=>warn.push('«'+z.r.name+'» متأخر عن موعده.'));
+  let h=`<header class="rh"><div><div class="rapp">${REP_LOGO}إدارة شؤوني</div><h1>${esc(p.name)}</h1><div class="rper">الشهر: ${esc(monthName(p.month))} · الترحيل إلى: ${esc(monthName(p.toMonth))} · الحالة: ${XP_ST[p.status][0]}</div></div><div class="rmeta">${repOwner()}أُنشئت في ${fmtD(p.created.slice(0,10))}<br>آخر تحديث ${p.updated?fmtD(p.updated.slice(0,10)):'—'}<br>طُبع ${fmtD(today())} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}<br>العملة: الريال العُماني (ر.ع.)</div></header>`;
+  h+=`<section><h2>الملخص</h2>${p.reason?`<p class="hint">سبب الخطة: ${esc(p.reason)}</p>`:''}<div class="kpis"><div><span>السيولة المتاحة</span><b>${n(C.t.avail)}</b></div><div><span>إجمالي المستحق</span><b>${n(C.t.due)}</b></div><div><span>الدفع المخطط</span><b class="ok">${n(C.t.pay)}</b></div><div><span>المرحَّل</span><b class="no">${n(C.t.def)}</b></div></div>
+    <div class="kpis k2"><div><span>دُفع فعلًا</span><b>${n(C.t.paid)}</b></div><div><span>مصروفات أساسية محجوزة</span><b>${n(C.t.ess)}</b></div><div><span>الرصيد المتوقع بعد الدفع</span><b class="${C.t.left<0?'no':'ok'}">${n(C.t.left)}</b></div><div><span>بنود مؤجلة</span><b>${C.t.nDef} من ${C.t.n}</b></div></div></section>`;
+  h+=`<section><h2>الفواتير والديون</h2>${T(['الالتزام','الموعد الأصلي','المستحق','دُفع فعلًا','المخطط','المرحَّل','الموعد المقترح','الحالة'],C.rows.map(z=>`<tr><td>${esc(z.r.name)}${z.r.note?`<small style="display:block">${esc(z.r.note)}</small>`:''}</td><td class="nw">${z.L.date?dmy(z.L.date):'—'}</td><td class="nw">${n(z.L.due)}</td><td class="nw">${n(z.L.paid)}</td><td class="nw ok">${z.r.mode==='exclude'?'مستبعد':n(z.P.pay)}</td><td class="nw ${z.P.def>0.0005?'no':''}">${z.r.mode==='exclude'?'—':n(z.P.def)}</td><td class="nw">${z.P.def>0.0005&&z.r.propDate?dmy(z.r.propDate)+(z.r.cred==='approved'?'':' (غير معتمد)'):'—'}</td><td>${z.st.map(s=>s[0]).join('، ')}</td></tr>`).concat([`<tr><td><b>المجموع</b></td><td></td><td class="nw"><b>${n(C.t.due)}</b></td><td class="nw"><b>${n(C.t.paid)}</b></td><td class="nw ok"><b>${n(C.t.pay)}</b></td><td class="nw no"><b>${n(C.t.def)}</b></td><td></td><td></td></tr>`]))}</section>`;
+  h+=`<section><h2>مقارنة الخطة الأصلية بالاستثنائية</h2>${T(['','الخطة الأصلية','الخطة الاستثنائية'],K.rows.map(([a,b,c])=>`<tr><td>${a}</td><td class="nw">${n(b)}</td><td class="nw">${n(c)}</td></tr>`).concat(K.debt?[`<tr><td>التخلص من الديون</td><td>${esc(K.debt.baseLbl)}</td><td>${K.debt.dsum?esc(K.debt.baseLbl)+' إذا سُدّد المؤجل الشهر القادم (فائدة إضافية ≈ '+money(K.debt.extraInt)+')، أو '+esc(K.debt.lateLbl)+' إذا أُضيف إلى رصيد الدين':'بدون تغيير'}</td></tr>`]:[]))}</section>`;
+  h+=`<section><h2>أثر الخطة على الأشهر القادمة</h2>${T(['','الدخل المتوقع','الالتزامات الأصلية','المرحَّل','مصروفات أساسية','المتبقي'],N.months.map(x=>`<tr><td>${esc(monthName(x.m))}</td><td class="nw">${n(x.inc)}</td><td class="nw">${n(x.orig)}</td><td class="nw ${x.carry>0.0005?'no':''}">${n(x.carry)}</td><td class="nw">${n(x.ess)}</td><td class="nw ${x.left<0?'no':'ok'}">${n(x.left)}</td></tr>`))}<p class="hint">الالتزامات الأصلية بدون المتأخرات، والمرحَّل يُضاف مرة واحدة. العجز في شهر يُرحَّل إلى الشهر الذي يليه.</p></section>`;
+  if(warn.length)h+=`<section><h2>التنبيهات والمخاطر</h2><ul>${warn.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></section>`;
+  if(p.notes)h+=`<section><h2>الملاحظات والشروط</h2><p style="white-space:pre-line">${esc(p.notes)}</p></section>`;
+  h+=`<section class="sign"><div class="sg-n"><span>ملاحظات</span><i></i><i></i></div><div class="sg-a"><span>المراجعة والاعتماد</span><div><em>الاسم</em><em>التوقيع</em><em>التاريخ</em></div></div></section><footer class="rf">تقرير من تطبيق «إدارة شؤوني» · ${esc(p.name)} · هذه خطة تخطيطية لا تغيّر الديون ولا مواعيدها الأصلية</footer>`;
+  return{title:p.name,body:h,C,N,K}}
+function xpPrint(p){const r=xpReport(p);prStyle('portrait');let el=document.getElementById('printArea');if(!el){el=document.createElement('div');el.id='printArea';document.body.appendChild(el)}el.className='rep';el.innerHTML=r.body;const old=document.title;document.title=r.title+' - إدارة شؤوني';
+  const done=()=>{document.title=old};window.addEventListener('afterprint',done,{once:true});try{window.print()}catch(e){toast('تعذّرت الطباعة هنا')}setTimeout(done,3000)}
+function xpHtmlFile(p){const r=xpReport(p);return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(r.title)}</title><style>${PRINT_CSS} body{margin:0;background:#fff}.rep{max-width:900px;margin:0 auto;padding:20px}@page{size:A4;margin:14mm 12mm}@media print{.rep{padding:0;max-width:none}}</style></head><body><div class="rep">${r.body}</div></body></html>`}
+async function xpShare(p){const nm='xplan-'+p.month+'.html';const res=await shareFile(nm,xpHtmlFile(p),'text/html');if(res!=='cancel')toast(res==='shared'?'أُرسل التقرير':'حُفظ التقرير '+nm+'. افتحه واطبعه أو احفظه PDF')}
+async function xpXlsx(p){const r=xpReport(p),C=r.C,N=r.N;const sub='إدارة شؤوني · '+monthName(p.month)+' · '+XP_ST[p.status][0];
+  const sh=[{name:'الخطة',title:p.name,sub,head:[['الالتزام','s',24],['الموعد الأصلي','d'],['المستحق','n'],['دُفع فعلًا','n'],['المخطط','n'],['المرحَّل','n'],['الطريقة','s',12],['الموعد المقترح','d'],['موافقة الجهة','s',18],['الحالة','s',26],['ملاحظة','s',20]],
+    rows:C.rows.map(z=>[z.r.name,z.L.date||'',z.L.due,z.L.paid,z.r.mode==='exclude'?0:z.P.pay,z.r.mode==='exclude'?0:z.P.def,XP_MODE[z.r.mode],z.P.def>0.0005?z.r.propDate||'':'',z.P.def>0.0005?XP_CRED[z.r.cred]:'',z.st.map(s=>s[0]).join('، '),z.r.note||'']),totals:[2,3,4,5]},
+   {name:'الأشهر القادمة',title:'أثر الخطة على الأشهر القادمة',sub,head:[['الشهر','s',18],['الدخل المتوقع','n'],['الالتزامات الأصلية','n'],['المرحَّل','n'],['مصروفات أساسية','n'],['المتبقي','n']],rows:N.months.map(x=>[monthName(x.m),x.inc,x.orig,x.carry,x.ess,x.left]),totals:[]},
+   {name:'الملخص',title:'ملخص الخطة',sub,head:[['البند','s',30],['المبلغ','n']],rows:[['السيولة المتاحة',C.t.avail],['مصروفات أساسية محجوزة',C.t.ess],['إجمالي المستحق',C.t.due],['دُفع فعلًا',C.t.paid],['الدفع المخطط',C.t.pay],['المرحَّل',C.t.def],['الرصيد المتوقع بعد الدفع',C.t.left]],totals:[]}];
+  const data=XL.build(sh);const nm='xplan-'+p.month+'.xlsx';const res=await shareFile(nm,data,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');if(res!=='cancel')toast(res==='shared'?'اختر «Numbers» لفتحه':'حُفظ الملف '+nm)}
+/* في الرئيسية */
+function xpHomeHtml(){if(S.month!==curM())return '';const p=xplans().filter(x=>x.month===curM()&&x.status!=='closed').sort((a,b)=>(b.updated||'').localeCompare(a.updated||''))[0];
+  if(!p)return `<button class="xphome" data-xplans="1"><span>🗓️</span><span><b>الخطة المالية الاستثنائية</b><small>أعد توزيع مدفوعات هذا الشهر مؤقتًا دون تغيير خطتك الأصلية</small></span><span class="xph-go">‹</span></button>`;
+  const C=xpCalc(p);return `<button class="xphome on" data-xpopen="${esc(p.id)}"><span>🗓️</span><span><b>${esc(p.name)}</b><small>${XP_ST[p.status][0]} · تدفع ${money(C.t.pay)} · دُفع ${money(C.t.paid)} · يُرحَّل ${money(C.t.def)}</small></span><span class="xph-go">‹</span></button>`}
+
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 /* في الآيفون لا ينتقل التركيز إلى الزر عند الضغط عليه، فيبقى الحقل الذي كتبت فيه «نشطًا» وتتوقف الصفحة عن التحديث.
  * لذلك نُخرج التركيز من الحقل عند الضغط على أي زر (ويُحفظ ما كتبته كما هو) */
@@ -4921,6 +5127,8 @@ document.addEventListener('click',async e=>{
   if(b.dataset.dbspeed){duaBarSet({speed:b.dataset.dbspeed});return}
   if(b.id==='dbEdit'){openDuaBarEdit();return}
   if(b.dataset.rescue){openRescue();return}
+  if(b.dataset.xplans){openXPlans();return}
+  if(b.dataset.xpopen){openXPlan(b.dataset.xpopen);return}
   if(b.dataset.rsend){if(!confirm('إنهاء خطة الثلاثين يومًا؟'))return;delete S.settings.rescue;await putSettings();render();toast('أُنهيت الخطة');return}
   if(b.dataset.audit){openAudit();return}
   if(b.dataset.cappct){S.settings.capPct=+b.dataset.cappct;await putSettings();render();return}
