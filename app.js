@@ -311,9 +311,14 @@ async function saveBackupFile(){const r=await shareFile('idarat-shuooni-backup-'
 /* أسماء الخانات: الاسم القصير ثابت، والطويل يتحرك تلقائيًا ليظهر كاملًا */
 const MQ_SEL=['.tile>b','.tx .t>b','.ghead b','.hp-main>b','.wd-main>b','.alertrow b','.folder>b','.qbtn .qn','.hstat b','.recrow>div>b','.dbsec>div>b','.dgcell>span','.apvrow b','.filerow>span','.dbsnap b','.dghead>b','.cardocs b'].join(',');
 const MQ_RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-function fitLabels(root){if(MQ_RM)return;(root||document).querySelectorAll(MQ_SEL).forEach(el=>{if(el.closest('.gm,.paperwrap,#printArea'))return;
+/* كشف تلقائي لأي نص آخر في التطبيق مقصوص في سطر واحد (حتى لو لم يكن في القائمة أعلاه) */
+const MQ_SKIP='.gm,.paperwrap,#printArea,svg,select,input,textarea,.ticker,.rz-track,.mq-in,nav.tabs,.npk,.cmptbl,table,.seg';
+function mqAuto(){const out=[];['#view','#layer','header.top','#monthbar'].forEach(r=>{const R=document.querySelector(r);if(!R)return;R.querySelectorAll('b,strong,span,small,em,div,a,label,h2,h3,h4,p,li,summary,button').forEach(el=>{
+  if(el.dataset.mq==='x'||el.querySelector(':scope>.mq-in')||!el.clientWidth||el.scrollWidth<=el.clientWidth+2)return;if(el.closest(MQ_SKIP))return;if(el.children.length&&[...el.children].some(c=>!/^(B|I|SMALL|SPAN|EM|STRONG|BDI)$/.test(c.tagName)||c.children.length))return;
+  const cs=getComputedStyle(el);if(cs.whiteSpace!=='nowrap'||cs.overflowX==='visible'||/auto|scroll/.test(cs.overflowX))return;out.push(el)})});return out}
+function fitLabels(root){if(MQ_RM)return;let L0=[];try{L0=mqAuto()}catch(e){}const all=[...(root||document).querySelectorAll(MQ_SEL)].concat(L0.filter(e=>!e.matches(MQ_SEL)));all.forEach(el=>{if(el.closest('.gm,.paperwrap,#printArea'))return;
   if(el.dataset.mq==='1'&&el.firstElementChild&&el.firstElementChild.classList.contains('mq-in')){mqMeasure(el);return}
-  if(el.dataset.mq||el.querySelector('br,.meter,.pill'))return;if(!el.clientWidth)return;
+  if(el.dataset.mq==='x'||el.querySelector('br,.meter,.pill')){el.dataset.mq='x';return}if(!el.clientWidth)return;
   el.classList.add('mq-on');const over=el.scrollWidth-el.clientWidth;el.dataset.mq='1';
   if(over<=2){return}
   const inn=document.createElement('span');inn.className='mq-in';while(el.firstChild)inn.appendChild(el.firstChild);el.appendChild(inn);mqMeasure(el)})}
@@ -323,7 +328,7 @@ function mqMeasure(el){const inn=el.firstElementChild;const d=inn.scrollWidth-el
 let mqT;function fitSoon(){clearTimeout(mqT);mqT=setTimeout(()=>fitLabels(),60)}
 try{new MutationObserver(fitSoon).observe(document.body,{childList:true,subtree:true})}catch(e){}
 window.addEventListener('resize',()=>{document.querySelectorAll('[data-mq]').forEach(el=>{if(!el.querySelector('.mq-in'))delete el.dataset.mq});fitSoon()});
-document.addEventListener('toggle',fitSoon,true);
+document.addEventListener('toggle',fitSoon,true);try{document.fonts&&document.fonts.ready.then(()=>fitSoon())}catch(e){}setInterval(()=>{if(!document.hidden)fitLabels()},2500);
 
 
 /* ===== التصغير والتكبير لكل الأقسام والعناوين =====
@@ -973,8 +978,8 @@ function reportsMonthExtras(){const m=S.month,a=inMonth(m),st=recStatus(m);
   return personSplitHtml(a,'المصاريف حسب الأشخاص')+(st.R.length?`<h2>الالتزامات الشهرية</h2><div class="panel"><div class="sumrow"><span>المدفوع</span><b class="num">${amtH(st.paidAmt)}</b></div><div class="sumrow"><span>عدد المدفوع</span><b>${st.paid.length} من ${st.R.length}</b></div><div class="sumrow"><span>المتوقع شهريًا</span><b class="num">${amtH(st.total)}</b></div></div>`:'')}
 
 /* ---------- 10. العرض ---------- */
-function render(){memoClear();applyCatNames();admChip();applyTabLabels();setTimeout(()=>fillStorage(document.getElementById('storBox')),50);
-  document.getElementById('mLabel').textContent=monthName(S.month);
+function render(){memoClear();applyCatNames();admChip();try{hdrMenuSync()}catch(e){}applyTabLabels();try{navTabChanged()}catch(e){}setTimeout(()=>fillStorage(document.getElementById('storBox')),50);
+  {const ml=document.getElementById('mLabel');ml.innerHTML='<span class="ml-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></span><span class="ml-t">'+esc(monthName(S.month))+'</span><span class="ml-car" aria-hidden="true">▾</span>'}
   document.getElementById('monthbar').hidden=S.tab==='settings';
   const v=document.getElementById('view');
   const keepQ=document.activeElement&&document.activeElement.id==='q';
@@ -3168,8 +3173,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.35.0';
+const APP_VERSION='2.36.0';
 const CHANGELOG=[
+ {v:'2.36.0',d:'2026-10-16',items:['زر «› رجوع» أعلى كل صفحة وكل نافذة يرجعك إلى الصفحة السابقة كما تركتها، في نفس موضع التمرير ومع ما كتبته، ويعمل معه سحب الرجوع وزر الرجوع في المتصفح','«ما الجديد» في التقارير صار مربعًا صغيرًا تقرؤه بالسحب داخله، وعند الضغط عليه تُفتح صفحة كاملة لكل الإصدارات','الأسماء والجمل الطويلة في كل التطبيق تتحرك تلقائيًا لتظهر كاملة بدل قصّها بـ«…»، ويُكتشف أي نص مقصوص جديد تلقائيًا','ملاءمة كل الصفحات والنوافذ لمقاسات iPhone من الأصغر إلى الأكبر: لا تتحرك الصفحة يمينًا ويسارًا، وخانات التاريخ والتقويم وأزرار الأعلى لا تخرج عن الشاشة','بطاقات التلاوات والأذكار وأدعية الرزق تترتب تلقائيًا في الشاشات الصغيرة، ويظهر عنوانها كاملًا','أيقونات أعلى الشاشة (الطباعة، إخفاء المبالغ، المظهر، الضبط، وضع المدير) صارت داخل زر القائمة ☰، وبقيت أيقونة المزامنة ظاهرة. تظهر نقطة على ☰ عندما يكون وضع المدير مفتوحًا','كل جدول فيه مبالغ في كل التقارير يُضاف له صف «المجموع» تلقائيًا قبل المعاينة والطباعة والحفظ، إذا لم يكن له مجموع، مع عدد البنود. ولا تُجمع الأعمدة التي لا معنى لجمعها مثل النسب والأرصدة والمقارنات','الضغط على التاريخ أعلى الشاشة يفتح تقويمًا لاختيار أي شهر بسهولة: السنوات في الأعلى، والأشهر الاثني عشر مع عدد العمليات في كل شهر، وزر «الشهر الحالي». وفي وضع شهر الراتب يظهر كل شهر من الراتب إلى الراتب']},
  {v:'2.35.0',d:'2026-10-16',items:['«الخطة المالية الاستثنائية»: زر في الرئيسية يفتح صفحة مستقلة لإعادة توزيع مدفوعات شهر صعب، وتُستورد فواتيرك وأقساطك المسجّلة تلقائيًا','لكل التزام: دفع كامل أو جزء أو تأجيل كامل أو استبعاد، مع تاريخ مقترح وحالة موافقة الجهة الدائنة، وإضافة التزامات للخطة فقط','حسابات فورية: المستحق والمخطط والمؤجَّل والسيولة المتبقية، وتنبيه إذا تجاوز الدفع المستحق أو السيولة','«مقارنة الخطة الأصلية بالاستثنائية»: ما تدفعه الآن، وما يتراكم للشهر القادم، وأثره على موعد التخلص من الديون والفوائد','توقع الشهر القادم وشهرين بعده: الدخل والالتزامات الأصلية والمرحَّل (مرة واحدة فقط) والمصروفات الأساسية والعجز أو الفائض','حماية الخطة الأصلية: لا تتغير الديون ولا الأقساط إلا بتسجيل دفعة فعلية، والحالة تُقرأ من الدفعات الفعلية، والموعد الأصلي يبقى معتمدًا حتى توافق الجهة','حفظ كمسودة واعتماد وإغلاق الشهر ومقارنة المخطط بالفعلي، ثم إعداد خطة الشهر التالي','سجل نسخ مع الرجوع لنسخة سابقة دون المساس بالدفعات، وكل تعديل يُسجّل في سجل التغييرات','تقرير A4 للطباعة وPDF وExcel ومشاركة']},
  {v:'2.34.0',d:'2026-10-16',items:['زر «💰 كم أستطيع أن أنفق اليوم؟» في الرئيسية: يبدأ من رصيدك الفعلي في حساباتك، ويطرح الأقساط والفواتير قبل الراتب ومبالغ خططك واحتياطي الطوارئ، ثم يقسم المتاح على الأيام حتى الراتب','يعرض ميزانية اليوم وما صرفته وما بقي، وميزانية 7 أيام، والمبلغ الذي تحتفظ به، وطريقة الحساب خطوة بخطوة','«حدّث المتبقي اليوم» بعد تسجيل مصروفاتك، واحتياطي طوارئ تحدده بنفسك','وضع «الصرف الآمن»: يطلب التأكد من الرصيد والفواتير والاحتياجات غير المسجّلة قبل اعتماد ميزانية كل دورة، ويحتفظ بهامش 10% حتى تعتمدها']},
  {v:'2.33.0',d:'2026-10-16',items:['زر «سورة الملك» صار «التلاوات القرآنية» بأيقونة مصحف، في نفس مكانه، ويفتح صفحة فيها سور الملك والواقعة ويس','قراءة كل سورة بالرسم العثماني من مشروع تنزيل، مع تكبير وتصغير الخط، والقراءة الليلية، وحفظ آخر آية وصلت إليها تلقائيًا، وزر «متابعة القراءة»','الاستماع إلى التلاوة بصوت مشاري راشد العفاسي: تشغيل وإيقاف، وشريط للموضع، والصوت، ومؤشر التقدم، ورسالة واضحة إذا تعذّر التحميل. لا يُشغَّل أي صوت تلقائيًا','ورد سورة الملك اليومي («أتممت القراءة») والأدعية بعدها بقيت كما هي']},
@@ -3239,7 +3245,9 @@ function versionHtml(){
    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div><b>إدارة شؤوني</b><div class="note">الإصدار <span class="num">${APP_VERSION}</span> · ${fmtD(CHANGELOG[0].d)}</div></div><button class="chip" id="checkUpd">البحث عن تحديث</button></div>
    <div class="devcard"><span class="avatar" style="width:44px;height:44px;background:var(--accent-soft);color:var(--accent);font-size:18px">م</span><div style="min-width:0"><span class="note">صاحب التطبيق ومطوّره</span><b>${DEV.name}</b><div class="note">${DEV.title} · ${DEV.country}</div></div></div>
    <div class="sumrow" style="align-items:center"><span>الهاتف</span><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end"><b class="num" dir="ltr">+968 ${DEV.phone}</b><a class="chip" href="tel:+${DEV.intl}">اتصال</a><a class="chip" href="https://wa.me/${DEV.intl}" target="_blank" rel="noopener">واتساب</a></span></div>
-   <details${S.showNew?' open':''}><summary class="note" style="cursor:pointer">ما الجديد</summary><div style="margin-top:8px">${CHANGELOG.map(c=>`<div style="padding-block:6px"><b class="num" style="font-size:13px">${c.v}</b> <span class="note">${fmtD(c.d)}</span><ul style="margin:4px 0 0;padding-inline-start:18px;font-size:13px;line-height:1.7">${c.items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></div>`).join('')}</div></details></div>`;
+   <div class="chlog-h"><b>ما الجديد</b>${S.showNew?'<span class="pill good">تحديث جديد</span>':''}<span class="note">${countWord(CHANGELOG.length,'إصدار واحد','إصداران','إصدارات','إصدارًا')}</span></div>
+   <div class="chlog" role="button" tabindex="0" data-chlog="1" aria-label="عرض كل التحديثات">${CHANGELOG.slice(0,6).map((c,k)=>`<div class="chl-v"><div class="chl-t"><b class="num">${c.v}</b><span class="note">${fmtD(c.d)}</span>${k===0?'<span class="pill good">الحالي</span>':''}</div><ul>${c.items.slice(0,k===0?6:3).map(i=>`<li>${esc(i)}</li>`).join('')}${c.items.length>(k===0?6:3)?`<li class="note">و${countWord(c.items.length-(k===0?6:3),'تحسين آخر','تحسينان آخران','تحسينات أخرى','تحسينًا آخر')}…</li>`:''}</ul></div>`).join('')}</div>
+   <button class="btn ghost block" data-chlog="1">عرض كل التحديثات بالتفصيل</button></div>`;
 }
 function checkVersion(){let last=null;try{last=localStorage.getItem('masareef:ver')}catch(e){}
   if(last&&last!==APP_VERSION){S.showNew=true;S.snapVer=1;setTimeout(()=>toast('تم التحديث إلى الإصدار '+APP_VERSION+'. اطّلع على الجديد في التقارير'),600)}
@@ -3365,8 +3373,24 @@ function reportDoc(o){o=o||prOpts();const R=prRange(o),has=k=>o.secs.includes(k)
   const sign=o.sign===false?'':`<section class="sign"><div class="sg-n"><span>ملاحظات</span><i></i><i></i></div><div class="sg-a"><span>المراجعة والاعتماد</span><div><em>الاسم</em><em>التوقيع</em><em>التاريخ</em></div></div></section>`;
   const foot=sign+`<footer class="rf">تقرير من تطبيق «إدارة شؤوني» · ${esc(R.label)}${o.dev?`<br>تصميم وتطوير: ${DEV.name}، ${DEV.title} · ${DEV.country} · <span class="n">+968 ${DEV.phone}</span>`:''}</footer>`;
   const cls=['rep',o.font==='lg'?'fs-lg':'',o.ink==='bw'?'ink-bw':''].filter(Boolean).join(' ');
-  return {title:R.label,cls,orient:o.orient,body:head+toc+(h||'<p>اختر قسمًا واحدًا على الأقل.</p>')+foot,count:parts.length,tx:A.length};
+  return {title:R.label,cls,orient:o.orient,body:repTotalsHtml(head+toc+(h||'<p>اختر قسمًا واحدًا على الأقل.</p>')+foot),count:parts.length,tx:A.length};
 }
+/* المجموع الكلي لكل جدول في كل التقارير: يُضاف تلقائيًا قبل المعاينة والطباعة والحفظ لأي جدول فيه مبالغ وليس له صف مجموع */
+const RT_SKIPH=/رصيد|متوسط|معدل|نسبة|النسبة|الفائدة|سعر|بعدها|الإنجاز|%/;
+function rtNum(td){const ns=td.querySelectorAll('.n');const t=td.textContent.replace(/\s+/g,'').trim();if(!t||t==='—'||t==='-')return{empty:true};
+  if(!ns.length){if(td.children.length&&td.querySelector(':not(b):not(span):not(i)'))return null;const pt=t.replace(/ر\.ع\.?/g,'');if(/^[−+-]?[\d,]+(\.\d+)?$/.test(pt)){const v=parseFloat(pt.replace(/[^\d.]/g,''));return{v:/^[−-]/.test(pt)?-v:v}}return null}
+  if(ns.length!==1)return null;const nt=ns[0].textContent.replace(/\s+/g,'');if(/%/.test(nt))return null;const rest=t.replace(nt,'').replace(/ر\.ع\.?|ريال|ع\.?/g,'');if(rest.length>2)return null;
+  const neg=/^[−-]/.test(nt);const v=parseFloat(nt.replace(/[^\d.]/g,''));return isFinite(v)?{v:neg?-v:v}:null}
+function repTotals(root){if(!root)return;root.querySelectorAll('table').forEach(tb=>{try{
+  if(tb.classList.contains('nototal')||tb.tFoot||!tb.tHead||!tb.tBodies.length)return;const H=[...tb.tHead.rows[0].cells];const nc=H.length;if(nc<2)return;
+  const rows=[...tb.tBodies[0].rows].filter(r=>!r.classList.contains('grp')&&r.cells.length===nc);if(rows.length<1)return;
+  if([...tb.tBodies[0].rows].some(r=>/^(المجموع|الإجمالي|المجموع الكلي)/.test((r.cells[0]&&r.cells[0].textContent.trim())||'')||(r.cells[1]&&/^(المجموع|الإجمالي)/.test(r.cells[1].textContent.trim()))))return;
+  const sums=new Array(nc).fill(null);for(let c=0;c<nc;c++){if(RT_SKIPH.test(H[c].textContent)||/^#?$/.test(H[c].textContent.trim()))continue;let tot=0,cnt=0,bad=false;for(const r of rows){const x=rtNum(r.cells[c]);if(x===null){bad=true;break}if(!x.empty){tot+=x.v;cnt++}}if(!bad&&cnt)sums[c]=Math.round(tot*1000)/1000}
+  const first=sums.findIndex(v=>v!==null);if(first<1)return;let lab=0;for(let c=0;c<first;c++){if(!/^#?$/.test(H[c].textContent.trim())){lab=c;break}}
+  const tf=document.createElement('tfoot');const tr=document.createElement('tr');tr.className='rt-auto';for(let c=0;c<nc;c++){const td=document.createElement('td');if(c===lab)td.innerHTML='<b>المجموع</b> <small>('+rows.length+')</small>';else if(sums[c]!==null)td.innerHTML='<span class="n">'+(sums[c]<0?'−':'')+money(Math.abs(sums[c]))+'</span>';tr.appendChild(td)}tf.appendChild(tr);tb.appendChild(tf)}catch(e){}})}
+function repTotalsHtml(html){try{const t=document.createElement('template');t.innerHTML=html;repTotals(t.content);const d=document.createElement('div');d.appendChild(t.content.cloneNode(true));return d.innerHTML}catch(e){return html}}
+(function(){const hook=el=>{if(el.dataset.rt)return;el.dataset.rt='1';try{new MutationObserver(()=>repTotals(el)).observe(el,{childList:true})}catch(e){}};
+  const chk=()=>{const el=document.getElementById('printArea');if(el)hook(el)};try{new MutationObserver(chk).observe(document.body,{childList:true})}catch(e){}window.addEventListener('beforeprint',()=>repTotals(document.getElementById('printArea')))})();
 /* تصميم التقرير: واحد للمعاينة والطباعة والملف المحفوظ */
 const PRINT_CSS=`.rep .dua{border:1px solid #D9C98F;background:#FBF7EA;border-radius:10px;padding:8px 14px;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}.rep .dua p{margin:4px 0;white-space:pre-line;font-size:1.05em}
 .rep .pbar{display:inline-block;width:56px;height:7px;border-radius:4px;background:#E6EAF0;vertical-align:middle;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}.rep .pbar i{display:block;height:100%;background:#1E7A4F}.rep .pbar.wide{width:100%}
@@ -4874,7 +4898,7 @@ async function xpSave(p,label){const old=xpById(p.id);p.updated=new Date().toISO
     old.rows.filter(o=>!p.rows.some(r=>r.key===o.key)).forEach(o=>aud('xplan','إزالة «'+o.name+'» من الخطة','',''))}}catch(e){}
   p.hist=(p.hist||[]).concat([xpSnap(p,label)]).slice(-25);const L=xplans().filter(x=>x.id!==p.id).concat([xpClone(p)]);S.settings.xplans=L;await putSettings()}
 /* قائمة الخطط */
-function openXPlans(){const L=document.getElementById('layer');const P=xplans().slice().sort((a,b)=>b.month.localeCompare(a.month)||(b.updated||'').localeCompare(a.updated||''));
+function openXPlans(){const L=document.getElementById('layer');setTimeout(()=>{const sh=L.querySelector('.sheet');if(sh)sh._refresh=openXPlans},0);const P=xplans().slice().sort((a,b)=>b.month.localeCompare(a.month)||(b.updated||'').localeCompare(a.updated||''));
   L.innerHTML=`${sheetTop('الخطط الاستثنائية')}<h2 style="margin-top:0">🗓️ الخطة المالية الاستثنائية</h2>
    <p class="note" style="margin-top:0">لإعادة توزيع مدفوعات شهر صعب: تختار ما تدفعه كاملًا أو جزئيًا وما تؤجله، وترى أثره على الشهر القادم وعلى موعد التخلص من ديونك، دون أن تتغير خطتك الأصلية أو ديونك.</p>
    ${P.length?`<div class="stack">${P.map(p=>{const C=xpCalc(p);return `<button class="xpcard" data-xpopen="${esc(p.id)}"><div><b>${esc(p.name)}</b><small>${esc(monthName(p.month))} → ${esc(monthName(p.toMonth))}${p.reason?' · '+esc(p.reason):''}</small></div><div class="xpc-n"><span class="pill ${XP_ST[p.status][1]}">${XP_ST[p.status][0]}</span><small>تدفع ${money(C.t.pay)} · يُرحَّل ${money(C.t.def)}</small></div></button>`}).join('')}</div>`:'<div class="panel empty"><b>لا خطط بعد</b>أنشئ خطة لشهر محدد، وستُستورد فواتيرك وأقساطك المسجّلة تلقائيًا.</div>'}
@@ -4916,7 +4940,8 @@ function openXPlan(id,fresh){const L=document.getElementById('layer');let p=fres
   const refresh=()=>{const C=xpCalc(p),N=xpNext(p,C),K=xpCompare(p,C,N);const s=document.getElementById('xpSum');if(s)s.innerHTML=sumHtml(C);const n=document.getElementById('xpNext');if(n)n.innerHTML=nextHtml(N);const k=document.getElementById('xpCmp');if(k)k.innerHTML=cmpHtml(K);
     C.rows.forEach((x,i)=>{const el=L.querySelector('[data-xprow="'+i+'"]');if(!el)return;const nn=el.querySelectorAll('.xpr-n b');if(nn.length===4){nn[2].textContent=money(x.P.pay);nn[3].textContent=money(x.P.def);nn[3].className='num '+(x.P.def>0.0005?'amt-exp':'')}
       const er=el.querySelector('.xperr');if(er)er.textContent=x.P.err||'';el.classList.toggle('err',!!x.P.err&&x.r.mode==='part')})};
-  const draw=()=>{const C=xpCalc(p),N=xpNext(p,C),K=xpCompare(p,C,N);const dis=ro()?'disabled':'';const msel=(id,v)=>{const o=[];for(let k=-1;k<=3;k++)o.push(shiftMonth(curM(),k));if(!o.includes(v))o.unshift(v);return `<select class="inp" id="${id}" ${dis}>${o.map(m=>`<option value="${m}" ${m===v?'selected':''}>${esc(monthName(m))}</option>`).join('')}</select>`};
+  const draw=()=>{draw1();const sh=L.querySelector('.sheet');if(sh)sh._refresh=()=>{const y=sh.scrollTop;draw();const s2=L.querySelector('.sheet');if(s2)s2.scrollTop=y}};
+  const draw1=()=>{const C=xpCalc(p),N=xpNext(p,C),K=xpCompare(p,C,N);const dis=ro()?'disabled':'';const msel=(id,v)=>{const o=[];for(let k=-1;k<=3;k++)o.push(shiftMonth(curM(),k));if(!o.includes(v))o.unshift(v);return `<select class="inp" id="${id}" ${dis}>${o.map(m=>`<option value="${m}" ${m===v?'selected':''}>${esc(monthName(m))}</option>`).join('')}</select>`};
    L.innerHTML=`${sheetTop('الخطة الاستثنائية')}<div class="xphead"><h2 style="margin:0">🗓️ ${esc(p.name)}</h2><span class="pill ${XP_ST[p.status][1]}">${XP_ST[p.status][0]}${dirty?' · غير محفوظة':''}</span></div>
     ${ro()?'<div class="infobox" style="margin:8px 0"><span>أُغلقت هذه الخطة. تستطيع مراجعتها وطباعتها، ولا يمكن تعديلها.</span></div>':''}
     <h3>1. بيانات الخطة</h3><div class="panel stack">
@@ -5000,8 +5025,8 @@ function xpReport(p){const C=xpCalc(p),N=xpNext(p,C),K=xpCompare(p,C,N);const no
   h+=`<section><h2>الملخص</h2>${p.reason?`<p class="hint">سبب الخطة: ${esc(p.reason)}</p>`:''}<div class="kpis"><div><span>السيولة المتاحة</span><b>${n(C.t.avail)}</b></div><div><span>إجمالي المستحق</span><b>${n(C.t.due)}</b></div><div><span>الدفع المخطط</span><b class="ok">${n(C.t.pay)}</b></div><div><span>المرحَّل</span><b class="no">${n(C.t.def)}</b></div></div>
     <div class="kpis k2"><div><span>دُفع فعلًا</span><b>${n(C.t.paid)}</b></div><div><span>مصروفات أساسية محجوزة</span><b>${n(C.t.ess)}</b></div><div><span>الرصيد المتوقع بعد الدفع</span><b class="${C.t.left<0?'no':'ok'}">${n(C.t.left)}</b></div><div><span>بنود مؤجلة</span><b>${C.t.nDef} من ${C.t.n}</b></div></div></section>`;
   h+=`<section><h2>الفواتير والديون</h2>${T(['الالتزام','الموعد الأصلي','المستحق','دُفع فعلًا','المخطط','المرحَّل','الموعد المقترح','الحالة'],C.rows.map(z=>`<tr><td>${esc(z.r.name)}${z.r.note?`<small style="display:block">${esc(z.r.note)}</small>`:''}</td><td class="nw">${z.L.date?dmy(z.L.date):'—'}</td><td class="nw">${n(z.L.due)}</td><td class="nw">${n(z.L.paid)}</td><td class="nw ok">${z.r.mode==='exclude'?'مستبعد':n(z.P.pay)}</td><td class="nw ${z.P.def>0.0005?'no':''}">${z.r.mode==='exclude'?'—':n(z.P.def)}</td><td class="nw">${z.P.def>0.0005&&z.r.propDate?dmy(z.r.propDate)+(z.r.cred==='approved'?'':' (غير معتمد)'):'—'}</td><td>${z.st.map(s=>s[0]).join('، ')}</td></tr>`).concat([`<tr><td><b>المجموع</b></td><td></td><td class="nw"><b>${n(C.t.due)}</b></td><td class="nw"><b>${n(C.t.paid)}</b></td><td class="nw ok"><b>${n(C.t.pay)}</b></td><td class="nw no"><b>${n(C.t.def)}</b></td><td></td><td></td></tr>`]))}</section>`;
-  h+=`<section><h2>مقارنة الخطة الأصلية بالاستثنائية</h2>${T(['','الخطة الأصلية','الخطة الاستثنائية'],K.rows.map(([a,b,c])=>`<tr><td>${a}</td><td class="nw">${n(b)}</td><td class="nw">${n(c)}</td></tr>`).concat(K.debt?[`<tr><td>التخلص من الديون</td><td>${esc(K.debt.baseLbl)}</td><td>${K.debt.dsum?esc(K.debt.baseLbl)+' إذا سُدّد المؤجل الشهر القادم (فائدة إضافية ≈ '+money(K.debt.extraInt)+')، أو '+esc(K.debt.lateLbl)+' إذا أُضيف إلى رصيد الدين':'بدون تغيير'}</td></tr>`]:[]))}</section>`;
-  h+=`<section><h2>أثر الخطة على الأشهر القادمة</h2>${T(['','الدخل المتوقع','الالتزامات الأصلية','المرحَّل','مصروفات أساسية','المتبقي'],N.months.map(x=>`<tr><td>${esc(monthName(x.m))}</td><td class="nw">${n(x.inc)}</td><td class="nw">${n(x.orig)}</td><td class="nw ${x.carry>0.0005?'no':''}">${n(x.carry)}</td><td class="nw">${n(x.ess)}</td><td class="nw ${x.left<0?'no':'ok'}">${n(x.left)}</td></tr>`))}<p class="hint">الالتزامات الأصلية بدون المتأخرات، والمرحَّل يُضاف مرة واحدة. العجز في شهر يُرحَّل إلى الشهر الذي يليه.</p></section>`;
+  h+=`<section><h2>مقارنة الخطة الأصلية بالاستثنائية</h2>${T(['','الخطة الأصلية','الخطة الاستثنائية'],K.rows.map(([a,b,c])=>`<tr><td>${a}</td><td class="nw">${n(b)}</td><td class="nw">${n(c)}</td></tr>`).concat(K.debt?[`<tr><td>التخلص من الديون</td><td>${esc(K.debt.baseLbl)}</td><td>${K.debt.dsum?esc(K.debt.baseLbl)+' إذا سُدّد المؤجل الشهر القادم (فائدة إضافية ≈ '+money(K.debt.extraInt)+')، أو '+esc(K.debt.lateLbl)+' إذا أُضيف إلى رصيد الدين':'بدون تغيير'}</td></tr>`]:[]),'nototal')}</section>`;
+  h+=`<section><h2>أثر الخطة على الأشهر القادمة</h2>${T(['','الدخل المتوقع','الالتزامات الأصلية','المرحَّل','مصروفات أساسية','المتبقي'],N.months.map(x=>`<tr><td>${esc(monthName(x.m))}</td><td class="nw">${n(x.inc)}</td><td class="nw">${n(x.orig)}</td><td class="nw ${x.carry>0.0005?'no':''}">${n(x.carry)}</td><td class="nw">${n(x.ess)}</td><td class="nw ${x.left<0?'no':'ok'}">${n(x.left)}</td></tr>`),'nototal')}<p class="hint">الالتزامات الأصلية بدون المتأخرات، والمرحَّل يُضاف مرة واحدة. العجز في شهر يُرحَّل إلى الشهر الذي يليه.</p></section>`;
   if(warn.length)h+=`<section><h2>التنبيهات والمخاطر</h2><ul>${warn.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></section>`;
   if(p.notes)h+=`<section><h2>الملاحظات والشروط</h2><p style="white-space:pre-line">${esc(p.notes)}</p></section>`;
   h+=`<section class="sign"><div class="sg-n"><span>ملاحظات</span><i></i><i></i></div><div class="sg-a"><span>المراجعة والاعتماد</span><div><em>الاسم</em><em>التوقيع</em><em>التاريخ</em></div></div></section><footer class="rf">تقرير من تطبيق «إدارة شؤوني» · ${esc(p.name)} · هذه خطة تخطيطية لا تغيّر الديون ولا مواعيدها الأصلية</footer>`;
@@ -5021,7 +5046,83 @@ function xpHomeHtml(){if(S.month!==curM())return '';const p=xplans().filter(x=>x
   if(!p)return `<button class="xphome" data-xplans="1"><span>🗓️</span><span><b>الخطة المالية الاستثنائية</b><small>أعد توزيع مدفوعات هذا الشهر مؤقتًا دون تغيير خطتك الأصلية</small></span><span class="xph-go">‹</span></button>`;
   const C=xpCalc(p);return `<button class="xphome on" data-xpopen="${esc(p.id)}"><span>🗓️</span><span><b>${esc(p.name)}</b><small>${XP_ST[p.status][0]} · تدفع ${money(C.t.pay)} · دُفع ${money(C.t.paid)} · يُرحَّل ${money(C.t.def)}</small></span><span class="xph-go">‹</span></button>`}
 
+function openChangelog(){const L=document.getElementById('layer');S.showNew=false;
+  L.innerHTML=`${sheetTop('ما الجديد')}<h2 style="margin-top:0">ما الجديد في إدارة شؤوني</h2><p class="note" style="margin-top:0">الإصدار الحالي <b class="num">${APP_VERSION}</b> · ${countWord(CHANGELOG.length,'إصدار واحد','إصداران','إصدارات','إصدارًا')}</p>
+   <div class="stack">${CHANGELOG.map((c,k)=>`<details class="panel chl-full"${k<2?' open':''}><summary><b class="num">${c.v}</b><span class="note">${fmtD(c.d)} · ${countWord(c.items.length,'تحسين واحد','تحسينان','تحسينات','تحسينًا')}</span></summary><ul>${c.items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></details>`).join('')}</div>
+   <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
+  L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close'))L.innerHTML=''}}
+/* ===== التنقل: زر «رجوع» للصفحة السابقة في كل صفحة ونافذة، ويعمل معه زر الرجوع وسحب الرجوع في المتصفح =====
+ * الصفحات (التبويبات) تُحفظ في سجل مع موضع التمرير. النوافذ: إذا فتحت نافذة من نافذة، يرجعك «رجوع» إلى السابقة كما تركتها،
+ * وإذا لم تكن قبلها نافذة يغلقها ويرجعك إلى الصفحة. فتح نافذة موجودة أصلًا في السجل يرجع إليها ولا يكرّرها. */
+const NAV={st:[],cur:null,busy:false,lastTab:null,lastMonth:null,y:0};
+const NAV_TABN={home:'الرئيسية',monthly:'الشهرية',log:'السجل',budget:'إدارة البيانات',reports:'التقارير',settings:'الضبط',advisor:'المستشار',debts:'الديون',house:'البيت',cars:'السيارات',trusts:'الأمانات',docs:'المستندات'};
+window.addEventListener('scroll',()=>{if(!NAV.busy)NAV.y=window.scrollY},{passive:true});
+function navPush(e){NAV.st.push(e);if(NAV.st.length>40)NAV.st.shift();try{history.pushState({nav:NAV.st.length},'')}catch(er){}navUI()}
+function navTabChanged(){const L=document.getElementById('layer');if(NAV.lastTab===null){NAV.lastTab=S.tab;NAV.lastMonth=S.month;return}
+  if(S.tab!==NAV.lastTab){if(!NAV.busy){const i=NAV.st.map(x=>x.t==='tab'&&x.tab).lastIndexOf(S.tab);if(S.tab==='home'&&!(L&&L.innerHTML)){NAV.st=NAV.st.filter(x=>x.t!=='tab')}else navPush({t:'tab',tab:NAV.lastTab,month:NAV.lastMonth,y:NAV.y})}NAV.lastTab=S.tab}NAV.lastMonth=S.month;navUI()}
+function sheetKey(L){const sh=L.querySelector('.sheet');if(!sh)return '';const a=sh.getAttribute('aria-label')||'';if(a)return a;const h=L.querySelector('h2');return h?h.textContent.trim().slice(0,40):''}
+function navLayerChanged(){const L=document.getElementById('layer');if(!L)return;const has=!!L.querySelector('.sheet');
+  if(NAV.busy){NAV.cur=has?{k:sheetKey(L),nodes:[...L.childNodes],h:[L.onclick,L.oninput,L.onchange]}:null;navInject();return}
+  if(!has){if(NAV.cur){NAV.st=NAV.st.filter(x=>x.t!=='sheet'&&x.t!=='open')}NAV.cur=null;navUI();return}
+  const k=sheetKey(L);
+  if(!NAV.cur){navPush({t:'open'})}
+  else if(k!==NAV.cur.k){const at=NAV.st.findIndex(x=>x.t==='sheet'&&x.k===k);if(at>=0){NAV.st.length=at;}else navPush({t:'sheet',k:NAV.cur.k,nodes:NAV.cur.nodes,h:NAV.cur.h,sc:NAV.cur.sc||0})}
+  NAV.cur={k,nodes:[...L.childNodes],h:[L.onclick,L.oninput,L.onchange],sc:0};navInject();navUI()}
+function navInject(){const L=document.getElementById('layer');const sh=L&&L.querySelector('.sheet');if(!sh)return;
+  if(NAV.cur)NAV.cur.h=[L.onclick,L.oninput,L.onchange];
+  if(!sh.dataset.navsc){sh.dataset.navsc='1';sh.addEventListener('scroll',()=>{if(NAV.cur&&!NAV.busy)NAV.cur.sc=sh.scrollTop},{passive:true})}
+  const prev=NAV.st.length&&NAV.st[NAV.st.length-1].t==='sheet'?NAV.st[NAV.st.length-1]:null;const lab=prev?'رجوع':'رجوع';
+  if(sh.querySelector('.qhead,[data-noback]')){const o=sh.querySelector('.navback');if(o)o.remove();return}
+  let bt=sh.querySelector(':scope .navback');if(!bt){const inn=sh.querySelector('.in')||sh;bt=document.createElement('button');bt.type='button';bt.className='navback';bt.dataset.navback='1';inn.insertBefore(bt,inn.firstChild)}
+  bt.setAttribute('aria-label',prev?'رجوع إلى '+prev.k:'رجوع إلى الصفحة');bt.innerHTML='<span aria-hidden="true">›</span> '+lab}
+function navUI(){const b=document.getElementById('navBack');if(!b)return;const L=document.getElementById('layer');const open=L&&L.querySelector('.sheet');const tabs=NAV.st.filter(x=>x.t==='tab');
+  const show=!open&&(tabs.length>0||S.tab!=='home');b.hidden=!show;document.body.classList.toggle('has-navback',show);
+  if(show){const t=tabs.length?tabs[tabs.length-1].tab:'home';b.setAttribute('aria-label','رجوع إلى '+(NAV_TABN[t]||'الصفحة السابقة'))}}
+function navBack(){const L=document.getElementById('layer');const open=L&&L.querySelector('.sheet');
+  if(open){let e=NAV.st[NAV.st.length-1];
+    if(e&&e.t==='sheet'){NAV.st.pop();NAV.busy=true;L.replaceChildren(...e.nodes);[L.onclick,L.oninput,L.onchange]=e.h;NAV.cur={k:e.k,nodes:e.nodes,h:e.h,sc:e.sc};const sh=L.querySelector('.sheet');if(sh)sh.scrollTop=e.sc||0;if(sh&&typeof sh._refresh==='function'){try{sh._refresh()}catch(er){}}setTimeout(()=>{NAV.busy=false;navInject();navUI()},0);return true}
+    if(e&&e.t==='open')NAV.st.pop();L.innerHTML='';render();return true}
+  const i=NAV.st.map(x=>x.t).lastIndexOf('tab');if(i<0){if(S.tab!=='home'){NAV.busy=true;S.tab='home';S.month=curM();render();window.scrollTo(0,0);NAV.busy=false;navUI();return true}return false}
+  const e=NAV.st[i];NAV.st.length=i;NAV.busy=true;S.tab=e.tab;if(e.month)S.month=e.month;render();window.scrollTo(0,e.y||0);NAV.y=e.y||0;setTimeout(()=>{window.scrollTo(0,e.y||0);NAV.busy=false},60);navUI();return true}
+/* زر الرجوع في المتصفح وسحب الرجوع في iPhone */
+window.addEventListener('popstate',()=>{if(document.getElementById('admLayer')&&document.getElementById('admLayer').innerHTML)return;navBack()});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-navback],#navBack');if(!b)return;e.preventDefault();e.stopPropagation();let st=null;try{st=history.state}catch(er){}if(st&&st.nav)history.back();else navBack()},true);
+(function navInit(){const h=document.querySelector('header.top');if(h&&!document.getElementById('navBack')){const b=document.createElement('button');b.id='navBack';b.type='button';b.className='navbackhdr';b.hidden=true;b.innerHTML='<span aria-hidden="true">›</span> رجوع';h.insertBefore(b,h.firstChild)}
+  const L=document.getElementById('layer');if(L){try{new MutationObserver(recs=>{if(recs.some(r=>r.target===L))navLayerChanged();else if(L.querySelector('.sheet')&&!L.querySelector('.navback'))navInject()}).observe(L,{childList:true,subtree:true})}catch(e){}}})();
+/* ===== قائمة ☰ أعلى الشاشة: كل الأيقونات داخلها ما عدا المزامنة ===== */
+const HDR_MENU_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+function hdrMenuSync(){const h=document.querySelector('.hdr-actions');if(!h)return;let mb=document.getElementById('menuBtn'),mn=document.getElementById('hdrMenu');
+  if(!mb){mb=document.createElement('button');mb.id='menuBtn';mb.type='button';mb.className='iconbtn menubtn';mb.setAttribute('aria-label','القائمة');mb.setAttribute('aria-haspopup','true');mb.setAttribute('aria-expanded','false');mb.innerHTML=HDR_MENU_ICON+'<i class="mb-dot" hidden></i>';h.appendChild(mb)}
+  if(!mn){mn=document.createElement('div');mn.id='hdrMenu';mn.className='hdrmenu';mn.hidden=true;mn.setAttribute('role','menu');h.appendChild(mn)}
+  [...h.children].forEach(c=>{if(c===mb||c===mn||c.id==='sync')return;mn.appendChild(c)});
+  const order=['admChip','prBtn','privBtn','lookBtn','setBtn'];[...mn.children].sort((a,b)=>{const i=order.indexOf(a.id),j=order.indexOf(b.id);return(i<0?99:i)-(j<0?99:j)}).forEach(c=>mn.appendChild(c));
+  [...mn.children].forEach(c=>c.setAttribute('role','menuitem'));
+  const ad=document.getElementById('admChip');const dot=mb.querySelector('.mb-dot');if(dot)dot.hidden=!(ad&&ad.classList.contains('on'))}
+function hdrMenuOpen(v){const mn=document.getElementById('hdrMenu'),mb=document.getElementById('menuBtn');if(!mn||!mb)return;hdrMenuSync();mn.hidden=!v;mb.setAttribute('aria-expanded',v?'true':'false');mb.classList.toggle('on',!!v)}
+document.addEventListener('click',e=>{const mb=e.target.closest('#menuBtn');if(mb){e.stopPropagation();const mn=document.getElementById('hdrMenu');hdrMenuOpen(mn&&mn.hidden);return}
+  const mn=document.getElementById('hdrMenu');if(!mn||mn.hidden)return;if(e.target.closest('#hdrMenu button'))setTimeout(()=>hdrMenuOpen(false),0);else if(!e.target.closest('#hdrMenu'))hdrMenuOpen(false)},true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')hdrMenuOpen(false)});
+window.addEventListener('scroll',()=>{const mn=document.getElementById('hdrMenu');if(mn&&!mn.hidden)hdrMenuOpen(false)},{passive:true});
+try{new MutationObserver(()=>{const h=document.querySelector('.hdr-actions');if(h&&[...h.children].some(c=>c.id!=='sync'&&c.id!=='menuBtn'&&c.id!=='hdrMenu'))hdrMenuSync();const ad=document.getElementById('admChip'),dot=document.querySelector('#menuBtn .mb-dot');if(dot)dot.hidden=!(ad&&ad.classList.contains('on'))}).observe(document.querySelector('header.top')||document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']})}catch(e){}
+setTimeout(hdrMenuSync,0);
+/* ===== اختيار الشهر من التقويم: الضغط على التاريخ أعلى الشاشة ===== */
+function openMonthPicker(){const L=document.getElementById('layer');let y=+S.month.slice(0,4);const cm=curM();
+  const ys=list().map(t=>+String(t.date||'').slice(0,4)).filter(v=>v>2000);const yMin=Math.min(y,+cm.slice(0,4),...(ys.length?ys:[y]))-1,yMax=Math.max(y,+cm.slice(0,4))+2;
+  const cnt=m=>{try{return inMonth(m).length}catch(e){return 0}};
+  const draw=()=>{const cells=[];for(let i=1;i<=12;i++){const k=y+'-'+String(i).padStart(2,'0');const n=cnt(k);const sel=k===S.month,now=k===cm;
+      cells.push(`<button class="mp-c${sel?' sel':''}${now?' now':''}" data-mpm="${k}" aria-pressed="${sel}" aria-label="${esc(monthName(k))}"><b>${MONTHS[i-1]}</b>${payMode()?`<small>– ${MONTHS[i%12]}${i===12?' '+(y+1):''}</small>`:''}<span class="mp-n">${now?'الحالي':n?countWord(n,'عملية','عمليتان','عمليات','عملية'):''}</span></button>`)}
+    L.innerHTML=`${sheetTop('اختيار الشهر')}<h2 style="margin-top:0">اختيار الشهر</h2>${payMode()?'<p class="note" style="margin-top:0">الشهر هنا من الراتب إلى الراتب: يبدأ يوم '+(+S.settings.payday)+' من الشهر وينتهي قبل الراتب التالي.</p>':''}
+     <div class="mp-y"><button class="iconbtn" data-mpy="-1" aria-label="السنة السابقة" ${y<=yMin?'disabled':''}>›</button><b class="num">${y}</b><button class="iconbtn" data-mpy="1" aria-label="السنة التالية" ${y>=yMax?'disabled':''}>‹</button></div>
+     <div class="mp-ys">${(()=>{const o=[];for(let k=yMin;k<=yMax;k++)o.push(`<button class="chip${k===y?' on':''}" data-mpyy="${k}">${k}</button>`);return o.join('')})()}</div>
+     <div class="mp-g">${cells.join('')}</div>
+     <div class="actions"><div class="row2"><button class="btn" data-mpm="${cm}">الشهر الحالي</button><button class="btn ghost" data-close>إغلاق</button></div></div></div></div>`;
+    const yc=L.querySelector('.mp-ys .on');if(yc)yc.scrollIntoView({inline:'center',block:'nearest'})};
+  draw();L.oninput=L.onchange=null;
+  L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+    if(x.dataset.mpy){y+=+x.dataset.mpy;draw();return}if(x.dataset.mpyy){y=+x.dataset.mpyy;draw();return}
+    if(x.dataset.mpm){S.month=x.dataset.mpm;L.innerHTML='';render();toast(monthName(S.month));return}}}
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
+document.addEventListener('click',e=>{const c=e.target.closest('div[data-chlog]');if(c&&!c.closest('#layer'))openChangelog()});document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches&&e.target.matches('div[data-chlog]'))openChangelog()});
 /* في الآيفون لا ينتقل التركيز إلى الزر عند الضغط عليه، فيبقى الحقل الذي كتبت فيه «نشطًا» وتتوقف الصفحة عن التحديث.
  * لذلك نُخرج التركيز من الحقل عند الضغط على أي زر (ويُحفظ ما كتبته كما هو) */
 let lastTap=0;
@@ -5127,6 +5228,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.dbspeed){duaBarSet({speed:b.dataset.dbspeed});return}
   if(b.id==='dbEdit'){openDuaBarEdit();return}
   if(b.dataset.rescue){openRescue();return}
+  if(b.dataset.chlog){openChangelog();return}
   if(b.dataset.xplans){openXPlans();return}
   if(b.dataset.xpopen){openXPlan(b.dataset.xpopen);return}
   if(b.dataset.rsend){if(!confirm('إنهاء خطة الثلاثين يومًا؟'))return;delete S.settings.rescue;await putSettings();render();toast('أُنهيت الخطة');return}
@@ -5202,6 +5304,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.gnext){nextCycle(b.dataset.gnext);return}
   if(b.dataset.pmonth!==undefined){const on=b.dataset.pmonth==='1';if(payMode()===on)return;S.settings.payMonth=on;await putSettings();S.month=curM();render();toast(on?'صار الشهر يُحسب من الراتب إلى الراتب، مثل «'+monthName(curM())+'»':'رجعت الأشهر حسب التقويم');return}
   if(b.id==='mPrev'){S.month=shiftMonth(S.month,-1);render();return}
+  if(b.id==='mLabel'){openMonthPicker();return}
   if(b.id==='mNext'){S.month=shiftMonth(S.month,1);render();return}
   if(b.dataset.edit){openSheet(S.tx[b.dataset.edit]);return}
   if(b.dataset.ftype){S.ftype=b.dataset.ftype;render();return}
