@@ -1294,3 +1294,25 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .srch-tips{flex-wrap:wrap}
 .sflash{animation:sflash 1.8s ease-out}
 @keyframes sflash{0%,40%{box-shadow:0 0 0 3px #E0A21B}100%{box-shadow:0 0 0 0 transparent}}
+
+/* ===== 2.41.0 اسأل تطبيقك ===== */
+.ask-card{margin-top:12px;border-radius:18px;padding:14px 16px;background:linear-gradient(135deg,var(--accent-soft),var(--surface));border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line))}
+.ask-card.red{background:linear-gradient(135deg,color-mix(in srgb,var(--exp) 10%,var(--surface)),var(--surface));border-color:color-mix(in srgb,var(--exp) 35%,var(--line))}
+.ask-card.green{background:linear-gradient(135deg,color-mix(in srgb,var(--inc) 10%,var(--surface)),var(--surface));border-color:color-mix(in srgb,var(--inc) 35%,var(--line))}
+.ask-h{display:flex;align-items:center;gap:8px}.ask-h span{font-size:20px}.ask-h small{font-size:13px;color:var(--muted);font-weight:600}
+.ask-big{margin:6px 0 4px}.ask-big b{font-size:32px;font-weight:800}.ask-big span{color:var(--muted);font-size:15px}
+.ask-card.red .ask-big b{color:var(--exp)}.ask-card.green .ask-big b{color:var(--inc)}
+.ask-card p{margin:3px 0;font-size:13.5px;line-height:1.7}
+.ask-card .chips{margin-top:8px}
+.sbars{display:flex;align-items:flex-end;gap:6px;height:96px;margin:10px 0 2px}
+.sbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;min-width:0}
+.sbar i{display:block;width:70%;max-width:34px;border-radius:6px 6px 2px 2px;background:color-mix(in srgb,var(--accent) 45%,var(--surface-2))}
+.sbar.cur i{background:var(--accent)}
+.sbar span{font-size:10px;color:var(--muted);white-space:nowrap}.sbar small{font-size:10.5px;color:var(--muted)}
+.cmd-card{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;padding:12px 14px;border-radius:16px;border:1.5px dashed var(--accent);background:var(--surface);color:var(--fg);font:inherit;text-align:start;cursor:pointer}
+.cmd-card>span:first-child{font-size:22px}.cmd-card>span:nth-child(2){flex:1;display:flex;flex-direction:column}.cmd-card small{color:var(--muted);font-size:12.5px}
+.s-ana{margin-top:10px}.s-ana summary{display:flex;justify-content:space-between;gap:8px;cursor:pointer;list-style:none}.s-ana summary::-webkit-details-marker{display:none}
+.s-fx{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.s-fx .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;align-items:center;margin:0}
+.s-fx .chip{flex:none}.s-fx .chip small{opacity:.7;margin-inline-start:3px}
+.s-fx .note{flex:none;font-size:12px}

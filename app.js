@@ -3215,8 +3215,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.40.0';
+const APP_VERSION='2.41.0';
 const CHANGELOG=[
+ {v:'2.41.0',d:'2026-10-16',items:['«اسأل تطبيقك»: اكتب سؤالك بلغتك فتأتيك الإجابة مباشرة، مثل: كم صرفت على البنزين هذا الشهر؟ كم علي هذا الشهر؟ كم باقي من راتبي؟ متى ينتهي قرض البنك؟ أكبر مصروف في سبتمبر، أين أصرف أكثر؟ متوسط المطاعم، كم مرة اشتريت قهوة؟','يفهم الفترات: اليوم، أمس، هذا الأسبوع، الشهر الماضي، آخر 3 أشهر، هذه السنة، اسم أي شهر، ويقارن كل إجابة بالفترة السابقة والمعدل الشهري مع رسم صغير لآخر 6 أشهر','يتسامح مع أخطاء الكتابة ويعرف المرادفات: وقود وبترول = بنزين، أكل وغداء = مطاعم، كهربا = كهرباء، ويتعلّم من الكلمات التي تكتبها في عملياتك','تحليل فوري لأي بحث: مجموع كل شهر والمعدل والتغيّر عن الشهر الماضي، وتصفية النتائج حسب الفئة والشهر والشخص، وترتيبها، وتصديرها Excel','أوامر سريعة: «بنزين 5» يسجّل مصروفًا جاهزًا، و«ادفع الكهرباء» يفتح نافذة الدفع','كله يعمل داخل هاتفك بدون إنترنت ولا خوادم، ولا تخرج بياناتك منه']},
  {v:'2.40.0',d:'2026-10-16',items:['أداة البحث 🔍: شريط بحث في الرئيسية، وزر «بحث في التطبيق» داخل القائمة ☰، واختصار ⌘K أو / على الماك','تبحث في العمليات (البيان والفئة والشخص والحساب والمبلغ والتاريخ) والديون والالتزامات والخطط والأشخاص والجهات والحسابات والأمانات والسيارات والمستندات وصفحات التطبيق وأدواته','تفهم المبالغ: 25 أو >100 أو <50 أو 100-200، والأشهر: مارس أو 2026-03، وتتجاهل التشكيل والهمزات والتاء المربوطة والأرقام العربية','النتائج مجمّعة مع مجموع المصروف والدخل للعمليات المطابقة، والمبالغ بالأخضر والأحمر، وتصفية حسب النوع، وآخر عمليات البحث','الضغط على أي نتيجة يفتحها مباشرة: العملية للتعديل، والدين في ملفه، والالتزام في الشهرية مفتوحًا ومُبرزًا']},
  {v:'2.39.0',d:'2026-10-16',items:['صفحة «📊 مخطط السداد والالتزامات» من الرئيسية ومن إدارة البيانات: تراجع فيها كل ديونك والتزاماتك الشهرية مع معادلاتها الحسابية','لكل دين تختار مبلغًا شهريًا أو عدد أشهر للتقسيط (6 أو 12 أو 24 أو أي عدد)، فيحسب فورًا عدد الأشهر وموعد الانتهاء والفوائد، وكم أسرع أو أبطأ من قسط العقد وكم توفّر','المتبقي من كل دين بعد 3 و6 و12 شهرًا، وفي جدول الدفع المقرر يظهر المتبقي من كل دين ومن مجموع الديون بعد كل شهر','الملخص: الدخل − أقساط الخطة − الالتزامات = المتاح للمصروفات، ويوميًا، وموعد التحرر من كل الديون','حفظ كخطة شهرية: تظهر في الرئيسية وبطاقة الدين، ويُقترح مبلغها عند السداد. قسط العقد ورصيد الدين لا يتغيران','معاينة التقرير وطباعته PDF وحفظه أو مشاركته']},
  {v:'2.38.0',d:'2026-10-16',items:['قاعدة ألوان واحدة في كل الأقسام: المدفوع أخضر، والمتأخر أحمر وبخط عريض، والجزئي والمستحق قريبًا برتقالي، والقادم رمادي','ملفات كل دين في «إدارة البيانات» صار فيها «الأقساط شهرًا بشهر»: كل شهر من بداية الدين حتى الأشهر القادمة بلونه ومبلغه، مع عدد المدفوع والمتأخر ومجموع المتأخرات، والسنوات التي فيها متأخرات مفتوحة تلقائيًا','بطاقة الدين تُظهر حالة قسط الشهر بلونها: مدفوع أخضر، أو متأخر بالأحمر مع المبلغ، ومنه المتأخرات من الأشهر الماضية','سجل كل التزام شهري بنفس الألوان، والشهر الذي لم يحن موعده يظهر «قادم» بدل «لم يُدفع»','في «الشهرية» المبلغ المقرر يظهر بالأحمر فقط إذا تأخر، والمتبقي في كل قسم أحمر فقط إذا فيه متأخر','المبالغ المدفوعة والمتأخرة أكبر من خط الصفحة في كل مكان، والدفعات المسجّلة خضراء','كشف الدين للطباعة فيه جدول «الأقساط شهرًا بشهر» بالألوان']},
@@ -5334,9 +5335,9 @@ function sParse(q){const n=sNorm(q);let amt=null;const words=[];let mon=null;
     if(/^\d+(\.\d+)?$/.test(w.replace(/,/g,''))&&!amt){amt={eq:+w.replace(/,/g,'')};words.push(w);return}
     const mi=MONTHS.map(sNorm).indexOf(w);if(mi>=0){mon=mon||('*-'+String(mi+1).padStart(2,'0'));return}
     words.push(w)});
-  return{n,words,amt,mon}}
+  return{n,words,amt,mon,alts:words.map(w=>/^\d/.test(w)?[w]:sExpand(w))}}
 function sAmtOk(P,v){v=+v||0;if(!P.amt)return true;if(P.amt.eq!==undefined)return Math.abs(v-P.amt.eq)<0.0005||String(r3(v)).startsWith(String(P.amt.eq));if(P.amt.min!==undefined&&v<P.amt.min)return false;if(P.amt.max!==undefined&&v>P.amt.max)return false;return true}
-function sTxt(P,hay){if(!P.words.length)return true;const h=sNorm(hay);return P.words.every(w=>h.includes(w)||(/^\d/.test(w)&&P.amt&&P.amt.eq!==undefined))}
+function sTxt(P,hay){if(!P.words.length)return true;const h=sNorm(hay);return P.words.every((w,i)=>h.includes(w)||(P.alts&&P.alts[i]||[]).some(a=>h.includes(a))||(/^\d/.test(w)&&P.amt&&P.amt.eq!==undefined))}
 function sMonOk(P,date){if(!P.mon)return true;if(!date)return false;const ym=String(date).slice(0,7);return P.mon.startsWith('*')?ym.slice(5)===P.mon.slice(2):ym===P.mon}
 /* الصفحات والأدوات */
 function sPages(){return [
@@ -5369,21 +5370,37 @@ function sRun(q,flt){const P=sParse(q);const out={};const add=(g,x)=>{(out[g]=ou
   if(want('page')&&!P.amt&&!P.mon)sPages().forEach(pg=>{if(sTxt(P,pg[1]+' '+pg[2]))add('page',pg)});
   return{P,out,empty}}
 const SRCH_G=[['all','الكل'],['tx','العمليات'],['debt','الديون'],['rec','الالتزامات'],['plan','الخطط'],['other','أشخاص وحسابات'],['page','الصفحات']];
-function openSearch(q0){const L=document.getElementById('layer');let q=q0||'',flt='all',more={};let tm;
-  L.innerHTML=`${sheetTop('البحث')}<div class="srch-top"><div class="srch-box"><span aria-hidden="true">🔍</span><input id="sQ" type="search" class="inp" placeholder="ابحث: اسم، فئة، مبلغ، شهر…" value="${esc(q)}" autocomplete="off" enterkeyhint="search"><button class="srch-x" id="sX" aria-label="مسح" ${q?'':'hidden'}>✕</button></div>
+function openSearch(q0){const L=document.getElementById('layer');let q=q0||'',flt='all',more={};let tm;let fx={sort:'new'},askIds=null;
+  L.innerHTML=`${sheetTop('البحث')}<div class="srch-top"><div class="srch-box"><span aria-hidden="true">🔍</span><input id="sQ" type="search" class="inp" placeholder="اسأل أو ابحث: كم صرفت على البنزين هذا الشهر؟" value="${esc(q)}" autocomplete="off" enterkeyhint="search"><button class="srch-x" id="sX" aria-label="مسح" ${q?'':'hidden'}>✕</button></div>
    <div class="chips srch-f">${SRCH_G.map(([k,n])=>`<button class="chip${k==='all'?' on':''}" data-sf="${k}">${n}</button>`).join('')}</div></div><div id="sRes"></div></div></div>`;
   const inp=document.getElementById('sQ');
   const draw=()=>{const R=sRun(q,flt);const box=document.getElementById('sRes');if(!box)return;
     if(R.empty){const H=sHist();box.innerHTML=`${H.length?`<h3>آخر عمليات البحث</h3><div class="chips">${H.map(h=>`<button class="chip" data-sh="${esc(h)}">🕘 ${esc(h)}</button>`).join('')}<button class="chip" data-shclr="1">مسح</button></div>`:''}
-      <h3>جرّب</h3><div class="srch-tips"><button class="chip" data-sh="بنزين">بنزين</button><button class="chip" data-sh="قرض">قرض</button><button class="chip" data-sh=">100">مبالغ أكبر من 100</button><button class="chip" data-sh="20-50">بين 20 و50</button><button class="chip" data-sh="${esc(MONTHS[+curM().slice(5)-1])}">${esc(MONTHS[+curM().slice(5)-1])}</button><button class="chip" data-sh="راتب">راتب</button></div>
+      <h3>اسأل</h3><div class="srch-tips"><button class="chip" data-sh="كم صرفت على البنزين هذا الشهر؟">كم صرفت على البنزين هذا الشهر؟</button><button class="chip" data-sh="كم علي هذا الشهر؟">كم علي هذا الشهر؟</button><button class="chip" data-sh="كم باقي من راتبي؟">كم باقي من راتبي؟</button><button class="chip" data-sh="أين أصرف أكثر هذا الشهر؟">أين أصرف أكثر؟</button><button class="chip" data-sh="أكبر مصروف الشهر الماضي">أكبر مصروف الشهر الماضي</button><button class="chip" data-sh="متوسط المطاعم">متوسط المطاعم</button>${debts().filter(d=>+d.balance>0.0005)[0]?`<button class="chip" data-sh="متى ينتهي ${esc(debts().filter(d=>+d.balance>0.0005)[0].name)}؟">متى ينتهي ${esc(debts().filter(d=>+d.balance>0.0005)[0].name)}؟</button>`:''}</div>
+      <h3>أوامر سريعة</h3><div class="srch-tips"><button class="chip" data-sh="بنزين 5">بنزين 5 ← يسجّل مصروفًا</button>${recs()[0]?`<button class="chip" data-sh="ادفع ${esc(recs()[0].name)}">ادفع ${esc(recs()[0].name)}</button>`:''}</div>
+      <h3>ابحث</h3><div class="srch-tips"><button class="chip" data-sh="بنزين">بنزين</button><button class="chip" data-sh="قرض">قرض</button><button class="chip" data-sh=">100">مبالغ أكبر من 100</button><button class="chip" data-sh="20-50">بين 20 و50</button><button class="chip" data-sh="${esc(MONTHS[+curM().slice(5)-1])}">${esc(MONTHS[+curM().slice(5)-1])}</button><button class="chip" data-sh="راتب">راتب</button></div>
       <p class="note">تبحث في العمليات (البيان والفئة والشخص والحساب والمبلغ والتاريخ) والديون والالتزامات والخطط والأشخاص والحسابات والأمانات والسيارات والمستندات وصفحات التطبيق. اكتب مبلغًا مثل <b dir="ltr">25</b> أو <b dir="ltr">&gt;100</b> أو <b dir="ltr">100-200</b>، أو اسم شهر مثل <b>مارس</b> أو <b dir="ltr">2026-03</b>.</p>
       <h3>الصفحات والأدوات</h3><div class="srch-pages">${sPages().map((p,i)=>`<button class="srch-pg" data-spg="${i}"><span>${p[0]}</span>${esc(p[1])}</button>`).join('')}</div>`;return}
-    const O=R.out;const tot=Object.values(O).reduce((s,a)=>s+a.length,0);
+    const AK=sAsk(q),CM=AK?null:sCommand(q);let top='';
+    if(AK)top+=`<div class="ask-card${AK.red?' red':''}${AK.green?' green':''}"><div class="ask-h"><span>${AK.icon}</span><small>${esc(AK.title)}</small></div><div class="ask-big"><b class="num">${esc(AK.big)}</b>${AK.unit?` <span>${esc(AK.unit)}</span>`:''}</div>${AK.lines.map(l=>`<p>${l}</p>`).join('')}${AK.bars?sBarsHtml(AK.bars):''}<div class="chips">${AK.ids&&AK.ids.length?`<button class="chip pay" data-askids="1">عرض العمليات (${AK.ids.length})</button>`:''}${AK.act?`<button class="chip" data-askact="1">${esc(AK.act.t)}</button>`:''}</div></div>`;
+    if(CM)top+=`<button class="cmd-card" data-cmd="1"><span>${CM.icon}</span><span><b>${esc(CM.t)}</b><small>${CM.s}</small></span><span class="xph-go">‹</span></button>`;
+    window.__sAK=AK;window.__sCM=CM;
+    if(askIds&&AK&&AK.ids){const set=new Set(askIds);R.out={tx:list().filter(t=>set.has(t.id)).sort((a,b)=>b.date.localeCompare(a.date)).map(t=>({t,c:catOf(t.cat)}))}}
+    const O=R.out;
+    if(O.tx){if(fx.cat)O.tx=O.tx.filter(x=>x.t.cat===fx.cat);if(fx.mon)O.tx=O.tx.filter(x=>mOf(x.t.date)===fx.mon);if(fx.per!==undefined&&fx.per!==null)O.tx=O.tx.filter(x=>(x.t.person||'')===fx.per);if(fx.acc)O.tx=O.tx.filter(x=>accOf(x.t)===fx.acc);
+      if(fx.sort==='old')O.tx.reverse();else if(fx.sort==='big')O.tx.sort((a,b)=>b.t.amount-a.t.amount);else if(fx.sort==='small')O.tx.sort((a,b)=>a.t.amount-b.t.amount);if(!O.tx.length)delete O.tx}
+    const tot=Object.values(O).reduce((s,a)=>s+a.length,0);
+    if(!tot&&top){box.innerHTML=top;return}
     if(!tot){box.innerHTML=`<div class="panel empty"><b>لا نتائج لـ«${esc(q)}»</b>جرّب كلمة أقصر أو اختر «الكل».</div>`;return}
     const sec=(g,title,arr,row)=>{if(!arr||!arr.length)return '';const lim=more[g]?arr.length:(flt==='all'?5:40);return `<div class="srch-g"><div class="srch-gh"><b>${title}</b><span class="note">${arr.length}</span></div><div class="panel" style="padding-block:2px">${arr.slice(0,lim).map(row).join('')}</div>${arr.length>lim?`<button class="chip" data-smore="${g}">عرض الكل (${arr.length})</button>`:''}</div>`};
     let h='';
     if(O.tx){const inc=O.tx.filter(x=>x.t.type==='inc').reduce((s,x)=>s+(+x.t.amount),0),exp=O.tx.filter(x=>x.t.type==='exp').reduce((s,x)=>s+(+x.t.amount),0);
-      h+=`<div class="srch-sum"><span>${countWord(O.tx.length,'عملية واحدة','عمليتان','عمليات','عملية')}</span>${exp?`<span>مصروف <b class="num amt-exp">${money(exp)}</b></span>`:''}${inc?`<span>دخل <b class="num amt-inc">${money(inc)}</b></span>`:''}</div>`}
+      h+=`<div class="srch-sum"><span>${countWord(O.tx.length,'عملية واحدة','عمليتان','عمليات','عملية')}</span>${exp?`<span>مصروف <b class="num amt-exp">${money(exp)}</b></span>`:''}${inc?`<span>دخل <b class="num amt-inc">${money(inc)}</b></span>`:''}</div>`;
+      if(O.tx.length>=2&&!AK){const ids=new Set(O.tx.map(x=>x.t.id));const bars=sMonthsBars(t=>ids.has(t.id),6);const avg=r3(bars.slice(0,5).reduce((s,b)=>s+b.v,0)/5);const p0=bars[4].v,p1=bars[5].v;
+        h+=`<details class="panel s-ana"${O.tx.length>=3?' open':''}><summary><b>📊 تحليل النتائج</b><span class="note">المعدل الشهري ${money(avg)}</span></summary>${sBarsHtml(bars)}<p class="note">هذا الشهر <b class="num">${money(p1)}</b> · الشهر الماضي <b class="num">${money(p0)}</b>${p0?` · ${p1>=p0?'<span class="amt-exp">↑ '+Math.round((p1-p0)/p0*100)+'%</span>':'<span class="amt-inc">↓ '+Math.round((p0-p1)/p0*100)+'%</span>'}`:''} · المتوسط للعملية <b class="num">${money((exp+inc)/O.tx.length)}</b></p></details>`}
+      const F=sFacets((R.out.tx||[]));const chip=(k,v,lbl,n)=>`<button class="chip${fx[k]===v?' on':''}" data-fx="${k}|${esc(v)}">${esc(lbl)} <small>${n}</small></button>`;
+      h+=`<div class="s-fx">${F.cat.length>1||fx.cat?`<div class="chips"><span class="note">الفئة:</span>${F.cat.slice(0,6).map(([k,n])=>chip('cat',k,catOf(k).n,n)).join('')}</div>`:''}${F.mon.length>1||fx.mon?`<div class="chips"><span class="note">الشهر:</span>${F.mon.slice(0,6).map(([k,n])=>chip('mon',k,mShort(k)+' '+k.slice(2,4),n)).join('')}</div>`:''}${F.per.length>1?`<div class="chips"><span class="note">الشخص:</span>${F.per.slice(0,5).map(([k,n])=>chip('per',k,personName(k),n)).join('')}</div>`:''}
+       <div class="chips"><span class="note">الترتيب:</span>${[['new','الأحدث'],['old','الأقدم'],['big','الأكبر'],['small','الأصغر']].map(([k,n])=>`<button class="chip${fx.sort===k?' on':''}" data-fsort="${k}">${n}</button>`).join('')}${fx.cat||fx.mon||fx.per!=null||askIds?'<button class="chip" data-fclr="1">✕ إلغاء التصفية</button>':''}<button class="chip" data-sxl="1">📊 Excel</button></div></div>`}
     h+=sec('tx','العمليات',O.tx,x=>`<button class="srch-row" data-sx="tx|${esc(x.t.id)}"><span class="srch-ic dot" style="--sc:${x.c.c||'var(--muted)'}"><i></i></span><span class="srch-m"><b>${esc(x.t.note||x.c.n)}</b><small>${esc(x.c.n)} · ${fmtD(x.t.date)}${x.t.person?' · '+esc(personName(x.t.person)):''}</small></span><b class="num ${x.t.type==='inc'?'amt-inc':'amt-exp'}">${x.t.type==='inc'?'+':'−'}${money(x.t.amount)}</b></button>`);
     h+=sec('debt','الديون',O.debt,d=>`<button class="srch-row" data-sx="debt|${esc(d.id)}"><span class="srch-ic">🏦</span><span class="srch-m"><b>${esc(d.name)}</b><small>${esc([d.lender,d.mode==='once'?'دفعة واحدة':'القسط '+money(d.payment)].filter(Boolean).join(' · '))}</small></span><b class="num ${+d.balance>0.0005?'amt-exp':'amt-inc'}">${+d.balance>0.0005?money(d.balance):'✓ انتهى'}</b></button>`);
     h+=sec('rec','الالتزامات الشهرية',O.rec,r=>{const it=itemOf('rec',r.id,curM());const st=it?itemSt(it,curM()):null;return `<button class="srch-row" data-sx="rec|${esc(r.id)}"><span class="srch-ic">🧾</span><span class="srch-m"><b>${esc(r.name)}</b><small>يوم ${+r.day||1}${st?' · '+st.t:''}</small></span><b class="num ${st&&st.k==='paid'?'amt-inc':'amt-exp'}">${money(amtAt(r,curM()))}</b></button>`});
@@ -5391,17 +5408,24 @@ function openSearch(q0){const L=document.getElementById('layer');let q=q0||'',fl
     const OT={person:['👤','شخص'],payee:['🏢','جهة'],acc:['💳','حساب'],trust:['🤝','أمانة'],car:['🚗','سيارة'],doc:['📄','مستند']};
     h+=sec('other','أشخاص وحسابات وأمانات ومستندات',O.other,o=>`<button class="srch-row" data-sx="${o.k}|${esc(o.x.id||'')}"><span class="srch-ic">${OT[o.k][0]}</span><span class="srch-m"><b>${esc(o.x.name||o.x.title||'')}</b><small>${OT[o.k][1]}${o.k==='trust'&&o.x.amount?' · '+money(o.x.amount):''}${o.k==='car'&&o.x.plate?' · '+esc(o.x.plate):''}</small></span></button>`);
     h+=sec('page','الصفحات والأدوات',O.page,pg=>`<button class="srch-row" data-spg="${sPages().findIndex(x=>x[1]===pg[1])}"><span class="srch-ic">${pg[0]}</span><span class="srch-m"><b>${esc(pg[1])}</b><small>فتح</small></span><span class="xph-go">‹</span></button>`);
-    box.innerHTML=h;
+    box.innerHTML=top+h;
     const hl=R.P.words.filter(w=>w.length>1&&!/^\d/.test(w));if(hl.length)box.querySelectorAll('.srch-m b').forEach(b=>{const t=b.textContent;const nt=sNorm(t);let i=-1,w0='';hl.some(w=>{const k=nt.indexOf(w);if(k>=0&&nt.length===t.length){i=k;w0=w;return true}return false});if(i>=0)b.innerHTML=esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+w0.length))+'</mark>'+esc(t.slice(i+w0.length))})};
   draw();setTimeout(()=>{try{inp.focus()}catch(e){}},80);
-  L.oninput=e=>{if(e.target.id==='sQ'){q=e.target.value;more={};document.getElementById('sX').hidden=!q;clearTimeout(tm);tm=setTimeout(draw,120)}};L.onchange=null;
+  L.oninput=e=>{if(e.target.id==='sQ'){q=e.target.value;more={};askIds=null;fx={sort:fx.sort};document.getElementById('sX').hidden=!q;clearTimeout(tm);tm=setTimeout(draw,120)}};L.onchange=null;
   L.onkeydown=e=>{if(e.key==='Enter'&&e.target.id==='sQ'){e.preventDefault();sHistAdd(q);e.target.blur()}};
   L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
     if(x.id==='sX'){q='';inp.value='';x.hidden=true;draw();inp.focus();return}
     if(x.dataset.sf){flt=x.dataset.sf;more={};L.querySelectorAll('[data-sf]').forEach(b=>b.classList.toggle('on',b===x));draw();return}
-    if(x.dataset.sh){q=x.dataset.sh;inp.value=q;document.getElementById('sX').hidden=false;draw();return}
+    if(x.dataset.sh){q=x.dataset.sh;askIds=null;fx={sort:'new'};inp.value=q;document.getElementById('sX').hidden=false;draw();return}
     if(x.dataset.shclr){try{localStorage.removeItem(SRCH_K)}catch(er){}draw();return}
     if(x.dataset.smore){more[x.dataset.smore]=1;draw();return}
+    if(x.dataset.fx){const [k,v]=x.dataset.fx.split('|');fx[k]=fx[k]===v?(k==='per'?undefined:null):v;draw();return}
+    if(x.dataset.fsort){fx.sort=x.dataset.fsort;draw();return}
+    if(x.dataset.fclr){fx={sort:fx.sort};askIds=null;draw();return}
+    if(x.dataset.sxl){const R=sRun(q,'tx');let arr=R.out.tx||[];if(askIds){const st=new Set(askIds);arr=list().filter(t=>st.has(t.id)).map(t=>({t,c:catOf(t.cat)}))}if(fx.cat)arr=arr.filter(y=>y.t.cat===fx.cat);if(fx.mon)arr=arr.filter(y=>mOf(y.t.date)===fx.mon);sTxXlsx(arr,q);return}
+    if(x.dataset.askids){askIds=(window.__sAK||{}).ids||[];more.tx=1;draw();const g=L.querySelector('.srch-g');if(g)g.scrollIntoView({block:'start'});return}
+    if(x.dataset.askact){const a=(window.__sAK||{}).act;if(!a)return;sHistAdd(q);if(a.k==='debt'){sFocus('budget','.dcard [data-dprint="'+a.id+'"]');return}if(a.k==='tab'){sGoTab(a.id);return}if(a.k==='tx'){sClick({'data-edit':a.id});return}if(a.fn==='spend'){L.innerHTML='';openSpendToday();return}return}
+    if(x.dataset.cmd){const c=window.__sCM;if(!c)return;sHistAdd(q);const a=c.a;if(a.fn==='add'){L.innerHTML='';openSheet(null,a.pre);return}if(a.fn==='dpay'){L.innerHTML='';openDebtPay(a.id);return}sClick(a);return}
     if(x.dataset.spg!==undefined){sHistAdd(q);const pg=sPages()[+x.dataset.spg];L.innerHTML='';if(pg)pg[3]();return}
     if(x.dataset.sx){sHistAdd(q);const [k,id]=x.dataset.sx.split('|');
       if(k==='tx'){sClick({'data-edit':id});return}
@@ -5415,6 +5439,120 @@ function openSearch(q0){const L=document.getElementById('layer');let q=q0||'',fl
       if(k==='trust'){sClick({'data-tedit':id});return}
       if(k==='car'){sClick({'data-cedit':id});return}
       if(k==='doc'){sFocus('docs','[data-vview="'+id+'"]');return}}}}
+
+
+/* ===== البحث الذكي «اسأل تطبيقك» — يعمل كله داخل الهاتف بدون إنترنت ولا خوادم =====
+ * 1) أسئلة بلغتك: كم صرفت على البنزين هذا الشهر؟ متى ينتهي قرض البنك؟ أكبر مصروف في سبتمبر…
+ * 2) مرادفات وتصحيح أخطاء الكتابة، ويتعلّم من كلماتك
+ * 3) تحليل فوري: مجموع كل شهر، المعدل، عدد المرات، المقارنة بالفترة السابقة
+ * 4) تصفية النتائج حسب الفئة والشهر والشخص والحساب، وترتيبها، وتصديرها
+ * 5) أوامر سريعة: «بنزين 5» يسجّل مصروفًا، «ادفع الكهرباء» يفتح الدفع */
+const SYN=[['بنزين','وقود','بترول','ديزل','محطه','تعبئه','fuel'],['مطعم','مطاعم','اكل','غداء','عشاء','فطور','قهوه','كافيه','مقهي','كوفي','وجبه','شاورما','برجر','بيتزا'],
+ ['بقاله','مقاضي','سوبرماركت','هايبر','لولو','كارفور','خضار','خضروات','لحم','دجاج','جمعيه'],['كهرباء','كهربا','ماء','مياه','انترنت','نت','فاتوره','فواتير','هاتف','جوال','موبايل','عمانتل','اوريدو'],
+ ['ايجار','اجار','سكن','شقه','منزل'],['قسط','اقساط','قرض','قروض','دين','ديون','تمويل','سلفه'],['دواء','ادويه','صيدليه','مستشفي','عياده','طبيب','دكتور','علاج','مستوصف'],
+ ['ملابس','تسوق','ثياب','احذيه','مول','شراء'],['دراسه','مدرسه','جامعه','دوره','دورات','كتب','رسوم','تعليم'],['سفر','رحله','نزهه','ترفيه','سينما','فندق','تذاكر','طيران'],
+ ['اهل','هديه','هدايا','عائله','الوالده','الوالد','الوالدين'],['صدقه','صدقات','زكاه','تبرع','تبرعات'],['راتب','رواتب','معاش'],['صيانه','تامين','ورشه','زيت','اطارات','كفرات','غسيل'],
+ ['عمل اضافي','دخل اضافي','فريلانس','مشروع جانبي']];
+const SYN_CAT={'بنزين':'fuel','مطعم':'rest','بقاله':'food','كهرباء':'bills','ايجار':'home','قسط':'loan','دواء':'health','ملابس':'shop','دراسه':'edu','سفر':'fun','اهل':'family','صدقه':'charity','راتب':'salary','صيانه':'car','عمل اضافي':'freelance'};
+function sBase(w){const m=w.match(/^(وال|بال|فال|كال|لل)(.{2,})$/);if(m)return m[1]==='لل'?'ال'+m[2]:'ال'+m[2];return w}
+function sStrip(w){w=sBase(w);return w.startsWith('ال')&&w.length>4?w.slice(2):w}
+function sLev(a,b,max){if(Math.abs(a.length-b.length)>max)return max+1;const d=[];for(let i=0;i<=a.length;i++){d[i]=[i];for(let j=1;j<=b.length;j++)d[i][j]=i?Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)):j}return d[a.length][b.length]}
+function sVocab(){return memo('svocab',()=>{const V=new Set();const addS=s=>sNorm(s).split(/[^؀-ۿa-z0-9]+/).forEach(w=>{if(w.length>=3)V.add(sStrip(w))});
+  list().forEach(t=>addS(t.note));EXP_CATS.concat(INC_CATS).forEach(c=>addS(c.n));recs().forEach(r=>addS(r.name));debts().forEach(d=>{addS(d.name);addS(d.lender)});people().forEach(p=>addS(p.name));(S.settings.goals||[]).forEach(g=>addS(g.name));SYN.flat().forEach(addS);return[...V]})}
+function sGroup(w){const b=sStrip(w);return SYN.find(g=>g.some(x=>x===w||x===b||sStrip(x)===b))||null}
+function sExpand(w){const out=new Set([w]);const b=sStrip(w);out.add(b);if(/^\d/.test(w))return[...out];
+  const g=sGroup(w);if(g)g.forEach(x=>{out.add(x);out.add(sStrip(x))});
+  const max=b.length>=7?2:b.length>=4?1:0;if(max&&!g){sVocab().forEach(v=>{if(v!==b&&sLev(b,v,max)<=max){out.add(v);const g2=sGroup(v);if(g2)g2.forEach(x=>out.add(sStrip(x)))}})}
+  return[...out].filter(x=>x.length>=2)}
+/* ── الفترات ── */
+const AR_NUM={'واحد':1,'شهر':1,'شهرين':2,'اثنين':2,'ثلاث':3,'ثلاثه':3,'اربع':4,'اربعه':4,'خمس':5,'خمسه':5,'سته':6,'ست':6,'سبع':7,'ثمان':8,'تسع':9,'عشر':10,'عشره':10,'اسبوع':7,'اسبوعين':14};
+function sPeriod(n){const td=today(),cm=curM(),Y=+td.slice(0,4);const R=(a,b,l,k)=>({from:a,to:b,label:l,kind:k});let m;
+  if(/(^| )(اليوم)( |$)/.test(n))return R(td,td,'اليوم','d');
+  if(/(^| )(امس|البارحه)( |$)/.test(n)){const y=addDays(td,-1);return R(y,y,'أمس','d')}
+  if(/الاسبوع (الماضي|السابق|اللي فات)/.test(n))return R(addDays(td,-13),addDays(td,-7),'الأسبوع الماضي','w');
+  if(/(هذا الاسبوع|الاسبوع)/.test(n))return R(addDays(td,-6),td,'آخر 7 أيام','w');
+  if((m=n.match(/(اخر|خلال|في اخر) (\d+|[؀-ۿ]+) ?(اشهر|شهور|شهر|ايام|يوم)/))){const k=+m[2]||AR_NUM[m[2]]||(m[2]==='شهرين'?2:3);if(/يوم|ايام/.test(m[3]))return R(addDays(td,-(k-1)),td,'آخر '+k+' يوم','d');return R(mStart(shiftMonth(cm,-(k-1))),mEnd(cm),'آخر '+monthsWord(k),'m')}
+  if(/(اخر|خلال) (شهرين)/.test(n))return R(mStart(shiftMonth(cm,-1)),mEnd(cm),'آخر شهرين','m');
+  if(/(اخر|خلال) (سنه|عام)/.test(n))return R(mStart(shiftMonth(cm,-11)),mEnd(cm),'آخر 12 شهرًا','m');
+  if(/(الشهر|شهر) (الماضي|السابق|اللي فات|الفائت)/.test(n)){const p=shiftMonth(cm,-1);return R(mStart(p),mEnd(p),monthName(p),'m1')}
+  if(/(هذا الشهر|الشهر الحالي|الشهر هذا|هالشهر|شهري)/.test(n))return R(mStart(cm),mEnd(cm),'هذا الشهر ('+monthName(cm)+')','m1');
+  if(/(السنه|العام) (الماضي|الماضيه|السابق|السابقه)/.test(n))return R((Y-1)+'-01-01',(Y-1)+'-12-31','سنة '+(Y-1),'y');
+  if(/(هذه السنه|هذا العام|السنه|العام|هالسنه)/.test(n))return R(Y+'-01-01',Y+'-12-31','سنة '+Y,'y');
+  const MN=MONTHS.map(sNorm);for(let i=0;i<12;i++){const re=new RegExp('(^| |في |ب)'+MN[i]+'( (\\d{4}))?( |$)');const mm=n.match(re);if(mm){let y=mm[3]?+mm[3]:Y;let k=y+'-'+String(i+1).padStart(2,'0');if(!mm[3]&&k>cm)k=(y-1)+'-'+String(i+1).padStart(2,'0');return R(mStart(k),mEnd(k),monthName(k),'m1')}}
+  if((m=n.match(/(20\d{2})-(\d{1,2})/))){const k=m[1]+'-'+m[2].padStart(2,'0');return R(mStart(k),mEnd(k),monthName(k),'m1')}
+  return null}
+function sPrevPeriod(P){const days=dDiff(P.from,P.to)+1;if(P.kind==='m1'){const k=mOf(P.from);const p=shiftMonth(k,-1);return{from:mStart(p),to:mEnd(p),label:monthName(p)}}
+  if(P.kind==='y'){const y=+P.from.slice(0,4)-1;return{from:y+'-01-01',to:y+'-12-31',label:'سنة '+y}}return{from:addDays(P.from,-days),to:addDays(P.from,-1),label:'الفترة السابقة'}}
+/* ── الموضوع: فئة أو شخص أو كلمات ── */
+const S_STOP=new Set(['كم','متي','ما','ماذا','هل','كيف','اين','وين','على','علي','عليه','في','من','الي','الى','عن','هذا','هذه','هالشهر','الشهر','شهر','الحالي','الماضي','السابق','اللي','فات','الفائت','اليوم','امس','البارحه','الاسبوع','اسبوع','السنه','العام','سنه','اخر','خلال','صرفت','دفعت','انفقت','اصرف','صرف','مصروف','مصروفات','مصاريف','المصاريف','المصروفات','كلفني','كلفتني','دفعته','صرفته','مجموع','اجمالي','بلغ','كان','كانت','لي','انا','عندي','باقي','متبقي','يبقي','بقي','المتبقي','ينتهي','تنتهي','اكبر','اعلي','اغلي','اصغر','اقل','ارخص','متوسط','معدل','مره','مرات','عدد','قارن','مقارنه','اكثر','فئه','ايش','شو','وش','لكل','كل','مع','و','او','دخلي','دخل','استلمت','الدخل','ينزل','يوم','ايام','اشهر','شهور','شهرين','ابي','اريد','اعرف','اعطني','لو','سمحت','ر','ع','ريال','بالريال','قسط','الاقساط','اقساطي','ديوني','التزاماتي','التزامات','اشتريت','شريت','اشتري','شراء','دفعتها','صرفتها','استخدمت','حق','حقت','مال','بتاع','تقريبا','بالضبط','الان','حاليا']);
+function sSubject(n,period){let txt=' '+n+' ';if(period){[/الاسبوع (الماضي|السابق|اللي فات)/,/(اخر|خلال|في اخر) (\d+|[؀-ۿ]+) ?(اشهر|شهور|شهر|ايام|يوم)/,/(الشهر|شهر) (الماضي|السابق|اللي فات|الفائت)/,/(السنه|العام) (الماضي|الماضيه|السابق|السابقه)/,/20\d{2}-\d{1,2}/].forEach(r=>txt=txt.replace(r,' '));MONTHS.map(sNorm).forEach(m=>txt=txt.replace(new RegExp('(^| |في |ب)'+m+'( \\d{4})?( |$)'),' '))}
+  const W=txt.split(/\s+/).filter(Boolean).map(w=>w.replace(/[؟?!.,،]/g,'')).filter(w=>w&&!S_STOP.has(w)&&!S_STOP.has(sStrip(w))&&!/^\d+$/.test(w));
+  const cats=new Set(),persons=new Set(),debtsM=[],recsM=[];const words=[];
+  W.forEach(w=>{const g=sGroup(w);let hit=false;if(g){const key=g[0];if(SYN_CAT[key]){cats.add(SYN_CAT[key]);hit=true}}
+    EXP_CATS.concat(INC_CATS).forEach(c=>{if(sNorm(c.n).split(/[ ()،,]+/).some(x=>x.length>2&&(x===w||sStrip(x)===sStrip(w)))){cats.add(c.id);hit=true}});
+    people().forEach(p=>{if(sNorm(p.name).includes(w)&&w.length>=2){persons.add(p.id);hit=true}});
+    debts().forEach(d=>{if(sNorm(d.name+' '+(d.lender||'')).includes(sStrip(w))&&!debtsM.includes(d))debtsM.push(d)});
+    recs().forEach(r=>{if(sNorm(r.name).includes(sStrip(w))&&!recsM.includes(r))recsM.push(r)});
+    words.push(w)});
+  return{W,words,cats:[...cats],persons:[...persons],debts:debtsM,recs:recsM}}
+function sTxMatch(sub,type){return t=>{if(type&&t.type!==type)return false;if(!sub.W.length)return true;
+  if(sub.cats.length&&sub.cats.includes(t.cat))return true;if(sub.persons.length&&sub.persons.includes(t.person))return true;
+  if(sub.recs.length&&sub.recs.some(r=>t.rec===r.id))return true;
+  const h=sNorm([t.note,catOf(t.cat).n,t.person?personName(t.person):''].join(' '));return sub.words.every(w=>sExpand(w).some(a=>h.includes(a)))}}
+function sMonthsBars(fn,k){const cm=curM();const o=[];for(let i=k-1;i>=0;i--){const m=shiftMonth(cm,-i);const a=inMonth(m).filter(fn);o.push({m,v:r3(a.reduce((s,t)=>s+(+t.amount),0)),n:a.length})}return o}
+function sBarsHtml(B){const mx=Math.max(1,...B.map(b=>b.v));return `<div class="sbars">${B.map(b=>`<div class="sbar${b.m===curM()?' cur':''}"><span class="num">${b.v?money(b.v):''}</span><i style="height:${Math.max(2,b.v/mx*56)}px"></i><small>${esc(MONTHS[+b.m.slice(5)-1].slice(0,3))}</small></div>`).join('')}</div>`}
+/* ── الإجابة عن السؤال ── */
+function sAsk(q){const n=' '+sNorm(q).replace(/[؟?!]/g,' ')+' ';const isQ=/(^| )(كم|متي|اكبر|اعلي|اغلي|اصغر|اقل|ارخص|متوسط|معدل|اين|وين|قارن|اكثر|عدد|ما هو|ما هي|هل)( |$)/.test(n)||/(صرفت|دفعت|انفقت|استلمت)/.test(n);
+  const per=sPeriod(n);if(!isQ&&!per)return null;const sub=sSubject(n,per);const td=today(),cm=curM();
+  const P=per||{from:mStart(cm),to:mEnd(cm),label:'هذا الشهر ('+monthName(cm)+')',kind:'m1'};
+  const inR=(a,b)=>list().filter(t=>t.date&&t.date>=a&&t.date<=b);
+  const subLbl=sub.cats.length?sub.cats.map(c=>catOf(c).n).join(' و'):sub.persons.length?sub.persons.map(personName).join(' و'):sub.W.join(' ');
+  /* متى ينتهي الدين / كم باقي منه */
+  if(sub.debts.length&&/(متي|ينتهي|تنتهي|باقي|متبقي|يبقي|كم علي)/.test(n)&&!/(صرفت|دفعت)/.test(n)){const d=sub.debts[0];const pl=debtSim();const e=debtEnd(d,pl);const left=debtLeft(d);const pa=ppAmt(d);
+    return{icon:'🏦',title:d.name,big:/(متي|ينتهي|تنتهي)/.test(n)?(e?fmtD(e):'غير محدد'):money(d.balance),unit:/(متي|ينتهي|تنتهي)/.test(n)?'':CUR,red:true,
+      lines:[`المتبقي <b class="num amt-exp">${money(d.balance)}</b> ${CUR}`,d.mode==='once'?'يُسدَّد دفعة واحدة':`القسط <b class="num">${money(d.payment)}</b>${left?' · باقٍ '+countWord(left,'قسط واحد','قسطان','أقساط','قسطًا'):''}`,e?`ينتهي ${fmtD(e)} (${spanWord(td,e)})`:'',pa?`حسب خطتك ${money(pa)} شهريًا ينتهي ${esc(ppEndLbl(d,ppAmort(d.balance,d.rate,pa).n))}`:''].filter(Boolean),act:{k:'debt',id:d.id,t:'فتح ملف الدين'}}}
+  /* كم علي هذا الشهر / الالتزامات */
+  if(/(كم علي|كم باقي علي|التزاماتي|المستحق|كم ادفع)/.test(n)&&!sub.cats.length&&!sub.recs.length){const st=recStatus(cm);return{icon:'🧾',title:'المتبقي عليك من التزامات '+monthName(cm),big:money(st.dueLeft),unit:CUR,red:st.dueLeft>0.0005,
+    lines:[`دفعت ${st.paid.length} من ${st.R.length} · المدفوع <b class="num amt-inc">${money(st.paidAmt)}</b> من <b class="num">${money(st.total)}</b>`].concat(st.R.filter(i=>!i.isPaid).slice(0,5).map(i=>{const s=itemSt(i,cm);return `${esc(i.name)}: <b class="num amt-exp">${money(s.a)}</b> · ${s.t}`})),act:{k:'tab',id:'monthly',t:'فتح الشهرية'}}}
+  /* كم باقي من راتبي */
+  if(/(باقي|متبقي|يبقي|بقي)/.test(n)&&/(راتب|دخل|فلوس|معي|عندي)/.test(n)){const a=inMonth(cm);const inc=sum(a,'inc'),exp=sum(a,'exp');const st=recStatus(cm);
+    return{icon:'💼',title:'المتبقي من راتب هذه الدورة',big:money(inc-exp),unit:CUR,red:inc-exp<0,lines:[`الدخل <b class="num amt-inc">${money(inc)}</b> − المصاريف <b class="num amt-exp">${money(exp)}</b>`,st.dueLeft>0.0005?`وعليك التزامات لم تُدفع <b class="num amt-exp">${money(st.dueLeft)}</b>، فيبقى بعدها <b class="num">${money(inc-exp-st.dueLeft)}</b>`:'كل التزامات الشهر مدفوعة'],act:{k:'fn',fn:'spend',t:'كم أستطيع أن أنفق اليوم؟'}}}
+  const isInc=/(دخل|استلمت|راتب|ايداع|ايرادات|كسبت)/.test(n)&&!/(صرفت|دفعت|انفقت|مصروف|مصاريف)/.test(n);const type=isInc?'inc':'exp';
+  const fn=sTxMatch(sub,type);const A=inR(P.from,P.to).filter(fn);const tot=r3(A.reduce((s,t)=>s+(+t.amount),0));
+  const pv=sPrevPeriod(P);const B=inR(pv.from,pv.to).filter(fn);const ptot=r3(B.reduce((s,t)=>s+(+t.amount),0));
+  const cmp=ptot>0.0005?`مقارنة بـ${esc(pv.label)}: <b class="num">${money(ptot)}</b> (${tot>=ptot?'<span class="amt-exp">أكثر بـ ':'<span class="amt-inc">أقل بـ '}${money(Math.abs(tot-ptot))}</span>${ptot?' · '+Math.round(Math.abs(tot-ptot)/ptot*100)+'%':''})`:'';
+  const bars=sMonthsBars(fn,6);const avg=r3(bars.slice(0,5).reduce((s,b)=>s+b.v,0)/5);
+  const ids=A.map(t=>t.id);const what=(isInc?'الدخل':'المصروف')+(subLbl?' على '+subLbl:'');
+  /* أكبر / أصغر */
+  if(/(اكبر|اعلي|اغلي)/.test(n)||/(اصغر|اقل|ارخص)/.test(n)){const big=/(اكبر|اعلي|اغلي)/.test(n);const s=A.slice().sort((a,b)=>big?b.amount-a.amount:a.amount-b.amount);const t=s[0];
+    if(!t)return{icon:'🔎',title:(big?'أكبر ':'أصغر ')+(isInc?'دخل':'مصروف')+' · '+P.label,big:'لا يوجد',lines:['لا عمليات في هذه الفترة'+(subLbl?' لـ'+esc(subLbl):'')]};
+    return{icon:big?'⬆️':'⬇️',title:(big?'أكبر ':'أصغر ')+(isInc?'دخل':'مصروف')+(subLbl?' على '+subLbl:'')+' · '+P.label,big:money(t.amount),unit:CUR,red:!isInc,lines:[`<b>${esc(t.note||catOf(t.cat).n)}</b> · ${esc(catOf(t.cat).n)} · ${fmtD(t.date)}`].concat(s.slice(1,4).map(x=>`${esc(x.note||catOf(x.cat).n)}: <b class="num">${money(x.amount)}</b> · ${fmtD(x.date)}`)),act:{k:'tx',id:t.id,t:'فتح العملية'},ids:s.map(x=>x.id)}}
+  /* أين أصرف أكثر */
+  if(/(اين|وين|اكثر فئه|على ايش|على شو|فيم)/.test(n)&&!sub.W.length){const by={};A.forEach(t=>{by[t.cat]=(by[t.cat]||0)+(+t.amount)});const L=Object.entries(by).sort((a,b)=>b[1]-a[1]);
+    return{icon:'🥇',title:'أين '+(isInc?'دخلك':'تصرف أكثر')+' · '+P.label,big:L[0]?catOf(L[0][0]).n:'—',lines:L.slice(0,6).map(([c,v])=>`${esc(catOf(c).n)}: <b class="num ${isInc?'amt-inc':'amt-exp'}">${money(v)}</b> · ${tot?Math.round(v/tot*100):0}%`),ids}}
+  /* متوسط */
+  if(/(متوسط|معدل)/.test(n))return{icon:'📈',title:'متوسط '+what+' شهريًا',big:money(avg),unit:CUR,red:!isInc,lines:['حسب آخر 5 أشهر قبل الحالي',`هذا الشهر حتى الآن <b class="num">${money(bars[5].v)}</b>`],bars};
+  /* كم مرة */
+  if(/(كم مره|عدد|كم عمليه)/.test(n))return{icon:'🔢',title:'عدد مرات '+what+' · '+P.label,big:String(A.length),unit:A.length===1?'مرة':'مرات',lines:[`المجموع <b class="num">${money(tot)}</b> ${CUR}`,A.length?`المتوسط للمرة <b class="num">${money(tot/A.length)}</b>`:''].filter(Boolean),bars,ids};
+  if(!sub.W.length&&!per&&!/(صرفت|دفعت|انفقت|مصروف|مصاريف|دخل|استلمت)/.test(n))return null;
+  return{icon:isInc?'💰':'💸',title:what+' · '+P.label,big:money(tot),unit:CUR,red:!isInc,green:isInc,lines:[countWord(A.length,'عملية واحدة','عمليتان','عمليات','عملية')+(A.length?' · المتوسط للمرة '+money(tot/A.length):''),cmp,`المعدل الشهري (آخر 5 أشهر) <b class="num">${money(avg)}</b>`].filter(Boolean),bars,ids}}
+/* ── الأوامر السريعة ── */
+function sCommand(q){const n=sNorm(q).replace(/[؟?!]/g,'').trim();let m;
+  if((m=n.match(/^(ادفع|دفعت|سدد|سددت)\s+(.+)$/))){const w=sStrip(m[2]);const r=recs().find(r=>sNorm(r.name).includes(w)||sExpand(w).some(a=>sNorm(r.name).includes(a)));const d=debts().find(d=>+d.balance>0.0005&&(sNorm(d.name+' '+(d.lender||'')).includes(w)));
+    if(r)return{icon:'🧾',t:'دفع «'+r.name+'»',s:'يفتح نافذة الدفع لهذا الشهر',a:{'data-rpay':r.id}};if(d)return{icon:'🏦',t:'سداد «'+d.name+'»',s:'يفتح نافذة سداد الدين',a:{fn:'dpay',id:d.id}};return null}
+  if((m=n.match(/^(?:سجل|اضف|صرفت|دفعت)?\s*(.+?)\s+(\d+(?:\.\d+)?)$/))||(m=n.match(/^(?:سجل|اضف|صرفت|دفعت)?\s*(\d+(?:\.\d+)?)\s+(.+)$/))){let txt=m[1],amt=+m[2];if(/^\d/.test(m[1])){amt=+m[1];txt=m[2]}
+    if(!(amt>0)||amt>100000)return null;const W=txt.split(/\s+/).filter(w=>!S_STOP.has(w));if(!W.length)return null;
+    const inc=/^(دخل|راتب|استلمت|ايداع)/.test(txt);let cat=null;W.some(w=>{const g=sGroup(w);if(g&&SYN_CAT[g[0]]){cat=SYN_CAT[g[0]];return true}const c=EXP_CATS.concat(INC_CATS).find(c=>sNorm(c.n).split(/[ ()،,]+/).some(x=>x.length>2&&sStrip(x)===sStrip(w)));if(c){cat=c.id;return true}return false});
+    if(!cat){const last=list().filter(t=>t.note&&sNorm(t.note).includes(sStrip(W[0]))).sort((a,b)=>b.date.localeCompare(a.date))[0];if(last)cat=last.cat}
+    const type=inc||INC_CATS.some(c=>c.id===cat)?'inc':'exp';const note=q.trim().replace(/[0-9٠-٩.,٫]+/g,'').replace(/^(سجل|سجّل|اضف|أضف|صرفت|دفعت)\s*/,'').trim();
+    return{icon:type==='inc'?'💰':'➕',t:(type==='inc'?'سجّل دخل ':'سجّل مصروف ')+money(amt)+' '+CUR,s:esc(note||'')+(cat?' · '+esc(catOf(cat).n):''),a:{fn:'add',pre:{type,amount:amt,cat:cat||'',note}}}}
+  return null}
+/* ── تحليل وتصفية نتائج العمليات ── */
+function sFacets(arr){const by=(f)=>{const o={};arr.forEach(x=>{const k=f(x.t);if(k)o[k]=(o[k]||0)+1});return Object.entries(o).sort((a,b)=>b[1]-a[1])};
+  return{cat:by(t=>t.cat),mon:by(t=>mOf(t.date)).sort((a,b)=>b[0].localeCompare(a[0])),per:by(t=>t.person||''),acc:by(t=>accOf(t))}}
+function sTxXlsx(arr,q){const sh=[{name:'نتائج البحث',title:'نتائج البحث: '+q,sub:'إدارة شؤوني · '+fmtD(today()),head:[['التاريخ','d'],['النوع','s',8],['الفئة','s',18],['البيان','s',26],['الشخص','s',14],['المبلغ','n']],
+  rows:arr.map(x=>[x.t.date,x.t.type==='inc'?'دخل':'مصروف',catOf(x.t.cat).n,x.t.note||'',x.t.person?personName(x.t.person):'',x.t.type==='inc'?+x.t.amount:-x.t.amount]),totals:[5]}];
+  const data=XL.build(sh);shareFile('search-'+today()+'.xlsx',data,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').then(r=>{if(r!=='cancel')toast(r==='shared'?'اختر «Numbers» لفتحه':'حُفظ الملف')})}
 
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 document.addEventListener('keydown',e=>{if(((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')||(e.key==='/'&&!e.target.closest('input,textarea,select,[contenteditable]'))){e.preventDefault();openSearch()}});
