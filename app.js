@@ -858,7 +858,7 @@ function vHome(){
   return `${homeDuaHtml()}${spiritHtml('top')}${rzHtml('top')}<section class="hero"><div class="lbl">${pc?'المتبقي من راتب هذه الدورة':'المتبقي في '+esc(mShort(m))}</div>
    <div class="big"><span class="num">${left<0?'−':''}${money(Math.abs(left))}</span> <small>${CUR}</small></div>
    <div class="row"><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M7 9v8h8"/></svg></span>الدخل</span><b class="num">${amtH(inc)}</b></div><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>المصاريف</span><b class="num">${amtH(exp)}</b></div></div>${pc?`<div class="lbl" style="margin-top:10px;font-size:12.5px">دورة الراتب: ${fmtD(pc.start)} – ${fmtD(pc.end)}</div>`:''}${heroDebtHtml(m,pc,left)}</section>
-   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}<button class="srchbar" data-search="1" aria-label="بحث في التطبيق"><span aria-hidden="true">🔍</span><span>ابحث في عملياتك وديونك والتزاماتك…</span></button>${spendBtnHtml()}${todayHtml()}${rescueHomeHtml()}${xpHomeHtml()}${ppHomeHtml()}
+   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}<button class="srchbar" data-search="1" aria-label="بحث في التطبيق"><span aria-hidden="true">🔍</span><span>ابحث في عملياتك وديونك والتزاماتك…</span></button>${spendBtnHtml()}${todayHtml()}${rescueHomeHtml()}${revHomeHtml()}${xpHomeHtml()}${ppHomeHtml()}${seasHomeHtml()}${subsHomeHtml()}
    ${pendHtml()||billAlertsHtml()||trustAlertsHtml()||carAlertsHtml()||docAlertsHtml()?'<div style="margin-top:14px">'+pendHtml()+billAlertsHtml()+trustAlertsHtml()+carAlertsHtml()+docAlertsHtml()+'</div>':''}${spiritHtml('mid')}${rzHtml('mid')}${smartAlertsHtml()}${bfHomeHtml()}${finStatusHtml()}${widgetNudgeHtml()}${empty}${advHomeHtml()}${plansHomeHtml()}${repHomeHtml()}
    ${recent.length?`<h2>آخر العمليات</h2><div class="panel" style="padding:6px 10px">${recent.map(txRow).join('')}</div><div style="margin-top:8px"><button class="chip" data-tab="log">عرض كل العمليات</button></div>`:''}${debtsBrowseHtml()}${spiritHtml('bottom')}${rzHtml('bottom')}`;
 }
@@ -2258,7 +2258,7 @@ function debtsManageHtml(){const Ds=debts(),P=debtPlan();DMODE='manage';
   const cards=act.length?`<details class="dmcards"><summary class="note">📂 ملفات كل دين: الدفعات والسجل والمستندات والكشف (${act.length})</summary><div class="stack" style="margin-top:8px">${debtSort(act,'end',pl).map(d=>debtCard(d,pl)).join('')}</div></details>`:'';
   const arch=done.length?`<details class="dmcards"><summary class="note">✓ الديون المنتهية (${done.length})</summary><div class="stack" style="margin-top:8px">${done.map(debtDoneCard).join('')}</div></details>`:'';
   const r=`<h2>🏦 ${esc(lbl('sec.debts'))}</h2><div class="panel mdlist">${Ds.length?Ds.map(row).join(''):'<p class="note" style="margin:6px 0">لا توجد ديون. أضفها هنا فتظهر للمتابعة في الرئيسية، وأقساطها في «'+esc(lbl('sec.monthly'))+'» للدفع.</p>'}</div>
-  <div class="chips" style="margin-top:6px"><button class="chip secadd" data-dadd="1"><span class="lk">🔒 </span>+ دين</button>${Ds.length?'<button class="chip" data-dgohome="1">عرضها في الرئيسية ‹</button>':''}</div>${Ds.length||recs().length?'<button class="btn ghost block" data-payplan="1" style="margin-top:8px">📊 مخطط السداد والالتزامات (مبلغ اختياري لكل دين)</button>':''}
+  <div class="chips" style="margin-top:6px"><button class="chip secadd" data-dadd="1"><span class="lk">🔒 </span>+ دين</button>${Ds.length?'<button class="chip" data-dgohome="1">عرضها في الرئيسية ‹</button>':''}</div>${Ds.length||recs().length?'<button class="btn ghost block" data-payplan="1" style="margin-top:8px">📊 مخطط السداد والالتزامات (مبلغ اختياري لكل دين)</button>':''}<div class="row2" style="margin-top:8px"><button class="btn ghost" data-seasonal="1">📆 المصاريف الموسمية</button><button class="btn ghost" data-subs="1">🔁 المتكررة غير المسجّلة</button></div>
   ${cards}${arch}
   ${Ds.length?`<div class="row2 dexp" style="margin-top:8px"><button class="btn ghost" data-dexp="pdf">🖨️ طباعة / PDF</button><button class="btn ghost" data-dexp="xlsx">📊 Excel / Numbers</button></div>`:''}
   ${act.length?`<h3>خطة التخلص من الديون</h3>
@@ -3215,8 +3215,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.41.0';
+const APP_VERSION='2.42.0';
 const CHANGELOG=[
+ {v:'2.42.0',d:'2026-10-17',items:['«📆 المصاريف الموسمية والسنوية»: رمضان وعيد الفطر وعيد الأضحى بتواريخها الهجرية تلقائيًا، والرسوم المدرسية، وتأمين السيارة وملكيتها من بيانات سيارتك، والسفر والهدايا وأي مصروف آخر','يحسب لكل موسم كم تدّخر شهريًا = (المبلغ − ما ادّخرته) ÷ الأشهر الباقية، وتسجّل «حوّلت للادخار» كل شهر، وحصة الشهر التي لم تحوّلها تُحجز تلقائيًا من «كم أستطيع أن أنفق اليوم»','عند «دفعته» يُفتح تسجيل المصروف، ويبدأ الادخار لموعده في السنة القادمة','«🔁 كاشف المصاريف المتكررة»: يفحص آخر 7 أشهر ويكتشف المبالغ المتقاربة بنفس الاسم التي تتكرر كل شهر وليست ضمن التزاماتك، ويبين كلفتها في السنة، وتضيفها كالتزام بضغطة أو تتجاهلها','«📋 مراجعة نهاية الشهر» في 4 خطوات: الملخص ومقارنته بالشهر السابق، والميزانية والفئات التي زادت عن معدلك، وأين تضع الفائض (المواسم، الخطط، دفعة إضافية للدين الأعلى فائدة)، ثم الإقفال بملاحظاتك وتقرير PDF','تظهر في الرئيسية تلقائيًا: المراجعة في أول 10 أيام من الشهر، والموسم القادم بعدّه التنازلي، والمصاريف المتكررة المكتشفة']},
  {v:'2.41.0',d:'2026-10-16',items:['«اسأل تطبيقك»: اكتب سؤالك بلغتك فتأتيك الإجابة مباشرة، مثل: كم صرفت على البنزين هذا الشهر؟ كم علي هذا الشهر؟ كم باقي من راتبي؟ متى ينتهي قرض البنك؟ أكبر مصروف في سبتمبر، أين أصرف أكثر؟ متوسط المطاعم، كم مرة اشتريت قهوة؟','يفهم الفترات: اليوم، أمس، هذا الأسبوع، الشهر الماضي، آخر 3 أشهر، هذه السنة، اسم أي شهر، ويقارن كل إجابة بالفترة السابقة والمعدل الشهري مع رسم صغير لآخر 6 أشهر','يتسامح مع أخطاء الكتابة ويعرف المرادفات: وقود وبترول = بنزين، أكل وغداء = مطاعم، كهربا = كهرباء، ويتعلّم من الكلمات التي تكتبها في عملياتك','تحليل فوري لأي بحث: مجموع كل شهر والمعدل والتغيّر عن الشهر الماضي، وتصفية النتائج حسب الفئة والشهر والشخص، وترتيبها، وتصديرها Excel','أوامر سريعة: «بنزين 5» يسجّل مصروفًا جاهزًا، و«ادفع الكهرباء» يفتح نافذة الدفع','كله يعمل داخل هاتفك بدون إنترنت ولا خوادم، ولا تخرج بياناتك منه']},
  {v:'2.40.0',d:'2026-10-16',items:['أداة البحث 🔍: شريط بحث في الرئيسية، وزر «بحث في التطبيق» داخل القائمة ☰، واختصار ⌘K أو / على الماك','تبحث في العمليات (البيان والفئة والشخص والحساب والمبلغ والتاريخ) والديون والالتزامات والخطط والأشخاص والجهات والحسابات والأمانات والسيارات والمستندات وصفحات التطبيق وأدواته','تفهم المبالغ: 25 أو >100 أو <50 أو 100-200، والأشهر: مارس أو 2026-03، وتتجاهل التشكيل والهمزات والتاء المربوطة والأرقام العربية','النتائج مجمّعة مع مجموع المصروف والدخل للعمليات المطابقة، والمبالغ بالأخضر والأحمر، وتصفية حسب النوع، وآخر عمليات البحث','الضغط على أي نتيجة يفتحها مباشرة: العملية للتعديل، والدين في ملفه، والالتزام في الشهرية مفتوحًا ومُبرزًا']},
  {v:'2.39.0',d:'2026-10-16',items:['صفحة «📊 مخطط السداد والالتزامات» من الرئيسية ومن إدارة البيانات: تراجع فيها كل ديونك والتزاماتك الشهرية مع معادلاتها الحسابية','لكل دين تختار مبلغًا شهريًا أو عدد أشهر للتقسيط (6 أو 12 أو 24 أو أي عدد)، فيحسب فورًا عدد الأشهر وموعد الانتهاء والفوائد، وكم أسرع أو أبطأ من قسط العقد وكم توفّر','المتبقي من كل دين بعد 3 و6 و12 شهرًا، وفي جدول الدفع المقرر يظهر المتبقي من كل دين ومن مجموع الديون بعد كل شهر','الملخص: الدخل − أقساط الخطة − الالتزامات = المتاح للمصروفات، ويوميًا، وموعد التحرر من كل الديون','حفظ كخطة شهرية: تظهر في الرئيسية وبطاقة الدين، ويُقترح مبلغها عند السداد. قسط العقد ورصيد الدين لا يتغيران','معاينة التقرير وطباعته PDF وحفظه أو مشاركته']},
@@ -4830,13 +4831,14 @@ function spendToday(manualBal){const td=today(),cyc=payCycle();const until=cyc?a
   const seen={};const items=dueItems(mStart(curM()),until).filter(i=>!i.isPaid).sort((a,b)=>a.date.localeCompare(b.date)).map(i=>{const k=i.kind+i.id;let need=r3(i.amount-(i.paidAmt||0));if(seen[k])need=r3(need-(i.prev||0));seen[k]=1;return Object.assign({},i,{need})}).filter(i=>i.need>0.0005);
   const oblig=r3(items.reduce((s,i)=>s+i.need,0));
   const save=r3(Math.max(0,goalsSummary().total-(S.settings.goals||[]).reduce((s,g)=>s+(+((g.log||{})[curM()])||0),0)));
+  const seasR=(()=>{try{return seasReserve()}catch(e){return 0}})();
   const reserve=r3(Math.max(0,+S.settings.safeReserve||0));const H=S.settings.safeHold||{};const hold=H.c===spendCycleKey()?r3(Math.max(0,+H.amt||0)):0;
   const safeOn=S.settings.safeMode!==false,confirmed=(S.settings.safeOk||'')===spendCycleKey();
-  const base=r3(bal-oblig-save-reserve-hold);const margin=safeOn&&!confirmed&&base>0?r3(base*0.1):0;const avail=r3(base-margin);
+  const base=r3(bal-oblig-save-seasR-reserve-hold);const margin=safeOn&&!confirmed&&base>0?r3(base*0.1):0;const avail=r3(base-margin);
   const todayTx=list().filter(t=>t.date===td&&t.type==='exp'&&!isFixedTx(t));const spentAll=r3(todayTx.reduce((s,t)=>s+(+t.amount),0));const anc={};A.forEach(a=>{if(a.anchor)anc[a.id]=a.anchor});const ded=t=>{if(manualBal!=null)return true;const id=accOf(t);if(!ids.has(id))return false;const A0=anc[id];return !A0||t.date>A0.date||(t.date===A0.date&&(t.createdAt||'')>(A0.at||''))};
   const spentFromBal=r3(todayTx.filter(ded).reduce((s,t)=>s+(+t.amount),0));
   const daily=r3(Math.max(0,avail+spentFromBal)/days);const left=r3(daily-spentAll);const week=r3(daily*Math.min(7,days));
-  return{days,until,cyc,bal,src,stale,anchorAt,items,oblig,save,reserve,hold,margin,safeOn,confirmed,avail,daily,spentAll,left,week,keep:r3(oblig+save+reserve+hold),manual:manualBal!=null}}
+  return{days,until,cyc,bal,src,stale,anchorAt,items,oblig,save,reserve,hold,margin,safeOn,confirmed,avail,daily,spentAll,left,week,keep:r3(oblig+save+seasR+reserve+hold),seas:seasR,manual:manualBal!=null}}
 function spendBtnHtml(){if(S.month!==curM())return '';let R=null;try{R=spendToday()}catch(e){}
   const v=R&&!R.need?`<b class="num ${R.left<0?'amt-exp':''}">${R.left<0?'−':''}${money(Math.abs(R.left))}</b><small>${R.left<0?'تجاوزت ميزانية اليوم':'متبقٍ لك اليوم'}</small>`:`<small>احسبه من رصيدك الحالي</small>`;
   return `<button class="spendbtn" data-spend="1"><span class="sb-t">💰 كم أستطيع أن أنفق اليوم؟</span><span class="sb-v">${v}</span></button>`}
@@ -4861,7 +4863,7 @@ function openSpendToday(manual){const L=document.getElementById('layer');let mb=
     <h3>كيف حسبته؟</h3><div class="panel paybk">
      ${row('1. الرصيد المسجّل',amtH(R.bal),'',esc(R.src)+(R.anchorAt&&!R.manual?' · آخر مطابقة '+fmtD(R.anchorAt):''))}
      ${row('2. أقساط وفواتير قبل الراتب','− '+money(R.oblig),'',R.items.length?R.items.slice(0,6).map(i=>esc(i.name)+' '+dmy(i.date)).join('، ')+(R.items.length>6?'…':''):'لا شيء')}
-     ${R.save?row('   مبالغ محجوزة لخططك هذا الشهر','− '+money(R.save)):''}
+     ${R.save?row('   مبالغ محجوزة لخططك هذا الشهر','− '+money(R.save)):''}${R.seas?row('   حصة المصاريف الموسمية هذا الشهر','− '+money(R.seas)):''}
      ${row('3. احتياطي الطوارئ','− '+money(R.reserve),'',`<button class="chip" id="spResEdit">${R.reserve?'تعديل':'حدّد مبلغًا'}</button>`)}
      ${R.hold?row('   محجوز لاحتياجات لم تُسجَّل','− '+money(R.hold)):''}
      ${R.margin?row('   هامش أمان حتى تعتمد الميزانية','− '+money(R.margin)):''}
@@ -5346,7 +5348,7 @@ function sPages(){return [
   ['🧭','المستشار المالي','المستشار نصائح صحه ماليه',()=>sGoTab('advisor')],['🏡','البيت','البيت المنزل',()=>sGoTab('house')],['🚗','السيارات','سياره تامين ملكيه',()=>sGoTab('cars')],['🤝','الأمانات','امانات اموال الاخرين',()=>sGoTab('trusts')],['📁','المستندات','مستندات خزنه ملفات',()=>sGoTab('docs')],
   ['📊','مخطط السداد والالتزامات','خطه سداد قسط اختياري تقسيط معادله',()=>openPayPlanner()],['🗓️','الخطة المالية الاستثنائية','خطه استثنائيه تاجيل',()=>openXPlans()],['💰','كم أستطيع أن أنفق اليوم؟','صرف امن انفق اليوم',()=>openSpendToday()],
   ['🛟','خطة الإنقاذ','انقاذ تنظيم وضعي',()=>openRescue()],['📖','التلاوات القرآنية','قران الملك الواقعه يس',()=>openQuranHub()],['📆','اختيار الشهر','تقويم شهر',()=>openMonthPicker()],['🖨️','طباعة تقرير','طباعه pdf تقرير',()=>openPrintSheet()],
-  ['💳','الحسابات والمحافظ','حساب بنك محفظه رصيد',()=>openAccounts()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()]]}
+  ['💳','الحسابات والمحافظ','حساب بنك محفظه رصيد',()=>openAccounts()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()],['📆','المصاريف الموسمية','رمضان العيد عيد الفطر الاضحي مدارس تامين سفر موسمي سنوي',()=>openSeasonal()],['🔁','المصاريف المتكررة','اشتراكات اشتراك متكرر منسي',()=>openSubs()],['📋','مراجعة الشهر','مراجعه نهايه الشهر اقفال فائض',()=>openReview()]]}
 function sGoTab(t){document.getElementById('layer').innerHTML='';S.tab=t;S.month=curM();render();window.scrollTo(0,0)}
 /* التنقل إلى عنصر وإبرازه */
 function sFocus(tab,sel,prep){const L=document.getElementById('layer');L.innerHTML='';S.tab=tab;S.month=curM();if(prep)prep();render();
@@ -5554,6 +5556,171 @@ function sTxXlsx(arr,q){const sh=[{name:'نتائج البحث',title:'نتائ�
   rows:arr.map(x=>[x.t.date,x.t.type==='inc'?'دخل':'مصروف',catOf(x.t.cat).n,x.t.note||'',x.t.person?personName(x.t.person):'',x.t.type==='inc'?+x.t.amount:-x.t.amount]),totals:[5]}];
   const data=XL.build(sh);shareFile('search-'+today()+'.xlsx',data,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').then(r=>{if(r!=='cancel')toast(r==='shared'?'اختر «Numbers» لفتحه':'حُفظ الملف')})}
 
+
+/* ===================== 1) المصاريف الموسمية والسنوية =====================
+ * رمضان والعيدين (بالتقويم الهجري تلقائيًا)، والمدارس، وتأمين السيارة وملكيتها، والسفر، والهدايا…
+ * لكل بند: المبلغ والموعد وما ادّخرته. الادخار الشهري اللازم = (المبلغ − المدّخر) ÷ الأشهر الباقية،
+ * ويُحجز ما لم تحوّله هذا الشهر من «كم أستطيع أن أنفق اليوم». */
+const SEAS_P=[['ramadan','🌙','رمضان',{h:[9,1]},150],['fitr','🎉','عيد الفطر',{h:[10,1]},200],['adha','🐑','عيد الأضحى',{h:[12,10]},250],['school','🎒','الرسوم والمستلزمات المدرسية',{md:'08-20'},200],
+ ['carins','🚗','تأمين السيارة',{car:'insExp'},180],['carreg','🪪','تجديد ملكية السيارة',{car:'regExp'},40],['travel','✈️','سفر الإجازة',{md:'07-01'},600],['gifts','🎁','هدايا ومناسبات',{md:'12-15'},100],['custom','📌','مصروف آخر',{},0]];
+function seas(){return (S.settings.seasonal||[]).filter(s=>!s.done)}
+function seasNextDate(p,from){from=from||today();const r=p[3]||{};
+  if(r.h)return nextHijri(r.h[0],r.h[1],from);
+  if(r.car){const c=cars().find(c=>c[r.car]&&c[r.car]>=from);if(c)return c[r.car]}
+  if(r.md){const y=+from.slice(0,4);let d=y+'-'+r.md;if(d<from)d=(y+1)+'-'+r.md;return d}
+  return addDays(from,90)}
+function seasCalc(s){const td=today(),cm=curM();const dm=mOf(s.date);const late=s.date<td;const ml=late?1:Math.max(1,monthsSpan(cm,dm));
+  const sa=+((s.aside||{})[spendCycleKey()])||0;const saved=+s.saved||0;const rem=r3(Math.max(0,(+s.amount||0)-saved));
+  const need=r3(Math.max(0,(+s.amount||0)-(saved-sa))/ml);const left=r3(Math.max(0,Math.min(rem,need-sa)));
+  return{ml,need,left,sa,saved,rem,late,days:dDiff(td,s.date),pct:+s.amount?Math.min(100,saved/(+s.amount)*100):0}}
+function seasReserve(){return r3(seas().reduce((t,s)=>t+seasCalc(s).left,0))}
+function seasSave(){S.settings.seasonal=(S.settings.seasonal||[]).slice();return putSettings()}
+function openSeasonal(){const L=document.getElementById('layer');const A=seas().slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const C=A.map(s=>({s,c:seasCalc(s)}));const yr=r3(A.reduce((t,s)=>t+(+s.amount||0),0)),mon=r3(C.reduce((t,x)=>t+x.c.need,0)),left=r3(C.reduce((t,x)=>t+x.c.left,0)),sv=r3(C.reduce((t,x)=>t+x.c.saved,0));
+  L.innerHTML=`${sheetTop('المصاريف الموسمية')}<h2 style="margin-top:0">📆 المصاريف الموسمية والسنوية</h2>
+   <p class="note" style="margin-top:0">سجّل المصاريف التي تأتي مرة في السنة، فيحسب لك كم تدّخر لها كل شهر حتى لا تفاجئك. ما لم تحوّله للادخار هذا الشهر يُحجز من «كم أستطيع أن أنفق اليوم».</p>
+   ${A.length?`<div class="pp-k"><div><span>مجموعها في السنة</span><b class="num">${money(yr)}</b></div><div><span>ادّخر شهريًا</span><b class="num amt-exp">${money(mon)}</b></div><div class="${left>0.0005?'bad':'ok'}"><span>باقٍ تحويله هذا الشهر</span><b class="num">${left>0.0005?money(left):'✓ تم'}</b></div><div class="ok"><span>ادّخرت لها حتى الآن</span><b class="num">${money(sv)}</b></div></div>`:''}
+   <div class="stack" style="margin-top:12px">${C.map(({s,c})=>`<div class="panel seas${c.late?' late':''}"><div class="seas-h"><span class="seas-ic">${s.icon||'📌'}</span><div style="flex:1;min-width:0"><b>${esc(s.name)}</b><small class="note" style="display:block">${fmtD(s.date)} · ${c.late?'<span class="amt-exp">حان موعده</span>':'بعد '+daysWord(c.days)}${s.rep==='once'?' · مرة واحدة':' · كل سنة'}</small></div><b class="num seas-amt">${money(s.amount)}</b></div>
+     <div class="meter"><i style="width:${c.pct}%;background:var(--inc)"></i></div>
+     <div class="seas-n"><span>ادّخرت <b class="num amt-inc">${money(c.saved)}</b></span><span>الباقي <b class="num ${c.rem>0.0005?'amt-exp':'amt-inc'}">${money(c.rem)}</b></span><span>شهريًا <b class="num">${money(c.need)}</b> × ${c.ml}</span></div>
+     ${c.left>0.0005?`<div class="seas-due">هذا الشهر: حوّل <b class="num amt-exp">${money(c.left)}</b> للادخار</div>`:c.rem>0.0005?'<div class="seas-due ok">✓ حوّلت حصة هذا الشهر</div>':''}
+     <div class="chips">${c.rem>0.0005?`<button class="chip pay" data-saside="${esc(s.id)}">حوّلت للادخار</button>`:''}<button class="chip" data-spaid="${esc(s.id)}">دفعته</button><button class="chip" data-sedit2="${esc(s.id)}">تعديل</button></div></div>`).join('')||'<div class="panel empty"><b>لا مصاريف موسمية بعد</b>ابدأ بإضافة رمضان والعيدين، فتواريخها تُحسب تلقائيًا بالتقويم الهجري.</div>'}</div>
+   <h3>إضافة</h3><div class="chips">${SEAS_P.filter(p=>p[0]==='custom'||!seas().some(s=>s.key===p[0])).map(p=>`<button class="chip" data-seadd="${p[0]}">${p[1]} ${p[2]}</button>`).join('')}</div>
+   <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
+  L.oninput=L.onchange=null;
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+    if(x.dataset.seadd){openSeasEdit(null,x.dataset.seadd);return}if(x.dataset.sedit2){openSeasEdit(x.dataset.sedit2);return}
+    if(x.dataset.saside){const s=S.settings.seasonal.find(y=>y.id===x.dataset.saside);const c=seasCalc(s);const v=parseAmt(prompt('كم حوّلت لادخار «'+s.name+'»؟ ('+CUR+')',amtIn(c.left||c.need)));if(v===null||!(v>0))return;
+      s.saved=r3((+s.saved||0)+v);s.aside=s.aside||{};const k=spendCycleKey();s.aside[k]=r3((+s.aside[k]||0)+v);try{aud('seas','ادخار لـ«'+s.name+'»','',money(v))}catch(er){}await seasSave();openSeasonal();toast('سُجّل: ادّخرت '+money(v)+' لـ'+s.name);return}
+    if(x.dataset.spaid){const s=S.settings.seasonal.find(y=>y.id===x.dataset.spaid);if(!confirm('دفعت «'+s.name+'»؟ سأفتح لك تسجيل المصروف، ثم يبدأ الادخار لموعده القادم.'))return;
+      const amt=+s.amount||0;s.paid=(s.paid||[]).concat([{date:today(),amt}]);s.saved=r3(Math.max(0,(+s.saved||0)-amt));s.aside={};
+      if(s.rep==='once')s.done=true;else{const p=SEAS_P.find(p=>p[0]===s.key)||SEAS_P[SEAS_P.length-1];const nx=s.key&&p[3]&&(p[3].h||p[3].md||p[3].car)?seasNextDate(p,addDays(s.date,20)):null;s.date=nx&&nx>s.date?nx:(+s.date.slice(0,4)+1)+s.date.slice(4)}
+      try{aud('seas','دفع «'+s.name+'»','',money(amt))}catch(er){}await seasSave();L.innerHTML='';openSheet(null,{type:'exp',amount:amt,cat:s.cat||'other',note:s.name});return}}}
+function openSeasEdit(id,key){const L=document.getElementById('layer');const ex=id?S.settings.seasonal.find(s=>s.id===id):null;const p=SEAS_P.find(p=>p[0]===(ex?ex.key:key))||SEAS_P[SEAS_P.length-1];
+  const CATK={ramadan:'food',fitr:'family',adha:'family',school:'edu',carins:'car',carreg:'car',travel:'fun',gifts:'family'};
+  const s=ex?Object.assign({},ex):{id:uidGen(),key:p[0],icon:p[1],name:p[0]==='custom'?'':p[2],amount:p[4]||'',date:seasNextDate(p),rep:'yearly',saved:0,cat:CATK[p[0]]||'other'};
+  const hij=p[3]&&p[3].h;
+  L.innerHTML=`${sheetTop('مصروف موسمي')}<h2 style="margin-top:0">${s.icon} ${ex?'تعديل':'إضافة'} ${esc(ex?s.name:p[2])}</h2><div class="stack">
+   <div class="field"><label for="seN">الاسم</label><input class="inp" id="seN" value="${esc(s.name)}" maxlength="40" placeholder="مثل: الحج، ختان، أثاث"></div>
+   <div class="row2"><div class="field"><label for="seA">المبلغ المتوقع (${CUR})</label><input class="inp num" id="seA" inputmode="decimal" value="${s.amount?amtIn(+s.amount):''}" style="text-align:left"></div><div class="field"><label for="seD">الموعد</label><input class="inp" type="date" id="seD" value="${esc(s.date)}"></div></div>
+   ${hij?`<small class="note">${p[2]} يُحسب تلقائيًا بالتقويم الهجري (أم القرى). عدّله إن اختلف الإعلان الرسمي.</small>`:''}
+   <div class="row2"><div class="field"><label for="seS">ادّخرت له حتى الآن (${CUR})</label><input class="inp num" id="seS" inputmode="decimal" value="${amtIn(+s.saved||0)}" style="text-align:left"></div><div class="field"><label for="seR">التكرار</label><select class="inp" id="seR"><option value="yearly" ${s.rep!=='once'?'selected':''}>كل سنة</option><option value="once" ${s.rep==='once'?'selected':''}>مرة واحدة</option></select></div></div>
+   <div class="field"><label for="seC">فئة المصروف عند الدفع</label><select class="inp" id="seC">${EXP_CATS.map(c=>`<option value="${c.id}" ${s.cat===c.id?'selected':''}>${esc(c.n)}</option>`).join('')}</select></div>
+   <p class="note" id="seP"></p>
+   <div class="actions"><button class="btn block" id="seSave">حفظ</button><div class="row2">${ex?'<button class="btn ghost" id="seDel">حذف</button>':''}<button class="btn ghost" id="seBack">‹ رجوع</button></div></div></div></div></div>`;
+  const prev=()=>{const a=parseAmt(document.getElementById('seA').value)||0,d=document.getElementById('seD').value,sv=parseAmt(document.getElementById('seS').value)||0;const el=document.getElementById('seP');if(!a||!d){el.textContent='';return}
+    const ml=d<today()?1:Math.max(1,monthsSpan(curM(),mOf(d)));el.innerHTML=`تحتاج أن تدّخر <b class="num amt-exp">${money(Math.max(0,a-sv)/ml)}</b> شهريًا لمدة ${monthsWord(ml)} = (${money(a)} − ${money(sv)}) ÷ ${ml}`};prev();
+  L.oninput=prev;L.onchange=prev;
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+    if(x.id==='seBack'){openSeasonal();return}
+    if(x.id==='seDel'){if(!confirm('حذف «'+s.name+'»؟'))return;S.settings.seasonal=S.settings.seasonal.filter(y=>y.id!==s.id);await seasSave();openSeasonal();return}
+    if(x.id==='seSave'){s.name=document.getElementById('seN').value.trim();const a=parseAmt(document.getElementById('seA').value);s.date=document.getElementById('seD').value;s.saved=parseAmt(document.getElementById('seS').value)||0;s.rep=document.getElementById('seR').value;s.cat=document.getElementById('seC').value;
+      if(!s.name){toast('اكتب الاسم');return}if(!(a>0)){toast('اكتب المبلغ المتوقع');return}if(!s.date){toast('حدّد الموعد');return}s.amount=a;
+      const Lst=(S.settings.seasonal||[]).filter(y=>y.id!==s.id);Lst.push(s);S.settings.seasonal=Lst;try{aud('seas',(ex?'تعديل':'إضافة')+' مصروف موسمي «'+s.name+'»','',money(a)+' · '+fmtD(s.date))}catch(er){}await putSettings();openSeasonal();toast('حُفظ');return}}}
+function seasHomeHtml(){if(S.month!==curM())return '';const A=seas().filter(s=>dDiff(today(),s.date)<=150).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!A.length)return(S.settings.seasonal||[]).length?'':`<button class="xphome" data-seasonal="1"><span>📆</span><span><b>المصاريف الموسمية</b><small>رمضان والعيدين والمدارس والتأمين: ادّخر لها شهريًا حتى لا تفاجئك</small></span><span class="xph-go">‹</span></button>`;
+  const s=A[0],c=seasCalc(s);const left=seasReserve();
+  return `<button class="xphome on seas-home" data-seasonal="1"><span>${s.icon||'📆'}</span><span><b>${esc(s.name)} ${c.late?'حان موعده':'بعد '+daysWord(c.days)}</b><small>ادّخرت <b class="num amt-inc">${money(c.saved)}</b> من ${money(s.amount)}${left>0.0005?` · حوّل هذا الشهر <b class="num amt-exp">${money(left)}</b>`:' · ✓ حصة الشهر محوّلة'}${A.length>1?' · و'+countWord(A.length-1,'موسم آخر','موسمان آخران','مواسم أخرى','موسمًا آخر'):''}</small><span class="meter" style="margin-top:4px"><i style="width:${c.pct}%;background:var(--inc)"></i></span></span><span class="xph-go">‹</span></button>`}
+
+/* ===================== 2) كاشف الاشتراكات والمصاريف المتكررة غير المسجّلة ===================== */
+function subsFind(){return memo('subsF',()=>{const cm=curM(),from=mStart(shiftMonth(cm,-6)),td=today();const ign=new Set(S.settings.subIgnore||[]);const G={};
+  list().filter(t=>t.type==='exp'&&!t.rec&&t.note&&t.date>=from&&!['loan'].includes(t.cat)).forEach(t=>{const k=sNorm(t.note).replace(/[0-9.,]+/g,'').replace(/\s+/g,' ').trim();if(k.length<2)return;(G[k]=G[k]||[]).push(t)});
+  const R=recs().map(r=>sNorm(r.name));const out=[];
+  Object.entries(G).forEach(([k,T])=>{if(ign.has(k))return;const ms=new Set(T.map(t=>mOf(t.date)));if(ms.size<3)return;if(T.length/ms.size>1.35)return;
+    const last=T.map(t=>t.date).sort().pop();if(dDiff(last,td)>50)return;if(R.some(n=>n.includes(k)||k.includes(n)))return;
+    const am=T.map(t=>+t.amount).sort((a,b)=>a-b),med=am[Math.floor(am.length/2)];if(am.some(a=>Math.abs(a-med)>Math.max(0.5,med*0.2)))return;
+    const days=T.map(t=>+t.date.slice(8,10)).sort((a,b)=>a-b);const lt=T.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];
+    out.push({k,name:lt.note,amt:r3(med),day:days[Math.floor(days.length/2)],months:ms.size,count:T.length,yearly:r3(med*12),last,cat:lt.cat,paidNow:ms.has(cm),person:lt.person||''})});
+  return out.sort((a,b)=>b.yearly-a.yearly)})}
+function openSubs(){const L=document.getElementById('layer');const D=subsFind();const yr=r3(D.reduce((s,x)=>s+x.yearly,0));
+  L.innerHTML=`${sheetTop('المصاريف المتكررة')}<h2 style="margin-top:0">🔁 مصاريف تتكرر كل شهر وغير مسجّلة</h2>
+   <p class="note" style="margin-top:0">فحصت عملياتك في آخر 7 أشهر، فوجدت مبالغ متقاربة بنفس الاسم تتكرر شهرًا بعد شهر، وليست ضمن التزاماتك. قد تكون اشتراكات أو مصاريف ثابتة نسيتها.</p>
+   ${D.length?`<div class="warnbox" style="margin:0 0 10px">تكلّفك معًا حوالي <b class="num">${money(r3(yr/12))}</b> شهريًا = <b class="num">${money(yr)}</b> في السنة.</div>
+   <div class="stack">${D.map((x,i)=>`<div class="panel subrow"><div class="seas-h"><span class="seas-ic">🔁</span><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><small class="note" style="display:block">${esc(catOf(x.cat).n)} · تكرر في ${monthsWord(x.months)} · حوالي يوم ${x.day} · آخرها ${fmtD(x.last)}</small></div><b class="num amt-exp seas-amt">${money(x.amt)}</b></div>
+     <div class="seas-n"><span>في السنة <b class="num amt-exp">${money(x.yearly)}</b></span><span>${x.paidNow?'<span class="amt-inc">دُفع هذا الشهر</span>':'لم يُدفع هذا الشهر بعد'}</span></div>
+     <div class="chips"><button class="chip pay" data-sbadd="${i}">أضفه كالتزام شهري</button><button class="chip" data-sbign="${i}">ليس متكررًا / تجاهل</button></div></div>`).join('')}</div>`
+   :'<div class="panel empty"><b>✓ لا مصاريف متكررة منسية</b>كل ما يتكرر شهريًا مسجّل ضمن التزاماتك. أفحص من جديد كلما أضفت عمليات.</div>'}
+   ${(S.settings.subIgnore||[]).length?`<p class="note">تجاهلت ${countWord(S.settings.subIgnore.length,'عنصرًا واحدًا','عنصرين','عناصر','عنصرًا')}. <button class="chip" id="subUnign">إظهارها من جديد</button></p>`:''}
+   <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
+  L.oninput=L.onchange=null;
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+    if(x.id==='subUnign'){S.settings.subIgnore=[];await putSettings();memoClear();openSubs();return}
+    if(x.dataset.sbign){const d=D[+x.dataset.sbign];S.settings.subIgnore=(S.settings.subIgnore||[]).concat([d.k]);await putSettings();memoClear();openSubs();toast('لن يظهر «'+d.name+'» مرة أخرى');return}
+    if(x.dataset.sbadd){const d=D[+x.dataset.sbadd];if(!confirm('إضافة «'+d.name+'» كالتزام شهري بمبلغ '+money(d.amt)+' يوم '+d.day+'؟'))return;const cm=curM();
+      const r={id:uidGen(),kind:'custom',name:d.name,amount:d.amt,cat:d.cat,day:Math.min(28,Math.max(1,d.day)),person:d.person,start:cm,since:cm,arrears:0,log:[{at:today(),t:'أُضيف من كاشف المصاريف المتكررة'}]};
+      S.settings.recurring=(S.settings.recurring||[]).concat([r]);
+      const ks=d.k;list().filter(t=>t.type==='exp'&&!t.rec&&t.note&&t.date>=mStart(cm)&&sNorm(t.note).replace(/[0-9.,]+/g,'').replace(/\s+/g,' ').trim()===ks).forEach(t=>{t.rec=r.id;putTx(t)});
+      try{aud('rec','إضافة التزام «'+d.name+'» من كاشف المتكررة','',money(d.amt))}catch(er){}await putSettings();memoClear();openSubs();toast('أُضيف «'+d.name+'» إلى التزاماتك الشهرية');return}}}
+function subsHomeHtml(){if(S.month!==curM())return '';let D=[];try{D=subsFind()}catch(e){}if(!D.length)return '';const yr=r3(D.reduce((s,x)=>s+x.yearly,0));
+  return `<button class="xphome subs-home" data-subs="1"><span>🔁</span><span><b>${countWord(D.length,'مصروف واحد يتكرر','مصروفان يتكرران','مصاريف تتكرر','مصروفًا يتكرر')} كل شهر وغير مسجّل</b><small>${esc(D.slice(0,3).map(x=>x.name).join('، '))} · حوالي <b class="num amt-exp">${money(yr)}</b> في السنة</small></span><span class="xph-go">‹</span></button>`}
+
+/* ===================== 3) مراجعة نهاية الشهر ===================== */
+function revDefault(){const cm=curM();const d=dDiff(mStart(cm),today());return d<=10?shiftMonth(cm,-1):cm}
+function revData(m){const a=inMonth(m);const inc=r3(sum(a,'inc')),exp=r3(sum(a,'exp')),net=r3(inc-exp);const pm=shiftMonth(m,-1);const pa=inMonth(pm);const pinc=sum(pa,'inc'),pexp=sum(pa,'exp');
+  const st=recStatus(m);const by={};a.filter(t=>t.type==='exp').forEach(t=>{by[t.cat]=(by[t.cat]||0)+(+t.amount)});const cats=Object.entries(by).sort((x,y)=>y[1]-x[1]);
+  const prev3={};[1,2,3].forEach(k=>inMonth(shiftMonth(m,-k)).filter(t=>t.type==='exp').forEach(t=>{prev3[t.cat]=(prev3[t.cat]||0)+(+t.amount)/3}));
+  const B=S.settings.budgets||{};const bud=Object.entries(B).filter(([,v])=>+v>0).map(([c,v])=>({c,b:+v,a:r3(by[c]||0)})).sort((x,y)=>(y.a/y.b)-(x.a/x.b));
+  const up=cats.filter(([c,v])=>prev3[c]>0.5&&v>prev3[c]*1.2&&v-prev3[c]>3).map(([c,v])=>({c,v:r3(v),avg:r3(prev3[c]),pct:Math.round((v-prev3[c])/prev3[c]*100)}));
+  return{m,inc,exp,net,rate:inc?Math.round(net/inc*100):0,pinc,pexp,st,cats,bud,up,n:a.length,mb:+S.settings.monthlyBudget||0}}
+function openReview(m0,step0){const L=document.getElementById('layer');let m=m0||revDefault(),step=step0||1;const R0=(S.settings.reviews||{})[m];let notes=R0?R0.notes||'':'',mood=R0?R0.mood||'':'';
+  const draw=()=>{const D=revData(m);const done=!!(S.settings.reviews||{})[m];const st=['الملخص','الميزانية','الفائض','الإقفال'];
+    let body='';
+    if(step===1)body=`<div class="pp-k"><div class="ok"><span>الدخل</span><b class="num">${money(D.inc)}</b></div><div class="bad"><span>المصاريف</span><b class="num">${money(D.exp)}</b></div><div class="${D.net<0?'bad':'ok'}"><span>${D.net<0?'العجز':'الفائض'}</span><b class="num">${money(Math.abs(D.net))}</b></div><div><span>نسبة الادخار</span><b class="num ${D.rate<0?'amt-exp':D.rate>=10?'amt-inc':''}">${D.rate}%</b></div></div>
+      <div class="panel" style="margin-top:10px"><div class="sumrow"><span>مقارنة بـ${esc(monthName(shiftMonth(m,-1)))}</span><span>المصاريف ${D.exp>=D.pexp?'<b class="amt-exp">↑ '+money(D.exp-D.pexp)+'</b>':'<b class="amt-inc">↓ '+money(D.pexp-D.exp)+'</b>'}</span></div>
+       <div class="sumrow"><span>الالتزامات والأقساط</span><span>دفعت ${D.st.paid.length} من ${D.st.R.length}${D.st.dueLeft>0.0005?' · <b class="amt-exp">باقٍ '+money(D.st.dueLeft)+'</b>':' · <b class="amt-inc">✓ كلها</b>'}</span></div>
+       <div class="sumrow"><span>عدد العمليات</span><b>${D.n}</b></div></div>
+      <h3>أين ذهبت مصاريفك</h3><div class="panel">${D.cats.slice(0,6).map(([c,v])=>`<div class="catrow"><span class="dot" style="background:${catOf(c).c}"></span><div class="name">${esc(catOf(c).n)} <small class="num">${D.exp?Math.round(v/D.exp*100):0}%</small><div class="meter"><i style="width:${D.exp?v/D.cats[0][1]*100:0}%;background:${catOf(c).c}"></i></div></div><span class="num amt-exp">${money(v)}</span></div>`).join('')||'<p class="note">لا مصاريف.</p>'}</div>`;
+    if(step===2)body=`${D.mb?`<div class="panel"><div class="sumrow"><span>الميزانية الشهرية</span><b class="num">${money(D.mb)}</b></div><div class="sumrow"><span>صرفت</span><b class="num ${D.exp>D.mb?'amt-exp':'amt-inc'}">${money(D.exp)} (${Math.round(D.exp/D.mb*100)}%)</b></div></div>`:''}
+      ${D.bud.length?`<h3>الفئات مقابل ميزانيتها</h3><div class="panel">${D.bud.map(x=>`<div class="catrow"><span class="dot" style="background:${catOf(x.c).c}"></span><div class="name">${esc(catOf(x.c).n)} <small class="num ${x.a>x.b?'amt-exp':''}">${Math.round(x.a/x.b*100)}%</small><div class="meter"><i style="width:${Math.min(100,x.a/x.b*100)}%;background:${x.a>x.b?'var(--exp)':'var(--inc)'}"></i></div></div><span class="num ${x.a>x.b?'amt-exp':'amt-inc'}">${money(x.a)} / ${money(x.b)}</span></div>`).join('')}</div>
+       ${D.bud.some(x=>x.a>x.b)?`<div class="warnbox" style="margin-top:8px">تجاوزت الميزانية في: ${D.bud.filter(x=>x.a>x.b).map(x=>esc(catOf(x.c).n)+' بـ<b class="num">'+money(x.a-x.b)+'</b>').join('، ')}</div>`:'<div class="okbox" style="margin-top:8px">✓ لم تتجاوز ميزانية أي فئة.</div>'}`:'<p class="note">لم تحدد ميزانيات للفئات. حدّدها من الضبط لتظهر هنا.</p>'}
+      <h3>زاد صرفها عن معدلك</h3>${D.up.length?`<div class="panel">${D.up.map(x=>`<div class="sumrow"><span>${esc(catOf(x.c).n)}<small class="note" style="display:block">معدلك ${money(x.avg)}</small></span><b class="num amt-exp">${money(x.v)} ↑${x.pct}%</b></div>`).join('')}</div>`:'<div class="okbox">✓ لا فئة زادت بشكل ملحوظ عن معدل آخر 3 أشهر.</div>'}`;
+    if(step===3){const G=(S.settings.goals||[]).map(g=>({g,c:goalCalc(g)})).filter(x=>!x.c.done);const Ds=debts().filter(d=>+d.balance>0.0005).sort((a,b)=>(+b.rate||0)-(+a.rate||0));const SE=seas().map(s=>({s,c:seasCalc(s)})).filter(x=>x.c.left>0.0005);
+      body=D.net>0.0005?`<div class="okbox">فائض الشهر <b class="num">${money(D.net)}</b> ${CUR}. قرّر أين يذهب قبل أن يذوب في المصاريف:</div>
+        <div class="stack" style="margin-top:10px">${SE.length?`<button class="revopt" data-revgo="seas"><span>📆</span><span><b>المصاريف الموسمية</b><small>باقٍ هذا الشهر ${money(SE.reduce((s,x)=>s+x.c.left,0))} لـ${esc(SE.map(x=>x.s.name).join(' و'))}</small></span></button>`:''}
+         ${G.slice(0,3).map(x=>`<button class="revopt" data-revdep="${esc(x.g.id)}"><span>🎯</span><span><b>إيداع في «${esc(x.g.name)}»</b><small>الباقي ${money(x.c.rem)}${x.c.monthly?' · المقترح شهريًا '+money(x.c.monthly):''}</small></span></button>`).join('')}
+         ${Ds[0]?`<button class="revopt" data-revdebt="${esc(Ds[0].id)}"><span>🏦</span><span><b>دفعة إضافية لـ«${esc(Ds[0].name)}»</b><small>${+Ds[0].rate?'الأعلى فائدة '+(+Ds[0].rate)+'% · ':''}المتبقي ${money(Ds[0].balance)}</small></span></button>`:''}
+         <button class="revopt" data-revgo="plan"><span>📊</span><span><b>مخطط السداد</b><small>شاهد أثر زيادة الأقساط على موعد التحرر من الديون</small></span></button></div>
+        <p class="note">قاعدة مفيدة: نصف الفائض للادخار والطوارئ، ونصفه لتسريع سداد الدين الأعلى فائدة.</p>`
+       :`<div class="warnbox">${D.net<-0.0005?'كان عندك عجز <b class="num">'+money(-D.net)+'</b> هذا الشهر.':'لا فائض هذا الشهر.'} راجع ما زاد صرفه في الخطوة السابقة.</div>
+        <div class="stack" style="margin-top:10px"><button class="revopt" data-revgo="rescue"><span>🛟</span><span><b>خطة الإنقاذ</b><small>رتّب أولويات الصرف حتى الراتب القادم</small></span></button><button class="revopt" data-revgo="xplan"><span>🗓️</span><span><b>الخطة الاستثنائية</b><small>أعد توزيع مدفوعات الشهر القادم مؤقتًا</small></span></button></div>`}
+    if(step===4)body=`<div class="field"><label>كيف كان هذا الشهر؟</label><div class="seg">${[['bad','😟 صعب'],['ok','🙂 مقبول'],['good','😀 ممتاز']].map(([k,n])=>`<button class="n" data-mood="${k}" aria-pressed="${mood===k}">${n}</button>`).join('')}</div></div>
+      <div class="field"><label for="revN">ملاحظاتك وقراراتك للشهر القادم</label><textarea class="inp" id="revN" rows="4" maxlength="800" placeholder="مثال: تقليل المطاعم إلى 30، تحويل 50 للطوارئ أول يوم الراتب">${esc(notes)}</textarea></div>
+      ${done?`<div class="okbox">✓ أُقفل هذا الشهر في ${fmtD((S.settings.reviews[m].at||'').slice(0,10))}. تستطيع تعديل الملاحظات وإعادة الحفظ.</div>`:''}
+      <div class="row2" style="margin-top:8px"><button class="btn" id="revClose">${done?'حفظ التعديلات':'✓ إقفال الشهر'}</button><button class="btn ghost" id="revPrint">🖨️ تقرير PDF</button></div>
+      ${Object.keys(S.settings.reviews||{}).length?`<h3>المراجعات السابقة</h3><div class="panel" style="padding-block:4px">${Object.entries(S.settings.reviews).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,12).map(([k,v])=>`<button class="sumrow revpast" data-revm="${k}"><span>${{bad:'😟',ok:'🙂',good:'😀'}[v.mood]||'📋'} ${esc(monthName(k))}</span><span>${v.net<0?'<b class="amt-exp">عجز '+money(-v.net)+'</b>':'<b class="amt-inc">فائض '+money(v.net)+'</b>'} · ${v.rate}%</span></button>`).join('')}</div>`:''}`;
+    L.innerHTML=`${sheetTop('مراجعة الشهر')}<div class="rev-top"><h2 style="margin:0">📋 مراجعة ${esc(monthName(m))}</h2><span class="pill ${done?'paid':'soon'}">${done?'مُقفل ✓':'لم يُقفل'}</span></div>
+      <div class="rev-m"><button class="chip" data-revmm="-1">‹ السابق</button>${m<curM()?'<button class="chip" data-revmm="1">التالي ›</button>':''}</div>
+      <div class="rev-steps">${st.map((t,i)=>`<button class="${step===i+1?'on':''}${step>i+1?' ok':''}" data-revst="${i+1}"><b>${i+1}</b>${t}</button>`).join('')}</div>
+      <div class="rev-body">${body}</div>
+      <div class="actions"><div class="row2">${step>1?'<button class="btn ghost" data-revst="'+(step-1)+'">‹ السابق</button>':'<button class="btn ghost" data-close>إغلاق</button>'}${step<4?'<button class="btn" data-revst="'+(step+1)+'">التالي ›</button>':'<button class="btn ghost" data-close>إغلاق</button>'}</div></div></div></div>`;
+    const sh=L.querySelector('.sheet');if(sh)sh._refresh=draw};
+  draw();
+  L.oninput=e=>{if(e.target.id==='revN')notes=e.target.value};L.onchange=null;
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+    if(x.dataset.revst){step=+x.dataset.revst;draw();L.querySelector('.sheet').scrollTop=0;return}
+    if(x.dataset.revmm){m=shiftMonth(m,+x.dataset.revmm);if(m>curM())m=curM();const r=(S.settings.reviews||{})[m];notes=r?r.notes||'':'';mood=r?r.mood||'':'';step=1;draw();return}
+    if(x.dataset.revm){m=x.dataset.revm;const r=S.settings.reviews[m];notes=r.notes||'';mood=r.mood||'';step=1;draw();return}
+    if(x.dataset.mood){mood=x.dataset.mood;draw();return}
+    if(x.dataset.revdep){openDeposit(x.dataset.revdep);return}
+    if(x.dataset.revdebt){openDebtPay(x.dataset.revdebt);return}
+    if(x.dataset.revgo){const g=x.dataset.revgo;if(g==='seas')openSeasonal();else if(g==='plan')openPayPlanner();else if(g==='rescue')openRescue();else if(g==='xplan')openXPlans();return}
+    if(x.id==='revPrint'){revPrint(m,notes,mood);return}
+    if(x.id==='revClose'){const D=revData(m);S.settings.reviews=Object.assign({},S.settings.reviews||{},{[m]:{at:new Date().toISOString(),inc:D.inc,exp:D.exp,net:D.net,rate:D.rate,notes,mood}});try{aud('review','إقفال مراجعة '+monthName(m),'',(D.net<0?'عجز ':'فائض ')+money(Math.abs(D.net)))}catch(er){}await putSettings();draw();toast('أُقفل شهر '+monthName(m)+'. بداية موفقة للشهر القادم');return}}}
+function revPrint(m,notes,mood){const D=revData(m);const N=v=>`<span class="n">${v<0?'−':''}${money(Math.abs(v))}</span>`;const T=(h,r)=>`<table><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${r.join('')}</tbody></table>`;const now=new Date();
+  let h=`<header class="rh"><div><div class="rapp">${REP_LOGO}إدارة شؤوني</div><h1>مراجعة ${esc(monthName(m))}</h1><div class="rper">${fmtD(mStart(m))} – ${fmtD(mEnd(m))}</div></div><div class="rmeta">${repOwner()}أُعدّ في ${fmtD(today())} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}</div></header>
+   <section><h2>الملخص</h2><div class="kpis"><div><span>الدخل</span><b class="ok">${N(D.inc)}</b></div><div><span>المصاريف</span><b class="no">${N(D.exp)}</b></div><div><span>${D.net<0?'العجز':'الفائض'}</span><b class="${D.net<0?'no':'ok'}">${N(D.net)}</b></div><div><span>نسبة الادخار</span><b>${D.rate}%</b></div></div>
+    <p class="hint">الالتزامات: دفعت ${D.st.paid.length} من ${D.st.R.length}${D.st.dueLeft>0.0005?' · باقٍ '+money(D.st.dueLeft):''} · المصاريف مقارنة بالشهر السابق ${D.exp>=D.pexp?'أكثر بـ ':'أقل بـ '}${money(Math.abs(D.exp-D.pexp))}</p></section>
+   <section><h2>المصاريف حسب الفئة</h2>${T(['الفئة','المبلغ','النسبة'],D.cats.map(([c,v])=>`<tr><td>${esc(catOf(c).n)}</td><td class="nw">${N(v)}</td><td>${D.exp?Math.round(v/D.exp*100):0}%</td></tr>`))}</section>
+   ${D.bud.length?`<section><h2>الميزانية مقابل الفعلي</h2>${T(['الفئة','الميزانية','الفعلي','الفرق'],D.bud.map(x=>`<tr><td>${esc(catOf(x.c).n)}</td><td class="nw">${N(x.b)}</td><td class="nw ${x.a>x.b?'no':'ok'}">${N(x.a)}</td><td class="nw ${x.a>x.b?'no':'ok'}">${N(x.b-x.a)}</td></tr>`))}</section>`:''}
+   ${D.up.length?`<section><h2>زاد صرفها عن المعدل</h2>${T(['الفئة','هذا الشهر','معدل 3 أشهر','الزيادة'],D.up.map(x=>`<tr><td>${esc(catOf(x.c).n)}</td><td class="nw no">${N(x.v)}</td><td class="nw">${N(x.avg)}</td><td>${x.pct}%</td></tr>`))}</section>`:''}
+   <section><h2>الملاحظات والقرارات</h2><p style="white-space:pre-line">${({bad:'😟 شهر صعب',ok:'🙂 شهر مقبول',good:'😀 شهر ممتاز'}[mood]||'')}${notes?'\n'+esc(notes):''}</p></section>
+   <footer class="rf">مراجعة شهرية من تطبيق «إدارة شؤوني»</footer>`;
+  h=repTotalsHtml(h);prStyle('portrait');let el=document.getElementById('printArea');if(!el){el=document.createElement('div');el.id='printArea';document.body.appendChild(el)}el.className='rep';el.innerHTML=h;
+  const old=document.title;document.title='مراجعة '+monthName(m)+' - إدارة شؤوني';window.addEventListener('afterprint',()=>{document.title=old},{once:true});try{window.print()}catch(e){toast('تعذّرت الطباعة هنا')}setTimeout(()=>{document.title=old},3000)}
+function revHomeHtml(){if(S.month!==curM())return '';const pm=shiftMonth(curM(),-1);const d=dDiff(mStart(curM()),today());
+  if(d>10||(S.settings.reviews||{})[pm]||!inMonth(pm).length)return '';const D=revData(pm);
+  return `<button class="xphome rev-home" data-review="${pm}"><span>📋</span><span><b>راجع شهر ${esc(monthName(pm))} وأقفله</b><small>${D.net<0?'عجز <b class="num amt-exp">'+money(-D.net)+'</b>':'فائض <b class="num amt-inc">'+money(D.net)+'</b>'} · 4 خطوات: الملخص، الميزانية، الفائض، الإقفال</small></span><span class="xph-go">‹</span></button>`}
+
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 document.addEventListener('keydown',e=>{if(((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')||(e.key==='/'&&!e.target.closest('input,textarea,select,[contenteditable]'))){e.preventDefault();openSearch()}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-premonthsl]');if(!b)return;e.preventDefault();e.stopPropagation();const [k,i]=b.dataset.premonthsl.split('|');openPreMonths(k,i)},true);
@@ -5665,6 +5832,9 @@ document.addEventListener('click',async e=>{
   if(b.dataset.rescue){openRescue();return}
   if(b.id==='srchBtn'||b.dataset.search){openSearch();return}
   if(b.dataset.payplan){openPayPlanner();return}
+  if(b.dataset.seasonal){openSeasonal();return}
+  if(b.dataset.subs){openSubs();return}
+  if(b.dataset.review){openReview(b.dataset.review==='1'?null:b.dataset.review);return}
   if(b.dataset.premonths){const [k,i]=b.dataset.premonths.split('|');openPreMonths(k,i);return}
   if(b.dataset.chlog){openChangelog();return}
   if(b.dataset.xplans){openXPlans();return}

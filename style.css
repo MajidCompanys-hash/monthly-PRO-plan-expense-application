@@ -1316,3 +1316,28 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .s-fx .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;align-items:center;margin:0}
 .s-fx .chip{flex:none}.s-fx .chip small{opacity:.7;margin-inline-start:3px}
 .s-fx .note{flex:none;font-size:12px}
+
+/* ===== 2.42.0 المواسم والمتكررة والمراجعة ===== */
+.seas{display:flex;flex-direction:column;gap:8px}
+.seas.late{border-color:var(--exp)}
+.seas-h{display:flex;align-items:center;gap:10px}
+.seas-ic{flex:none;width:40px;height:40px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;font-size:21px}
+.seas-amt{font-size:18px}
+.seas-n{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--muted)}
+.seas-n b{font-size:14.5px}
+.seas-due{font-size:13px;background:color-mix(in srgb,var(--exp) 8%,var(--surface));border-radius:10px;padding:6px 10px}
+.seas-due.ok{background:color-mix(in srgb,var(--inc) 10%,var(--surface));color:var(--inc)}
+.seas-due b{font-size:15px}
+.xphome .meter{display:block;width:100%}
+.subs-home{border-color:color-mix(in srgb,#E0A21B 55%,var(--line));background:color-mix(in srgb,#E0A21B 8%,var(--surface))}
+.rev-home{border-color:var(--accent);background:var(--accent-soft)}
+.rev-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.rev-m{display:flex;gap:6px;margin:8px 0}
+.rev-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:6px 0 12px}
+.rev-steps button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--muted);font:inherit;font-size:12px;cursor:pointer;min-width:0}
+.rev-steps button b{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--fg);font-size:12.5px}
+.rev-steps button.on{border-color:var(--accent);color:var(--accent);font-weight:700}.rev-steps button.on b{background:var(--accent);color:#fff}
+.rev-steps button.ok b{background:var(--inc);color:#fff}
+.revopt{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--fg);font:inherit;text-align:start;cursor:pointer}
+.revopt>span:first-child{font-size:22px}.revopt>span:nth-child(2){display:flex;flex-direction:column;min-width:0}.revopt small{color:var(--muted);font-size:12.5px}
+.revpast{width:100%;border:0;background:transparent;font:inherit;color:var(--fg);cursor:pointer}
