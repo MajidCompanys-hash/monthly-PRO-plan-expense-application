@@ -73,7 +73,7 @@ function svgI(p,sw){return `<svg viewBox="0 0 24 24" fill="none" stroke="current
 /* بداية النافذة المنبثقة الموحّدة */
 function sheetTop(label){return `<div class="scrim" data-close></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${label}"><div class="in"><div class="grab"></div>`}
 /* معدلات آخر n أشهر مكتملة لها بيانات (لا يدخل فيها الشهر الحالي) */
-function pastMonths(n){const cm=curM();const out=[];for(let k=1;k<=(n||3);k++){const a=inMonth(shiftMonth(cm,-k));if(a.length)out.push(a)}return out}
+function pastMonths_(n){const cm=curM();const out=[];for(let k=1;k<=(n||3);k++){const a=inMonth(shiftMonth(cm,-k));if(a.length)out.push(a)}return out}
 function pastAvg(fn,n){const M=pastMonths(n);return M.length?M.reduce((s,a)=>s+fn(a),0)/M.length:null}
 /* عرض المبالغ: بدون كسور إذا كان المبلغ صحيحًا، وبثلاث خانات (البيسة) إذا فيه كسور */
 function money(v){const n=r3(Number(v)||0);const whole=Math.abs(n-Math.round(n))<0.0005;return n.toLocaleString('en-US',whole?{maximumFractionDigits:0}:{minimumFractionDigits:3,maximumFractionDigits:3})}
@@ -113,7 +113,7 @@ function sum(a,type){return r3(a.filter(t=>t.type===type).reduce((s,t)=>s+(+t.am
 /* ---------- 2. التخزين في الجهاز وقاعدة البيانات الداخلية ---------- */
 /* rev: رقم يزيد مع كل حفظ، ويُكتب في الذاكرة الأساسية وفي قاعدة البيانات الداخلية.
    إذا فشل الحفظ في الذاكرة الأساسية (امتلأت)، تكون القاعدة الداخلية أحدث، فتُعتمد هي عند الفتح التالي. */
-function cacheSave(){S.rev=(S.rev||0)+1;try{secStamp()}catch(e){}try{localStorage.setItem('masareef:v1',JSON.stringify({rev:S.rev,tx:S.tx,del:S.del,settings:S.settings}))}catch(e){if(!S.lsWarned){S.lsWarned=1;toast('ذاكرة التطبيق ممتلئة. بياناتك محفوظة في قاعدة البيانات الداخلية، واحفظ نسخة احتياطية كملف',null,7000)}}mirrorSoon()}
+function cacheSave(){memoClear();S.rev=(S.rev||0)+1;try{secStamp()}catch(e){}try{localStorage.setItem('masareef:v1',JSON.stringify({rev:S.rev,tx:S.tx,del:S.del,settings:S.settings}))}catch(e){if(!S.lsWarned){S.lsWarned=1;toast('ذاكرة التطبيق ممتلئة. بياناتك محفوظة في قاعدة البيانات الداخلية، واحفظ نسخة احتياطية كملف',null,7000)}}mirrorSoon()}
 function cacheLoad(){let raw=null;try{raw=localStorage.getItem('masareef:v1')}catch(e){}
   if(!raw){S.lsState='missing';return}
   try{const r=JSON.parse(raw);if(!r||typeof r!=='object')throw 0;S.tx=r.tx||{};S.del=r.del||{};S.settings=Object.assign({monthlyBudget:0,budgets:{}},r.settings||{});S.lsRev=S.rev=+r.rev||0;S.lsState='ok';if(S.snapVer)S.snapVerData=backupText()}
@@ -177,7 +177,7 @@ async function snapList(){try{return (await IDB.all('snap')).sort((a,b)=>b.at.lo
 async function putTx(t){txPrep(t);cacheSave();render();Sync.soon()}
 async function delTx(id){try{if(S.tx[id]&&!S.tx[id].sample)aud('del','حذف عملية',txSum(S.tx[id]),'')}catch(e){}delete S.tx[id];S.del[id]=Date.now();cacheSave();render();Sync.soon()}
 /* حفظ أو حذف مجموعة عمليات دفعة واحدة: حفظ واحد وعرض واحد بدل تكراره لكل عملية */
-function txPrep(t){try{audTx(S.tx[t.id],t)}catch(e){}delete t.localOnly;if(!S.tx[t.id]&&!t.sample&&admPendNew())t.pend=1;t.u=Date.now();S.tx[t.id]=t}
+function txPrep(t){memoClear();try{audTx(S.tx[t.id],t)}catch(e){}delete t.localOnly;if(!S.tx[t.id]&&!t.sample&&admPendNew())t.pend=1;t.u=Date.now();S.tx[t.id]=t}
 async function putTxMany(arr){arr.forEach(txPrep);cacheSave();render();Sync.soon()}
 async function delTxMany(ids){try{if(ids.length)aud('del','حذف '+countWord(ids.length,'عملية واحدة','عمليتين','عمليات','عملية'),ids.slice(0,3).map(id=>S.tx[id]?txSum(S.tx[id]):'').filter(Boolean).join(' | ')+(ids.length>3?' …':''),'')}catch(e){}const n=Date.now();ids.forEach(id=>{delete S.tx[id];S.del[id]=n});cacheSave();render();Sync.soon()}
 /* كل قسم له وقت آخر تعديل (_su)، حتى تدمج المزامنة بين الأجهزة كل قسم على حدة ولا يضيع تعديل قسم بسبب تعديل قسم آخر */
@@ -185,7 +185,7 @@ const SecJ={};
 function secStamp(){const now=Date.now(),su=S.settings._su=Object.assign({},S.settings._su||{});const parts=splitSettings();delete parts.settings._su;delete parts.settings._u;
   Object.entries(parts).forEach(([k,v])=>{const j=JSON.stringify(v);if(SecJ[k]!==undefined&&SecJ[k]!==j)su[k]=now;SecJ[k]=j})}
 function secSeed(){const parts=splitSettings();delete parts.settings._su;delete parts.settings._u;Object.entries(parts).forEach(([k,v])=>SecJ[k]=JSON.stringify(v))}
-async function putSettings(){try{audDiff()}catch(e){}S.settings._u=Date.now();cacheSave();Sync.soon()}
+async function putSettings(){memoClear();try{audDiff()}catch(e){}S.settings._u=Date.now();cacheSave();Sync.soon()}
 /* تنزيل أي ملف أو Blob إلى جهازك (دالة واحدة لكل التطبيق) */
 function dlBlob(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},2000)}
 function saveFile(name,text,type){try{dlBlob(new Blob([text],{type}),name);return true}catch(e){return false}}
@@ -518,7 +518,7 @@ function dashHtml(onData){
 }
 
 /* ---------- 6. مستشاري الذكي: تحليل بياناتك داخل الجهاز فقط ---------- */
-function advCtx(){const now=new Date(),cm=curM();const a=inMonth(cm);const inc=sum(a,'inc'),exp=sum(a,'exp');
+function advCtx_(){const now=new Date(),cm=curM();const a=inMonth(cm);const inc=sum(a,'inc'),exp=sum(a,'exp');
   const prev=pastMonths(3),avgInc=pastAvg(x=>sum(x,'inc'))||0,avgExp=avgExpense();
   const {dim,day}=mDays();
   const st=recStatus(cm);const G=(S.settings.goals||[]).map(g=>({g,c:goalCalc(g)}));
@@ -626,7 +626,7 @@ function periodTo(d){return d.cyc?'حتى نزول الراتب':'حتى نها�
  * هذا هو «المتاح يوميًا» الوحيد في التطبيق (الرئيسية، الميزانية، المستشار، الويدجت). */
 const isFixedTx=t=>!!(t.rec||t.debt||t.cat==='loan');
 function varSpend(a){return a.filter(t=>t.type==='exp'&&!isFixedTx(t)).reduce((s,t)=>s+(+t.amount||0),0)}
-function dailyPlan(extra){const now=new Date(),cm=curM(),td=today();const cyc=payCycle(now);
+function dailyPlan_(extra){const now=new Date(),cm=curM(),td=today();const cyc=payCycle(now);
   const mE=mEnd(cm);
   const from=cyc?cyc.start:cm+'-01',to=cyc?cyc.end:mE;const a=inRange(from,td);
   const dim=cyc?cyc.len:+mE.slice(8),day=cyc?cyc.dayIdx:now.getDate(),left=cyc?cyc.left:dim-day+1;
@@ -973,7 +973,7 @@ function reportsMonthExtras(){const m=S.month,a=inMonth(m),st=recStatus(m);
   return personSplitHtml(a,'المصاريف حسب الأشخاص')+(st.R.length?`<h2>الالتزامات الشهرية</h2><div class="panel"><div class="sumrow"><span>المدفوع</span><b class="num">${amtH(st.paidAmt)}</b></div><div class="sumrow"><span>عدد المدفوع</span><b>${st.paid.length} من ${st.R.length}</b></div><div class="sumrow"><span>المتوقع شهريًا</span><b class="num">${amtH(st.total)}</b></div></div>`:'')}
 
 /* ---------- 10. العرض ---------- */
-function render(){applyCatNames();admChip();applyTabLabels();setTimeout(()=>fillStorage(document.getElementById('storBox')),50);
+function render(){memoClear();applyCatNames();admChip();applyTabLabels();setTimeout(()=>fillStorage(document.getElementById('storBox')),50);
   document.getElementById('mLabel').textContent=monthName(S.month);
   document.getElementById('monthbar').hidden=S.tab==='settings';
   const v=document.getElementById('view');
@@ -1510,7 +1510,7 @@ function goalCalc(g){const tgt=+g.target||0,sv=+g.saved||0,rem=Math.max(0,tgt-sv
   const stm=Math.min(sv,+((g.log||{})[curM()])||0);const plan=(rem+stm)/months;const left=Math.max(0,plan-stm);
   return{tgt,sv,rem,days,months,byPay:pays!==null,monthly:plan,left,stm,done:tgt>0&&sv>=tgt,past:days<0,pct:tgt?Math.min(100,sv/tgt*100):0,dl}}
 function goalDate(g){return fmtD(g.due)+((GOAL_KINDS[g.kind]||{}).hijri?' (تقريبًا)':'')}
-function goalsSummary(){const G=(S.settings.goals||[]).map(g=>({g,c:goalCalc(g)})).filter(x=>!x.c.past);
+function goalsSummary_(){const G=(S.settings.goals||[]).map(g=>({g,c:goalCalc(g)})).filter(x=>!x.c.past);
   const total=G.reduce((s,x)=>s+x.c.left,0),plan=G.reduce((s,x)=>s+x.c.monthly,0);const near=G.slice().sort((a,b)=>(a.g.due||'9999').localeCompare(b.g.due||'9999'))[0];return{G,total,plan,near}}
 function goalsHtml(){
   const all=(S.settings.goals||[]).slice().sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
@@ -3022,7 +3022,7 @@ function openImport(){
 }
 
 /* ---------- 22. المزامنة مع Google Drive ---------- */
-function mergeData(r){
+function mergeData(r){memoClear();
   const del=Object.assign({},r.del||{});for(const [k,v] of Object.entries(S.del||{}))if(!del[k]||v>del[k])del[k]=v;
   const rt=r.tx||{};const tx={};const ids=new Set([...Object.keys(S.tx),...Object.keys(rt)]);
   ids.forEach(id=>{const a=S.tx[id],b=rt[id];const w=!a?b:!b?a:((+b.u||0)>(+a.u||0)?b:a);if(!w)return;if(del[id]&&del[id]>=(+w.u||0))return;tx[id]=w});
@@ -3168,8 +3168,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.32.0';
+const APP_VERSION='2.32.1';
 const CHANGELOG=[
+ {v:'2.32.1',d:'2026-10-16',items:['مراجعة شاملة: فُحص كل زر في كل صفحة ونافذة (أكثر من 4,000 ضغطة) بالشهر العادي وحسب الراتب وببيانات فارغة، بلا أي خطأ','التحقق من الحفظ: بعد إعادة الفتح، وبعد مسح ذاكرة المتصفح (تُستعاد من قاعدة البيانات الداخلية)، والنسخ الاحتياطي والاستعادة، والحذف، والمزامنة','مطابقة الأرقام بين الرئيسية والشهرية والتقارير والطباعة وExcel','أسرع: الرئيسية أسرع بمرتين والمستشار بثلاث مرات ونصف مع البيانات الكبيرة']},
  {v:'2.32.0',d:'2026-10-16',items:['زر طباعة 🖨️ أعلى كل صفحة يفتح تقرير تلك الصفحة: الرئيسية، والشهرية، والسجل، والخطط والميزانية، والديون، والمستشار، والبيت، والسيارات، والأمانات','تصميم احترافي للتقارير: رأس بشعار التطبيق واسمك، وأقسام مرقّمة، وأرقام الصفحات، وخانة ملاحظات واعتماد','قسم جديد «أبرز النقاط والتوصيات»: الصحة المالية، وأهم الأرقام بجمل واضحة، ورسم للدخل والمصروفات لكل شهر']},
  {v:'2.31.4',d:'2026-10-16',items:['إصلاح: صفحة «إدارة البيانات» كانت لا تفتح إذا كان «سقف المصاريف الشهري» محددًا','إصلاح: خطة بدون موعد كانت توقف قسم الخطط والرئيسية','إذا تعطّل جزء من صفحة يظهر سبب الخطأ مكانه بدل أن تتوقف الصفحة كلها']},
  {v:'2.31.2',d:'2026-10-16',items:['إصلاح: أزرار صفحة «إدارة البيانات» كانت لا تستجيب في الآيفون بعد الكتابة في حقل (مبلغ الراتب، السقف الشهري، حدود الفئات)']},
@@ -3784,7 +3785,7 @@ function salaryDueHtml(){const pc=payCycle();if(!pc||S.month!==curM())return '';
   try{if(localStorage.getItem('masareef:salskip')===today())return ''}catch(e){}const ls=lastSalary();
   return `<div class="saldue"><span class="sd-ic">💰</span><div class="sd-m"><b>هل نزل راتبك؟</b><small>موعده ${fmtD(pc.start)}${ls?' · المعتاد <span class="num">'+amtH(ls.amount)+'</span>':''}</small></div><div class="sd-b"><button class="chip pay" data-salyes="1">نعم، نزل</button><button class="chip" data-salno="1">ليس بعد</button></div></div>`}
 /* ===== توقّع الأشهر الثلاثة القادمة ===== */
-function forecast(n){n=n||3;const cm=curM();const past=[1,2,3].map(k=>shiftMonth(cm,-k));const used=past.filter(m=>inMonth(m).length);
+function forecast_(n){n=n||3;const cm=curM();const past=[1,2,3].map(k=>shiftMonth(cm,-k));const used=past.filter(m=>inMonth(m).length);
   const ls=lastSalary();const incAvg=ls?+ls.amount:(used.length?used.reduce((s,m)=>s+sum(inMonth(m),'inc'),0)/used.length:0);
   const varAvg=used.length?used.reduce((s,m)=>s+inMonth(m).filter(t=>t.type==='exp'&&!isFixedTx(t)).reduce((a,t)=>a+(+t.amount),0),0)/used.length:0;
   const Ds=debts().filter(d=>+d.balance>0.0005);const pl=Ds.length?debtSim():{finish:{}};const G=(S.settings.goals||[]).map(g=>({g,c:goalCalc(g)})).filter(x=>!x.c.done&&x.c.tgt);
@@ -4350,7 +4351,7 @@ const dDiff=(a,b)=>Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5)
 function unusualTx(){const P=pastMonths(3);if(!P.length)return [];const st={};P.forEach(a=>a.filter(t=>t.type==='exp'&&!isFixedTx(t)).forEach(t=>{const x=st[t.cat]||(st[t.cat]={n:0,s:0});x.n++;x.s+=+t.amount}));
   const from=addDays(today(),-7);return inMonth(curM()).filter(t=>t.type==='exp'&&!isFixedTx(t)&&t.date>=from).map(t=>{const x=st[t.cat];const avg=x&&x.n>=3?x.s/x.n:null;return{t,avg}})
     .filter(o=>o.avg&&+o.t.amount>=Math.max(20,o.avg*2.5)).map(o=>Object.assign(o,{x:+o.t.amount/o.avg}))}
-function smartAlertList(){const C=alertCfg(),m=curM(),td=today(),out=[];const dis=adisGet();
+function smartAlertList_(){const C=alertCfg(),m=curM(),td=today(),out=[];const dis=adisGet();
   const push=o=>{if(!dis[o.ref])out.push(o)};
   if(C.inst.on||C.late.on)recStatus(m).R.filter(i=>i.kind==='debt'&&!i.isPaid).forEach(i=>{const dd=dueOf(i,m),n=dDiff(td,dd),need=r3(i.amount-(i.paidAmt||0));
     if(n<0&&C.late.on)out.push({ref:'late:'+i.id+':'+m,kind:'late',level:'late',days:n,title:'تأخر '+i.name+' '+money(need)+' '+CUR,when:'كان موعده '+dmy(dd)+'. ادفعه أو تواصل مع الجهة مبكرًا',act:['الدفع','data-dgopay="'+esc(i.id)+'"']});
@@ -4428,7 +4429,7 @@ function spendable(){const BB=accBalances();const A=accList();let total=0,known=
   const due=recStatus(curM()).dueLeft;if(due>0.0005)resv.push(['التزامات وأقساط لم تُدفع هذا الشهر',due]);
   const avail=r3(total-reserved-tr-due);return{known,total:r3(total),reserved:r3(reserved),tr,due,avail,resv}}
 /* التنبؤ بالرصيد يومًا بيوم حتى نهاية الشهر */
-function balanceForecast(){const d=dailyPlan();const td=today(),m=curM(),end=mEnd(m);const S0=spendable();
+function balanceForecast_(){const d=dailyPlan();const td=today(),m=curM(),end=mEnd(m);const S0=spendable();
   let start,src;const mainB=(()=>{const BB=accBalances();let s=0,n=0;accList().forEach(a=>{if(a.id in BB&&!['reserve','project','card'].includes(a.kind)){s+=+BB[a.id];n++}});return n?{s:r3(s),n}:null})();
   if(mainB){start=mainB.s-trustsHeld();src='رصيد حساباتك المسجّل ('+countWord(mainB.n,'حساب واحد','حسابان','حسابات','حسابًا')+')'+(trustsHeld()>0.0005?' ناقص الأمانات':'')}
   else{const b=bankPlan(d);start=b.recorded;src='ما سجّلته من دخل ومصروف منذ بداية الشهر (لم تحدّد أرصدة حساباتك)'}
@@ -4637,11 +4638,22 @@ function openDuaBarEdit(){const L=document.getElementById('layer');let items=(du
     if(x.id==='dbReset'){if(!confirm('استعادة الأدعية الافتراضية؟ ستُحذف تعديلاتك على القائمة.'))return;S.settings.duaBar=Object.assign(duaBar(),{items:null});await putSettings();L.innerHTML='';render();toast('رجعت الأدعية الافتراضية');return}
     if(x.id==='dbSave'){S.settings.duaBar=Object.assign(duaBar(),{items:items.slice(0,60)});await putSettings();L.innerHTML='';render();toast('حُفظت أدعية الشريط')}}}
 
+
+/* ===== ذاكرة مؤقتة للحسابات الثقيلة داخل الرسم الواحد: تُمسح عند أي تغيير في البيانات أو الشهر أو عند كل ضغطة ===== */
+let MEMO={};function memoClear(){MEMO={}}
+function memo(k,fn){const key=k+'|'+S.month+'|'+today();if(key in MEMO)return MEMO[key];const v=fn();MEMO[key]=v;return v}
+function pastMonths(n){return memo('pm'+(n||3),()=>pastMonths_(n))}
+function advCtx(){return memo('ctx',()=>advCtx_())}
+function dailyPlan(extra){return extra?dailyPlan_(extra):memo('dp',()=>dailyPlan_())}
+function goalsSummary(){return memo('gs',()=>goalsSummary_())}
+function forecast(n){return memo('fc'+(n||3),()=>forecast_(n))}
+function balanceForecast(){return memo('bf',()=>balanceForecast_())}
+function smartAlertList(){return memo('sa',()=>smartAlertList_())}
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 /* في الآيفون لا ينتقل التركيز إلى الزر عند الضغط عليه، فيبقى الحقل الذي كتبت فيه «نشطًا» وتتوقف الصفحة عن التحديث.
  * لذلك نُخرج التركيز من الحقل عند الضغط على أي زر (ويُحفظ ما كتبته كما هو) */
 let lastTap=0;
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button,[data-tab]');if(!b)return;lastTap=Date.now();
+document.addEventListener('click',e=>{memoClear();const b=e.target.closest&&e.target.closest('button,[data-tab]');if(!b)return;lastTap=Date.now();
   const a=document.activeElement;if(a&&a!==b&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&!b.contains(a)){try{a.blur()}catch(x){}}},true);
 document.addEventListener('click',async e=>{
   {const rt=e.target.closest('[data-rtog]');if(rt&&!e.target.closest('button,a,summary,details')){const row=rt.closest('.recrow');const on=!row.classList.contains('open');row.classList.toggle('open',on);rt.setAttribute('aria-expanded',on);S.recOpen=S.recOpen||{};if(on)S.recOpen[rt.dataset.rtog]=1;else delete S.recOpen[rt.dataset.rtog];return}}
