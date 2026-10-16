@@ -978,3 +978,41 @@ details.dmcards>summary{cursor:pointer;font-weight:600}
 .errbox{display:flex;flex-direction:column;gap:6px;margin:10px 0}
 .errbox code{font-size:11.5px;background:var(--surface);border-radius:8px;padding:6px 8px;word-break:break-all;white-space:pre-wrap;text-align:left}
 .errbox .errst{opacity:.75}
+
+/* 2.33.0 — التلاوات القرآنية: أخضر زمردي، ذهبي هادئ، خلفية عاجية */
+.wirdcard.qhubbtn{background:linear-gradient(135deg,#0E5A46,#0A4536);color:#FFF8E7}
+.wirdcard.qhubbtn small{color:#E9D9A8}
+.qh-btnic{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(233,217,168,.16);color:#E9C46A}
+.qh-btnic svg{width:24px;height:24px}
+.sheet.quran.qhub,.sheet.quran.qlisten{--q-em:#0E5A46;--q-gold:#B8923A;--q-ivory:#FBF8EF}
+.sheet.quran.qhub.rd-app,.sheet.quran.qlisten.rd-app{--bg:#FBF8EF;--surface:#FFFDF7;--surface-2:#F2ECDB;--line:#E6DCC0}
+.qh-t{display:flex;align-items:center;gap:10px}
+.qh-ic{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--q-em);color:#E9C46A}.qh-ic svg{width:26px;height:26px}
+.qh-hero{margin:4px 0 14px;padding:18px 16px;border-radius:18px;text-align:center;color:#FFF8E7;background:linear-gradient(140deg,#0E5A46 0%,#0B4A3A 60%,#123F35 100%);border:1px solid #C9A85A;position:relative;overflow:hidden}
+.qh-hero::before{content:"";position:absolute;inset:6px;border:1px solid rgba(233,196,106,.35);border-radius:13px;pointer-events:none}
+.qh-ayah{font-family:"Amiri Quran App","Geeza Pro","Noto Naskh Arabic",serif;font-size:28px;line-height:2;color:#F3DFA2}
+.qh-hero small{display:block;color:#E9D9A8;font-size:12px;margin-top:-2px}
+.qh-hero p{margin:10px 6px 0;font-size:13.5px;line-height:1.8;color:#F5EEDB}
+.qh-cards{display:grid;gap:12px}
+.qh-card{background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--q-gold,#B8923A);border-radius:16px;padding:14px;box-shadow:0 2px 10px rgb(14 90 70 / .06)}
+.qh-c1{display:flex;gap:12px;align-items:center}
+.qh-c1 b{font-size:18px;color:var(--fg)}.qh-c1 small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}.qh-c1 .qh-ok{color:#1C7F55;font-weight:600}
+.qh-no{flex:none;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;border:2px solid var(--q-gold,#B8923A);color:var(--q-em,#0E5A46);font-weight:700;font-size:15px;background:var(--q-ivory,#FBF8EF)}
+.qh-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.qh-btns .btn:not(.ghost),.qh-cont .btn{background:var(--q-em,#0E5A46);color:#FFF8E7}
+.qh-cont{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:14px;padding:12px 14px;border-radius:14px;border:1px dashed var(--q-gold,#B8923A);background:var(--surface)}
+.qh-cont small{display:block;color:var(--muted);font-size:12.5px}
+.qback{border:0;background:none;color:var(--q-em,#0E5A46);font:inherit;font-weight:700;font-size:13.5px;padding:0 0 2px;cursor:pointer}
+.sheet.quran.rd-night .qback,.sheet.quran.rd-night .qh-no{color:#E9C46A}
+.qtools .iconbtn.on{background:var(--q-em,#0E5A46);color:#F3DFA2}
+.qv-hl{background:rgba(233,196,106,.35);border-radius:6px;transition:background 1.2s}
+.ql-card{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 16px;border-radius:20px;background:var(--surface);border:1px solid var(--line);text-align:center}
+.ql-art{display:grid;place-items:center;width:96px;height:96px;border-radius:24px;background:linear-gradient(140deg,#0E5A46,#123F35);color:#E9C46A;border:1px solid #C9A85A}.ql-art svg{width:60px;height:60px}
+.ql-name{font-size:22px}.ql-rec{color:var(--muted)}
+.ql-prog{width:100%}.ql-prog input,.ql-vol input{width:100%;accent-color:#0E5A46}
+.ql-time{display:flex;justify-content:space-between;direction:ltr;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ql-play{width:72px;height:72px;border-radius:50%;border:0;background:#0E5A46;color:#FFF8E7;font-size:26px;box-shadow:0 6px 18px rgb(14 90 70 / .35);cursor:pointer}
+.ql-vol{display:flex;align-items:center;gap:8px;width:100%}
+.ql-msg{margin:0;font-size:13.5px;color:var(--muted);min-height:20px}
+.ql-prog,.ql-vol{direction:ltr}
+.spirit .qhubbtn small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
