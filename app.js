@@ -853,7 +853,7 @@ function vHome(){
   return `${homeDuaHtml()}${spiritHtml('top')}${rzHtml('top')}<section class="hero"><div class="lbl">${pc?'المتبقي من راتب هذه الدورة':'المتبقي في '+esc(mShort(m))}</div>
    <div class="big"><span class="num">${left<0?'−':''}${money(Math.abs(left))}</span> <small>${CUR}</small></div>
    <div class="row"><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M7 9v8h8"/></svg></span>الدخل</span><b class="num">${amtH(inc)}</b></div><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>المصاريف</span><b class="num">${amtH(exp)}</b></div></div>${pc?`<div class="lbl" style="margin-top:10px;font-size:12.5px">دورة الراتب: ${fmtD(pc.start)} – ${fmtD(pc.end)}</div>`:''}${heroDebtHtml(m,pc,left)}</section>
-   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${todayHtml()}${rescueHomeHtml()}
+   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${spendBtnHtml()}${todayHtml()}${rescueHomeHtml()}
    ${pendHtml()||billAlertsHtml()||trustAlertsHtml()||carAlertsHtml()||docAlertsHtml()?'<div style="margin-top:14px">'+pendHtml()+billAlertsHtml()+trustAlertsHtml()+carAlertsHtml()+docAlertsHtml()+'</div>':''}${spiritHtml('mid')}${rzHtml('mid')}${smartAlertsHtml()}${bfHomeHtml()}${finStatusHtml()}${widgetNudgeHtml()}${empty}${advHomeHtml()}${plansHomeHtml()}${repHomeHtml()}
    ${recent.length?`<h2>آخر العمليات</h2><div class="panel" style="padding:6px 10px">${recent.map(txRow).join('')}</div><div style="margin-top:8px"><button class="chip" data-tab="log">عرض كل العمليات</button></div>`:''}${debtsBrowseHtml()}${spiritHtml('bottom')}${rzHtml('bottom')}`;
 }
@@ -3168,8 +3168,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.33.0';
+const APP_VERSION='2.34.0';
 const CHANGELOG=[
+ {v:'2.34.0',d:'2026-10-16',items:['زر «💰 كم أستطيع أن أنفق اليوم؟» في الرئيسية: يبدأ من رصيدك الفعلي في حساباتك، ويطرح الأقساط والفواتير قبل الراتب ومبالغ خططك واحتياطي الطوارئ، ثم يقسم المتاح على الأيام حتى الراتب','يعرض ميزانية اليوم وما صرفته وما بقي، وميزانية 7 أيام، والمبلغ الذي تحتفظ به، وطريقة الحساب خطوة بخطوة','«حدّث المتبقي اليوم» بعد تسجيل مصروفاتك، واحتياطي طوارئ تحدده بنفسك','وضع «الصرف الآمن»: يطلب التأكد من الرصيد والفواتير والاحتياجات غير المسجّلة قبل اعتماد ميزانية كل دورة، ويحتفظ بهامش 10% حتى تعتمدها']},
  {v:'2.33.0',d:'2026-10-16',items:['زر «سورة الملك» صار «التلاوات القرآنية» بأيقونة مصحف، في نفس مكانه، ويفتح صفحة فيها سور الملك والواقعة ويس','قراءة كل سورة بالرسم العثماني من مشروع تنزيل، مع تكبير وتصغير الخط، والقراءة الليلية، وحفظ آخر آية وصلت إليها تلقائيًا، وزر «متابعة القراءة»','الاستماع إلى التلاوة بصوت مشاري راشد العفاسي: تشغيل وإيقاف، وشريط للموضع، والصوت، ومؤشر التقدم، ورسالة واضحة إذا تعذّر التحميل. لا يُشغَّل أي صوت تلقائيًا','ورد سورة الملك اليومي («أتممت القراءة») والأدعية بعدها بقيت كما هي']},
  {v:'2.32.1',d:'2026-10-16',items:['مراجعة شاملة: فُحص كل زر في كل صفحة ونافذة (أكثر من 4,000 ضغطة) بالشهر العادي وحسب الراتب وببيانات فارغة، بلا أي خطأ','التحقق من الحفظ: بعد إعادة الفتح، وبعد مسح ذاكرة المتصفح (تُستعاد من قاعدة البيانات الداخلية)، والنسخ الاحتياطي والاستعادة، والحذف، والمزامنة','مطابقة الأرقام بين الرئيسية والشهرية والتقارير والطباعة وExcel','أسرع: الرئيسية أسرع بمرتين والمستشار بثلاث مرات ونصف مع البيانات الكبيرة']},
  {v:'2.32.0',d:'2026-10-16',items:['زر طباعة 🖨️ أعلى كل صفحة يفتح تقرير تلك الصفحة: الرئيسية، والشهرية، والسجل، والخطط والميزانية، والديون، والمستشار، والبيت، والسيارات، والأمانات','تصميم احترافي للتقارير: رأس بشعار التطبيق واسمك، وأقسام مرقّمة، وأرقام الصفحات، وخانة ملاحظات واعتماد','قسم جديد «أبرز النقاط والتوصيات»: الصحة المالية، وأهم الأرقام بجمل واضحة، ورسم للدخل والمصروفات لكل شهر']},
@@ -4743,6 +4744,77 @@ function openListen(id){id=+id;const s=qSur(id);if(!s)return;qStop();const L=doc
     if(x.dataset.qread){openSurah(+x.dataset.qread);return}
     if(x.id==='qlPlay'){if(!a.paused){a.pause();return}wantPlay=true;if(!a.getAttribute('src'))load();msg('جارٍ التحميل…');const pr=a.play();if(pr&&pr.catch)pr.catch(()=>{});return}}}
 
+
+/* ===== 💰 كم أستطيع أن أنفق اليوم؟ — من الرصيد الفعلي حتى نزول الراتب ===== */
+function spendCycleKey(){const c=payCycle();return c?c.start:mStart(curM())}
+function spendToday(manualBal){const td=today(),cyc=payCycle();const until=cyc?addDays(cyc.next,-1):mEnd(curM());const days=Math.max(1,cyc?cyc.left:dDiff(td,mEnd(curM()))+1);
+  const BB=accBalances();const A=accList().filter(a=>a.id in BB&&!['reserve','project','card'].includes(a.kind));const ids=new Set(A.map(a=>a.id));
+  const tr=trustsHeld();let bal=null,src='',stale=null,anchorAt='';
+  if(manualBal!=null&&isFinite(manualBal)){bal=+manualBal;src='الرصيد الذي كتبته الآن'}
+  else if(A.length){bal=r3(A.reduce((s,a)=>s+(+BB[a.id]),0)-tr);src='أرصدة '+A.map(a=>a.name).join(' و')+(tr>0.0005?' ناقص الأمانات '+money(tr):'');
+    anchorAt=A.map(a=>a.anchor&&a.anchor.date||'').filter(Boolean).sort()[0]||'';stale=!anchorAt||anchorAt<addDays(td,-7)}
+  if(bal===null)return{need:true,days,until,cyc};
+  const seen={};const items=dueItems(mStart(curM()),until).filter(i=>!i.isPaid).sort((a,b)=>a.date.localeCompare(b.date)).map(i=>{const k=i.kind+i.id;let need=r3(i.amount-(i.paidAmt||0));if(seen[k])need=r3(need-(i.prev||0));seen[k]=1;return Object.assign({},i,{need})}).filter(i=>i.need>0.0005);
+  const oblig=r3(items.reduce((s,i)=>s+i.need,0));
+  const save=r3(Math.max(0,goalsSummary().total-(S.settings.goals||[]).reduce((s,g)=>s+(+((g.log||{})[curM()])||0),0)));
+  const reserve=r3(Math.max(0,+S.settings.safeReserve||0));const H=S.settings.safeHold||{};const hold=H.c===spendCycleKey()?r3(Math.max(0,+H.amt||0)):0;
+  const safeOn=S.settings.safeMode!==false,confirmed=(S.settings.safeOk||'')===spendCycleKey();
+  const base=r3(bal-oblig-save-reserve-hold);const margin=safeOn&&!confirmed&&base>0?r3(base*0.1):0;const avail=r3(base-margin);
+  const todayTx=list().filter(t=>t.date===td&&t.type==='exp'&&!isFixedTx(t));const spentAll=r3(todayTx.reduce((s,t)=>s+(+t.amount),0));const anc={};A.forEach(a=>{if(a.anchor)anc[a.id]=a.anchor});const ded=t=>{if(manualBal!=null)return true;const id=accOf(t);if(!ids.has(id))return false;const A0=anc[id];return !A0||t.date>A0.date||(t.date===A0.date&&(t.createdAt||'')>(A0.at||''))};
+  const spentFromBal=r3(todayTx.filter(ded).reduce((s,t)=>s+(+t.amount),0));
+  const daily=r3(Math.max(0,avail+spentFromBal)/days);const left=r3(daily-spentAll);const week=r3(daily*Math.min(7,days));
+  return{days,until,cyc,bal,src,stale,anchorAt,items,oblig,save,reserve,hold,margin,safeOn,confirmed,avail,daily,spentAll,left,week,keep:r3(oblig+save+reserve+hold),manual:manualBal!=null}}
+function spendBtnHtml(){if(S.month!==curM())return '';let R=null;try{R=spendToday()}catch(e){}
+  const v=R&&!R.need?`<b class="num ${R.left<0?'amt-exp':''}">${R.left<0?'−':''}${money(Math.abs(R.left))}</b><small>${R.left<0?'تجاوزت ميزانية اليوم':'متبقٍ لك اليوم'}</small>`:`<small>احسبه من رصيدك الحالي</small>`;
+  return `<button class="spendbtn" data-spend="1"><span class="sb-t">💰 كم أستطيع أن أنفق اليوم؟</span><span class="sb-v">${v}</span></button>`}
+function openSpendToday(manual){const L=document.getElementById('layer');let mb=manual;
+  const draw=()=>{const R=spendToday(mb);const row=(n,v,cls,sub)=>`<div class="sumrow"><span>${n}${sub?`<small class="note" style="display:block">${sub}</small>`:''}</span><b class="num ${cls||''}">${v}</b></div>`;
+   const dTxt=R.cyc?'الراتب بعد '+countWord(R.days,'يوم واحد','يومين','أيام','يومًا')+' ('+fmtD(R.cyc.next)+')':countWord(R.days,'يوم واحد','يومان','أيام','يومًا')+' حتى نهاية الشهر';
+   if(R.need){L.innerHTML=`${sheetTop('كم أنفق اليوم')}<h2 style="margin-top:0">💰 كم أستطيع أن أنفق اليوم؟</h2>
+     <div class="infobox" style="margin:0 0 10px"><span>أحتاج رصيدك الحالي لأحسب. حدّده مرة واحدة في «حساباتي» فيتحدّث بعدها تلقائيًا مع كل عملية، أو اكتبه هنا لحساب سريع الآن.</span></div>
+     <div class="field"><label for="spBal">رصيدك الحالي (${CUR})</label><input class="inp num" id="spBal" inputmode="decimal" placeholder="مثل 120.000" style="text-align:left"></div>
+     <div class="actions"><button class="btn block" id="spCalc">احسب</button><div class="row2"><button class="btn ghost" data-accopen="1">💳 حساباتي</button><button class="btn ghost" data-close>إغلاق</button></div></div></div></div>`;return}
+   const over=R.left<-0.0005,pct=R.daily?Math.min(100,R.spentAll/R.daily*100):100;
+   L.innerHTML=`${sheetTop('كم أنفق اليوم')}<h2 style="margin-top:0">💰 كم أستطيع أن أنفق اليوم؟</h2><p class="note" style="margin:-4px 0 10px">${dTxt}</p>
+    ${R.safeOn&&!R.confirmed?`<div class="warnbox spsafe" style="margin:0 0 12px"><b>🛡️ وضع الصرف الآمن</b><span>قبل اعتماد ميزانية هذه الدورة تأكّد من الآتي. حتى تعتمدها أحتفظ بـ 10% من المتاح كهامش أمان (<b class="num">${amtH(R.margin)}</b>).</span>
+      <div class="spchk"><span>${R.manual?'✍️ الرصيد مكتوب يدويًا الآن':R.stale?'⚠️ رصيد حسابك لم يُطابَق منذ '+(R.anchorAt?fmtD(R.anchorAt):'مدة'):'✓ رصيد حسابك محدّث ('+fmtD(R.anchorAt)+')'}</span>${R.stale&&!R.manual?'<button class="chip" data-accopen="1">طابق الرصيد</button>':''}</div>
+      <div class="spchk"><span>${R.items.length?'✓ مسجّل '+countWord(R.items.length,'التزام واحد','التزامان','التزامات','التزامًا')+' قبل الراتب':'⚠️ لا التزامات مسجّلة قبل الراتب'}. هل سجّلت كل الفواتير والأقساط؟</span><button class="chip" data-tab="monthly" data-close>الشهرية</button></div>
+      <div class="spchk col"><span>احتياجات أساسية لم تسجّلها (غاز، مدارس، دواء…)؟ احجز لها مبلغًا:</span><div class="capin"><input class="inp num" id="spHold" inputmode="decimal" value="${R.hold?amtIn(R.hold):''}" placeholder="0.000" style="text-align:left"><button class="btn" id="spHoldSave">حجز</button></div></div>
+      <button class="btn block" id="spOk">✓ تأكدت، اعتمد الميزانية</button></div>`:''}
+    <div class="sptoday${over?' over':''}"><div class="sp-big"><span>${over?'تجاوزت ميزانية اليوم بـ':'متبقٍ لك اليوم'}</span><b class="num">${amtH(Math.abs(R.left))}</b></div>
+     <div class="meter"><i style="width:${pct}%;background:${over?'var(--exp)':pct>80?'var(--warn)':'var(--inc)'}"></i></div>
+     <div class="sp-3"><div><span>ميزانية اليوم</span><b class="num">${amtH(R.daily)}</b></div><div><span>صرفت اليوم</span><b class="num">${amtH(R.spentAll)}</b></div><div><span>ميزانية ${countWord(Math.min(7,R.days),'يوم','يومين','أيام','يومًا')}</span><b class="num">${amtH(R.week)}</b></div></div></div>
+    <div class="panel spkeep"><div><span>🔒 احتفظ بهذا المبلغ ولا تصرفه</span><b class="num">${amtH(R.keep)}</b></div><small class="note">للالتزامات والخطط والاحتياطي حتى الراتب</small></div>
+    <h3>كيف حسبته؟</h3><div class="panel paybk">
+     ${row('1. الرصيد المسجّل',amtH(R.bal),'',esc(R.src)+(R.anchorAt&&!R.manual?' · آخر مطابقة '+fmtD(R.anchorAt):''))}
+     ${row('2. أقساط وفواتير قبل الراتب','− '+money(R.oblig),'',R.items.length?R.items.slice(0,6).map(i=>esc(i.name)+' '+dmy(i.date)).join('، ')+(R.items.length>6?'…':''):'لا شيء')}
+     ${R.save?row('   مبالغ محجوزة لخططك هذا الشهر','− '+money(R.save)):''}
+     ${row('3. احتياطي الطوارئ','− '+money(R.reserve),'',`<button class="chip" id="spResEdit">${R.reserve?'تعديل':'حدّد مبلغًا'}</button>`)}
+     ${R.hold?row('   محجوز لاحتياجات لم تُسجَّل','− '+money(R.hold)):''}
+     ${R.margin?row('   هامش أمان حتى تعتمد الميزانية','− '+money(R.margin)):''}
+     <div class="sumrow total"><span>المتاح للصرف</span><b class="num ${R.avail<0?'amt-exp':'amt-inc'}">${R.avail<0?'−':''}${amtH(Math.abs(R.avail))}</b></div>
+     ${row('4–5. ÷ '+countWord(R.days,'يوم واحد','يومين','أيام','يومًا')+' حتى الراتب','= '+money(R.daily)+' يوميًا')}</div>
+    ${R.avail<0?`<div class="warnbox" style="margin-top:10px">رصيدك لا يغطي التزاماتك حتى الراتب. لا تصرف إلا الضروري، وراجع <button class="chip pay" data-shortfall="1">خطة العجز</button></div>`:''}
+    <div id="spResBox" hidden class="panel stack" style="margin-top:10px"><div class="field"><label for="spRes">احتياطي الطوارئ الذي لا يدخل في الصرف (${CUR})</label><input class="inp num" id="spRes" inputmode="decimal" value="${R.reserve?amtIn(R.reserve):''}" placeholder="مثل 10.000" style="text-align:left"></div><button class="btn" id="spResSave">حفظ</button></div>
+    <div class="actions"><button class="btn block" id="spRefresh">🔄 حدّث المتبقي اليوم</button>
+     <div class="row2"><button class="btn ghost" id="spAdd">+ سجّل مصروفًا</button><button class="btn ghost" data-close>إغلاق</button></div>
+     <label class="toggle"><input type="checkbox" id="spSafe" ${R.safeOn?'checked':''}><span>وضع الصرف الآمن: يطلب التأكد من الفواتير والاحتياجات قبل اعتماد ميزانية كل دورة</span></label>
+     <p class="note" style="margin:0">مصروفات بطاقة الائتمان تُحسب في «صرفت اليوم»، لكنها لا تُخصم من رصيدك إلا عند سداد البطاقة. الحساب تقدير من بياناتك المسجّلة.</p></div></div></div>`};
+  draw();
+  L.oninput=null;L.onchange=async e=>{if(e.target.id==='spSafe'){S.settings.safeMode=e.target.checked;await putSettings();draw();render()}};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;
+    if(x.dataset.tab){L.innerHTML='';S.tab=x.dataset.tab;S.month=curM();render();window.scrollTo(0,0);return}
+    if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+    if(x.dataset.accopen){L.innerHTML='';openAccounts();return}
+    if(x.dataset.shortfall){openShortfall();return}
+    if(x.id==='spCalc'){const v=parseAmt(String(document.getElementById('spBal').value||''));if(v===null||isNaN(v)){toast('اكتب رصيدك الحالي');return}mb=v;draw();return}
+    if(x.id==='spRefresh'){draw();render();toast('حُدّثت ميزانية اليوم بما سجّلته');return}
+    if(x.id==='spAdd'){L.innerHTML='';openSheet(null,{type:'exp'});return}
+    if(x.id==='spResEdit'){const b=document.getElementById('spResBox');b.hidden=!b.hidden;if(!b.hidden)document.getElementById('spRes').focus();return}
+    if(x.id==='spResSave'){const v=parseAmt(String(document.getElementById('spRes').value||'0'));if(v===null||isNaN(v)||v<0){toast('اكتب مبلغًا صحيحًا');return}S.settings.safeReserve=v;await putSettings();draw();render();toast('حُفظ احتياطي الطوارئ');return}
+    if(x.id==='spHoldSave'){const v=parseAmt(String(document.getElementById('spHold').value||'0'));if(v===null||isNaN(v)||v<0){toast('اكتب مبلغًا صحيحًا');return}S.settings.safeHold={c:spendCycleKey(),amt:v};await putSettings();draw();render();toast(v?'حُجز المبلغ حتى الراتب':'أُلغي الحجز');return}
+    if(x.id==='spOk'){S.settings.safeOk=spendCycleKey();await putSettings();draw();render();toast('اعتُمدت ميزانية هذه الدورة');return}}}
+
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 /* في الآيفون لا ينتقل التركيز إلى الزر عند الضغط عليه، فيبقى الحقل الذي كتبت فيه «نشطًا» وتتوقف الصفحة عن التحديث.
  * لذلك نُخرج التركيز من الحقل عند الضغط على أي زر (ويُحفظ ما كتبته كما هو) */
@@ -4841,6 +4913,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.shortfall){openShortfall();return}
   if(b.dataset.askopen){openAsk(b.dataset.askopen);return}
   if(b.dataset.bfopen){openForecast();return}
+  if(b.dataset.spend){openSpendToday();return}
   if(b.id==='prBtn'){openPrintSheet(PAGE_PRESET[S.tab]||'full');return}
   if(b.dataset.duabar){openDuaBarRead();return}
   if(b.id==='dbOn'){duaBarSet({on:!duaBar().on});return}
