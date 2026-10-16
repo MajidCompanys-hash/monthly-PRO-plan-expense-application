@@ -1178,3 +1178,62 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .pm-c.late{border-color:var(--exp);background:color-mix(in srgb,var(--exp) 12%,var(--surface))}
 .pm-c.late .num{color:var(--exp);font-weight:800;font-size:13.5px}.pm-c.late small{color:var(--exp);font-weight:700}
 @media (max-width:359px){.pm-g{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* ===== 2.38.0 قاعدة الألوان: المدفوع أخضر والمتأخر أحمر ===== */
+.rec-amt b{color:var(--fg)}
+.rec-amt.late b,.rec-amt.late small{color:var(--exp);font-weight:800}
+.rec-amt.part b{color:#B07A12}
+.rec-amt.ok b{color:var(--inc)!important}
+.pill.late b{font-weight:800}
+.rh-sub{display:block;font-size:13px;margin:10px 0 4px}
+.rh-m.st-late{border-inline-start:3px solid var(--exp);padding-inline-start:8px}
+.rh-m.st-paid{border-inline-start:3px solid var(--inc);padding-inline-start:8px}
+.mgrid{margin:8px 0 6px;display:flex;flex-direction:column;gap:6px}
+.mg-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.mg-h>b{font-size:13.5px}
+.mg-s{display:flex;gap:8px;font-size:12px;flex-wrap:wrap}
+.mg-s .ok{color:var(--inc);font-weight:600}.mg-s .bad{color:var(--exp);font-weight:800}
+.mg-y{border:1px solid var(--line);border-radius:12px;padding:6px 8px;background:var(--surface)}
+.mg-y>summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none}
+.mg-y>summary::-webkit-details-marker{display:none}
+.mg-y>summary::after{content:'▾';margin-inline-start:auto;color:var(--muted)}
+.mg-y:not([open])>summary::after{content:'◂'}
+.mg-g{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:6px}
+.mg-c{display:flex;flex-direction:column;align-items:center;gap:0;padding:6px 3px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;cursor:pointer;min-width:0}
+.mg-c b{font-size:12px;font-weight:600}.mg-c .num{font-size:13px;font-weight:700}.mg-c small{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.mg-c .mg-pre{font-size:9.5px;opacity:.85}
+.mg-c.paid{background:color-mix(in srgb,var(--inc) 12%,var(--surface));border-color:color-mix(in srgb,var(--inc) 45%,var(--line))}
+.mg-c.paid .num,.mg-c.paid small{color:var(--inc)}
+.mg-c.late{background:color-mix(in srgb,var(--exp) 12%,var(--surface));border-color:var(--exp)}
+.mg-c.late .num{color:var(--exp);font-weight:800;font-size:14px}.mg-c.late small{color:var(--exp);font-weight:700}
+.mg-c.part,.mg-c.due{background:color-mix(in srgb,#E0A21B 12%,var(--surface));border-color:color-mix(in srgb,#E0A21B 55%,var(--line))}
+.mg-c.part .num,.mg-c.due .num{color:#B07A12}
+.mg-c.up{opacity:.75}
+.mg-c.cur{box-shadow:0 0 0 2px var(--accent)}
+.yg-key .part::before{background:#E0A21B}
+@media (max-width:359px){.mg-g{grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* المبالغ المدفوعة (أخضر) وغير المدفوعة (أحمر) أكبر من خط الصفحة */
+.mg-c .num{font-size:16px}.mg-c.late .num{font-size:17px}
+.yg-c .num{font-size:16px}.yg-c.bad .num,.yg-c.pre.bad .num{font-size:17px;font-weight:800}
+.rec-amt b,.rec-amt.ok b{font-size:19px!important}
+.rec-amt.late b{font-size:20px!important}
+.pm-c .num{font-size:15px}.pm-c.late .num{font-size:16.5px}
+.pill b.num,.pill .num{font-size:14.5px;font-weight:800}
+.calamt{font-size:17px}
+.calamt.k-paid{color:var(--inc)}
+.calamt.k-late{color:var(--exp);font-weight:800}
+.prevtag .num{font-size:14px;font-weight:800}
+.dcard .gm b{font-size:20px}
+.paychip{background:color-mix(in srgb,var(--inc) 12%,var(--surface));color:var(--inc);border:1px solid color-mix(in srgb,var(--inc) 35%,var(--line))}
+.paychip .pce .num{font-size:15px;font-weight:800;color:var(--inc)}
+.recsec-left.due b{color:var(--fg)}
+.recsec-left.late b{color:var(--exp);font-weight:800}
+.recsec-left.ok b{color:var(--inc)}
+/* أي مبلغ متبقٍّ (غير مدفوع) يظهر بالأحمر */
+.recsec-left.rem b{color:var(--exp);font-weight:700}
+.rec-amt.rem b,.rec-amt.rem small{color:var(--exp)}
+.rec-amt.part b{color:var(--exp)}
+.mg-c.part .num,.mg-c.due .num{color:var(--exp)}
+.rem-big{font-size:1.12em;font-weight:800}
+.dgcell b.amt-exp{color:var(--exp)}
+.dcard .gm b.amt-exp{color:var(--exp)}
