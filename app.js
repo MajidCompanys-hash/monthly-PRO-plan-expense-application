@@ -3232,8 +3232,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.49.0';
+const APP_VERSION='2.50.0';
 const CHANGELOG=[
+ {v:'2.50.0',d:'2026-10-17',items:['السحب للأسفل صار في كل صفحات التطبيق: سحب قليل يفتح البحث (تظهر العدسة)، وسحب أكثر أو الإمساك بالسحب ثانية تقريبًا يحدّث كل شيء (مزامنة Google Drive، تحديث التطبيق، تحديث البيانات) مع المؤشر الدوّار واهتزاز خفيف عند كل مرحلة']},
  {v:'2.49.0',d:'2026-10-17',items:['السحب يمينًا ويسارًا في أي مكان من الصفحة ينقلك بين أقسام الشريط السفلي (الرئيسية، الشهرية، السجل، إدارة البيانات، التقارير) كما في iPhone: اسحب لليمين للقسم التالي ولليسار للسابق، والصفحة تتحرك مع إصبعك، وفي أول وآخر قسم ترتد مكانها. الجداول العريضة التي تتحرك أفقيًا لا تتأثر','في الرئيسية: السحب القليل للأسفل يفتح البحث، والسحب أكثر يحدّث كل شيء (مزامنة Google Drive، تحديث التطبيق، تحديث البيانات)، مع اهتزاز خفيف عند كل مرحلة']},
  {v:'2.48.0',d:'2026-10-17',items:['حركات اللمس مثل تطبيقات iPhone: عند السحب للأسفل تنزل الصفحة مع إصبعك بمقاومة مطاطية، ويظهر مؤشر iPhone الدوّار تدريجيًا مع اهتزاز خفيف عند الوصول للحد، ثم تبقى الصفحة نازلة أثناء التحديث وترجع بنعومة','سحب أي نافذة للأسفل من أعلاها يغلقها، أو يرجعك للنافذة السابقة إن فتحتها من نافذة أخرى، والسحب القصير يرجعها مكانها','السحب من حافة الشاشة اليمنى نحو اليسار يرجع للصفحة أو النافذة السابقة والصفحة تتحرك مع إصبعك، كما في iPhone بالعربية','انتقال ناعم عند فتح صفحة من صفحة (تدخل من اليسار) وعند الرجوع (تدخل من اليمين)']},
  {v:'2.47.1',d:'2026-10-17',items:['السحب للأسفل من أعلى الصفحة صار حسب القسم: في الرئيسية يفتح البحث مباشرة، وفي «إدارة البيانات» و«التقارير» يحدّث كل شيء (مزامنة Google Drive، وتحديث التطبيق، وتحديث البيانات وفحص سلامتها) ثم يعرض ملخصًا']},
@@ -6549,7 +6550,8 @@ function openCatQuick(o){const L=document.getElementById('layer');o=Object.assig
 const PTR={y0:null,dy:0,off:0,busy:false,on:false,hit:false,mode:''};
 const IOS_SPIN='<svg viewBox="0 0 30 30" aria-hidden="true">'+[...Array(12)].map((_,i)=>`<rect x="13.6" y="2" width="2.8" height="8" rx="1.4" transform="rotate(${i*30} 15 15)" style="--i:${i}"/>`).join('')+'</svg>';
 function ptrEl(){let el=document.getElementById('ptr');if(!el){el=document.createElement('div');el.id='ptr';el.setAttribute('aria-hidden','true');el.innerHTML='<i class="rf">'+IOS_SPIN+'</i><i class="sr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></i><span></span>';document.body.appendChild(el)}return el}
-function ptrMode(){return S.tab==='home'?'search':(S.tab==='budget'||S.tab==='reports')?'sync':''}
+/* كل الصفحات: سحب قليل = البحث · سحب أكثر أو الإمساك قليلًا = التحديث */
+function ptrMode(){return S.tab?'search':''}
 function ptrOk(){return !!ptrMode()&&!PTR.busy&&!document.querySelector('#layer .sheet')&&(()=>{const mn=document.getElementById('hdrMenu');return !mn||mn.hidden})()&&(window.scrollY||document.documentElement.scrollTop||0)<=0}
 function rubber(x,d){return (1-(1/((x*0.55/d)+1)))*d}
 function hapt(){try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}try{let s=document.getElementById('hapt');if(!s){s=document.createElement('label');s.id='hapt';s.innerHTML='<input type="checkbox" switch>';s.style.cssText='position:fixed;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden';document.body.appendChild(s)}s.click()}catch(e){}}
@@ -6563,13 +6565,14 @@ document.addEventListener('touchmove',e=>{if(PTR.y0==null||PTR.busy)return;const
   if(dy<=0){if(PTR.on){viewY(0,false);ptrHide();PTR.on=false}return}
   if(e.cancelable)e.preventDefault();PTR.dy=dy;PTR.off=rubber(dy,window.innerHeight||800);PTR.on=true;viewY(PTR.off,false);ptrPlace(PTR.off);
   /* الرئيسية: سحب قليل = البحث، سحب أكثر = التحديث */
-  const p=PTR.off/64,deep=PTR.mode==='search'&&PTR.off>=PTR_DEEP,sr=PTR.mode==='search'&&!deep;ptrEl().classList.toggle('srch',sr);
-  ptrShow(deep?1:p,p<1?'':sr?'أفلت للبحث · اسحب أكثر للتحديث':'أفلت للتحديث');
+  const p=PTR.off/64;if(p>=1&&!PTR.held&&!PTR.ht){PTR.ht=setTimeout(()=>{if(PTR.on&&PTR.off>=64){PTR.held=true;hapt();ptrEl().classList.remove('srch');ptrShow(1,'أفلت للتحديث');PTR.hit=2}},900)}else if(p<1){clearTimeout(PTR.ht);PTR.ht=null;PTR.held=false}
+  const deep=PTR.mode==='search'&&(PTR.off>=PTR_DEEP||PTR.held),sr=PTR.mode==='search'&&!deep;ptrEl().classList.toggle('srch',sr);
+  ptrShow(deep?1:p,p<1?'':sr?'أفلت للبحث · اسحب أكثر أو أمسك للتحديث':'أفلت للتحديث');
   const lv=deep?2:p>=1?1:0;if(lv>(PTR.hit||0)){hapt()}PTR.hit=lv},{passive:false});
 const PTR_DEEP=120;
 document.addEventListener('touchend',()=>{if(PTR.y0==null)return;PTR.y0=null;if(!PTR.on)return;const go=PTR.off>=64;PTR.on=false;
-  if(go&&PTR.mode==='search'&&PTR.off<PTR_DEEP){viewY(0,true);ptrHide();setTimeout(openSearch,120)}else if(go){viewY(58,true);ptrPlace(58);ptrRun()}else{viewY(0,true);ptrHide()}},{passive:true});
-document.addEventListener('touchcancel',()=>{if(PTR.y0==null)return;PTR.y0=null;if(PTR.on){PTR.on=false;viewY(0,true);ptrHide()}},{passive:true});
+  clearTimeout(PTR.ht);PTR.ht=null;const held=PTR.held;PTR.held=false;if(go&&PTR.mode==='search'&&PTR.off<PTR_DEEP&&!held){viewY(0,true);ptrHide();setTimeout(openSearch,120)}else if(go){viewY(58,true);ptrPlace(58);ptrRun()}else{viewY(0,true);ptrHide()}},{passive:true});
+document.addEventListener('touchcancel',()=>{clearTimeout(PTR.ht);PTR.ht=null;PTR.held=false;if(PTR.y0==null)return;PTR.y0=null;if(PTR.on){PTR.on=false;viewY(0,true);ptrHide()}},{passive:true});
 async function ptrRun(){if(PTR.busy)return;PTR.busy=true;const t0=Date.now();const el=ptrEl();el.classList.remove('srch');el.classList.add('spin');const msgs=[];const step=t=>{ptrShow(1,t);ptrPlace(58)};
   try{const on=navigator.onLine!==false;
     if(on&&Sync.linked()){step('مزامنة Google Drive…');try{await Promise.race([Promise.resolve(Sync.now()),new Promise(r=>setTimeout(r,25000))])}catch(e){}const s=document.querySelector('#sync span');msgs.push('☁️ '+(s?s.textContent.trim():'تمت المزامنة'))}
