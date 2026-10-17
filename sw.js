@@ -1,6 +1,6 @@
 /* إدارة شؤوني - يحفظ ملفات التطبيق في الجهاز ليعمل بدون إنترنت. لا يرسل أي بيانات.
  * عند كل تحديث يتغيّر رقم CACHE، فيحمّل الجهاز الملفات الجديدة ويحذف القديمة. */
-const CACHE = 'masareef-v2.42.0';
+const CACHE = 'masareef-v2.43.0';
 const FILES = [
   './', './index.html', './style.css', './app.js', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'
@@ -9,7 +9,7 @@ const FILES = [
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => c.addAll(FILES.map(u => new Request(u, { cache: 'reload' }))).then(() => c.add(new Request('./amiri-quran.woff', { cache: 'reload' })).catch(() => {})))
+      .then(c => c.addAll(FILES.map(u => new Request(u, { cache: 'reload' }))).then(() => c.add(new Request('./amiri-quran.woff', { cache: 'reload' })).catch(() => {})).then(() => c.addAll(['./pdf.min.js','./pdf.worker.min.js'].map(u => new Request(u, { cache: 'reload' }))).catch(() => {})))
       .then(() => self.skipWaiting())
   );
 });

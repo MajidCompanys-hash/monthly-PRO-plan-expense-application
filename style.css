@@ -1341,3 +1341,22 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .revopt{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--fg);font:inherit;text-align:start;cursor:pointer}
 .revopt>span:first-child{font-size:22px}.revopt>span:nth-child(2){display:flex;flex-direction:column;min-width:0}.revopt small{color:var(--muted);font-size:12.5px}
 .revpast{width:100%;border:0;background:transparent;font:inherit;color:var(--fg);cursor:pointer}
+
+/* ===== 2.43.0 استيراد كشف الحساب ===== */
+.stbtn{display:flex;align-items:center;gap:12px;width:100%;margin:10px 0;padding:12px 14px;border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));border-radius:16px;background:var(--accent-soft);color:var(--fg);font:inherit;text-align:start;cursor:pointer}
+.stbtn>span:first-child{font-size:22px}.stbtn>span:nth-child(2){flex:1;display:flex;flex-direction:column;min-width:0}.stbtn small{color:var(--muted);font-size:12.5px}
+.stbtn.sm{padding:9px 12px;margin:8px 0 0;background:var(--surface)}
+.stpick{margin-top:12px;cursor:pointer;text-align:center}
+.st-f{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:10px 0}.st-f .chip{flex:none}
+.strow{display:flex;flex-direction:column;gap:8px;padding:10px 12px}
+.strow.off{opacity:.55}
+.strow.dup{border-color:color-mix(in srgb,#E0A21B 60%,var(--line))}
+.st-h{display:flex;align-items:center;gap:10px}
+.st-chk{flex:none;width:28px;height:28px;border-radius:8px;border:2px solid var(--accent);background:var(--surface);color:#fff;font-weight:800;cursor:pointer}
+.st-chk[aria-pressed="true"]{background:var(--accent)}
+.st-note{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st-amt{font-size:17px;white-space:nowrap}
+.st-dup{font-size:12.5px;color:#B07A12;background:color-mix(in srgb,#E0A21B 10%,var(--surface));border-radius:8px;padding:5px 8px}
+.st-raw summary{font-size:12px;color:var(--muted);cursor:pointer}.st-raw small{color:var(--muted);font-size:11.5px;direction:ltr;display:block;text-align:left}
+.st-link .chip{justify-content:center}
+.st-upd{display:flex;gap:8px;align-items:center;margin:12px 2px;font-size:14px}
