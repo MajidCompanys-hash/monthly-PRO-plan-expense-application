@@ -3232,8 +3232,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.48.0';
+const APP_VERSION='2.49.0';
 const CHANGELOG=[
+ {v:'2.49.0',d:'2026-10-17',items:['السحب يمينًا ويسارًا في أي مكان من الصفحة ينقلك بين أقسام الشريط السفلي (الرئيسية، الشهرية، السجل، إدارة البيانات، التقارير) كما في iPhone: اسحب لليمين للقسم التالي ولليسار للسابق، والصفحة تتحرك مع إصبعك، وفي أول وآخر قسم ترتد مكانها. الجداول العريضة التي تتحرك أفقيًا لا تتأثر','في الرئيسية: السحب القليل للأسفل يفتح البحث، والسحب أكثر يحدّث كل شيء (مزامنة Google Drive، تحديث التطبيق، تحديث البيانات)، مع اهتزاز خفيف عند كل مرحلة']},
  {v:'2.48.0',d:'2026-10-17',items:['حركات اللمس مثل تطبيقات iPhone: عند السحب للأسفل تنزل الصفحة مع إصبعك بمقاومة مطاطية، ويظهر مؤشر iPhone الدوّار تدريجيًا مع اهتزاز خفيف عند الوصول للحد، ثم تبقى الصفحة نازلة أثناء التحديث وترجع بنعومة','سحب أي نافذة للأسفل من أعلاها يغلقها، أو يرجعك للنافذة السابقة إن فتحتها من نافذة أخرى، والسحب القصير يرجعها مكانها','السحب من حافة الشاشة اليمنى نحو اليسار يرجع للصفحة أو النافذة السابقة والصفحة تتحرك مع إصبعك، كما في iPhone بالعربية','انتقال ناعم عند فتح صفحة من صفحة (تدخل من اليسار) وعند الرجوع (تدخل من اليمين)']},
  {v:'2.47.1',d:'2026-10-17',items:['السحب للأسفل من أعلى الصفحة صار حسب القسم: في الرئيسية يفتح البحث مباشرة، وفي «إدارة البيانات» و«التقارير» يحدّث كل شيء (مزامنة Google Drive، وتحديث التطبيق، وتحديث البيانات وفحص سلامتها) ثم يعرض ملخصًا']},
  {v:'2.47.0',d:'2026-10-17',items:['اسحب الصفحة الرئيسية للأسفل من أعلاها وأفلت للتحديث: مزامنة Google Drive الآن، والبحث عن إصدار جديد للتطبيق وتثبيته، وإعادة قراءة البيانات وحساب الديون والأقسام وفحص السلامة، ثم ملخص بالنتيجة. بدون إنترنت تُحدَّث البيانات في الهاتف فقط']},
@@ -6556,15 +6557,18 @@ function ptrPlace(off){const el=ptrEl();const v=document.getElementById('view');
 function ptrShow(p,txt){const el=ptrEl();el.classList.add('vis');el.style.setProperty('--p',Math.min(1,p));const n=Math.max(1,Math.round(Math.min(1,p)*12));for(let k=1;k<=12;k++)el.classList.toggle('n'+k,k===n);el.querySelector('span').textContent=txt||''}
 function ptrHide(){const el=document.getElementById('ptr');if(el){el.classList.remove('vis','spin','srch');el.style.removeProperty('--p')}}
 function viewY(y,anim){const v=document.getElementById('view');if(!v)return;PTR.cur=y||0;v.style.transition=anim?'transform .38s cubic-bezier(.2,.8,.2,1)':'none';v.style.transform=y?'translate3d(0,'+y+'px,0)':'';if(!y&&anim)setTimeout(()=>{if(!PTR.on&&!PTR.busy){v.style.transition='';v.style.transform=''}},400)}
-document.addEventListener('touchstart',e=>{PTR.y0=null;if(e.touches.length!==1||!ptrOk()||e.target.closest('input,textarea,select,.sheet,#hdrMenu,.tabs'))return;PTR.y0=e.touches[0].clientY;PTR.x0=e.touches[0].clientX;PTR.dy=0;PTR.off=0;try{PTR.base=document.getElementById('view').getBoundingClientRect().top}catch(er){PTR.base=null}PTR.on=false;PTR.hit=false;PTR.mode=ptrMode()},{passive:true});
+document.addEventListener('touchstart',e=>{PTR.y0=null;if(e.touches.length!==1||!ptrOk()||e.target.closest('input,textarea,select,.sheet,#hdrMenu,.tabs'))return;PTR.y0=e.touches[0].clientY;PTR.x0=e.touches[0].clientX;PTR.dy=0;PTR.off=0;PTR.hit=0;try{PTR.base=document.getElementById('view').getBoundingClientRect().top}catch(er){PTR.base=null}PTR.on=false;PTR.hit=false;PTR.mode=ptrMode()},{passive:true});
 document.addEventListener('touchmove',e=>{if(PTR.y0==null||PTR.busy)return;const dy=e.touches[0].clientY-PTR.y0,dx=Math.abs(e.touches[0].clientX-PTR.x0);
   if(!PTR.on&&((window.scrollY||0)>0||dx>dy||dy<0)){PTR.y0=null;return}
   if(dy<=0){if(PTR.on){viewY(0,false);ptrHide();PTR.on=false}return}
   if(e.cancelable)e.preventDefault();PTR.dy=dy;PTR.off=rubber(dy,window.innerHeight||800);PTR.on=true;viewY(PTR.off,false);ptrPlace(PTR.off);
-  const p=PTR.off/64,sr=PTR.mode==='search';ptrEl().classList.toggle('srch',sr);ptrShow(p,p>=1?(sr?'أفلت لفتح البحث':'أفلت للتحديث'):'');
-  if(p>=1&&!PTR.hit){PTR.hit=true;hapt()}else if(p<0.85)PTR.hit=false},{passive:false});
+  /* الرئيسية: سحب قليل = البحث، سحب أكثر = التحديث */
+  const p=PTR.off/64,deep=PTR.mode==='search'&&PTR.off>=PTR_DEEP,sr=PTR.mode==='search'&&!deep;ptrEl().classList.toggle('srch',sr);
+  ptrShow(deep?1:p,p<1?'':sr?'أفلت للبحث · اسحب أكثر للتحديث':'أفلت للتحديث');
+  const lv=deep?2:p>=1?1:0;if(lv>(PTR.hit||0)){hapt()}PTR.hit=lv},{passive:false});
+const PTR_DEEP=120;
 document.addEventListener('touchend',()=>{if(PTR.y0==null)return;PTR.y0=null;if(!PTR.on)return;const go=PTR.off>=64;PTR.on=false;
-  if(go&&PTR.mode==='search'){viewY(0,true);ptrHide();setTimeout(openSearch,120)}else if(go){viewY(58,true);ptrPlace(58);ptrRun()}else{viewY(0,true);ptrHide()}},{passive:true});
+  if(go&&PTR.mode==='search'&&PTR.off<PTR_DEEP){viewY(0,true);ptrHide();setTimeout(openSearch,120)}else if(go){viewY(58,true);ptrPlace(58);ptrRun()}else{viewY(0,true);ptrHide()}},{passive:true});
 document.addEventListener('touchcancel',()=>{if(PTR.y0==null)return;PTR.y0=null;if(PTR.on){PTR.on=false;viewY(0,true);ptrHide()}},{passive:true});
 async function ptrRun(){if(PTR.busy)return;PTR.busy=true;const t0=Date.now();const el=ptrEl();el.classList.remove('srch');el.classList.add('spin');const msgs=[];const step=t=>{ptrShow(1,t);ptrPlace(58)};
   try{const on=navigator.onLine!==false;
@@ -6584,16 +6588,26 @@ const SW={on:false,kind:'',x0:0,y0:0,t0:0,el:null,dx:0,dy:0,lock:''};
 function swCanBackTab(){const b=document.getElementById('navBack');return !!(b&&!b.hidden)}
 document.addEventListener('touchstart',e=>{SW.on=false;if(e.touches.length!==1||PTR.busy)return;const t=e.touches[0];const L=document.getElementById('layer');const sh=L&&L.querySelector('.sheet');const W=window.innerWidth;
   const edge=t.clientX>=W-22;
-  if(edge?e.target.closest('input[type=range],textarea,[contenteditable]'):e.target.closest('input,textarea,select,[contenteditable],.mq-in,.rzpage,.fc-tw,.st-f,.ba-f,.chips'))return;
+  if(edge?e.target.closest('input[type=range],textarea,[contenteditable]'):e.target.closest('input,textarea,select,[contenteditable],.rzpage,.fc-tw,.st-f,.ba-f'))return;
   if(sh&&!sh.classList.contains('quran')&&!sh.closest('[data-noback]')){if(edge){Object.assign(SW,{on:true,kind:'edge',el:sh})}else if(e.target.closest('.sheet')&&sh.scrollTop<=0){Object.assign(SW,{on:true,kind:'down',el:sh})}}
+  else if(!sh&&swTabs().includes(S.tab)&&!PTR.busy&&!hScrollIn(e.target)&&!e.target.closest('header,.tabs,#hdrMenu,.fab')){Object.assign(SW,{on:true,kind:'tab',el:document.getElementById('view')})}
   else if(!sh&&edge&&swCanBackTab()){Object.assign(SW,{on:true,kind:'edge',el:document.getElementById('view')})}
   if(SW.on){SW.x0=t.clientX;SW.y0=t.clientY;SW.t0=Date.now();SW.dx=0;SW.dy=0;SW.lock=''}},{passive:true});
 document.addEventListener('touchmove',e=>{if(!SW.on)return;const t=e.touches[0];const dx=t.clientX-SW.x0,dy=t.clientY-SW.y0;
-  if(!SW.lock){if(Math.abs(dx)<6&&Math.abs(dy)<6)return;SW.lock=SW.kind==='down'?(dy>0&&dy>Math.abs(dx)?'y':'no'):(dx<0&&-dx>Math.abs(dy)?'x':'no');if(SW.lock==='no'){SW.on=false;return}SW.el.style.transition='none';if(SW.kind==='down'&&SW.el.scrollTop>0){SW.on=false;return}}
+  if(!SW.lock){if(Math.abs(dx)<8&&Math.abs(dy)<8)return;SW.lock=SW.kind==='down'?(dy>0&&dy>Math.abs(dx)?'y':'no'):SW.kind==='tab'?(Math.abs(dx)>Math.abs(dy)*1.3&&!PTR.on?'t':'no'):(dx<0&&-dx>Math.abs(dy)?'x':'no');if(SW.lock==='no'){SW.on=false;return}SW.el.style.transition='none';if(SW.kind==='down'&&SW.el.scrollTop>0){SW.on=false;return}}
   if(e.cancelable)e.preventDefault();const sc=document.querySelector('#layer .scrim');
+  if(SW.lock==='t'){const nb=swNeighbor(dx);SW.dx=nb?dx:dx*0.25;SW.el.style.transform='translate3d('+SW.dx+'px,0,0)';SW.el.style.opacity=String(Math.max(.55,1-Math.abs(SW.dx)/(window.innerWidth*1.6)));return}
   if(SW.lock==='y'){SW.dy=Math.max(0,dy);SW.el.style.transform='translate3d(0,'+SW.dy+'px,0)';if(sc)sc.style.opacity=String(Math.max(.15,1-SW.dy/500))}
   else{SW.dx=Math.min(0,dx);SW.el.style.transform='translate3d('+SW.dx+'px,0,0)';SW.el.style.boxShadow='8px 0 24px rgb(0 0 0 / .18)';if(sc)sc.style.opacity=String(Math.max(.15,1+SW.dx/window.innerWidth))}},{passive:false});
+function swTabs(){return [...document.querySelectorAll('nav.tabs [data-tab]')].filter(b=>!b.hidden&&b.offsetParent!==null).map(b=>b.dataset.tab)}
+/* بالعربية الصفحة التالية على اليسار: سحب الإصبع لليمين يُظهر الصفحة التالية، ولليسار يُظهر السابقة */
+function swNeighbor(dx){const L=swTabs(),i=L.indexOf(S.tab);if(i<0||!dx)return null;return L[dx>0?i+1:i-1]||null}
+function hScrollIn(t){let e=t;while(e&&e!==document.body){if(e.scrollWidth>e.clientWidth+4){const o=getComputedStyle(e).overflowX;if(o==='auto'||o==='scroll')return true}e=e.parentElement}return false}
+function swTabGo(dx){const el=SW.el,nb=swNeighbor(dx),W=window.innerWidth;el.style.transition='transform .2s ease-in,opacity .2s';el.style.transform='translate3d('+(dx>0?W:-W)*0.6+'px,0,0)';el.style.opacity='0';
+  setTimeout(()=>{NAV.busy=true;S.tab=nb;S.month=curM();render();window.scrollTo(0,0);NAV.y=0;NAV.busy=false;navUI();el.style.transition='none';el.style.transform='translate3d('+(dx>0?-W:W)*0.35+'px,0,0)';el.style.opacity='0.3';void el.offsetWidth;
+    el.style.transition='transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s';el.style.transform='';el.style.opacity='';setTimeout(()=>{el.style.transition=''},320)},200)}
 function swEnd(cancel){if(!SW.on)return;SW.on=false;if(!SW.lock)return;const el=SW.el,sc=document.querySelector('#layer .scrim');const dt=Math.max(1,Date.now()-SW.t0);
+  if(SW.lock==='t'){const v=Math.abs(SW.dx)/dt;if(!cancel&&swNeighbor(SW.dx)&&(Math.abs(SW.dx)>window.innerWidth*.28||(Math.abs(SW.dx)>45&&v>.45))){hapt();swTabGo(SW.dx)}else{el.style.transition='transform .28s cubic-bezier(.2,.8,.2,1),opacity .28s';el.style.transform='';el.style.opacity='';setTimeout(()=>{el.style.transition=''},300)}return}
   const W=window.innerWidth,H=window.innerHeight;const go=!cancel&&(SW.lock==='y'?(SW.dy>110||(SW.dy>40&&SW.dy/dt>.55)):(-SW.dx>W*.33||(-SW.dx>50&&-SW.dx/dt>.5)));
   el.style.transition='transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s';
   if(go){el.style.transform=SW.lock==='y'?'translate3d(0,'+H+'px,0)':'translate3d('+(-W)+'px,0,0)';if(sc){sc.style.transition='opacity .28s';sc.style.opacity='0'}
