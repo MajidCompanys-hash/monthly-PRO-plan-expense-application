@@ -775,7 +775,7 @@ h2.fold-closed,.backrow.fold-closed{margin-bottom:4px}
 .yg-key .ok::before{background:var(--inc)}.yg-key .bad::before{background:var(--exp)}
 
 /* ===== الصفحة ثابتة على قدّ الشاشة: بدون تكبير بالإصبعين أو بالنقر المزدوج ===== */
-html,body{touch-action:pan-x pan-y;overflow-x:hidden;max-width:100%}
+html{touch-action:pan-x pan-y;overflow-x:hidden;max-width:100%}body{touch-action:pan-x pan-y;overflow-x:clip;max-width:100%}
 button,a,input,select,textarea,label{touch-action:manipulation}
 /* الآيفون يكبّر الصفحة تلقائيًا عند الكتابة في خانة خطها أصغر من 16، فنجعلها 16 */
 @supports (-webkit-touch-callout:none){input,select,textarea,.inp{font-size:16px!important}}
@@ -1401,3 +1401,27 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .salbox{align-items:center}.salbox .chip{flex:none}
 .ba-mon{grid-template-columns:minmax(0,1fr) auto auto;row-gap:4px}.ba-mon .ba-bars{grid-column:1/-1;grid-row:2}
 @media (max-width:359px){.ba-mon{grid-template-columns:minmax(0,1fr) auto auto}.ba-mon .num.amt-inc{display:inline}}
+/* عمليات الكشوفات المستوردة */
+.sm-search{margin-bottom:8px}.sm-f{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sm-f .inp{min-width:0}
+.sm-c{margin:10px 0 6px}
+.sm-list{padding-block:2px}.sm-row{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line);min-width:0}.sm-row:last-child{border-bottom:0}.sm-row.own{opacity:.7}
+.sm-ck{flex:none;padding:8px 2px;display:flex}.sm-ck input{width:20px;height:20px}
+.sm-b{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;padding:10px 0;color:inherit;font:inherit;text-align:start;cursor:pointer}
+.sm-b .srch-m{flex:1;min-width:0;display:flex;flex-direction:column}.sm-b .srch-m b,.sm-b .srch-m small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sm-b>b{flex:none}
+.sm-bulk{display:grid;gap:8px;margin-bottom:8px;border:1px solid var(--accent)}
+.sm-ed .seg button[disabled]{opacity:.4}
+/* التصنيف السريع */
+.ck-g{padding:0;overflow:hidden}.ck-g.open{border-color:var(--accent)}
+.ck-h{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:12px;color:inherit;font:inherit;text-align:start;cursor:pointer;min-width:0}
+.ck-m{flex:1;min-width:0;display:flex;flex-direction:column}.ck-m b,.ck-m small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ck-m small{color:var(--muted);font-size:12px}.ck-h>b{flex:none}
+.ck-tag{flex:none;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;color:var(--cc);background:color-mix(in srgb,var(--cc) 14%,transparent);max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ck-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:0 10px 4px}
+.ck-c{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);font:inherit;font-size:11.5px;cursor:pointer;min-width:0}
+.ck-c i{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-style:normal;font-size:17px}.ck-c span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ck-c.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+.ck-g .pg-keep{margin:6px 10px 10px}
+.ck-rule{gap:8px;align-items:center}.ck-rule>span:first-child{flex:1;min-width:0}
+/* البحث مثبّت أعلى الرئيسية + عدسة البحث في كل الأقسام */
+.srchpin{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--hdrH,58px));z-index:4;background:var(--bg);margin:-4px -2px 4px;padding:2px 2px 8px}
+.srchpin .srchbar{margin:0;gap:10px}.srchpin .srchbar svg{width:20px;height:20px;flex:none;color:var(--accent)}.srchpin .srchbar span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#srchBtn.srchfab{color:var(--accent)}
