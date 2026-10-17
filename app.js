@@ -858,7 +858,7 @@ function vHome(){
   return `${homeDuaHtml()}${spiritHtml('top')}${rzHtml('top')}<section class="hero"><div class="lbl">${pc?'المتبقي من راتب هذه الدورة':'المتبقي في '+esc(mShort(m))}</div>
    <div class="big"><span class="num">${left<0?'−':''}${money(Math.abs(left))}</span> <small>${CUR}</small></div>
    <div class="row"><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M7 9v8h8"/></svg></span>الدخل</span><b class="num">${amtH(inc)}</b></div><div class="cell"><span><span class="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>المصاريف</span><b class="num">${amtH(exp)}</b></div></div>${pc?`<div class="lbl" style="margin-top:10px;font-size:12.5px">دورة الراتب: ${fmtD(pc.start)} – ${fmtD(pc.end)}</div>`:''}${heroDebtHtml(m,pc,left)}</section>
-   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}<button class="srchbar" data-search="1" aria-label="بحث في التطبيق"><span aria-hidden="true">🔍</span><span>ابحث في عملياتك وديونك والتزاماتك…</span></button><button class="stbtn sm" data-stmt="1"><span>🏦</span><span><b>استيراد كشف حساب البنك</b><small>أضف عمليات الشهر من كشف PDF بضغطة</small></span><span class="xph-go">‹</span></button>${spendBtnHtml()}${todayHtml()}${rescueHomeHtml()}${revHomeHtml()}${xpHomeHtml()}${ppHomeHtml()}${seasHomeHtml()}${subsHomeHtml()}
+   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${backupNudgeHtml()}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}<button class="srchbar" data-search="1" aria-label="بحث في التطبيق"><span aria-hidden="true">🔍</span><span>ابحث في عملياتك وديونك والتزاماتك…</span></button>${list().some(t=>t.src==='stmt')?'<button class="stbtn sm" data-bana="1"><span>📊</span><span><b>تحليل كشوفات البنوك</b><small>المدمج من كل بنوكك · خطة الشهر القادم</small></span><span class="xph-go">‹</span></button>':'<button class="stbtn sm" data-stmt="1"><span>🏦</span><span><b>استيراد كشف حساب البنك</b><small>أضف عمليات الشهر من كشف PDF بضغطة</small></span><span class="xph-go">‹</span></button>'}${spendBtnHtml()}${todayHtml()}${rescueHomeHtml()}${revHomeHtml()}${xpHomeHtml()}${ppHomeHtml()}${safe('التوقعات',()=>fcHomeHtml())}${seasHomeHtml()}${subsHomeHtml()}
    ${pendHtml()||billAlertsHtml()||trustAlertsHtml()||carAlertsHtml()||docAlertsHtml()?'<div style="margin-top:14px">'+pendHtml()+billAlertsHtml()+trustAlertsHtml()+carAlertsHtml()+docAlertsHtml()+'</div>':''}${spiritHtml('mid')}${rzHtml('mid')}${smartAlertsHtml()}${bfHomeHtml()}${finStatusHtml()}${widgetNudgeHtml()}${empty}${advHomeHtml()}${plansHomeHtml()}${repHomeHtml()}
    ${recent.length?`<h2>آخر العمليات</h2><div class="panel" style="padding:6px 10px">${recent.map(txRow).join('')}</div><div style="margin-top:8px"><button class="chip" data-tab="log">عرض كل العمليات</button></div>`:''}${debtsBrowseHtml()}${spiritHtml('bottom')}${rzHtml('bottom')}`;
 }
@@ -2844,7 +2844,7 @@ function admAsk(then,why){let el=document.getElementById('admLayer');if(!el){el=
   if(!c.bio)setTimeout(()=>{const i=document.getElementById('admPin');if(i)i.focus()},60)}
 /* كل زر تعديل أو حذف أو تراجع أو اعتماد يمر من هنا أولًا */
 const ADM_SEL=['[data-edit]','[data-txdel]','[data-txedit]','[data-dpe]','[data-redit]','[data-dedit]','[data-tedit]','[data-cedit]','[data-gedit]','[data-pedit]','[data-sedit]','[data-rpedit]',
-  '[data-apv]','[data-apedit]','#syncEncOff','[data-unpay]','[data-recpick]','[data-secadd]','[data-early]','[data-icoedit]','#rzOn','[data-rzpos]','[data-payedit]','#payAdd','[data-mdi]','#plOn','[data-plscope]','[data-plbefore]','[data-rename]','#lblEdit','[data-acedit]','#acAdd','[data-trdel]','[data-subadd]','#dnEdit','#wdEdit','#apvAll','[id$="DelAsk"]','#pdYes','.toast button','#clearSample','#restoreBtn','label[for="restoreFile"]','label[for="restoreFile2"]','[data-snaprest]','#syncUnlink','#vaultReset','#admOff','#admPinChange','#admApprove','#admBioSet'].join(',');
+  '[data-apv]','[data-apedit]','#syncEncOff','[data-purge]','#pgGo','#dpGo','#fcBud','[data-unpay]','[data-recpick]','[data-secadd]','[data-early]','[data-icoedit]','#rzOn','[data-rzpos]','[data-payedit]','#payAdd','[data-mdi]','#plOn','[data-plscope]','[data-plbefore]','[data-rename]','#lblEdit','[data-acedit]','#acAdd','[data-trdel]','[data-subadd]','#dnEdit','#wdEdit','#apvAll','[id$="DelAsk"]','#pdYes','.toast button','#clearSample','#restoreBtn','label[for="restoreFile"]','label[for="restoreFile2"]','[data-snaprest]','#syncUnlink','#vaultReset','#admOff','#admPinChange','#admApprove','#admBioSet'].join(',');
 document.addEventListener('click',e=>{if(!admOn())return;if(e.target.closest('#admLayer'))return;
   if(admOpen()){if(e.target.closest('button,label'))Adm.last=Date.now();return}
   const b=e.target.closest(ADM_SEL);if(!b)return;e.preventDefault();e.stopImmediatePropagation();
@@ -3215,8 +3215,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.43.0';
+const APP_VERSION='2.44.0';
 const CHANGELOG=[
+ {v:'2.44.0',d:'2026-10-17',items:['«📊 تحليل كشوفات البنوك»: كل ما تستورده من كشوفات بنك مسقط والبنك الوطني وأي بنك تضيفه مستقبلًا يُدمج في قاعدة واحدة ويُفرز مصروفات وإيداعات، والتحويلات بين حساباتك مستبعدة','التحليل: الإيداعات والمصروفات والصافي، وكل بنك وحده مع آخر رصيد، وشهرًا بشهر برسم، والمصروفات حسب الفئة، والإيداعات حسب المصدر، وأكثر الجهات صرفًا، والتحويلات للأشخاص، والفوائد والغرامات التي دفعتها للبنك','العمليات المدمجة: تصفية مصروفات أو إيداعات، وحسب البنك والفترة والفئة، وترتيب بالأحدث أو الأكبر، والضغط على أي عملية يفتحها للتعديل','«خطة الشهر القادم»: الدخل المتوقع، والتزاماتك وأقساطك، وسقف مقترح لكل فئة من متوسط كشوفاتك، وما يبقى للادخار، مع توصيات (الغرامات، المطاعم، المصاريف الصغيرة، التحويلات)، وتعتمد الأسقف كميزانيات بضغطة','طباعة التحليل كاملًا في تقرير PDF واحد، أو ملف Excel واحد فيه 6 أوراق: العمليات المدمجة، حسب البنك، شهريًا، حسب الفئة، الجهات، خطة الشهر القادم','بعد كل استيراد يفتح التحليل مباشرة، وقائمة بالكشوفات التي استوردتها','في الضبط «🧹 مسح بيانات الإدخال وإعادة إدخالها»: تختار شهرًا أو عدة أشهر أو سنة أو كل الفترات، والمستورد من الكشوفات فقط أو كل العمليات، وحسابًا معينًا ومصروفات أو إيداعات، وترى المعاينة ثم تمسح بعد لقطة احتياطية تلقائية، ثم «أرفق كشف هذه الفترة» فتُستورد عملياتها فقط وتُفرز تلقائيًا','دفعات الديون المرتبطة بالعمليات الممسوحة تُحذف من سجل الدين ويُعاد المبلغ إلى رصيده، فلا يُخصم القسط مرتين عند إعادة الاستيراد','المسح يشمل بيانات الإدخال (العمليات) فقط: الخطط الشهرية ومخطط السداد والالتزامات والأقساط والديون وتقسيم الصرف والميزانيات والمصاريف الموسمية والحسابات والفئات تبقى كما هي، مع خيار «إبقاء دفعات الديون والالتزامات المسجّلة» حتى لا يتغير رصيد أي قرض أو حالة أي التزام','منع تكرار الكشوفات: السطر المستورد من قبل لا يُستورد مرة ثانية حتى لو أرفقت نفس الكشف أو كشفًا متداخلًا، والصفوف المتطابقة فعلًا في نفس الكشف تُحسب صحيحة، والعملية التي أدخلتها يدويًا تُطابَق مع سطر واحد فقط من الكشف، ويظهر في أعلى المراجعة كم عملية مكررة لن تُستورد ولماذا، والضغط مرتين على «استيراد» لا يكرر شيئًا','استيراد عدة كشوفات PDF أو Excel معًا: اختر كل الملفات مرة واحدة فيتعرف التطبيق على بنك كل ملف ورقم حسابه، ويجمع ملفات نفس الحساب في كشف واحد مرتب بالتاريخ، ويحذف الأسطر المتكررة بين الكشوفات المتداخلة (مع إبقاء العمليات المتطابقة فعلًا في نفس الكشف)، ثم تراجع كل حساب وتستورده، ويتذكر أي حساب في التطبيق يتبع كل رقم حساب','«🖨️ طباعة مرتبة» للكشوفات: ملخص لكل بنك (الفترة والإيداعات والمصروفات والرصيد الافتتاحي والختامي والمكرر)، ثم جدول لكل شهر بالتاريخ والبيان والفئة والمدين والدائن والرصيد وحالة كل سطر، مع المجاميع','«📈 التوقعات ومقارنة الأشهر» في الرئيسية وفي إدارة البيانات: يتعلم من أشهرك الماضية في كشوفات البنك (أو كل العمليات) معدل كل فئة وأعلى وأقل شهر واتجاهها، ويقارن الشهر الحالي بها (حتى الآن، والمتوقع بنهاية الشهر، وتنبيه «تجاوز التوقع» أو «أسرع من المعدل»)، ويتوقع الأشهر الثلاثة القادمة: الدخل والالتزامات والمصاريف المتوقعة والموسمية وما يبقى','جدول الأشهر مرتب: كل فئة شهرًا بشهر مع المعدل وهذا الشهر والتوقع وصف المجموع، للمصروفات والالتزامات والإيداعات','يحفظ توقع كل شهر عند بدايته، وبعد انتهائه يعرض «التوقع مقابل الفعلي» ودقة التوقع فئة بفئة','الإدارة: عدد الأشهر التي يتعلم منها (3 أو 6 أو 12)، المصدر (الكشوفات أو كل العمليات)، استبعاد شهر غير طبيعي، الشهر الذي لا يغطيه الكشف كاملًا يُستبعد تلقائيًا، تعديل توقع أي فئة يدويًا، واعتماد التوقع كميزانيات','طباعة تقرير PDF منظم وملف Excel من 5 أوراق مع المجاميع','«🔍 فحص تكرار عمليات الكشوفات» في الضبط وفي تحليل الكشوفات: يفحص كل بياناتك ويعرض المكرر (سطر كشف مستورد مرتين، أو عملية يدوية موجودة أيضًا في الكشف)، ويبقي نسخة واحدة: نسخة الكشف مع فئتك وملاحظتك اليدوية، وإن كانت اليدوية دفعة دين تبقى وتُربط بالكشف، ويحذف الزائد بعد لقطة احتياطية']},
  {v:'2.43.0',d:'2026-10-17',items:['«🏦 استيراد كشف حساب البنك»: تختار ملف الكشف PDF أو Excel أو CSV من بنك مسقط أو البنك الوطني العُماني أو أي بنك، فيقرأ التطبيق كل العمليات داخل هاتفك بدون إنترنت ولا يُرسل الكشف لأي مكان','يقرأ البيان حتى لو امتد على أكثر من سطر، ويميّز السحب من الإيداع، ويتحقق من تسلسل الرصيد سطرًا بسطر ويعرض «✓ مطابق»، ويطلب كلمة المرور إذا كان الكشف محميًا','يقترح الفئة من البيان: المها وشل ونفط عمان = وقود، البقالات والمطاعم والصيدليات والعيادات وأوريدو وعمانتل… والتحويلات إلى الأشخاص ومنهم، ويتعلّم من تصنيفاتك في كل استيراد','يجمع أسطر القرض في بنك مسقط (الأصل والفوائد والفوائد المتأخرة وغرامات التأخير) في عملية واحدة بتفصيلها، ويربطها بدينك كدفعة إن أردت','صفحة مراجعة قبل الحفظ: تعدّل الفئة والبيان وتلغي ما لا تريده، والمكرر والمستورد سابقًا يُعلَّم ولا يُضاف مرتين، والسحب النقدي غير محدد افتراضيًا، ثم يُحدَّث رصيد الحساب إلى الرصيد الختامي في الكشف','يتعرّف على التحويلات بين حساباتك (مثل تحويلك من الوطني إلى مسقط) من رقم الحساب، فلا يحسبها دخلًا ولا مصروفًا','«📊 حفظ الكشف Excel»: يحوّل كشف PDF إلى ملف Excel مرتب (التاريخ، البيان، ملاحظتي، الفئة، مدين، دائن، الرصيد، يُستورد)، تعدّله في Numbers ثم تستورده من نفس الزر فتُقرأ فئاتك وملاحظاتك منه']},
  {v:'2.42.0',d:'2026-10-17',items:['«📆 المصاريف الموسمية والسنوية»: رمضان وعيد الفطر وعيد الأضحى بتواريخها الهجرية تلقائيًا، والرسوم المدرسية، وتأمين السيارة وملكيتها من بيانات سيارتك، والسفر والهدايا وأي مصروف آخر','يحسب لكل موسم كم تدّخر شهريًا = (المبلغ − ما ادّخرته) ÷ الأشهر الباقية، وتسجّل «حوّلت للادخار» كل شهر، وحصة الشهر التي لم تحوّلها تُحجز تلقائيًا من «كم أستطيع أن أنفق اليوم»','عند «دفعته» يُفتح تسجيل المصروف، ويبدأ الادخار لموعده في السنة القادمة','«🔁 كاشف المصاريف المتكررة»: يفحص آخر 7 أشهر ويكتشف المبالغ المتقاربة بنفس الاسم التي تتكرر كل شهر وليست ضمن التزاماتك، ويبين كلفتها في السنة، وتضيفها كالتزام بضغطة أو تتجاهلها','«📋 مراجعة نهاية الشهر» في 4 خطوات: الملخص ومقارنته بالشهر السابق، والميزانية والفئات التي زادت عن معدلك، وأين تضع الفائض (المواسم، الخطط، دفعة إضافية للدين الأعلى فائدة)، ثم الإقفال بملاحظاتك وتقرير PDF','تظهر في الرئيسية تلقائيًا: المراجعة في أول 10 أيام من الشهر، والموسم القادم بعدّه التنازلي، والمصاريف المتكررة المكتشفة']},
  {v:'2.41.0',d:'2026-10-16',items:['«اسأل تطبيقك»: اكتب سؤالك بلغتك فتأتيك الإجابة مباشرة، مثل: كم صرفت على البنزين هذا الشهر؟ كم علي هذا الشهر؟ كم باقي من راتبي؟ متى ينتهي قرض البنك؟ أكبر مصروف في سبتمبر، أين أصرف أكثر؟ متوسط المطاعم، كم مرة اشتريت قهوة؟','يفهم الفترات: اليوم، أمس، هذا الأسبوع، الشهر الماضي، آخر 3 أشهر، هذه السنة، اسم أي شهر، ويقارن كل إجابة بالفترة السابقة والمعدل الشهري مع رسم صغير لآخر 6 أشهر','يتسامح مع أخطاء الكتابة ويعرف المرادفات: وقود وبترول = بنزين، أكل وغداء = مطاعم، كهربا = كهرباء، ويتعلّم من الكلمات التي تكتبها في عملياتك','تحليل فوري لأي بحث: مجموع كل شهر والمعدل والتغيّر عن الشهر الماضي، وتصفية النتائج حسب الفئة والشهر والشخص، وترتيبها، وتصديرها Excel','أوامر سريعة: «بنزين 5» يسجّل مصروفًا جاهزًا، و«ادفع الكهرباء» يفتح نافذة الدفع','كله يعمل داخل هاتفك بدون إنترنت ولا خوادم، ولا تخرج بياناتك منه']},
@@ -3935,6 +3936,7 @@ function vSettings(){const c=lockCfg(),af=c&&c.after!=null?+c.after:60;setTimeou
   <h2>☁️ المزامنة مع Google Drive</h2><div id="syncBox">${syncHtml()}</div>
   <h2>🛡️ وضع المدير</h2>${admHtml()}
   <h2>✏️ أسماء الأقسام</h2><div class="panel stack"><span class="note">غيّر أسماء أقسام القائمة الشهرية ومجموعات الديون وأقسامي والشريط السفلي. يمكنك أيضًا الضغط على ✏️ بجانب أي عنوان مباشرة.</span><button class="btn ghost block" id="lblEdit"><span class="lk">🔒 </span>تعديل أسماء الأقسام</button></div>
+  <h2>🧹 مسح بيانات الإدخال وإعادة إدخالها</h2><div class="panel stack"><span class="note">امسح بيانات الإدخال فقط (العمليات) لشهر أو عدة أشهر أو سنة أو كل الفترات، مع بقاء الخطط والالتزامات والديون وتقسيم الصرف كما هي، ثم أرفق كشف حساب البنك لنفس الفترة فتُعاد العمليات وتُفرز تلقائيًا. تُحفظ لقطة احتياطية قبل المسح.</span><button class="btn ghost block" data-purge="1"><span class="lk">🔒 </span>🧹 مسح وإعادة إدخال بيانات فترة</button><button class="btn ghost block" data-dupscan="1">🔍 فحص تكرار عمليات الكشوفات</button></div>
   <h2>🗂️ البيانات والمظهر</h2>
   <div class="stack"><button class="btn ghost block" id="dbOpen">🗄️ قاعدة البيانات والنسخ الاحتياطي</button><button class="btn ghost block" id="lookBtn2">🎨 المظهر والألوان</button><button class="btn ghost block" data-tab="reports">📊 التقارير والمزامنة</button></div>
   <p class="note" style="text-align:center;margin-top:14px">إدارة شؤوني · الإصدار ${APP_VERSION}</p>`}
@@ -4141,7 +4143,7 @@ function vMaster(){const P=people(),Y=payees(),A=accList(),R=recs(),D=debts();
   const sec=(title,items,addAttr,addTxt,empty)=>`<h2>${title}</h2><div class="panel mdlist">${items.length?items.join(''):`<p class="note" style="margin:6px 0">${empty}</p>`}</div><button class="chip secadd" ${addAttr}><span class="lk">🔒 </span>${addTxt}</button>`;
   return `<div class="backrow" style="margin-top:4px"><h2 style="margin:0">${esc(lbl('sec.master'))}</h2><button class="chip" data-tab="home">الرئيسية ‹</button></div>
   <p class="note" style="margin:0 2px 10px">أدخل هنا الأشخاص والجهات والحسابات والالتزامات والديون مرة واحدة، فتظهر جاهزة للاختيار في كل مكان بالتطبيق، بدون كتابة الأسماء من جديد ولا أخطاء إملائية.</p>
-  <h2>📊 الاستيراد والتصدير (Excel / Numbers)</h2><button class="stbtn" data-stmt="1"><span>🏦</span><span><b>استيراد كشف حساب البنك</b><small>بنك مسقط · البنك الوطني العُماني · PDF أو Excel أو CSV</small></span><span class="xph-go">‹</span></button>${safe('الاستيراد والتصدير',()=>mdIoHtml())}
+  <h2>📊 الاستيراد والتصدير (Excel / Numbers)</h2><button class="stbtn" data-stmt="1"><span>🏦</span><span><b>استيراد كشف حساب البنك</b><small>بنك مسقط · البنك الوطني العُماني · PDF أو Excel أو CSV</small></span><span class="xph-go">‹</span></button>${list().some(t=>t.src==='stmt')?'<button class="stbtn sm" data-bana="1"><span>📊</span><span><b>تحليل كشوفات البنوك المدمجة</b><small>مصروفات وإيداعات كل البنوك في مكان واحد، وخطة الشهر القادم، PDF وExcel</small></span><span class="xph-go">‹</span></button>':''}<button class="stbtn sm" data-fcast="set"><span>📈</span><span><b>التوقعات ومقارنة الأشهر</b><small>يتعلم من أشهرك الماضية ويقارنها بالشهر الحالي والقادمة · إدارة الأشهر المحسوبة والتعديل اليدوي · PDF وExcel</small></span><span class="xph-go">‹</span></button>${safe('الاستيراد والتصدير',()=>mdIoHtml())}
   <h2>أقسامي</h2>${safe('لوحة الأقسام',()=>dashHtml(true))}${safe('الاختصارات',()=>quickHtml())}
   <h2>💼 الراتب والمتبقي هذا الشهر</h2>${safe('إدارة الراتب',()=>salMgmtHtml())}
   ${sec('👨‍👩‍👧 الأشخاص',P.map(p=>row(esc(p.name),[p.rel?esc(p.rel):'',+p.allowance?'المخصص '+money(p.allowance):''].filter(Boolean).join(' · '),`data-pedit="${esc(p.id)}"`,['person:'+p.id,personAv(p)])),'data-padd="1"','+ شخص','لا يوجد أشخاص بعد.')}
@@ -5348,8 +5350,8 @@ function sPages(){return [
   ['🗄️','إدارة البيانات','الديون الحسابات الاشخاص الجهات الاستيراد التصدير',()=>sGoTab('budget')],['📊','التقارير','تقرير احصائيات ما الجديد',()=>sGoTab('reports')],['⚙️','الضبط','الاعدادات settings',()=>sGoTab('settings')],
   ['🧭','المستشار المالي','المستشار نصائح صحه ماليه',()=>sGoTab('advisor')],['🏡','البيت','البيت المنزل',()=>sGoTab('house')],['🚗','السيارات','سياره تامين ملكيه',()=>sGoTab('cars')],['🤝','الأمانات','امانات اموال الاخرين',()=>sGoTab('trusts')],['📁','المستندات','مستندات خزنه ملفات',()=>sGoTab('docs')],
   ['📊','مخطط السداد والالتزامات','خطه سداد قسط اختياري تقسيط معادله',()=>openPayPlanner()],['🗓️','الخطة المالية الاستثنائية','خطه استثنائيه تاجيل',()=>openXPlans()],['💰','كم أستطيع أن أنفق اليوم؟','صرف امن انفق اليوم',()=>openSpendToday()],
-  ['🛟','خطة الإنقاذ','انقاذ تنظيم وضعي',()=>openRescue()],['📖','التلاوات القرآنية','قران الملك الواقعه يس',()=>openQuranHub()],['📆','اختيار الشهر','تقويم شهر',()=>openMonthPicker()],['🖨️','طباعة تقرير','طباعه pdf تقرير',()=>openPrintSheet()],
-  ['💳','الحسابات والمحافظ','حساب بنك محفظه رصيد',()=>openAccounts()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()],['📆','المصاريف الموسمية','رمضان العيد عيد الفطر الاضحي مدارس تامين سفر موسمي سنوي',()=>openSeasonal()],['🔁','المصاريف المتكررة','اشتراكات اشتراك متكرر منسي',()=>openSubs()],['📋','مراجعة الشهر','مراجعه نهايه الشهر اقفال فائض',()=>openReview()],['🏦','استيراد كشف حساب البنك','كشف حساب بنك مسقط الوطني pdf استيراد',()=>openStmt()]]}
+  ['📈','التوقعات ومقارنة الأشهر','توقع توقعات مقارنه الاشهر معدل تعلم الاشهر الماضيه القادمه',()=>openMonthFc()],['🔍','فحص تكرار الكشوفات','تكرار مكرر كشف البنك',()=>openDupScan()],['🛟','خطة الإنقاذ','انقاذ تنظيم وضعي',()=>openRescue()],['📖','التلاوات القرآنية','قران الملك الواقعه يس',()=>openQuranHub()],['📆','اختيار الشهر','تقويم شهر',()=>openMonthPicker()],['🖨️','طباعة تقرير','طباعه pdf تقرير',()=>openPrintSheet()],
+  ['💳','الحسابات والمحافظ','حساب بنك محفظه رصيد',()=>openAccounts()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()],['📆','المصاريف الموسمية','رمضان العيد عيد الفطر الاضحي مدارس تامين سفر موسمي سنوي',()=>openSeasonal()],['🔁','المصاريف المتكررة','اشتراكات اشتراك متكرر منسي',()=>openSubs()],['📋','مراجعة الشهر','مراجعه نهايه الشهر اقفال فائض',()=>openReview()],['🏦','استيراد كشف حساب البنك','كشف حساب بنك مسقط الوطني pdf استيراد',()=>openStmt()],['📊','تحليل كشوفات البنوك','تحليل كشف بنك مدمج خطه الشهر القادم',()=>openBankAnalysis()],['🧹','مسح وإعادة إدخال بيانات فترة','مسح حذف شهر سنه اعاده ادخال كشف',()=>openPurge()]]}
 function sGoTab(t){document.getElementById('layer').innerHTML='';S.tab=t;S.month=curM();render();window.scrollTo(0,0)}
 /* التنقل إلى عنصر وإبرازه */
 function sFocus(tab,sel,prep){const L=document.getElementById('layer');L.innerHTML='';S.tab=tab;S.month=curM();if(prep)prep();render();
@@ -5789,8 +5791,10 @@ function stClassify(R,ownNow,ownAcc){const learn=S.settings.stmtLearn||{};const 
     out.push(Object.assign({date:r.date,amount:r.amount,raw:[r.desc],idx:[i],bal:r.bal,skip:!!r.skip},c))});
   out.forEach(x=>{if(x.kind==='loan'){const p=x.parts;x.note='أقساط القرض: أصل '+money(p.prin)+(p.int?' + فوائد '+money(p.int):'')+(p.over?' + فوائد متأخرة '+money(p.over):'')+(p.pen?' + غرامات تأخير '+money(p.pen):'')}});
   /* المكرر: موجود مسبقًا بنفس التاريخ (±يوم) والمبلغ والنوع، أو استُورد من قبل */
-  const ex=list();const refs=new Set(ex.map(t=>t.bref).filter(Boolean));
-  out.forEach(x=>{x.bref='st:'+x.date+':'+x.amount+':'+stLearnKey(x.raw.join(' ')).slice(0,20);const dup=refs.has(x.bref)?'imported':ex.find(t=>t.type===x.type&&Math.abs(+t.amount-x.amount)<0.0005&&Math.abs(dDiff(t.date,x.date))<=1);
+  /* التحقق من التكرار: (1) نفس سطر الكشف مستورد من قبل، بالعدد (لو تكرر نفس المبلغ في نفس اليوم مرتين يُحسب مرتين)، (2) عملية أدخلتها يدويًا بنفس النوع والمبلغ خلال يوم، وكل عملية تطابق سطرًا واحدًا فقط */
+  const ex=list();const refN={};ex.forEach(t=>{if(t.bref)refN[t.bref]=(refN[t.bref]||0)+1});const used=new Set();
+  out.forEach(x=>{x.bref='st:'+x.date+':'+x.amount+':'+stLearnKey(x.raw.join(' ')).slice(0,20);let dup=null;if(refN[x.bref]>0){refN[x.bref]--;dup='imported'}
+    if(!dup){dup=ex.filter(t=>!used.has(t.id)&&t.src!=='stmt'&&!t.sample&&t.type===x.type&&Math.abs(+t.amount-x.amount)<0.0005&&Math.abs(dDiff(t.date,x.date))<=1).sort((a,b)=>Math.abs(dDiff(a.date,x.date))-Math.abs(dDiff(b.date,x.date)))[0]||null;if(dup){used.add(dup.id);x.dupId=dup.id}}
     x.dup=dup?(dup==='imported'?'استُورد من قبل':'موجود: '+(dup.note||catOf(dup.cat).n)+' '+fmtD(dup.date)):'';
     if(!x.dup&&x.kind!=='loan'){const pair=ex.find(t=>t.src==='stmt'&&t.acc!==ownAcc&&t.type!==x.type&&Math.abs(+t.amount-x.amount)<0.0005&&Math.abs(dDiff(t.date,x.date))<=2&&(t.own||/تحويل|حوالة/.test(t.note||'')));if(pair){x.kind='own';x.pair=pair.id;x.note=x.type==='inc'?'تحويل وارد من حسابك الآخر':'تحويل إلى حسابك الآخر'}}
     x.on=!x.dup&&!x.skip&&x.kind!=='cash'&&x.kind!=='own'});
@@ -5820,47 +5824,54 @@ function stXlsx(I,P,st,fname){const bank=ST_BANKS[st.bank].n;
     head:[['التاريخ','d'],['البيان','s',40],['ملاحظتي','s',26],['الفئة','s',18],['مدين','n'],['دائن','n'],['الرصيد','n'],['يُستورد','s',8],['النوع','s',12]],rows,totals:[4,5]}];
   const data=XL.build(sh);const nm='statement-'+st.bank+'-'+(P.to||today())+'.xlsx';shareFile(nm,data,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').then(r=>{if(r!=='cancel')toast(r==='shared'?'اختر «Numbers» لفتحه':'حُفظ '+nm)})}
 /* واجهة الاستيراد */
-function openStmt(){const L=document.getElementById('layer');const st={bank:(S.settings.stmtBank)||'bm',acc:(S.settings.stmtAcc)||'main'};
+function openStmt(opt){opt=opt||{};const L=document.getElementById('layer');const st={bank:(S.settings.stmtBank)||'bm',acc:(S.settings.stmtAcc)||'main',range:opt.range||null};
   const A=accList();
   L.innerHTML=`${sheetTop('كشف الحساب')}<h2 style="margin-top:0">🏦 استيراد كشف حساب البنك</h2>
+   ${st.range?`<div class="infobox"><span>📅 ستُستورد عمليات <b>${esc(st.range.label)}</b> فقط (${fmtD(st.range.from)} – ${fmtD(st.range.to)})، وما خارجها في الكشف يُتجاهل.</span></div>`:''}
    <p class="note" style="margin-top:0">اختر ملف الكشف (PDF أو Excel أو CSV) الذي نزّلته من تطبيق البنك. يُقرأ داخل هاتفك فقط ولا يُرسل لأي مكان، ثم تراجع العمليات قبل إضافتها.</p>
    <div class="field"><label>البنك</label><div class="seg">${Object.entries(ST_BANKS).map(([k,b])=>`<button class="n" data-stbank="${k}" aria-pressed="${st.bank===k}">${b.n}</button>`).join('')}</div></div>
    <div class="field"><label for="stAcc">أضفها إلى حساب</label><select class="inp" id="stAcc">${A.map(a=>`<option value="${esc(a.id)}" ${st.acc===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}</select></div>
-   <label class="btn block stpick" for="stFile">📄 اختر ملف الكشف</label><input type="file" id="stFile" accept="application/pdf,.pdf,.xlsx,.csv,text/csv" hidden>
+   <label class="btn block stpick" for="stFile">📄 اختر ملف الكشف أو عدة ملفات</label><small class="note" style="display:block;text-align:center;margin-top:4px">تستطيع اختيار عدة كشوفات معًا (أشهر مختلفة أو بنوك مختلفة)، فتُدمج ويُحذف المتكرر بينها</small>${list().some(t=>t.src==='stmt')?'<button class="btn ghost block" id="stAna" style="margin-top:8px">📊 تحليل الكشوفات المستوردة</button>':''}${(S.settings.stmtHist||[]).length?`<details class="panel" style="margin-top:12px"><summary><b>الكشوفات المستوردة (${S.settings.stmtHist.length})</b></summary>${S.settings.stmtHist.slice().reverse().map(h=>`<div class="sumrow"><span>${esc(ST_BANKS[h.bank]?ST_BANKS[h.bank].n:'بنك')}<small class="note" style="display:block">${esc(h.file||'')} · ${h.from?fmtD(h.from)+' – '+fmtD(h.to):''}</small></span><b>${h.n} عملية</b></div>`).join('')}</details>`:''}<input type="file" id="stFile" accept="application/pdf,.pdf,.xlsx,.csv,text/csv" multiple hidden>
    <div id="stMsg"></div>
    <details class="panel" style="margin-top:12px"><summary><b>كيف أنزّل الكشف؟</b></summary><p class="note">بنك مسقط: تطبيق mobile banking ← الحساب ← كشف الحساب ← اختر الفترة ← تنزيل PDF. البنك الوطني: تطبيق NBO ← الحسابات ← كشف الحساب ← PDF أو Excel. احفظه في «الملفات» ثم اختره هنا. إذا كان الملف محميًا بكلمة مرور يطلبها التطبيق.</p></details>
    <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
   const msg=(h)=>{const m=document.getElementById('stMsg');if(m)m.innerHTML=h};
   L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+    if(x.id==='stAna'){openBankAnalysis();return}
     if(x.dataset.stbank){st.bank=x.dataset.stbank;L.querySelectorAll('[data-stbank]').forEach(b=>b.setAttribute('aria-pressed',b===x));return}};
   L.oninput=null;
-  L.onchange=async e=>{if(e.target.id==='stAcc'){st.acc=e.target.value;return}if(e.target.id!=='stFile')return;const f=e.target.files[0];e.target.value='';if(!f)return;
-    msg('<div class="infobox"><span>⏳ أقرأ الكشف…</span></div>');let P=null;
-    try{if(/\.pdf$/i.test(f.name)||f.type==='application/pdf'){const buf=await f.arrayBuffer();let r=null,pw='';
-        for(let k=0;k<3;k++){try{r=await stReadPdf(buf.slice(0),pw);break}catch(er){if(er&&er.name==='PasswordException'){pw=prompt(k?'كلمة المرور غير صحيحة. أعد كتابتها':'الكشف محمي بكلمة مرور. اكتبها (لا تُحفظ)')||'';if(!pw)throw new Error('pw')}else throw er}}
-        if(!r)throw new Error('pw');P=stParsePages(r.pages);if(!P.rows.length&&r.txt.replace(/\s/g,'').length<50){msg('<div class="warnbox">هذا الكشف صورة ممسوحة وليس نصًا، فلا يمكن قراءته. نزّل الكشف من تطبيق البنك مباشرة، أو بصيغة Excel.</div>');return}}
-      else if(/\.xlsx$/i.test(f.name)){const book=await readXlsx(await f.arrayBuffer());for(const rows of Object.values(book)){P=stFromTable(rows);if(P)break}}
-      else{P=stFromTable(stCsv(await f.text()))}}
-    catch(er){msg(`<div class="warnbox">${er&&er.message==='pw'?'لم تُكتب كلمة المرور.':er&&er.message==='lib'?'تعذّر تحميل قارئ PDF. افتح التطبيق مرة واحدة مع الإنترنت ليحفظه، ثم يعمل بدونه.':'تعذّر قراءة الملف: '+esc(er&&er.message||'')}</div>`);return}
-    if(!P||!P.rows.length){msg('<div class="warnbox">لم أجد عمليات في هذا الملف. تأكد أنه كشف حساب يحتوي أعمدة التاريخ والمبلغ والرصيد. وإن استمرت المشكلة أرسل لي نموذجًا لأضبط القارئ على تنسيقه.</div>');return}
+  L.onchange=async e=>{if(e.target.id==='stAcc'){st.acc=e.target.value;return}if(e.target.id!=='stFile')return;const fs=[...e.target.files];e.target.value='';if(!fs.length)return;
+    if(fs.length>1){const items=[];for(let i=0;i<fs.length;i++){msg(`<div class="infobox"><span>⏳ أقرأ الكشف ${i+1} من ${fs.length}: ${esc(fs[i].name)}…</span></div>`);try{const r=await stReadFile(fs[i]);items.push({name:fs[i].name,P:r.P,txt:r.txt})}catch(er){items.push({name:fs[i].name,err:stErrTxt(er)})}}
+      msg('');S.settings.stmtBank=st.bank;S.settings.stmtAcc=st.acc;openStmtBatch(items,st);return}
+    const f=fs[0];msg('<div class="infobox"><span>⏳ أقرأ الكشف…</span></div>');let P=null;
+    try{P=(await stReadFile(f)).P}catch(er){msg(`<div class="warnbox">${stErrTxt(er)}</div>`);return}
     S.settings.stmtBank=st.bank;S.settings.stmtAcc=st.acc;openStmtReview(P,st,f.name)}}
-function openStmtReview(P,st,fname){const L=document.getElementById('layer');const I=stClassify(P.rows,P.own,st.acc);let flt='all';let upd=P.close!=null;let lim=60;
+async function stReadFile(f){let P=null,txt='';
+  if(/\.pdf$/i.test(f.name)||f.type==='application/pdf'){const buf=await f.arrayBuffer();let r=null,pw='';
+    for(let k=0;k<3;k++){try{r=await stReadPdf(buf.slice(0),pw);break}catch(er){if(er&&er.name==='PasswordException'){pw=prompt((k?'كلمة المرور غير صحيحة. أعد كتابتها':'الكشف محمي بكلمة مرور. اكتبها (لا تُحفظ)')+'\n'+f.name)||'';if(!pw)throw new Error('pw')}else throw er}}
+    if(!r)throw new Error('pw');txt=r.txt;P=stParsePages(r.pages);if(!P.rows.length&&r.txt.replace(/\s/g,'').length<50)throw new Error('scan')}
+  else if(/\.xlsx$/i.test(f.name)){const book=await readXlsx(await f.arrayBuffer());for(const rows of Object.values(book)){P=stFromTable(rows);if(P)break}}
+  else{const t=await f.text();txt=t.slice(0,4000);P=stFromTable(stCsv(t))}
+  if(!P||!P.rows.length)throw new Error('empty');return{P,txt}}
+function stErrTxt(er){const m=er&&er.message;return m==='pw'?'لم تُكتب كلمة المرور.':m==='lib'?'تعذّر تحميل قارئ PDF. افتح التطبيق مرة واحدة مع الإنترنت ليحفظه، ثم يعمل بدونه.':m==='scan'?'هذا الكشف صورة ممسوحة وليس نصًا، فلا يمكن قراءته. نزّل الكشف من تطبيق البنك مباشرة، أو بصيغة Excel.':m==='empty'?'لم أجد عمليات في هذا الملف. تأكد أنه كشف حساب يحتوي أعمدة التاريخ والمبلغ والرصيد.':'تعذّر قراءة الملف: '+esc(m||'')}
+function openStmtReview(P,st,fname,after){const L=document.getElementById('layer');const I=stClassify(P.rows,P.own,st.acc);if(st.range)I.forEach(x=>{if(x.date<st.range.from||x.date>st.range.to){x.on=false;x.out=true}});let flt='all';let upd=P.close!=null;let lim=60;let busy=false;
   const cats=t=>(t==='inc'?INC_CATS:EXP_CATS);
   const draw=()=>{const on=I.filter(x=>x.on);const sx=on.filter(x=>x.type==='exp').reduce((s,x)=>s+x.amount,0),si=on.filter(x=>x.type==='inc').reduce((s,x)=>s+x.amount,0);
     const V=I.map((x,i)=>({x,i})).filter(({x})=>flt==='all'||(flt==='exp'&&x.type==='exp')||(flt==='inc'&&x.type==='inc')||(flt==='dup'&&x.dup)||(flt==='loan'&&(x.kind==='loan'||x.kind==='card'))||(flt==='own'&&x.kind==='own'));
     const sh=L.querySelector('.sheet');const y=sh?sh.scrollTop:0;
     L.innerHTML=`${sheetTop('مراجعة الكشف')}<h2 style="margin-top:0">مراجعة الكشف قبل الاستيراد</h2>
-     <p class="note" style="margin-top:0">${esc(ST_BANKS[st.bank].n)} · ${esc(fname)} · ${P.from?fmtD(P.from)+' – '+fmtD(P.to):''}</p>
+     <p class="note" style="margin-top:0">${esc(ST_BANKS[st.bank].n)} · ${esc(fname)} · ${P.from?fmtD(P.from)+' – '+fmtD(P.to):''}</p>${P.files>1?`<div class="infobox" style="margin-bottom:8px"><span>📚 دُمجت ${countWord(P.files,'ملف','ملفان','ملفات','ملفًا')} في كشف واحد مرتب بالتاريخ${P.xdup?' وحُذف '+countWord(P.xdup,'سطر مكرر','سطران مكرران','أسطر مكررة','سطرًا مكررًا')+' بين الملفات':' بدون تكرار بينها'}.</span></div>`:''}
      <div class="pp-k"><div><span>عمليات في الكشف</span><b class="num">${P.rows.length}</b><small>${I.length} بعد تجميع الأقساط</small></div><div class="${P.tot&&P.chk===P.tot?'ok':P.tot?'bad':''}"><span>مطابقة الرصيد</span><b>${P.tot?(P.chk===P.tot?'✓ مطابق':P.chk+' من '+P.tot):'—'}</b><small>${P.open!=null?'افتتاحي '+money(P.open)+' · ختامي '+money(P.close):''}</small></div>
       <div class="bad"><span>مصروفات ستُضاف</span><b class="num">${money(sx)}</b></div><div class="ok"><span>إيداعات ستُضاف</span><b class="num">${money(si)}</b></div></div>
+     ${I.some(x=>x.dup)?`<div class="warnbox" style="margin:10px 0 0">🔁 ${countWord(I.filter(x=>x.dup).length,'عملية واحدة مكررة','عمليتان مكررتان','عمليات مكررة','عملية مكررة')} لن تُستورد: ${I.filter(x=>x.dup==='استُورد من قبل').length?I.filter(x=>x.dup==='استُورد من قبل').length+' مستوردة من قبل':''}${I.filter(x=>x.dup&&x.dup!=='استُورد من قبل').length?' · '+I.filter(x=>x.dup&&x.dup!=='استُورد من قبل').length+' أدخلتها يدويًا':''}. راجعها من «المكرر».</div>`:'<div class="okbox" style="margin:10px 0 0">✓ لا تكرار مع بياناتك الحالية.</div>'}
      <div class="chips st-f">${[['all','الكل ('+I.length+')'],['exp','المصروفات'],['inc','الإيداعات'],['loan','الأقساط والبطاقة'],['dup','المكرر ('+I.filter(x=>x.dup).length+')']].concat(I.some(x=>x.kind==='own')?[['own','بين حساباتك ('+I.filter(x=>x.kind==='own').length+')']]:[]).map(([k,n])=>`<button class="chip${flt===k?' on':''}" data-stf="${k}">${n}</button>`).join('')}<button class="chip" data-stall="1">تحديد الكل</button><button class="chip" data-stnone="1">إلغاء الكل</button></div>
      <div class="stack st-list">${V.slice(0,lim).map(({x,i})=>`<div class="panel strow${x.on?'':' off'}${x.dup?' dup':''}"><div class="st-h"><button class="st-chk" data-ston="${i}" aria-pressed="${x.on}" aria-label="تضمين">${x.on?'✓':''}</button><div style="flex:1;min-width:0"><b class="st-note">${esc(x.note)}</b><small class="note" style="display:block">${fmtD(x.date)}${x.raw.length>1?' · '+x.raw.length+' سطرًا مجمّعًا':''}${x.learned?' · 🧠 من تصنيفك السابق':''}</small></div><b class="num ${x.type==='inc'?'amt-inc':'amt-exp'} st-amt">${x.type==='inc'?'+':'−'}${money(x.amount)}</b></div>
-       ${x.dup?`<div class="st-dup">⚠️ يبدو مكررًا — ${esc(x.dup)}</div>`:''}${x.kind==='own'?'<div class="st-dup">🔁 تحويل بين حساباتك: غير محدد افتراضيًا لأنه ليس دخلًا ولا مصروفًا.</div>':''}${x.kind==='cash'?'<div class="st-dup">💵 سحب نقدي: غير محدد افتراضيًا حتى لا يُحسب مصروفًا مرتين (سجّل ما صرفته نقدًا بالتفصيل).</div>':''}
+       ${x.dup?`<div class="st-dup">⚠️ يبدو مكررًا — ${esc(x.dup)}</div>`:''}${x.out?'<div class="st-dup">📅 خارج الفترة المختارة، لن يُستورد.</div>':''}${x.kind==='own'?'<div class="st-dup">🔁 تحويل بين حساباتك: غير محدد افتراضيًا لأنه ليس دخلًا ولا مصروفًا.</div>':''}${x.kind==='cash'?'<div class="st-dup">💵 سحب نقدي: غير محدد افتراضيًا حتى لا يُحسب مصروفًا مرتين (سجّل ما صرفته نقدًا بالتفصيل).</div>':''}
        <div class="row2"><select class="inp" data-stcat="${i}">${cats(x.type).map(c=>`<option value="${c.id}" ${x.cat===c.id?'selected':''}>${esc(c.n)}</option>`).join('')}</select><input class="inp" data-stnote="${i}" value="${esc(x.note)}" maxlength="80"></div>
        ${(x.kind==='loan'||x.kind==='card')&&debts().some(d=>+d.balance>0.0005)?`<div class="row2 st-link"><select class="inp" data-stdebt="${i}"><option value="">بدون ربط بدين</option>${debts().filter(d=>+d.balance>0.0005).map(d=>`<option value="${esc(d.id)}" ${x.debt===d.id?'selected':''}>${esc(d.name)}</option>`).join('')}</select><button class="chip${x.link?' pay':''}" data-stlink="${i}" aria-pressed="${x.link}">${x.link?'✓ سجّله دفعة للدين':'سجّله دفعة للدين'}</button></div>`:''}
        <details class="st-raw"><summary>نص الكشف</summary><small>${x.raw.map(esc).join('<br>')}</small></details></div>`).join('')}</div>${V.length>lim?`<button class="btn ghost block" data-stmore="1" style="margin-top:8px">عرض المزيد (${V.length-lim} متبقية)</button>`:''}
      ${P.close!=null?`<label class="st-upd"><input type="checkbox" id="stUpd" ${upd?'checked':''}> حدّث رصيد «${esc((accList().find(a=>a.id===st.acc)||{}).name||'الحساب')}» إلى <b class="num">${money(P.close)}</b> كما في ${fmtD(P.to)}</label>`:''}
-     <div class="row2" style="margin-top:8px"><button class="btn ghost" id="stXl">📊 حفظ الكشف Excel</button><button class="btn ghost" id="stBack">‹ ملف آخر</button></div>
+     <div class="row2" style="margin-top:8px"><button class="btn ghost" id="stXl">📊 حفظ الكشف Excel</button><button class="btn ghost" id="stPr">🖨️ طباعة مرتبة</button></div><button class="btn ghost block" id="stBack" style="margin-top:8px">‹ ملف آخر</button>
      <p class="note">ملف Excel فيه كل العمليات بفئاتها وملاحظاتك. تعدّله في Numbers أو Excel ثم تستورده هنا من جديد بنفس الزر، فتُقرأ الفئة والملاحظة منه.</p>
      <div class="actions"><button class="btn block" id="stGo">استيراد ${countWord(on.length,'عملية واحدة','عمليتين','عمليات','عملية')}</button></div></div></div>`;
     const s2=L.querySelector('.sheet');if(s2)s2.scrollTop=y};
@@ -5869,25 +5880,403 @@ function openStmtReview(P,st,fname){const L=document.getElementById('layer');con
   L.onchange=e=>{const t=e.target;if(t.dataset.stcat!==undefined){I[+t.dataset.stcat].cat=t.value;I[+t.dataset.stcat].catSet=true;return}if(t.dataset.stdebt!==undefined){const x=I[+t.dataset.stdebt];x.debt=t.value||'';if(!x.debt)x.link=false;draw();return}if(t.id==='stUpd')upd=t.checked};
   L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
     if(x.id==='stBack'){openStmt();return}
-    if(x.id==='stXl'){stXlsx(I,P,st,fname);return}
+    if(x.id==='stXl'){stXlsx(I,P,st,fname);return}if(x.id==='stPr'){stPrint([{bank:st.bank,acc:st.acc,P,files:[fname],I}]);return}
     if(x.dataset.stf){flt=x.dataset.stf;lim=60;draw();return}
     if(x.dataset.stmore){lim+=100;draw();return}
     if(x.dataset.stall||x.dataset.stnone){I.forEach(z=>{if(flt==='all'||(flt==='exp'&&z.type==='exp')||(flt==='inc'&&z.type==='inc')||(flt==='dup'&&z.dup)||(flt==='loan'&&(z.kind==='loan'||z.kind==='card')))z.on=!!x.dataset.stall});draw();return}
     if(x.dataset.ston){const z=I[+x.dataset.ston];z.on=!z.on;draw();return}
     if(x.dataset.stlink){const z=I[+x.dataset.stlink];if(!z.debt){toast('اختر الدين أولًا');return}z.link=!z.link;draw();return}
-    if(x.id==='stGo'){const on=I.filter(z=>z.on);if(!on.length){toast('لم تحدد أي عملية');return}
-      if(!confirm('استيراد '+on.length+' عملية إلى «'+((accList().find(a=>a.id===st.acc)||{}).name||'الحساب')+'»؟'))return;
+    if(x.id==='stGo'){if(busy)return;let on=I.filter(z=>z.on);if(!on.length){toast('لم تحدد أي عملية');return}
+      /* حماية أخيرة: لو استُورد نفس الكشف بعد فتح هذه الصفحة (ضغطتان أو نافذة أخرى) لا يتكرر */
+      const exN={};list().forEach(t=>{if(t.bref)exN[t.bref]=(exN[t.bref]||0)+1});const allow={};I.forEach(z=>{allow[z.bref]=(allow[z.bref]||0)+1});Object.keys(allow).forEach(k=>{allow[k]-=exN[k]||0});
+      const skipped=on.filter(z=>!z.dup&&!(allow[z.bref]-->0));if(skipped.length){skipped.forEach(z=>{z.on=false;z.dup='استُورد من قبل'});on=on.filter(z=>z.on);toast('تجاهلت '+countWord(skipped.length,'عملية مستوردة','عمليتين مستوردتين','عمليات مستوردة','عملية مستوردة')+' من قبل');if(!on.length){draw();return}}
+      if(!confirm('استيراد '+on.length+' عملية إلى «'+((accList().find(a=>a.id===st.acc)||{}).name||'الحساب')+'»؟'))return;busy=true;
       const learn=Object.assign({},S.settings.stmtLearn||{});let n=0,nl=0;const batch=[];
       for(const z of on){const note=(z.note||'').trim()||catOf(z.cat).n;
-        if(z.link&&z.debt){const d=S.settings.debts.find(q=>q.id===z.debt);if(d){const p=await applyDebtPayment(d,z.amount,z.date,true);const t=S.tx[p.tx];if(t){t.acc=st.acc;t.note=note;t.bref=z.bref;t.src='stmt';await putTx(t)}n++;nl++;continue}}
-        const t={id:uidGen(),type:z.type,amount:z.amount,cat:z.cat,date:z.date,method:z.kind==='cash'?'cash':'transfer',note,acc:st.acc,createdAt:new Date().toISOString(),bref:z.bref,src:'stmt'};if(z.debt&&z.kind!=='normal')t.debt=z.debt;if(z.kind==='own'||z.kind==='xfer')t.own=z.kind==='own'?1:undefined;batch.push(t);n++;
+        if(z.link&&z.debt){const d=S.settings.debts.find(q=>q.id===z.debt);if(d){const p=await applyDebtPayment(d,z.amount,z.date,true);const t=S.tx[p.tx];if(t){t.acc=st.acc;t.note=note;t.bref=z.bref;t.src='stmt';t.bank=st.bank;t.skind=z.kind;if(z.parts)t.parts=z.parts;await putTx(t)}n++;nl++;continue}}
+        const t={id:uidGen(),type:z.type,amount:z.amount,cat:z.cat,date:z.date,method:z.kind==='cash'?'cash':'transfer',note,acc:st.acc,createdAt:new Date().toISOString(),bref:z.bref,src:'stmt'};if(z.debt&&z.kind!=='normal')t.debt=z.debt;if(z.kind==='own')t.own=1;t.bank=st.bank;t.skind=z.kind;if(z.parts)t.parts=z.parts;batch.push(t);n++;
         z.raw.forEach(r=>{const k=stLearnKey(r);if(k&&z.kind==='normal')learn[k]={cat:z.cat,type:z.type,note:z.catSet||z.note!==stClean(r)?note:''}})}
       if(batch.length)await putTxMany(batch);
       S.settings.stmtOwn=[...new Set((S.settings.stmtOwn||[]).concat(P.own||[]))].slice(-12);
+      S.settings.stmtHist=(S.settings.stmtHist||[]).concat([{at:new Date().toISOString(),bank:st.bank,acc:st.acc,file:fname,from:P.from,to:P.to,n,open:P.open,close:P.close}]).slice(-60);
       S.settings.stmtLearn=learn;
       if(upd&&P.close!=null){const Ac=S.settings.accounts=S.settings.accounts||[];let a=Ac.find(q=>q.id===st.acc);if(!a&&st.acc==='main'){a={id:'main',kind:'main',name:mainAcc().name};Ac.unshift(a)}if(a)a.anchor={date:P.to,bal:P.close,at:new Date().toISOString()}}
       try{aud('stmt','استيراد كشف '+ST_BANKS[st.bank].n,'',n+' عملية'+(nl?' منها '+nl+' دفعات ديون':'')+' · '+fmtD(P.from)+' – '+fmtD(P.to))}catch(er){}
-      await putSettings();L.innerHTML='';render();toast('استُوردت '+countWord(n,'عملية واحدة','عمليتان','عمليات','عملية')+(nl?' · '+nl+' دفعات ديون':'')+(upd&&P.close!=null?' · وحُدّث رصيد الحساب':''));return}}}
+      S.settings.stmtAccMap=Object.assign({},S.settings.stmtAccMap||{});(P.own||[]).forEach(nm=>{S.settings.stmtAccMap[nm]=st.acc});await putSettings();L.innerHTML='';render();if(after)after();else openBankAnalysis();toast('استُوردت '+countWord(n,'عملية واحدة','عمليتان','عمليات','عملية')+(nl?' · '+nl+' دفعات ديون':'')+(upd&&P.close!=null?' · وحُدّث رصيد الحساب':''));return}}}
+
+
+/* ===================== تحليل كشوفات البنوك المدمجة + خطة الشهر القادم =====================
+ * يدمج كل العمليات المستوردة من كشوفات البنوك (مسقط، الوطني، وأي بنك تضيفه) في قاعدة واحدة،
+ * ويفرزها مصروفات وإيداعات، ويحللها حسب البنك والفئة والجهة والشهر، ثم يقترح خطة للشهر القادم.
+ * التحويلات بين حساباتك لا تُحسب دخلًا ولا مصروفًا. */
+function baBankName(t){const a=accList().find(x=>x.id===accOf(t));return (ST_BANKS[t.bank]&&t.bank!=='other'?ST_BANKS[t.bank].n:'')||(a?a.name:'بنك')}
+function baKey(t){return t.bank&&t.bank!=='other'?t.bank:'acc:'+accOf(t)}
+function baData(o){o=o||{};const all=list().filter(t=>t.src==='stmt'&&!t.own);let A=all;
+  const cm=curM();let from=null,to=null;
+  if(o.per==='3m'){from=mStart(shiftMonth(cm,-2));to=mEnd(cm)}else if(o.per==='6m'){from=mStart(shiftMonth(cm,-5));to=mEnd(cm)}else if(o.per&&/^\d{4}-\d{2}$/.test(o.per)){from=mStart(o.per);to=mEnd(o.per)}
+  if(from)A=A.filter(t=>t.date>=from&&t.date<=to);if(o.bank)A=A.filter(t=>baKey(t)===o.bank);
+  const inc=r3(sum(A,'inc')),exp=r3(sum(A,'exp'));
+  const banks={};A.forEach(t=>{const k=baKey(t);const b=banks[k]=banks[k]||{k,name:baBankName(t),inc:0,exp:0,n:0,from:t.date,to:t.date};b[t.type]+=+t.amount;b.n++;if(t.date<b.from)b.from=t.date;if(t.date>b.to)b.to=t.date});
+  Object.values(banks).forEach(b=>{b.inc=r3(b.inc);b.exp=r3(b.exp);const h=(S.settings.stmtHist||[]).filter(x=>(x.bank&&x.bank!=='other'?x.bank:'acc:'+x.acc)===b.k).sort((p,q)=>(q.to||'').localeCompare(p.to||''))[0];b.close=h?h.close:null;b.closeAt=h?h.to:null});
+  const byCat={},byIncCat={},merch={},people={},months={};let fees={int:0,pen:0,over:0},nSmall=0;
+  A.forEach(t=>{const v=+t.amount;const m=mOf(t.date);const M=months[m]=months[m]||{m,inc:0,exp:0,n:0};M[t.type]+=v;M.n++;
+    if(t.type==='exp'){byCat[t.cat]=(byCat[t.cat]||0)+v;if(v<3)nSmall++;
+      if(t.skind==='xfer'||/^تحويل إلى/.test(t.note||'')){const k=(t.note||'').replace(/^تحويل إلى\s*/,'')||'—';const p=people[k]=people[k]||{k,v:0,n:0};p.v+=v;p.n++}
+      else if(t.cat!=='loan'){const k=(t.note||'').split(' · ').pop().replace(/\s+(LLC|L\.L\.C|SAOG|SAOC|CO\.?)\b.*$/i,'').trim().slice(0,32)||catOf(t.cat).n;const mm=merch[k]=merch[k]||{k,v:0,n:0,cat:t.cat};mm.v+=v;mm.n++}
+      if(t.parts){fees.int+=+t.parts.int||0;fees.pen+=+t.parts.pen||0;fees.over+=+t.parts.over||0}}
+    else byIncCat[t.cat]=(byIncCat[t.cat]||0)+v});
+  const nm=Math.max(1,Object.keys(months).length);
+  return{A,all,inc,exp,net:r3(inc-exp),n:A.length,banks:Object.values(banks).sort((a,b)=>b.n-a.n),byCat:Object.entries(byCat).sort((a,b)=>b[1]-a[1]),byIncCat:Object.entries(byIncCat).sort((a,b)=>b[1]-a[1]),
+    merch:Object.values(merch).sort((a,b)=>b.v-a.v),people:Object.values(people).sort((a,b)=>b.v-a.v),months:Object.values(months).sort((a,b)=>a.m.localeCompare(b.m)).map(x=>Object.assign(x,{inc:r3(x.inc),exp:r3(x.exp)})),
+    fees:{int:r3(fees.int),pen:r3(fees.pen),over:r3(fees.over)},nSmall,nm,from:A.length?A.map(t=>t.date).sort()[0]:null,to:A.length?A.map(t=>t.date).sort().pop():null}}
+/* خطة الشهر القادم من متوسطات الكشوفات */
+function baPlan(D){const nx=shiftMonth(curM(),1);const full=D.months.filter(x=>x.m<curM());const base=full.length?full:D.months;const n=Math.max(1,base.length);
+  const avgInc=r3(base.reduce((s,x)=>s+x.inc,0)/n),avgExp=r3(base.reduce((s,x)=>s+x.exp,0)/n);
+  const sal=+S.settings.salaryAmt||0;const inc=sal>0?sal:avgInc;
+  const fixedI=monthItems(nx);const fixed=r3(fixedI.reduce((s,i)=>s+Math.max(0,i.amount-(i.prev||0)),0));
+  const seasN=(()=>{try{return r3(seas().reduce((t,s)=>t+seasCalc(s).need,0))}catch(e){return 0}})();
+  const ms=new Set(base.map(x=>x.m));const cat={};let xf=0;D.A.filter(t=>t.type==='exp'&&ms.has(mOf(t.date))&&!['loan','home'].includes(t.cat)&&!t.rec&&!t.debt).forEach(t=>{if(t.skind==='xfer'){xf+=+t.amount;return}cat[t.cat]=(cat[t.cat]||0)+(+t.amount)});
+  const B=S.settings.budgets||{};
+  const lines=Object.entries(cat).map(([c,v])=>{const avg=r3(v/n);const cut=['rest','shop','fun','family'].includes(c)?0.85:['food','fuel','bills','health','edu','charity'].includes(c)?0.95:0.9;const sug=Math.ceil(avg*cut);return{c,n:catOf(c).n,avg,sug,cur:+B[c]||0}}).filter(x=>x.avg>0.5).sort((a,b)=>b.avg-a.avg);if(xf/n>0.5)lines.push({c:'_xfer',n:'تحويلات للأشخاص',avg:r3(xf/n),sug:Math.ceil(xf/n*0.9),cur:0});
+  const varT=r3(lines.reduce((s,x)=>s+x.sug,0));const left=r3(inc-fixed-varT-seasN);const save=r3(Math.max(0,Math.floor(left*0.6)));const buffer=r3(Math.max(0,left-save));
+  const tips=[];
+  if(D.fees.pen>0.0005||D.fees.over>0.0005)tips.push(`دفعت غرامات تأخير وفوائد متأخرة بمجموع <b class="num amt-exp">${money(D.fees.pen+D.fees.over)}</b> ر.ع. ادفع الأقساط في موعدها وتوفّرها كلها.`);
+  const rest=lines.find(x=>x.c==='rest');if(rest&&rest.avg>20)tips.push(`المطاعم والمقاهي معدلها <b class="num">${money(rest.avg)}</b> شهريًا. سقف <b class="num">${money(rest.sug)}</b> يوفّر <b class="num amt-inc">${money(rest.avg-rest.sug)}</b>.`);
+  if(D.nSmall>30)tips.push(`عندك ${D.nSmall} عملية صغيرة (أقل من 3 ر.ع). المصاريف الصغيرة المتكررة تتراكم: حدّد لها مبلغًا أسبوعيًا.`);
+  const pp=D.people.reduce((s,p)=>s+p.v,0);if(pp>avgInc*0.25*n&&pp>50)tips.push(`التحويلات للأشخاص <b class="num">${money(pp/n)}</b> شهريًا في المتوسط. سجّل ما يعود منها كأمانة أو دين لتتابعه.`);
+  if(left<0)tips.push(`الدخل لا يغطي الالتزامات والمصاريف المتوقعة: العجز <b class="num amt-exp">${money(-left)}</b>. قلّل المصاريف المتغيرة أو استخدم «الخطة الاستثنائية».`);
+  else tips.push(`بعد الالتزامات والمصاريف المقترحة يبقى <b class="num amt-inc">${money(left)}</b>: اقتراحي ادخار <b class="num">${money(save)}</b> وترك <b class="num">${money(buffer)}</b> احتياطًا.`);
+  return{nx,inc,avgInc,avgExp,fixed,fixedI,seasN,lines,varT,left,save,buffer,tips,n}}
+function openBankAnalysis(o){const L=document.getElementById('layer');o=Object.assign({per:'all',bank:'',tab:'sum',ft:'all',fc:'',sort:'new',lim:80},o||{});
+  const draw=()=>{const D=baData(o);const PL=baPlan(baData({per:'all'}));const sh=L.querySelector('.sheet');const y=sh?sh.scrollTop:0;
+    const allD=baData({per:'all'});const perOpts=[['all','كل الفترات'],['3m','آخر 3 أشهر'],['6m','آخر 6 أشهر']].concat(allD.months.slice().reverse().slice(0,6).map(x=>[x.m,mShort(x.m)+' '+x.m.slice(2,4)]));
+    let body='';
+    if(!allD.all.length)body=`<div class="panel empty"><b>لا كشوفات مستوردة بعد</b>استورد كشف حساب من بنك مسقط أو الوطني أو أي بنك، فتظهر هنا كل العمليات مدمجة ومحللة.</div><button class="btn block" data-baimp="1">🏦 استيراد كشف حساب</button>`;
+    else if(o.tab==='sum'){body=`<div class="pp-k"><div class="ok"><span>الإيداعات</span><b class="num">${money(D.inc)}</b></div><div class="bad"><span>المصروفات</span><b class="num">${money(D.exp)}</b></div><div class="${D.net<0?'bad':'ok'}"><span>الصافي</span><b class="num">${D.net<0?'−':''}${money(Math.abs(D.net))}</b></div><div><span>العمليات</span><b class="num">${D.n}</b><small>${D.from?fmtD(D.from)+' – '+fmtD(D.to):''}</small></div></div>
+      <h3>حسب البنك</h3><div class="stack">${D.banks.map(b=>`<div class="panel ba-bank"><div class="seas-h"><span class="seas-ic">🏦</span><div style="flex:1;min-width:0"><b>${esc(b.name)}</b><small class="note" style="display:block">${b.n} عملية · ${fmtD(b.from)} – ${fmtD(b.to)}${b.close!=null?' · الرصيد '+money(b.close)+' في '+fmtD(b.closeAt):''}</small></div></div><div class="seas-n"><span>إيداع <b class="num amt-inc">${money(b.inc)}</b></span><span>صرف <b class="num amt-exp">${money(b.exp)}</b></span><span>صافي <b class="num ${b.inc-b.exp<0?'amt-exp':'amt-inc'}">${money(b.inc-b.exp)}</b></span></div></div>`).join('')}</div>
+      <h3>شهرًا بشهر</h3><div class="panel">${(()=>{const mx=Math.max(1,...D.months.map(x=>Math.max(x.inc,x.exp)));return D.months.map(x=>`<div class="ba-mon"><span>${esc(mShort(x.m))} ${x.m.slice(2,4)}</span><div class="ba-bars"><i class="i" style="width:${x.inc/mx*100}%"></i><i class="e" style="width:${x.exp/mx*100}%"></i></div><span class="num amt-inc">${money(x.inc)}</span><span class="num amt-exp">${money(x.exp)}</span></div>`).join('')})()}</div>
+      <h3>المصروفات حسب الفئة</h3><div class="panel">${D.byCat.map(([c,v])=>`<button class="catrow ba-c" data-bafc="${c}"><span class="dot" style="background:${catOf(c).c}"></span><div class="name">${esc(catOf(c).n)} <small class="num">${D.exp?Math.round(v/D.exp*100):0}%</small><div class="meter"><i style="width:${D.byCat[0]?v/D.byCat[0][1]*100:0}%;background:${catOf(c).c}"></i></div></div><span class="num amt-exp">${money(v)}</span></button>`).join('')}</div>
+      <h3>الإيداعات حسب المصدر</h3><div class="panel">${D.byIncCat.map(([c,v])=>`<div class="sumrow"><span>${esc(catOf(c).n)}</span><b class="num amt-inc">${money(v)}</b></div>`).join('')||'<p class="note">لا إيداعات.</p>'}</div>
+      <h3>أكثر الجهات صرفًا</h3><div class="panel">${D.merch.slice(0,10).map(m=>`<div class="sumrow"><span>${esc(m.k)}<small class="note" style="display:block">${esc(catOf(m.cat).n)} · ${m.n} مرة</small></span><b class="num amt-exp">${money(m.v)}</b></div>`).join('')||'<p class="note">—</p>'}</div>
+      ${D.people.length?`<h3>التحويلات للأشخاص</h3><div class="panel">${D.people.slice(0,8).map(p=>`<div class="sumrow"><span>${esc(p.k)}<small class="note" style="display:block">${p.n} تحويل</small></span><b class="num amt-exp">${money(p.v)}</b></div>`).join('')}</div>`:''}
+      ${D.fees.int+D.fees.pen+D.fees.over>0.0005?`<h3>فوائد وغرامات دفعتها للبنك</h3><div class="panel"><div class="sumrow"><span>فوائد القروض</span><b class="num amt-exp">${money(D.fees.int)}</b></div><div class="sumrow"><span>فوائد متأخرة</span><b class="num amt-exp">${money(D.fees.over)}</b></div><div class="sumrow"><span>غرامات تأخير</span><b class="num amt-exp">${money(D.fees.pen)}</b></div><div class="sumrow total"><span>المجموع</span><b class="num amt-exp">${money(D.fees.int+D.fees.over+D.fees.pen)}</b></div></div>`:''}`}
+    else if(o.tab==='tx'){let T=D.A.slice();if(o.ft!=='all')T=T.filter(t=>t.type===o.ft);if(o.fc)T=T.filter(t=>t.cat===o.fc);
+      T.sort(o.sort==='big'?(a,b)=>b.amount-a.amount:o.sort==='old'?(a,b)=>a.date.localeCompare(b.date):(a,b)=>b.date.localeCompare(a.date));const si=r3(sum(T,'inc')),se=r3(sum(T,'exp'));
+      body=`<div class="chips ba-f">${[['all','الكل'],['exp','المصروفات'],['inc','الإيداعات']].map(([k,n])=>`<button class="chip${o.ft===k?' on':''}" data-baft="${k}">${n}</button>`).join('')}${[['new','الأحدث'],['old','الأقدم'],['big','الأكبر']].map(([k,n])=>`<button class="chip${o.sort===k?' on':''}" data-basort="${k}">${n}</button>`).join('')}${o.fc?`<button class="chip on" data-bafc="">✕ ${esc(catOf(o.fc).n)}</button>`:''}</div>
+       <div class="srch-sum"><span>${countWord(T.length,'عملية واحدة','عمليتان','عمليات','عملية')}</span>${se?`<span>مصروف <b class="num amt-exp">${money(se)}</b></span>`:''}${si?`<span>إيداع <b class="num amt-inc">${money(si)}</b></span>`:''}</div>
+       <div class="panel" style="padding-block:2px">${T.slice(0,o.lim).map(t=>`<button class="srch-row" data-baedit="${esc(t.id)}"><span class="srch-ic dot" style="--sc:${catOf(t.cat).c}"><i></i></span><span class="srch-m"><b>${esc(t.note||catOf(t.cat).n)}</b><small>${esc(baBankName(t))} · ${esc(catOf(t.cat).n)} · ${fmtD(t.date)}</small></span><b class="num ${t.type==='inc'?'amt-inc':'amt-exp'}">${t.type==='inc'?'+':'−'}${money(t.amount)}</b></button>`).join('')}</div>
+       ${T.length>o.lim?`<button class="btn ghost block" data-bamore="1" style="margin-top:8px">عرض المزيد (${T.length-o.lim})</button>`:''}`}
+    else{const P=PL;body=`<div class="okbox">خطة <b>${esc(monthName(P.nx))}</b> مبنية على متوسط ${monthsWord(P.n)} من كشوفاتك ومن التزاماتك وأقساطك المسجّلة.</div>
+      <div class="pp-k" style="margin-top:10px"><div class="ok"><span>الدخل المتوقع</span><b class="num">${money(P.inc)}</b><small>${+S.settings.salaryAmt>0?'راتبك المسجّل · متوسط إيداعاتك '+money(P.avgInc):'متوسط الإيداعات'}</small></div><div class="bad"><span>التزامات وأقساط</span><b class="num">${money(P.fixed)}</b></div><div class="bad"><span>مصاريف متغيرة مقترحة</span><b class="num">${money(P.varT)}</b><small>كان معدلها ${money(P.lines.reduce((s,x)=>s+x.avg,0))}</small></div><div class="${P.left<0?'bad':'ok'}"><span>يبقى</span><b class="num">${P.left<0?'−':''}${money(Math.abs(P.left))}</b></div></div>
+      <p class="pp-eq">يبقى = ${money(P.inc)} − ${money(P.fixed)} − ${money(P.varT)}${P.seasN?' − '+money(P.seasN)+' (المواسم)':''} = <b class="num ${P.left<0?'amt-exp':'amt-inc'}">${money(P.left)}</b></p>
+      <h3>الالتزامات والأقساط في ${esc(monthName(P.nx))}</h3><div class="panel">${P.fixedI.map(i=>`<div class="sumrow"><span>${esc(i.name)}<small class="note" style="display:block">يوم ${i.day}</small></span><b class="num amt-exp">${money(Math.max(0,i.amount-(i.prev||0)))}</b></div>`).join('')||'<p class="note">لا التزامات مسجلة.</p>'}${P.seasN?`<div class="sumrow"><span>حصة المصاريف الموسمية</span><b class="num amt-exp">${money(P.seasN)}</b></div>`:''}</div>
+      <h3>سقف مقترح لكل فئة</h3><div class="panel">${P.lines.map(x=>`<div class="sumrow"><span>${esc(x.n)}<small class="note" style="display:block">معدلك ${money(x.avg)}${x.cur?' · ميزانيتك الحالية '+money(x.cur):''}</small></span><b class="num">${money(x.sug)}</b></div>`).join('')}<div class="sumrow total"><span>المجموع</span><b class="num">${money(P.varT)}</b></div></div>
+      <h3>توصيات</h3><ul class="tips">${P.tips.map(t=>`<li>${t}</li>`).join('')}</ul>
+      <button class="btn block" data-baapply="1">✓ اعتمد الأسقف كميزانية الفئات</button><p class="note">يغيّر ميزانيات الفئات فقط، وتستطيع تعديلها لاحقًا من الضبط.</p>`}
+    L.innerHTML=`${sheetTop('تحليل الكشوفات')}<h2 style="margin-top:0">📊 تحليل كشوفات البنوك</h2>
+     <p class="note" style="margin-top:0">كل ما استوردته من كشوفات ${esc(allD.banks.map(b=>b.name).join(' و')||'البنوك')} مدمج في قاعدة واحدة ومفرز مصروفات وإيداعات. التحويلات بين حساباتك مستبعدة.</p>
+     ${allD.all.length?`<div class="rev-steps ba-tabs">${[['sum','📊','التحليل'],['tx','🧾','العمليات'],['plan','🗓️','خطة الشهر القادم']].map(([k,ic,n])=>`<button class="${o.tab===k?'on':''}" data-batab="${k}"><b>${ic}</b>${n}</button>`).join('')}</div>
+      ${o.tab!=='plan'?`<div class="row2"><select class="inp" id="baPer">${perOpts.map(([k,n])=>`<option value="${k}" ${o.per===k?'selected':''}>${esc(n)}</option>`).join('')}</select><select class="inp" id="baBank"><option value="">كل البنوك</option>${allD.banks.map(b=>`<option value="${esc(b.k)}" ${o.bank===b.k?'selected':''}>${esc(b.name)}</option>`).join('')}</select></div>`:''}`:''}
+     <div class="ba-body">${body}</div>
+     ${allD.all.length?`<h3>طباعة وتصدير</h3><div class="row2"><button class="btn ghost" id="baPdf">🖨️ تقرير PDF</button><button class="btn ghost" id="baXl">📊 ملف Excel</button></div><div class="row2" style="margin-top:8px"><button class="btn ghost" data-baimp="1">🏦 استيراد كشف آخر</button><button class="btn ghost" id="baDup">🔍 فحص التكرار</button></div>`:''}
+     <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
+    const s2=L.querySelector('.sheet');if(s2){s2.scrollTop=y;s2._refresh=draw}};
+  draw();
+  L.oninput=null;L.onchange=e=>{if(e.target.id==='baPer'){o.per=e.target.value;draw()}if(e.target.id==='baBank'){o.bank=e.target.value;draw()}};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+    if(x.dataset.batab){o.tab=x.dataset.batab;o.lim=80;draw();L.querySelector('.sheet').scrollTop=0;return}
+    if(x.dataset.bafc!==undefined){o.fc=x.dataset.bafc;o.tab='tx';o.ft=o.fc?'exp':o.ft;draw();return}
+    if(x.dataset.baft){o.ft=x.dataset.baft;draw();return}if(x.dataset.basort){o.sort=x.dataset.basort;draw();return}if(x.dataset.bamore){o.lim+=150;draw();return}
+    if(x.dataset.baedit){sClick({'data-edit':x.dataset.baedit});return}
+    if(x.dataset.baimp){openStmt();return}
+    if(x.id==='baDup'){openDupScan();return}if(x.id==='baPdf'){baPrint(o);return}if(x.id==='baXl'){baXlsx(o);return}
+    if(x.dataset.baapply){const P=baPlan(baData({per:'all'}));if(!confirm('اعتماد '+P.lines.length+' سقفًا كميزانيات للفئات؟'))return;const B=Object.assign({},S.settings.budgets||{});P.lines.filter(l=>l.c[0]!=='_').forEach(l=>B[l.c]=l.sug);S.settings.budgets=B;try{aud('budget','اعتماد ميزانيات من تحليل الكشوفات','',P.lines.map(l=>l.n+' '+money(l.sug)).join('، '))}catch(er){}await putSettings();toast('اعتُمدت ميزانيات الفئات للشهر القادم');draw();return}}}
+function baReport(o){const D=baData(o),P=baPlan(baData({per:'all'}));const N=v=>`<span class="n">${v<0?'−':''}${money(Math.abs(v))}</span>`;const T=(h,r,c)=>`<table${c?' class="'+c+'"':''}><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${r.join('')}</tbody></table>`;const now=new Date();
+  const per=o.per==='all'?'كل الفترات':o.per==='3m'?'آخر 3 أشهر':o.per==='6m'?'آخر 6 أشهر':monthName(o.per);
+  let h=`<header class="rh"><div><div class="rapp">${REP_LOGO}إدارة شؤوني</div><h1>تحليل كشوفات البنوك</h1><div class="rper">${esc(D.banks.map(b=>b.name).join(' + '))} · ${esc(per)} · ${D.from?fmtD(D.from)+' – '+fmtD(D.to):''}</div></div><div class="rmeta">${repOwner()}أُعدّ في ${fmtD(today())} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}<br>العملة: ر.ع.</div></header>
+   <section><h2>الملخص</h2><div class="kpis"><div><span>الإيداعات</span><b class="ok">${N(D.inc)}</b></div><div><span>المصروفات</span><b class="no">${N(D.exp)}</b></div><div><span>الصافي</span><b class="${D.net<0?'no':'ok'}">${N(D.net)}</b></div><div><span>العمليات</span><b>${D.n}</b></div></div><p class="hint">التحويلات بين حساباتك مستبعدة من الإيداعات والمصروفات.</p></section>
+   <section><h2>حسب البنك</h2>${T(['البنك','الفترة','العمليات','الإيداعات','المصروفات','الصافي','آخر رصيد'],D.banks.map(b=>`<tr><td>${esc(b.name)}</td><td class="nw">${fmtD(b.from)} – ${fmtD(b.to)}</td><td>${b.n}</td><td class="nw ok">${N(b.inc)}</td><td class="nw no">${N(b.exp)}</td><td class="nw">${N(b.inc-b.exp)}</td><td class="nw">${b.close!=null?N(b.close):'—'}</td></tr>`))}</section>
+   <section><h2>شهرًا بشهر</h2>${T(['الشهر','الإيداعات','المصروفات','الصافي','العمليات'],D.months.map(x=>`<tr><td>${esc(monthName(x.m))}</td><td class="nw ok">${N(x.inc)}</td><td class="nw no">${N(x.exp)}</td><td class="nw">${N(x.inc-x.exp)}</td><td>${x.n}</td></tr>`))}</section>
+   <section><h2>المصروفات حسب الفئة</h2>${T(['الفئة','المبلغ','النسبة'],D.byCat.map(([c,v])=>`<tr><td>${esc(catOf(c).n)}</td><td class="nw">${N(v)}</td><td>${D.exp?Math.round(v/D.exp*100):0}%</td></tr>`))}</section>
+   <section><h2>الإيداعات حسب المصدر</h2>${T(['المصدر','المبلغ'],D.byIncCat.map(([c,v])=>`<tr><td>${esc(catOf(c).n)}</td><td class="nw ok">${N(v)}</td></tr>`))}</section>
+   <section><h2>أكثر الجهات صرفًا</h2>${T(['الجهة','الفئة','المرات','المبلغ'],D.merch.slice(0,15).map(m=>`<tr><td>${esc(m.k)}</td><td>${esc(catOf(m.cat).n)}</td><td>${m.n}</td><td class="nw">${N(m.v)}</td></tr>`))}</section>
+   ${D.people.length?`<section><h2>التحويلات للأشخاص</h2>${T(['إلى','المرات','المبلغ'],D.people.slice(0,12).map(p=>`<tr><td>${esc(p.k)}</td><td>${p.n}</td><td class="nw">${N(p.v)}</td></tr>`))}</section>`:''}
+   ${D.fees.int+D.fees.pen+D.fees.over>0.0005?`<section><h2>فوائد وغرامات دفعتها للبنك</h2>${T(['البند','المبلغ'],[['فوائد القروض',D.fees.int],['فوائد متأخرة',D.fees.over],['غرامات تأخير',D.fees.pen]].map(([a,b])=>`<tr><td>${a}</td><td class="nw no">${N(b)}</td></tr>`))}</section>`:''}
+   <section><h2>خطة ${esc(monthName(P.nx))}</h2><div class="kpis"><div><span>الدخل المتوقع</span><b class="ok">${N(P.inc)}</b></div><div><span>التزامات وأقساط</span><b class="no">${N(P.fixed)}</b></div><div><span>مصاريف متغيرة مقترحة</span><b class="no">${N(P.varT)}</b></div><div><span>يبقى</span><b class="${P.left<0?'no':'ok'}">${N(P.left)}</b></div></div>
+    ${T(['الفئة','معدلك الشهري','السقف المقترح','الفرق'],P.lines.map(x=>`<tr><td>${esc(x.n)}</td><td class="nw">${N(x.avg)}</td><td class="nw"><b>${N(x.sug)}</b></td><td class="nw ok">${N(x.avg-x.sug)}</td></tr>`))}
+    <ul>${P.tips.map(t=>`<li>${t.replace(/<b class="num[^"]*">/g,'<b>')}</li>`).join('')}</ul></section>
+   <section class="txs"><h2>العمليات المدمجة (${D.n})</h2>${T(['#','التاريخ','البنك','النوع','الفئة','البيان','المبلغ'],D.A.slice().sort((a,b)=>a.date.localeCompare(b.date)).map((t,i)=>`<tr><td class="idx">${i+1}</td><td class="nw">${fmtD(t.date)}</td><td>${esc(baBankName(t))}</td><td>${t.type==='inc'?'إيداع':'مصروف'}</td><td>${esc(catOf(t.cat).n)}</td><td>${esc(t.note||'')}</td><td class="nw ${t.type==='inc'?'ok':'no'}">${t.type==='inc'?'+':'−'}${money(t.amount)}</td></tr>`),'nototal')}</section>
+   <footer class="rf">تحليل كشوفات البنوك من تطبيق «إدارة شؤوني» · قُرئت الكشوفات داخل الهاتف ولم تُرسل لأي جهة</footer>`;
+  return repTotalsHtml(h)}
+function baPrint(o){const h=baReport(o);prStyle('portrait');let el=document.getElementById('printArea');if(!el){el=document.createElement('div');el.id='printArea';document.body.appendChild(el)}el.className='rep';el.innerHTML=h;
+  const old=document.title;document.title='تحليل كشوفات البنوك - إدارة شؤوني';window.addEventListener('afterprint',()=>{document.title=old},{once:true});try{window.print()}catch(e){toast('تعذّرت الطباعة هنا')}setTimeout(()=>{document.title=old},3000)}
+function baXlsx(o){const D=baData(o),P=baPlan(baData({per:'all'}));const sub='إدارة شؤوني · '+D.banks.map(b=>b.name).join(' + ')+(D.from?' · '+fmtD(D.from)+' – '+fmtD(D.to):'');
+  const sh=[{name:'العمليات المدمجة',title:'العمليات المدمجة من كشوفات البنوك',sub,head:[['التاريخ','d'],['البنك','s',18],['النوع','s',9],['الفئة','s',18],['البيان','s',36],['إيداع','n'],['مصروف','n']],rows:D.A.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(t=>[t.date,baBankName(t),t.type==='inc'?'إيداع':'مصروف',catOf(t.cat).n,t.note||'',t.type==='inc'?+t.amount:'',t.type==='exp'?+t.amount:'']),totals:[5,6]},
+   {name:'حسب البنك',title:'الإيداعات والمصروفات حسب البنك',sub,head:[['البنك','s',22],['من','d'],['إلى','d'],['العمليات','i'],['الإيداعات','n'],['المصروفات','n'],['الصافي','n'],['آخر رصيد','n']],rows:D.banks.map(b=>[b.name,b.from,b.to,b.n,b.inc,b.exp,r3(b.inc-b.exp),b.close!=null?b.close:'']),totals:[3,4,5,6]},
+   {name:'شهريًا',title:'شهرًا بشهر',sub,head:[['الشهر','s',22],['الإيداعات','n'],['المصروفات','n'],['الصافي','n'],['العمليات','i']],rows:D.months.map(x=>[monthName(x.m),x.inc,x.exp,r3(x.inc-x.exp),x.n]),totals:[1,2,3,4]},
+   {name:'حسب الفئة',title:'المصروفات حسب الفئة',sub,head:[['الفئة','s',24],['المبلغ','n'],['النسبة','p']],rows:D.byCat.map(([c,v])=>[catOf(c).n,r3(v),D.exp?v/D.exp:0]),totals:[1]},
+   {name:'الجهات',title:'أكثر الجهات صرفًا',sub,head:[['الجهة','s',30],['الفئة','s',18],['المرات','i'],['المبلغ','n']],rows:D.merch.map(m=>[m.k,catOf(m.cat).n,m.n,r3(m.v)]),totals:[2,3]},
+   {name:'خطة الشهر القادم',title:'خطة '+monthName(P.nx),sub:'الدخل المتوقع '+money(P.inc)+' · التزامات '+money(P.fixed)+' · يبقى '+money(P.left),head:[['الفئة','s',24],['معدلك الشهري','n'],['السقف المقترح','n'],['التوفير','n']],rows:P.lines.map(x=>[x.n,x.avg,x.sug,r3(x.avg-x.sug)]),totals:[1,2,3]}];
+  const data=XL.build(sh);const nm='bank-analysis-'+today()+'.xlsx';shareFile(nm,data,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').then(r=>{if(r!=='cancel')toast(r==='shared'?'اختر «Numbers» لفتحه':'حُفظ '+nm)})}
+
+/* ===================== مسح بيانات فترة وإعادة إدخالها من كشف البنك =====================
+ * تختار شهرًا أو عدة أشهر أو سنة كاملة، وما تريد مسحه (المستورد من الكشوفات فقط أو كل العمليات)،
+ * ترى المعاينة ثم تمسح بعد أخذ لقطة احتياطية تستطيع الرجوع إليها، ثم ترفق كشف الحساب فتُستورد عمليات هذه الفترة فقط وتُفرز تلقائيًا. */
+function pgRange(st){if(st.mode==='month')return{from:mStart(st.m1),to:mEnd(st.m1),label:monthName(st.m1)};
+  if(st.mode==='range'){const a=st.m1<=st.m2?st.m1:st.m2,b=st.m1<=st.m2?st.m2:st.m1;return{from:mStart(a),to:mEnd(b),label:monthName(a)+' إلى '+monthName(b)}}
+  if(st.mode==='all')return{from:'1900-01-01',to:'2999-12-31',label:'كل الفترات',all:true};
+  return{from:st.y+'-01-01',to:st.y+'-12-31',label:'سنة '+st.y}}
+function pgLinked(t){return !!(t.rec||debts().some(d=>(d.pays||[]).some(p=>p.tx===t.id)))}
+function pgPick(st){const R=pgRange(st);return list().filter(t=>t.date&&t.date>=R.from&&t.date<=R.to&&!t.sample&&(st.scope==='all'||t.src==='stmt')&&(st.acc==='*'||accOf(t)===st.acc)&&(st.type==='all'||t.type===st.type)&&!(st.keep&&pgLinked(t)))}
+function openPurge(){const L=document.getElementById('layer');const cm=curM();const st={mode:'month',m1:cm,m2:cm,y:+today().slice(0,4),scope:list().some(t=>t.src==='stmt')?'stmt':'all',acc:'*',type:'all',keep:false,done:null};
+  const draw=()=>{const R=pgRange(st);const T=pgPick(st);const se=r3(sum(T,'exp')),si=r3(sum(T,'inc'));const dp=T.filter(t=>debts().some(d=>(d.pays||[]).some(p=>p.tx===t.id))).length;const rp=T.filter(t=>t.rec).length;
+    const yrs=[...new Set(list().map(t=>+String(t.date||'').slice(0,4)).filter(y=>y>2000))].concat([st.y]).sort((a,b)=>b-a).filter((v,i,a)=>a.indexOf(v)===i);
+    L.innerHTML=`${sheetTop('مسح وإعادة إدخال')}<h2 style="margin-top:0">🧹 مسح بيانات الإدخال وإعادة إدخالها</h2>
+     <p class="note" style="margin-top:0">امسح بيانات الإدخال فقط (العمليات) لشهر أو عدة أشهر أو سنة أو كل الفترات، ثم أرفق كشف الحساب لنفس الفترة فتُستورد وتُفرز تلقائيًا من جديد بدون تكرار. قبل المسح تُحفظ لقطة احتياطية تستطيع الرجوع إليها من «إدارة البيانات».</p>
+     ${st.done?`<div class="okbox">✓ مُسحت ${countWord(st.done.n,'عملية واحدة','عمليتان','عمليات','عملية')} من ${esc(st.done.label)}. الخطوة التالية: أرفق كشف الحساب لهذه الفترة.</div><button class="btn block" id="pgImp" style="margin-top:10px">🏦 أرفق كشف ${esc(st.done.label)}</button>`:''}
+     <h3>1. الفترة</h3><div class="seg">${[['month','شهر'],['range','عدة أشهر'],['year','سنة'],['all','كل الفترات']].map(([k,n])=>`<button class="n" data-pgmode="${k}" aria-pressed="${st.mode===k}">${n}</button>`).join('')}</div>
+     ${st.mode==='all'?'':`<div class="row2" style="margin-top:8px">${st.mode==='year'?`<select class="inp" id="pgY">${yrs.map(y=>`<option value="${y}" ${y===st.y?'selected':''}>${y}</option>`).join('')}</select>`:`<div class="field"><label>${st.mode==='range'?'من شهر':'الشهر'}</label><input class="inp" type="month" id="pgM1" value="${st.m1}"></div>${st.mode==='range'?`<div class="field"><label>إلى شهر</label><input class="inp" type="month" id="pgM2" value="${st.m2}"></div>`:''}`}</div>`}
+     <small class="note">${R.all?'كل العمليات المسجّلة من أول عملية إلى آخر عملية':'من '+fmtD(R.from)+' إلى '+fmtD(R.to)+(payMode()?' (حسب أشهر الراتب)':'')}</small>
+     <h3>2. ماذا تمسح؟</h3><div class="seg"><button class="n" data-pgscope="stmt" aria-pressed="${st.scope==='stmt'}">المستورد من الكشوفات فقط</button><button class="n" data-pgscope="all" aria-pressed="${st.scope==='all'}">كل العمليات</button></div>
+     <div class="row2" style="margin-top:8px"><select class="inp" id="pgAcc"><option value="*">كل الحسابات</option>${accList().map(a=>`<option value="${esc(a.id)}" ${st.acc===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}</select><select class="inp" id="pgType"><option value="all" ${st.type==='all'?'selected':''}>المصروفات والإيداعات</option><option value="exp" ${st.type==='exp'?'selected':''}>المصروفات فقط</option><option value="inc" ${st.type==='inc'?'selected':''}>الإيداعات فقط</option></select></div>
+     <label class="pg-keep"><input type="checkbox" id="pgKeep"${st.keep?' checked':''}><span><b>إبقاء دفعات الديون والالتزامات المسجّلة</b><small class="note">لا تُمسح الدفعات المربوطة بقرض أو التزام، فيبقى الرصيد وحالة «مدفوع» كما هي. إذا أعدت استيراد الكشف تُكشف هذه الدفعات كمكررة ولا تُستورد مرتين.</small></span></label>
+     <div class="okbox pg-safe"><b>🛡️ يبقى كما هو ولا يُمسح أبدًا:</b> الخطط الشهرية، مخطط السداد، الالتزامات والأقساط، الديون والقروض، تقسيم الصرف والميزانيات، المصاريف الموسمية، الأهداف، الحسابات والفئات والإعدادات. المسح يشمل فقط بيانات الإدخال (العمليات).</div>
+     <h3>3. المعاينة</h3><div class="pp-k"><div><span>عمليات ستُمسح</span><b class="num">${T.length}</b></div><div class="bad"><span>مصروفات</span><b class="num">${money(se)}</b></div><div class="ok"><span>إيداعات</span><b class="num">${money(si)}</b></div><div><span>مرتبطة</span><b class="num">${dp+rp}</b><small>${dp?dp+' دفعة دين يُعاد رصيدها':''}${dp&&rp?' · ':''}${rp?rp+' دفعة التزام':''}</small></div></div>
+     ${T.length?`<details class="panel" style="margin-top:8px"><summary class="note">عرض العمليات (${T.length})</summary>${T.slice().sort((a,b)=>a.date.localeCompare(b.date)).slice(0,60).map(t=>`<div class="sumrow"><span>${esc(t.note||catOf(t.cat).n)}<small class="note" style="display:block">${fmtD(t.date)} · ${esc(catOf(t.cat).n)}${t.src==='stmt'?' · من كشف':''}</small></span><b class="num ${t.type==='inc'?'amt-inc':'amt-exp'}">${money(t.amount)}</b></div>`).join('')}${T.length>60?'<p class="note">… و'+(T.length-60)+' أخرى</p>':''}</details>`:''}
+     ${R.all&&T.length?'<p class="note bad-t">تنبيه: سيُمسح كل سجل العمليات للنطاق المحدد. للتأكيد ستُطلب كتابة كلمة «مسح».</p>':''}
+     ${dp?'<p class="note">دفعات الديون المرتبطة تُحذف من سجل الدين ويُعاد المبلغ إلى رصيده، فإذا أعدت استيرادها وربطتها بالدين يُخصم من جديد مرة واحدة.</p>':''}
+     <div class="actions"><button class="btn danger block" id="pgGo" ${T.length?'':'disabled'}>🧹 مسح ${countWord(T.length,'عملية واحدة','عمليتين','عمليات','عملية')}</button><div class="row2"><button class="btn ghost" id="pgImp2">🏦 أرفق كشفًا بدون مسح</button><button class="btn ghost" data-close>إغلاق</button></div></div></div></div>`};
+  draw();
+  L.oninput=null;L.onchange=e=>{const t=e.target;if(t.id==='pgM1'&&t.value){st.m1=t.value;if(st.mode!=='range')st.m2=t.value}if(t.id==='pgM2'&&t.value)st.m2=t.value;if(t.id==='pgY')st.y=+t.value;if(t.id==='pgAcc')st.acc=t.value;if(t.id==='pgType')st.type=t.value;if(t.id==='pgKeep')st.keep=t.checked;draw()};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+    if(x.dataset.pgmode){st.mode=x.dataset.pgmode;draw();return}if(x.dataset.pgscope){st.scope=x.dataset.pgscope;draw();return}
+    if(x.id==='pgImp'||x.id==='pgImp2'){const R=pgRange(st);openStmt({range:R});return}
+    if(x.id==='pgGo'){const R=pgRange(st);const T=pgPick(st);if(!T.length)return;
+      if(!confirm('مسح '+T.length+' عملية من '+R.label+'؟\nستُحفظ لقطة احتياطية قبل المسح تستطيع الرجوع إليها.'))return;
+      const w=prompt('للتأكيد اكتب كلمة: مسح');if((w||'').trim()!=='مسح'){toast('لم يتم المسح');return}
+      try{await snapTake('قبل مسح '+R.label,false)}catch(er){}
+      const ids=new Set(T.map(t=>t.id));let nd=0;
+      for(const d of (S.settings.debts||[])){for(const p of (d.pays||[]).slice()){if(p.tx&&ids.has(p.tx)){await delDebtPay(d,p);ids.delete(p.tx);nd++}}}
+      if(ids.size)await delTxMany([...ids]);
+      try{aud('del','مسح بيانات '+R.label,(st.scope==='stmt'?'المستورد من الكشوفات':'كل العمليات')+(st.acc!=='*'?' · '+((accList().find(a=>a.id===st.acc)||{}).name||''):''),T.length+' عملية'+(nd?' منها '+nd+' دفعات ديون':''))}catch(er){}
+      await putSettings();st.done={n:T.length,label:R.label};draw();toast('مُسحت '+T.length+' عملية');return}}}
+
+/* ---------- فحص تكرار عمليات كشوفات البنك ---------- */
+function dupFind(){const A=list().filter(t=>!t.pend&&!t.sample);const G=[];
+  /* (1) نفس سطر الكشف مستورد أكثر من مرة: الصفوف المتطابقة داخل الاستيراد الواحد سليمة، والزائد عن أكبر استيراد مكرر */
+  const by={};A.forEach(t=>{if(t.src==='stmt'&&t.bref)(by[t.bref]=by[t.bref]||[]).push(t)});
+  Object.values(by).forEach(arr=>{if(arr.length<2)return;const bk={};arr.forEach(t=>{const k=(t.acc||'')+'|'+String(t.createdAt||'').slice(0,16);(bk[k]=bk[k]||[]).push(t)});const ks=Object.keys(bk);if(ks.length<2)return;
+    const keepK=ks.sort((a,b)=>bk[b].length-bk[a].length||a.localeCompare(b))[0];const keep=bk[keepK];const extra=ks.slice(1).flatMap(k=>bk[k]).slice(0,Math.max(0,arr.length-keep.length));
+    if(extra.length)G.push({id:'b'+arr[0].id,kind:'stmt',keep:keep[0],del:extra,why:'نفس سطر الكشف مستورد '+countWord(arr.length/keep.length|0,'مرة','مرتين','مرات','مرة')})});
+  /* (2) عملية أدخلتها يدويًا وموجودة أيضًا من الكشف: نفس النوع والمبلغ خلال يوم، كل عملية تطابق واحدة فقط */
+  const used=new Set(G.flatMap(g=>g.del.map(t=>t.id)));const S2=A.filter(t=>t.src==='stmt'&&!used.has(t.id)&&!t.own);
+  A.filter(t=>t.src!=='stmt').sort((a,b)=>a.date.localeCompare(b.date)).forEach(m=>{if(m.own||m.trf)return;
+    const c=S2.filter(s=>!used.has(s.id)&&s.type===m.type&&Math.abs(+s.amount-(+m.amount))<0.0005&&Math.abs(dDiff(s.date,m.date))<=1).sort((a,b)=>Math.abs(dDiff(a.date,m.date))-Math.abs(dDiff(b.date,m.date)))[0];
+    if(c){used.add(c.id);G.push({id:'m'+m.id,kind:'manual',man:m,st:c,why:'أدخلتها يدويًا وهي موجودة في كشف '+esc(baBankName(c))})}});
+  return G.sort((a,b)=>((b.st||b.keep).date).localeCompare((a.st||a.keep).date))}
+function dupPayOf(id){for(const d of (S.settings.debts||[]))for(const p of (d.pays||[]))if(p.tx===id)return {d,p};return null}
+function openDupScan(){const L=document.getElementById('layer');let G=dupFind();const off=new Set();
+  const row=t=>`<div class="dup-r"><span class="srch-ic dot" style="--sc:${catOf(t.cat).c}"><i></i></span><span class="srch-m"><b>${esc(t.note||catOf(t.cat).n)}</b><small>${esc(t.src==='stmt'?baBankName(t):'إدخال يدوي')} · ${esc(catOf(t.cat).n)} · ${fmtD(t.date)}${dupPayOf(t.id)?' · دفعة دين':''}</small></span><b class="num ${t.type==='inc'?'amt-inc':'amt-exp'}">${t.type==='inc'?'+':'−'}${money(t.amount)}</b></div>`;
+  const draw=()=>{const on=G.filter(g=>!off.has(g.id));const nDel=on.reduce((s,g)=>s+(g.kind==='stmt'?g.del.length:1),0);
+    L.innerHTML=`${sheetTop('فحص التكرار')}<h2 style="margin-top:0">🔍 فحص تكرار عمليات الكشوفات</h2>
+     ${!G.length?`<div class="okbox">✓ لا يوجد أي تكرار. كل عملية من كشوفات البنك مسجّلة مرة واحدة، ولا توجد عملية يدوية مكررة معها.</div>`:`<div class="warnbox">وُجد ${countWord(G.length,'تكرار واحد','تكراران','تكرارات','تكرارًا')}. سيبقى من كل مجموعة نسخة واحدة: نسخة الكشف مع فئتك وملاحظتك اليدوية، وإن كانت اليدوية دفعة دين تبقى هي وتُربط بالكشف. تُحفظ لقطة احتياطية قبل الحذف.</div>
+     <div class="chips"><button class="chip" data-dpall="1">تحديد الكل</button><button class="chip" data-dpnone="1">إلغاء الكل</button></div>
+     <div class="stack">${G.map(g=>`<div class="panel dup-g${off.has(g.id)?' off':''}"><label class="dup-h"><input type="checkbox" data-dpg="${g.id}"${off.has(g.id)?'':' checked'}><span>${g.why}</span></label>
+       ${g.kind==='stmt'?`<div class="dup-k">يبقى</div>${row(g.keep)}<div class="dup-k bad">يُحذف ${g.del.length>1?'('+g.del.length+')':''}</div>${g.del.map(row).join('')}`:`<div class="dup-k">${dupPayOf(g.man.id)?'يبقى (دفعة دين) ويُربط بالكشف':'يُحذف وتُنقل فئته وملاحظته للكشف'}</div>${row(g.man)}<div class="dup-k">${dupPayOf(g.man.id)?'يُحذف':'يبقى'}</div>${row(g.st)}`}</div>`).join('')}</div>
+     <div class="actions"><button class="btn block danger" id="dpGo"${nDel?'':' disabled'}><span class="lk">🔒 </span>حذف ${countWord(nDel,'عملية مكررة','عمليتين مكررتين','عمليات مكررة','عملية مكررة')}</button></div>`}
+     <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`};
+  L.onchange=e=>{const c=e.target.closest('[data-dpg]');if(!c)return;c.checked?off.delete(c.dataset.dpg):off.add(c.dataset.dpg);const y=L.querySelector('.sheet').scrollTop;draw();L.querySelector('.sheet').scrollTop=y};
+  L.oninput=null;
+  L.onclick=async e=>{const b=e.target.closest('button,[data-close]');if(b&&b.tagName==='LABEL')return;if(!b)return;
+    if(b.hasAttribute('data-close')){L.innerHTML='';render();return}
+    if(b.dataset.dpall){off.clear();draw();return}if(b.dataset.dpnone){G.forEach(g=>off.add(g.id));draw();return}
+    if(b.id==='dpGo'){const on=G.filter(g=>!off.has(g.id));if(!on.length)return;const n=on.reduce((s,g)=>s+(g.kind==='stmt'?g.del.length:1),0);
+      if(!confirm('حذف '+n+' عملية مكررة؟\nستُحفظ لقطة احتياطية قبل الحذف.'))return;b.disabled=true;
+      try{await snapTake('قبل حذف التكرار',false)}catch(er){}
+      const ids=new Set();const upd=[];
+      for(const g of on){if(g.kind==='stmt'){g.del.forEach(t=>ids.add(t.id));continue}
+        const m=S.tx[g.man.id],s=S.tx[g.st.id];if(!m||!s)continue;
+        if(dupPayOf(m.id)){['acc','bref','src','bank','skind','parts'].forEach(k=>{if(s[k]!=null)m[k]=s[k]});if(!m.note)m.note=s.note;upd.push(m);ids.add(s.id)}
+        else{s.cat=m.cat;if((m.note||'').trim())s.note=m.note;if(m.debt&&!s.debt)s.debt=m.debt;upd.push(s);ids.add(m.id)}}
+      if(upd.length)await putTxMany(upd);
+      for(const d of (S.settings.debts||[])){for(const p of (d.pays||[]).slice()){if(p.tx&&ids.has(p.tx)){await delDebtPay(d,p);ids.delete(p.tx)}}}
+      if(ids.size)await delTxMany([...ids]);await putSettings();try{memoClear()}catch(er){}
+      aud('del','فحص التكرار','حذف '+n+' عملية مكررة','');toast('حُذفت '+countWord(n,'عملية مكررة','عمليتان مكررتان','عمليات مكررة','عملية مكررة'));G=dupFind();off.clear();draw();render();return}};
+  draw()}
+
+/* ===================== التوقعات ومقارنة الأشهر =====================
+ * يتعلم من الأشهر الماضية (من كشوفات البنك المستوردة أو من كل العمليات): معدل كل فئة، أعلى وأقل شهر، الاتجاه،
+ * ثم يقارن الشهر الحالي بها ويتوقع الأشهر القادمة. يحفظ توقع كل شهر عند بدايته ليقارنه بالفعلي بعد انتهائه.
+ * كل شيء داخل الجهاز، والطباعة والتصدير من نفس الصفحة. */
+function fcCfg(){const c=S.settings.fcast=S.settings.fcast||{};if(!c.n)c.n=6;c.ex=c.ex||[];c.ov=c.ov||{};c.snap=c.snap||{};c.srcE=c.src||(list().some(t=>t.src==='stmt')?'stmt':'all');return c}
+function fcIsFix(t){return !!(t.rec||t.debt||t.cat==='loan'||t.skind==='loan')}
+function fcData(){const C=fcCfg();const cm=curM();
+  const pool=list().filter(t=>t.date&&!t.sample&&!t.pend&&!t.own&&(C.srcE==='all'||t.src==='stmt'));
+  const M={};pool.forEach(t=>{const m=mOf(t.date);const x=M[m]=M[m]||{m,exp:{},inc:{},fix:0,n:0};x.n++;const v=+t.amount||0;
+    if(t.type==='inc')x.inc[t.cat]=(x.inc[t.cat]||0)+v;else if(fcIsFix(t))x.fix+=v;else x.exp[t.cat]=(x.exp[t.cat]||0)+v});
+  const past=Object.keys(M).filter(m=>m<cm).sort();
+  /* الشهر الذي لا يغطيه كشف كامل (أول أو آخر شهر في الكشف) يُستبعد تلقائيًا حتى لا ينخفض المعدل، ويمكنك إدخاله يدويًا */
+  const H=S.settings.stmtHist||[];const part=new Set(C.srcE==='stmt'?past.filter(m=>!H.some(h=>h.from&&h.to&&h.from<=addDays(mStart(m),3)&&h.to>=addDays(mEnd(m),-3))):[]);
+  const avail=past.filter(m=>part.has(m)?(C.inc||[]).includes(m):!C.ex.includes(m));const base=avail.slice(-C.n);const nb=base.length;
+  const W=base.map((m,i)=>i+1);const wS=W.reduce((s,w)=>s+w,0)||1;
+  const md=mDays();const frac=Math.min(1,Math.max(0.01,md.day/md.dim));const cur=M[cm]||{m:cm,exp:{},inc:{},fix:0,n:0};
+  const mk=(key,get,ovk)=>{const vals=base.map(m=>r3(get(M[m])));const avg=nb?r3(vals.reduce((s,v)=>s+v,0)/nb):0;const wavg=nb?r3(vals.reduce((s,v,i)=>s+v*W[i],0)/wS):0;
+    const ov=ovk&&C.ov[ovk]!=null&&C.ov[ovk]!==''?+C.ov[ovk]:null;const fc=ov!=null?ov:wavg;
+    let trend=0;if(nb>=4){const h=Math.floor(nb/2);const a=vals.slice(0,h).reduce((s,v)=>s+v,0)/h,b=vals.slice(-h).reduce((s,v)=>s+v,0)/h;trend=a>0.5?Math.round((b-a)/a*100):0}
+    const now=r3(get(cur));const pace=r3(fc*frac);const proj=r3(now+Math.max(0,fc-now)*(1-frac));
+    const st=fc<0.5?(now>0.5?'new':'ok'):now>fc*1.001?'over':now>pace*1.15&&now>fc*0.3?'fast':'ok';
+    return{key,vals,avg,fc:r3(fc),ov,min:nb?Math.min(...vals):0,max:nb?Math.max(...vals):0,trend,now,pace,proj,st}};
+  const cats=new Set();base.concat([cm]).forEach(m=>{if(M[m])Object.keys(M[m].exp).forEach(c=>cats.add(c))});
+  const exp=[...cats].map(c=>Object.assign(mk(c,x=>x?x.exp[c]||0:0,c),{n:catOf(c).n,c:catOf(c).c})).filter(r=>r.avg>0.05||r.now>0.05||r.ov!=null).sort((a,b)=>b.fc-a.fc||b.now-a.now);
+  const icats=new Set();base.concat([cm]).forEach(m=>{if(M[m])Object.keys(M[m].inc).forEach(c=>icats.add(c))});
+  const inc=[...icats].map(c=>Object.assign(mk(c,x=>x?x.inc[c]||0:0,null),{n:catOf(c).n})).filter(r=>r.avg>0.05||r.now>0.05).sort((a,b)=>b.fc-a.fc);
+  const fix=Object.assign(mk('_fix',x=>x?x.fix:0,null),{n:'الالتزامات والأقساط'});
+  const tot=k=>r3(exp.reduce((s,r)=>s+r[k],0));
+  const varFc=tot('fc'),varNow=tot('now'),varAvg=tot('avg'),incFc=r3(inc.reduce((s,r)=>s+r.fc,0)),incNow=r3(inc.reduce((s,r)=>s+r.now,0));
+  const sal=+S.settings.salaryAmt||0;
+  const next=[1,2,3].map(k=>{const m=shiftMonth(cm,k);const fx=r3(monthItems(m).filter(i=>!i.pre).reduce((s,i)=>s+Math.max(0,(+i.amount||0)-(i.prev||0)),0));
+    const se=(()=>{try{return r3(seas().filter(s=>mOf(s.date)>=m).reduce((t,s)=>t+seasCalc(s).need,0))}catch(e){return 0}})();
+    const ic=sal>0?Math.max(sal,incFc):incFc;return{m,inc:r3(ic),fix:fx,var:varFc,seas:se,left:r3(ic-fx-varFc-se)}});
+  const acc=Object.keys(C.snap).filter(m=>m<cm&&M[m]).sort().slice(-12).map(m=>{const s=C.snap[m];const A=M[m];const act=r3(Object.values(A.exp).reduce((a,v)=>a+v,0));
+    const cs=Object.keys(s.c||{}).concat(Object.keys(A.exp)).filter((v,i,a)=>a.indexOf(v)===i).map(c=>({c,n:catOf(c).n,f:r3((s.c||{})[c]||0),a:r3(A.exp[c]||0)})).filter(x=>x.f>0.05||x.a>0.05).sort((a,b)=>b.a-a.a);
+    return{m,f:r3(s.v||0),a:act,d:r3(act-(s.v||0)),pct:s.v>0.5?Math.round(Math.abs(act-s.v)/s.v*100):null,cs}});
+  return{C,cm,M,past,part,avail,base,nb,exp,inc,fix,varFc,varNow,varAvg,incFc,incNow,next,acc,frac,md,proj:tot('proj')}}
+/* يحفظ توقع الشهر الحالي مرة واحدة (أول مرة يُفتح فيها) ليُقارن بالفعلي بعد انتهائه */
+function fcSnap(D){const C=D.C;if(C.snap[D.cm]||!D.nb)return false;const c={};D.exp.forEach(r=>{if(r.fc>0.05)c[r.key]=r.fc});C.snap[D.cm]={at:today(),v:D.varFc,c};
+  const ks=Object.keys(C.snap).sort();while(ks.length>24)delete C.snap[ks.shift()];return true}
+function fcStTxt(r){return r.st==='over'?'<span class="fc-st bad">تجاوز التوقع</span>':r.st==='fast'?'<span class="fc-st warn">أسرع من المعدل</span>':r.st==='new'?'<span class="fc-st warn">جديد</span>':'<span class="fc-st ok">ضمن المعدل</span>'}
+function fcHomeHtml(){if(S.month!==curM())return '';if(!list().some(t=>!t.sample&&t.date&&mOf(t.date)<curM()))return '';let D;try{D=fcData()}catch(e){return ''}if(!D.nb)return '';if(fcSnap(D))setTimeout(()=>{putSettings()},0);
+  const over=D.exp.filter(r=>r.st==='over'||r.st==='fast').length;
+  return `<button class="xphome" data-fcast="1"><span>📈</span><span><b>التوقعات ومقارنة الأشهر</b><small>مصاريف ${esc(mShort(D.cm))} حتى الآن <b class="num ${D.varNow>D.varFc*D.frac*1.1?'amt-exp':'amt-inc'}">${money(D.varNow)}</b> من توقع <b class="num">${money(D.varFc)}</b>${over?' · <b class="amt-exp">'+countWord(over,'فئة','فئتان','فئات','فئة')+' فوق المعدل</b>':''}</small></span><span class="xph-go">‹</span></button>`}
+function openMonthFc(o){const L=document.getElementById('layer');o=Object.assign({tab:'now'},o||{});
+  const draw=()=>{const D=fcData();if(fcSnap(D)){putSettings()}const sh=L.querySelector('.sheet');const y=sh?sh.scrollTop:0;const C=D.C;
+    const mh=D.base.map(m=>`<th>${esc(mShort(m))}<small class="fc-y">${m.slice(0,4)}</small></th>`).join('');
+    const tbl=(rows,cls)=>`<div class="fc-tw"><table class="fc-t"><thead><tr><th>الفئة</th>${mh}<th>المعدل</th><th>${esc(mShort(D.cm))} حتى الآن</th><th>التوقع</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.n)}</td>${r.vals.map(v=>`<td class="num">${v?money(v):'—'}</td>`).join('')}<td class="num b">${money(r.avg)}</td><td class="num ${r.st==='over'?'amt-exp':''}">${money(r.now)}</td><td class="num b">${money(r.fc)}${r.ov!=null?' ✎':''}</td></tr>`).join('')}
+      <tr class="tot"><td>المجموع</td>${D.base.map((m,i)=>`<td class="num">${money(rows.reduce((s,r)=>s+r.vals[i],0))}</td>`).join('')}<td class="num">${money(rows.reduce((s,r)=>s+r.avg,0))}</td><td class="num">${money(rows.reduce((s,r)=>s+r.now,0))}</td><td class="num">${money(rows.reduce((s,r)=>s+r.fc,0))}</td></tr></tbody></table></div>`;
+    let body='';
+    if(!D.past.length)body=`<div class="panel empty"><b>لا توجد أشهر سابقة بعد</b>استورد كشف حساب البنك لأشهر سابقة أو سجّل عملياتك، فيتعلم التطبيق معدلاتك ويتوقع الأشهر القادمة.</div><button class="btn block" data-fcimp="1">🏦 استيراد كشف حساب</button>`;
+    else if(!D.nb)body=`<div class="warnbox">كل الأشهر السابقة مستبعدة من الحساب. أعد بعضها من «الإدارة».</div>`;
+    else if(o.tab==='now'){const pr=Math.round(D.frac*100);
+      body=`<div class="pp-k"><div><span>مصاريف ${esc(mShort(D.cm))} حتى الآن</span><b class="num ${D.varNow>D.varFc*D.frac*1.1?'amt-exp':''}">${money(D.varNow)}</b><small>مضى ${pr}% من الشهر</small></div><div><span>توقع الشهر</span><b class="num">${money(D.varFc)}</b><small>المعدل ${money(D.varAvg)}</small></div><div class="${D.proj>D.varFc*1.05?'bad':'ok'}"><span>المتوقع بنهاية الشهر</span><b class="num">${money(D.proj)}</b></div><div class="ok"><span>الدخل المتوقع</span><b class="num">${money(D.next[0].inc)}</b><small>هذا الشهر ${money(D.incNow)}</small></div></div>
+       <p class="note">التوقع مبني على ${monthsWord(D.nb)} (${esc(mShort(D.base[0]))} – ${esc(mShort(D.base[D.nb-1]))}) من ${C.srcE==='stmt'?'كشوفات البنك':'كل العمليات'}، والأشهر الأحدث وزنها أكبر. الالتزامات والأقساط محسوبة وحدها.</p>
+       <h3>كل فئة مقابل معدلها</h3><div class="stack">${D.exp.map(r=>{const mx=Math.max(r.fc,r.now,0.01);return `<div class="panel fc-c"><div class="fc-h"><span class="dot" style="background:${r.c}"></span><b>${esc(r.n)}</b>${fcStTxt(r)}</div>
+         <div class="fc-bar"><i class="a" style="width:${Math.min(100,r.now/mx*100)}%"></i><i class="p" style="inset-inline-start:${Math.min(100,r.pace/mx*100)}%"></i></div>
+         <div class="fc-n"><span>حتى الآن <b class="num ${r.st==='over'?'amt-exp':''}">${money(r.now)}</b></span><span>التوقع <b class="num">${money(r.fc)}</b></span><span>المعدل <b class="num">${money(r.avg)}</b></span>${r.trend?`<span>الاتجاه <b class="num ${r.trend>0?'amt-exp':'amt-inc'}">${r.trend>0?'▲':'▼'}${Math.abs(r.trend)}%</b></span>`:''}</div></div>`}).join('')}</div>
+       <h3>الالتزامات والأقساط</h3><div class="panel"><div class="sumrow"><span>المدفوع هذا الشهر</span><b class="num">${money(D.fix.now)}</b></div><div class="sumrow"><span>معدل الأشهر السابقة</span><b class="num">${money(D.fix.avg)}</b></div></div>`}
+    else if(o.tab==='hist'){body=`<h3>المصروفات شهرًا بشهر</h3>${tbl(D.exp)}<h3>الالتزامات والأقساط</h3>${tbl([D.fix])}<h3>الإيداعات شهرًا بشهر</h3>${D.inc.length?tbl(D.inc):'<p class="note">لا إيداعات.</p>'}`}
+    else if(o.tab==='next'){body=`<p class="note">الدخل من راتبك المسجّل أو من معدل الإيداعات، والالتزامات من أقساطك والتزاماتك المسجّلة لكل شهر، والمصاريف من التوقع المتعلَّم.</p>
+       <div class="fc-tw"><table class="fc-t"><thead><tr><th>الشهر</th><th>الدخل</th><th>الالتزامات</th><th>المصاريف المتوقعة</th><th>الموسمية</th><th>يبقى</th></tr></thead><tbody>${D.next.map(x=>`<tr><td>${esc(monthName(x.m))}</td><td class="num amt-inc">${money(x.inc)}</td><td class="num amt-exp">${money(x.fix)}</td><td class="num amt-exp">${money(x.var)}</td><td class="num">${x.seas?money(x.seas):'—'}</td><td class="num b ${x.left<0?'amt-exp':'amt-inc'}">${x.left<0?'−':''}${money(Math.abs(x.left))}</td></tr>`).join('')}
+       <tr class="tot"><td>المجموع</td>${['inc','fix','var','seas','left'].map(k=>`<td class="num">${money(D.next.reduce((s,x)=>s+x[k],0))}</td>`).join('')}</tr></tbody></table></div>
+       <h3>توقع ${esc(monthName(D.next[0].m))} حسب الفئة</h3><div class="panel">${D.exp.filter(r=>r.fc>0.05).map(r=>`<div class="sumrow"><span>${esc(r.n)}${r.ov!=null?' <small class="note">(يدوي)</small>':''}</span><b class="num">${money(r.fc)}</b></div>`).join('')}<div class="sumrow total"><span>المجموع</span><b class="num">${money(D.varFc)}</b></div></div>`}
+    else if(o.tab==='acc'){body=D.acc.length?`<p class="note">عند بداية كل شهر يُحفظ توقعه، وبعد انتهائه يُقارن بما صرفته فعلًا لتعرف دقة التوقع.</p><div class="fc-tw"><table class="fc-t"><thead><tr><th>الشهر</th><th>التوقع</th><th>الفعلي</th><th>الفرق</th><th>الدقة</th></tr></thead><tbody>${D.acc.map(x=>`<tr><td>${esc(monthName(x.m))}</td><td class="num">${money(x.f)}</td><td class="num">${money(x.a)}</td><td class="num ${x.d>0?'amt-exp':'amt-inc'}">${x.d>0?'+':x.d<0?'−':''}${money(Math.abs(x.d))}</td><td class="num">${x.pct==null?'—':Math.max(0,100-x.pct)+'%'}</td></tr>`).join('')}</tbody></table></div>
+       ${D.acc.slice(-1).map(x=>`<h3>${esc(monthName(x.m))}: التوقع مقابل الفعلي</h3><div class="panel">${x.cs.map(c=>`<div class="sumrow"><span>${esc(c.n)}<small class="note" style="display:block">التوقع ${money(c.f)}</small></span><b class="num ${c.a>c.f*1.05?'amt-exp':'amt-inc'}">${money(c.a)}</b></div>`).join('')}</div>`).join('')}`
+      :`<div class="panel empty"><b>تبدأ المقارنة من الشهر القادم</b>حُفظ توقع ${esc(monthName(D.cm))}. بعد انتهائه ستظهر هنا مقارنة التوقع بما صرفته فعلًا، فئة بفئة.</div>`}
+    else{const last12=D.past.slice(-12);
+      body=`<h3>عدد الأشهر التي يتعلم منها</h3><div class="seg">${[3,6,12].map(n=>`<button class="n" data-fcn="${n}" aria-pressed="${C.n===n}">آخر ${n} أشهر</button>`).join('')}</div>
+       <h3>مصدر البيانات</h3><div class="seg"><button class="n" data-fcsrc="stmt" aria-pressed="${C.srcE==='stmt'}">كشوفات البنك فقط</button><button class="n" data-fcsrc="all" aria-pressed="${C.srcE==='all'}">كل العمليات</button></div>
+       <h3>الأشهر المحسوبة</h3><p class="note" style="margin-top:0">اضغط على شهر غير طبيعي (سفر، عيد، مصروف نادر) لاستبعاده من المعدل.</p><div class="chips">${last12.map(m=>{const pt=D.part.has(m);const on=D.avail.includes(m);return `<button class="chip${on?' on':''}" data-fcex="${m}"${pt?' data-part="1"':''}>${on?'':'✕ '}${esc(mShort(m))} ${m.slice(2,4)}${pt?' (جزئي)':''}</button>`}).join('')}</div>${D.part.size?'<p class="note">«جزئي» = الكشف لا يغطي الشهر كاملًا، فلا يُحسب إلا إذا اخترته.</p>':''}
+       <h3>تعديل التوقع يدويًا</h3><p class="note" style="margin-top:0">اترك الخانة فارغة ليبقى التوقع تلقائيًا.</p><div class="panel">${D.exp.map(r=>`<div class="fc-ov"><span>${esc(r.n)}<small class="note" style="display:block">تلقائي ${money(r.ov!=null?r3(r.vals.reduce((s,v,i)=>s+v*(i+1),0)/(D.nb*(D.nb+1)/2)):r.fc)}</small></span><input class="inp num" inputmode="decimal" data-fcov="${esc(r.key)}" value="${r.ov!=null?r.ov:''}" placeholder="${money(r.fc)}"></div>`).join('')}</div>
+       <div class="stack" style="margin-top:10px"><button class="btn block" id="fcBud">✓ اعتماد التوقع كميزانيات (سقف لكل فئة)</button><button class="btn ghost block" id="fcReset">↺ إرجاع الإعدادات التلقائية</button><button class="btn ghost block" id="fcSnapClr">🗑️ مسح سجل التوقعات المحفوظة</button></div>`}
+    L.innerHTML=`${sheetTop('التوقعات ومقارنة الأشهر')}<h2 style="margin-top:0">📈 التوقعات ومقارنة الأشهر</h2>
+     <div class="chips fc-tabs">${[['now','هذا الشهر'],['hist','جدول الأشهر'],['next','الأشهر القادمة'],['acc','التوقع والفعلي'],['set','الإدارة']].map(([k,n])=>`<button class="chip${o.tab===k?' on':''}" data-fct="${k}">${n}</button>`).join('')}</div>
+     ${body}
+     ${D.nb?`<h3>طباعة وتصدير</h3><div class="row2"><button class="btn ghost" id="fcPdf">🖨️ تقرير PDF</button><button class="btn ghost" id="fcXl">📊 ملف Excel</button></div>`:''}
+     <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
+    const s2=L.querySelector('.sheet');if(s2)s2.scrollTop=y};
+  L.oninput=null;
+  L.onchange=async e=>{const t=e.target.closest('[data-fcov]');if(!t)return;const C=fcCfg();const v=String(t.value).trim();if(v==='')delete C.ov[t.dataset.fcov];else{const n=parseAmt(v);if(isNaN(n)||n<0){toast('أدخل مبلغًا صحيحًا');return}C.ov[t.dataset.fcov]=r3(n)}await putSettings();draw()};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+    const C=fcCfg();
+    if(x.dataset.fct){o.tab=x.dataset.fct;draw();L.querySelector('.sheet').scrollTop=0;return}
+    if(x.dataset.fcimp){openStmt();return}
+    if(x.dataset.fcn){C.n=+x.dataset.fcn;await putSettings();draw();return}
+    if(x.dataset.fcsrc){C.src=x.dataset.fcsrc;await putSettings();draw();return}
+    if(x.dataset.fcex){const m=x.dataset.fcex;if(x.dataset.part){C.inc=C.inc||[];C.inc=C.inc.includes(m)?C.inc.filter(z=>z!==m):C.inc.concat([m])}else C.ex=C.ex.includes(m)?C.ex.filter(z=>z!==m):C.ex.concat([m]);await putSettings();draw();return}
+    if(x.id==='fcReset'){if(!confirm('إرجاع الإعدادات التلقائية؟ (آخر 6 أشهر، بدون استبعاد، بدون تعديل يدوي)'))return;C.n=6;C.ex=[];C.inc=[];C.ov={};await putSettings();draw();toast('رجعت الإعدادات التلقائية');return}
+    if(x.id==='fcSnapClr'){if(!confirm('مسح سجل التوقعات المحفوظة؟ يبدأ الحفظ من جديد.'))return;C.snap={};await putSettings();draw();return}
+    if(x.id==='fcBud'){const D=fcData();const B=Object.assign({},S.settings.budgets||{});let n=0;D.exp.forEach(r=>{if(r.fc>0.5){B[r.key]=Math.ceil(r.fc);n++}});
+      if(!n)return;if(!confirm('اعتماد التوقع سقفًا شهريًا لـ '+n+' فئة؟'))return;S.settings.budgets=B;await putSettings();toast('اعتُمدت '+countWord(n,'ميزانية واحدة','ميزانيتان','ميزانيات','ميزانية'));render();return}
+    if(x.id==='fcPdf'){fcPrint();return}if(x.id==='fcXl'){fcXlsx();return}};
+  draw()}
+function fcReport(){const D=fcData();const N=v=>`<span class="n">${v<0?'−':''}${money(Math.abs(v))}</span>`;const T=(h,r,c)=>`<table${c?' class="'+c+'"':''}><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${r.join('')}</tbody></table>`;const now=new Date();
+  const mh=D.base.map(m=>esc(mShort(m))+' '+m.slice(2,4));const rowsT=rows=>rows.map(r=>`<tr><td>${esc(r.n)}</td>${r.vals.map(v=>`<td class="nw">${N(v)}</td>`).join('')}<td class="nw"><b>${N(r.avg)}</b></td><td class="nw">${N(r.now)}</td><td class="nw"><b>${N(r.fc)}</b></td></tr>`);
+  const hh=['الفئة'].concat(mh,['المعدل',esc(mShort(D.cm))+' حتى الآن','التوقع']);
+  let h=`<header class="rh"><div><div class="rapp">${REP_LOGO}إدارة شؤوني</div><h1>التوقعات ومقارنة الأشهر</h1><div class="rper">مبني على ${monthsWord(D.nb)}${D.nb?' ('+esc(monthName(D.base[0]))+' – '+esc(monthName(D.base[D.nb-1]))+')':''} · ${D.C.srcE==='stmt'?'من كشوفات البنك':'من كل العمليات'}</div></div><div class="rmeta">${repOwner()}أُعدّ في ${fmtD(today())} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}<br>العملة: ر.ع.</div></header>
+   <section><h2>الملخص</h2><div class="kpis"><div><span>مصاريف ${esc(mShort(D.cm))} حتى الآن</span><b>${N(D.varNow)}</b></div><div><span>توقع الشهر</span><b>${N(D.varFc)}</b></div><div><span>المتوقع بنهاية الشهر</span><b class="${D.proj>D.varFc*1.05?'no':'ok'}">${N(D.proj)}</b></div><div><span>الدخل المتوقع</span><b class="ok">${N(D.next[0].inc)}</b></div></div><p class="hint">مضى ${Math.round(D.frac*100)}% من الشهر. الأشهر الأحدث وزنها أكبر في التوقع، والالتزامات والأقساط محسوبة وحدها.</p></section>
+   <section><h2>هذا الشهر مقابل المعدل</h2>${T(['الفئة','حتى الآن','المعدل','التوقع','المتوقع بنهاية الشهر','الحالة'],D.exp.map(r=>`<tr><td>${esc(r.n)}</td><td class="nw ${r.st==='over'?'no':''}">${N(r.now)}</td><td class="nw">${N(r.avg)}</td><td class="nw">${N(r.fc)}</td><td class="nw">${N(r.proj)}</td><td>${r.st==='over'?'تجاوز التوقع':r.st==='fast'?'أسرع من المعدل':r.st==='new'?'جديد':'ضمن المعدل'}</td></tr>`))}</section>
+   <section><h2>المصروفات شهرًا بشهر</h2>${T(hh,rowsT(D.exp))}</section>
+   <section><h2>الالتزامات والأقساط شهرًا بشهر</h2>${T(hh,rowsT([D.fix]),'nototal')}</section>
+   ${D.inc.length?`<section><h2>الإيداعات شهرًا بشهر</h2>${T(hh,rowsT(D.inc))}</section>`:''}
+   <section><h2>الأشهر القادمة</h2>${T(['الشهر','الدخل','الالتزامات','المصاريف المتوقعة','الموسمية','يبقى'],D.next.map(x=>`<tr><td>${esc(monthName(x.m))}</td><td class="nw ok">${N(x.inc)}</td><td class="nw no">${N(x.fix)}</td><td class="nw no">${N(x.var)}</td><td class="nw">${N(x.seas)}</td><td class="nw ${x.left<0?'no':'ok'}"><b>${N(x.left)}</b></td></tr>`))}</section>
+   ${D.acc.length?`<section><h2>التوقع مقابل الفعلي</h2>${T(['الشهر','التوقع','الفعلي','الفرق','الدقة'],D.acc.map(x=>`<tr><td>${esc(monthName(x.m))}</td><td class="nw">${N(x.f)}</td><td class="nw">${N(x.a)}</td><td class="nw ${x.d>0?'no':'ok'}">${N(x.d)}</td><td>${x.pct==null?'—':Math.max(0,100-x.pct)+'%'}</td></tr>`),'nototal')}</section>`:''}
+   <footer class="rf">التوقعات ومقارنة الأشهر من تطبيق «إدارة شؤوني» · حُسبت داخل الهاتف ولم تُرسل لأي جهة</footer>`;
+  return{h:repTotalsHtml(h),wide:D.nb>=6}}
+function fcPrint(){const r=fcReport();prStyle(r.wide?'landscape':'portrait');let el=document.getElementById('printArea');if(!el){el=document.createElement('div');el.id='printArea';document.body.appendChild(el)}el.className='rep';el.innerHTML=r.h;
+  const old=document.title;document.title='التوقعات ومقارنة الأشهر - إدارة شؤوني';window.addEventListener('afterprint',()=>{document.title=old},{once:true});try{window.print()}catch(e){toast('تعذّرت الطباعة هنا')}setTimeout(()=>{document.title=old},3000)}
+function fcXlsx(){const D=fcData();const sub='إدارة شؤوني · مبني على '+monthsWord(D.nb)+' · '+(D.C.srcE==='stmt'?'كشوفات البنك':'كل العمليات');
+  const mhead=D.base.map(m=>[mShort(m)+' '+m.slice(2,4),'n']);const hd=[['الفئة','s',24]].concat(mhead,[['المعدل','n'],['هذا الشهر','n'],['التوقع','n']]);const tc=hd.map((_,i)=>i).slice(1);
+  const rw=rows=>rows.map(r=>[r.n].concat(r.vals,[r.avg,r.now,r.fc]));
+  const sh=[{name:'هذا الشهر',title:'هذا الشهر مقابل المعدل',sub,head:[['الفئة','s',24],['حتى الآن','n'],['المعدل','n'],['التوقع','n'],['بنهاية الشهر','n'],['الحالة','s',16]],rows:D.exp.map(r=>[r.n,r.now,r.avg,r.fc,r.proj,r.st==='over'?'تجاوز التوقع':r.st==='fast'?'أسرع من المعدل':r.st==='new'?'جديد':'ضمن المعدل']),totals:[1,2,3,4]},
+    {name:'المصروفات شهريًا',title:'المصروفات شهرًا بشهر',sub,head:hd,rows:rw(D.exp.concat([D.fix])),totals:tc},
+    {name:'الإيداعات شهريًا',title:'الإيداعات شهرًا بشهر',sub,head:hd,rows:rw(D.inc),totals:tc},
+    {name:'الأشهر القادمة',title:'توقع الأشهر القادمة',sub,head:[['الشهر','s',22],['الدخل','n'],['الالتزامات','n'],['المصاريف المتوقعة','n'],['الموسمية','n'],['يبقى','n']],rows:D.next.map(x=>[monthName(x.m),x.inc,x.fix,x.var,x.seas,x.left]),totals:[1,2,3,4,5]}];
+  if(D.acc.length)sh.push({name:'التوقع والفعلي',title:'التوقع مقابل الفعلي',sub,head:[['الشهر','s',22],['التوقع','n'],['الفعلي','n'],['الفرق','n'],['الدقة','p']],rows:D.acc.map(x=>[monthName(x.m),x.f,x.a,x.d,x.pct==null?'':Math.max(0,100-x.pct)/100])});
+  const data=XL.build(sh);const nm='forecast-'+today()+'.xlsx';shareFile(nm,data,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet').then(r=>{if(r!=='cancel')toast(r==='shared'?'اختر «Numbers» لفتحه':'حُفظ '+nm)})}
+
+/* ===================== استيراد عدة كشوفات معًا =====================
+ * يقرأ كل الملفات، يتعرف على البنك ورقم الحساب في كل ملف، ويجمع ملفات نفس الحساب في مجموعة واحدة،
+ * ويحذف الأسطر المتكررة بين الملفات المتداخلة (نفس التاريخ والمبلغ والرصيد بعد العملية)، ثم تراجع كل مجموعة وتستوردها. */
+/* التعرف على بنك الملف: الاسم ورمز البنك في IBAN وشكل أعمدة الكشف */
+const ST_BANK_ID={bm:/bank\s*muscat|bankmuscat|بنك\s*مسقط|OM\d{2}027\d|post date\s+value date\s+narration/gi,nbo:/national\s*bank\s*of\s*oman|\bnbo|البنك\s*الوطني|OM\d{2}018\d|posting date\s+value date\s+description/gi};
+function stDetectBank(it,def){const t=(it.txt||'').slice(0,6000)+' '+it.name;let best=def,bn=0;Object.entries(ST_BANK_ID).forEach(([k,re])=>{const n=(t.match(re)||[]).length;if(n>bn){bn=n;best=k}});return best}
+function stRowKey(r){return r.date+'|'+(r.type||'')+'|'+r3(r.amount)+'|'+(r.bal!=null?r3(r.bal):stLearnKey(r.desc||'').slice(0,24))}
+function stMerge(Ps){const per=Ps.map(P=>{const c={};P.rows.forEach(r=>{const k=stRowKey(r);c[k]=(c[k]||0)+1});return c});const need={};per.forEach(c=>Object.entries(c).forEach(([k,n])=>{need[k]=Math.max(need[k]||0,n)}));
+  const ord=Ps.map((P,i)=>({P,i})).sort((a,b)=>(a.P.from||'').localeCompare(b.P.from||''));const rows=[];let xdup=0;const got={};
+  ord.forEach(({P,i})=>{P.rows.forEach((r,j)=>{const k=stRowKey(r);if((got[k]||0)>=need[k]){xdup++;return}got[k]=(got[k]||0)+1;rows.push(Object.assign({},r,{_f:i,_j:j}))})});
+  rows.sort((a,b)=>a.date.localeCompare(b.date)||0);
+  const first=ord[0].P,last=ord.slice().sort((a,b)=>(b.P.to||'').localeCompare(a.P.to||''))[0].P;
+  return{rows,open:first.open,close:last.close,from:ord.map(o=>o.P.from).filter(Boolean).sort()[0]||null,to:ord.map(o=>o.P.to).filter(Boolean).sort().pop()||null,
+    chk:Ps.reduce((s,P)=>s+(P.chk||0),0),tot:Ps.reduce((s,P)=>s+(P.tot||0),0),cols:Ps.some(P=>P.cols),own:[...new Set(Ps.flatMap(P=>P.own||[]))],files:Ps.length,xdup}}
+function stGuessAcc(bank,own,def){const M=S.settings.stmtAccMap||{};const A=accList();for(const n of own||[])if(M[n]&&A.some(a=>a.id===M[n]))return M[n];
+  const k=bank==='bm'?/مسقط|muscat/i:bank==='nbo'?/الوطني|nbo/i:null;const a=k&&A.find(x=>k.test(x.name||''));return a?a.id:def}
+function stGroups(items,st){const G=[];items.filter(it=>it.P).forEach(it=>{it.bank=stDetectBank(it,st.bank);const own=new Set(it.P.own||[]);
+    let g=G.find(g=>g.bank===it.bank&&((!own.size&&!g.own.size)||[...own].some(n=>g.own.has(n))));if(!g){g={bank:it.bank,own:new Set(),items:[]};G.push(g)}g.items.push(it);own.forEach(n=>g.own.add(n))});
+  G.forEach(g=>{g.M=stMerge(g.items.map(it=>it.P));g.acc=stGuessAcc(g.bank,[...g.own],st.acc)});return G}
+function openStmtBatch(items,st){const L=document.getElementById('layer');const G=stGroups(items,st);const bad=items.filter(it=>it.err);let done=new Set();
+  const draw=()=>{const A=accList();
+    L.innerHTML=`${sheetTop('عدة كشوفات')}<h2 style="margin-top:0">📚 ${countWord(items.length,'كشف واحد','كشفان','كشوفات','كشفًا')} معًا</h2>
+     <p class="note" style="margin-top:0">جمعت ملفات نفس الحساب في مجموعة واحدة وحذفت الأسطر المتكررة بين الملفات المتداخلة. راجع كل مجموعة ثم استوردها، ويُفحص التكرار أيضًا مع بياناتك الحالية.</p>
+     ${bad.length?`<div class="warnbox">${bad.map(it=>`<div><b>${esc(it.name)}</b>: ${it.err}</div>`).join('')}</div>`:''}
+     <div class="stack">${G.map((g,gi)=>`<div class="panel stb-g${done.has(gi)?' done':''}"><div class="seas-h"><span class="seas-ic">🏦</span><div style="flex:1;min-width:0"><b>${esc(ST_BANKS[g.bank].n)}</b><small class="note" style="display:block">${g.M.from?fmtD(g.M.from)+' – '+fmtD(g.M.to):''} · ${g.M.rows.length} عملية</small></div>${done.has(gi)?'<span class="fc-st ok">✓ استُوردت</span>':''}</div>
+       ${g.items.slice().sort((a,b)=>(a.P.from||'').localeCompare(b.P.from||'')).map(it=>`<div class="sumrow"><span>📄 ${esc(it.name)}<small class="note" style="display:block">${it.P.from?fmtD(it.P.from)+' – '+fmtD(it.P.to):''}${it.P.tot?' · '+(it.P.chk===it.P.tot?'الرصيد مطابق ✓':'مطابقة '+it.P.chk+'/'+it.P.tot):''}</small></span><b class="num">${it.P.rows.length}</b></div>`).join('')}
+       ${g.M.xdup?`<div class="stb-x">🔁 ${countWord(g.M.xdup,'سطر واحد مكرر','سطران مكرران','أسطر مكررة','سطرًا مكررًا')} بين الملفات حُذف</div>`:g.items.length>1?'<div class="stb-x ok">✓ لا تكرار بين الملفات</div>':''}
+       <div class="field" style="margin-top:8px"><label>أضفها إلى حساب</label><select class="inp" data-sbgacc="${gi}">${A.map(a=>`<option value="${esc(a.id)}" ${g.acc===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}</select></div>
+       <button class="btn block${done.has(gi)?' ghost':''}" data-sbgo="${gi}" style="margin-top:8px">${done.has(gi)?'مراجعة مرة أخرى':'مراجعة واستيراد'} ${G.length>1?'('+(gi+1)+' من '+G.length+')':''}</button></div>`).join('')}</div>
+     ${G.length?`<button class="btn ghost block" id="sbPr" style="margin-top:10px">🖨️ طباعة كل الكشوفات مرتبة</button>`:''}
+     ${done.size?'<button class="btn ghost block" id="sbAna" style="margin-top:8px">📊 تحليل الكشوفات المستوردة</button>':''}
+     <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`};
+  const bind=()=>{L.oninput=null;
+    L.onchange=e=>{const s=e.target.closest('[data-sbgacc]');if(s)G[+s.dataset.sbgacc].acc=s.value};
+    L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+      if(x.id==='sbAna'){openBankAnalysis();return}
+      if(x.id==='sbPr'){stPrint(G.map(g=>({bank:g.bank,acc:g.acc,P:g.M,files:g.items.map(it=>it.name),I:stClassify(g.M.rows,g.M.own,g.acc)})));return}
+      if(x.dataset.sbgo!=null){const gi=+x.dataset.sbgo;const g=G[gi];const sg={bank:g.bank,acc:g.acc,range:st.range};
+        openStmtReview(g.M,sg,g.items.length>1?countWord(g.items.length,'ملف','ملفان','ملفات','ملفًا'):g.items[0].name,()=>{done.add(gi);draw();bind();const nx=G.findIndex((_,i)=>!done.has(i));if(nx<0){L.innerHTML='';render();openBankAnalysis()}})}}};
+  draw();bind()}
+/* طباعة الكشوفات مرتبة: لكل بنك ملخص ثم جدول لكل شهر بالمجموع */
+function stPrint(groups){const N=v=>`<span class="n">${money(v)}</span>`;const now=new Date();const T=(h,r,c)=>`<table${c?' class="'+c+'"':''}><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${r.join('')}</tbody></table>`;
+  let h=`<header class="rh"><div><div class="rapp">${REP_LOGO}إدارة شؤوني</div><h1>كشوفات الحسابات</h1><div class="rper">${esc(groups.map(g=>ST_BANKS[g.bank].n).join(' + '))}</div></div><div class="rmeta">${repOwner()}أُعدّ في ${fmtD(today())} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}<br>العملة: ر.ع.</div></header>`;
+  h+=`<section><h2>الملخص</h2>${T(['البنك','الحساب','الفترة','العمليات','الإيداعات','المصروفات','الافتتاحي','الختامي','مكرر لن يُستورد'],groups.map(g=>{const inc=g.I.filter(x=>x.type==='inc').reduce((s,x)=>s+x.amount,0),exp=g.I.filter(x=>x.type==='exp').reduce((s,x)=>s+x.amount,0);
+    return `<tr><td>${esc(ST_BANKS[g.bank].n)}</td><td>${esc((accList().find(a=>a.id===g.acc)||{}).name||'')}</td><td class="nw">${g.P.from?fmtD(g.P.from)+' – '+fmtD(g.P.to):''}</td><td>${g.I.length}</td><td class="nw ok">${N(inc)}</td><td class="nw no">${N(exp)}</td><td class="nw">${g.P.open!=null?N(g.P.open):'—'}</td><td class="nw">${g.P.close!=null?N(g.P.close):'—'}</td><td>${g.I.filter(x=>x.dup).length+(g.P.xdup||0)}</td></tr>`}),'nototal')}
+   ${groups.some(g=>g.files&&g.files.length)?`<p class="hint">الملفات: ${esc(groups.flatMap(g=>g.files||[]).join(' · '))}</p>`:''}</section>`;
+  groups.forEach(g=>{const byM={};g.I.forEach(x=>{(byM[mOf(x.date)]=byM[mOf(x.date)]||[]).push(x)});
+    h+=`<section><h2>${esc(ST_BANKS[g.bank].n)} · ${esc((accList().find(a=>a.id===g.acc)||{}).name||'')}</h2>`;
+    Object.keys(byM).sort().forEach(m=>{const X=byM[m].slice().sort((a,b)=>a.date.localeCompare(b.date));
+      h+=`<h3>${esc(monthName(m))}</h3>${T(['#','التاريخ','البيان','الفئة','مدين','دائن','الرصيد','الحالة'],X.map((x,i)=>`<tr><td class="idx">${i+1}</td><td class="nw">${fmtD(x.date)}</td><td>${esc(x.note||x.raw.join(' '))}</td><td>${esc(catOf(x.cat).n)}</td><td class="nw no">${x.type==='exp'?N(x.amount):''}</td><td class="nw ok">${x.type==='inc'?N(x.amount):''}</td><td class="nw">${x.bal!=null?money(x.bal):''}</td><td>${x.dup?'مكرر':x.kind==='own'?'بين حساباتي':x.on===false?'لا':'يُستورد'}</td></tr>`))}`});
+    h+='</section>'});
+  h+=`<footer class="rf">كشوفات الحسابات من تطبيق «إدارة شؤوني» · قُرئت داخل الهاتف ولم تُرسل لأي جهة</footer>`;
+  prStyle('portrait');let el=document.getElementById('printArea');if(!el){el=document.createElement('div');el.id='printArea';document.body.appendChild(el)}el.className='rep';el.innerHTML=repTotalsHtml(h);
+  const old=document.title;document.title='كشوفات الحسابات - إدارة شؤوني';window.addEventListener('afterprint',()=>{document.title=old},{once:true});try{window.print()}catch(e){toast('تعذّرت الطباعة هنا')}setTimeout(()=>{document.title=old},3000)}
 
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 document.addEventListener('keydown',e=>{if(((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')||(e.key==='/'&&!e.target.closest('input,textarea,select,[contenteditable]'))){e.preventDefault();openSearch()}});
@@ -6002,6 +6391,10 @@ document.addEventListener('click',async e=>{
   if(b.dataset.payplan){openPayPlanner();return}
   if(b.dataset.seasonal){openSeasonal();return}
   if(b.dataset.stmt){openStmt();return}
+  if(b.dataset.bana){openBankAnalysis();return}
+  if(b.dataset.purge){openPurge();return}
+  if(b.dataset.fcast){openMonthFc({tab:b.dataset.fcast==='set'?'set':'now'});return}
+  if(b.dataset.dupscan){openDupScan();return}
   if(b.dataset.subs){openSubs();return}
   if(b.dataset.review){openReview(b.dataset.review==='1'?null:b.dataset.review);return}
   if(b.dataset.premonths){const [k,i]=b.dataset.premonths.split('|');openPreMonths(k,i);return}

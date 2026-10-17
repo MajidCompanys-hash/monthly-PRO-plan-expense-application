@@ -1360,3 +1360,37 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .st-raw summary{font-size:12px;color:var(--muted);cursor:pointer}.st-raw small{color:var(--muted);font-size:11.5px;direction:ltr;display:block;text-align:left}
 .st-link .chip{justify-content:center}
 .st-upd{display:flex;gap:8px;align-items:center;margin:12px 2px;font-size:14px}
+
+/* ===== 2.44.0 تحليل كشوفات البنوك ===== */
+.ba-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ba-tabs button b{width:auto;height:auto;background:none;font-size:18px}
+.ba-tabs button.on b{background:none}
+.ba-body{margin-top:10px}
+.ba-mon{display:grid;grid-template-columns:62px 1fr auto auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.ba-mon:last-child{border-bottom:0}
+.ba-mon .num{font-size:13.5px;min-width:64px;text-align:left}
+.ba-bars{display:flex;flex-direction:column;gap:3px}
+.ba-bars i{display:block;height:7px;border-radius:4px;min-width:2px}
+.ba-bars i.i{background:var(--inc)}.ba-bars i.e{background:var(--exp)}
+.ba-c{width:100%;border:0;background:transparent;font:inherit;color:var(--fg);text-align:start;cursor:pointer}
+.ba-f{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 0 8px}.ba-f .chip{flex:none}
+@media (max-width:359px){.ba-mon{grid-template-columns:52px 1fr auto}.ba-mon .num.amt-inc{display:none}}
+/* 2.44.0 — فحص التكرار ومسح بيانات الإدخال */
+.dup-g{padding:10px 12px}.dup-g.off{opacity:.55}
+.dup-h{display:flex;gap:8px;align-items:flex-start;font-weight:700;margin-bottom:6px}.dup-h input{margin-top:3px;flex:none;width:18px;height:18px}
+.dup-k{font-size:.78rem;color:var(--inc);font-weight:700;margin-top:6px}.dup-k.bad{color:var(--exp)}
+.dup-r{display:flex;align-items:center;gap:8px;padding:6px 0;min-width:0}.dup-r .srch-m{flex:1;min-width:0}.dup-r .srch-m b,.dup-r .srch-m small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pg-keep{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--bg)}.pg-keep input{flex:none;width:20px;height:20px;margin-top:2px}.pg-keep b{display:block}
+.pg-safe{margin-top:10px;line-height:1.7}.bad-t{color:var(--exp);font-weight:700}
+/* التوقعات ومقارنة الأشهر */
+.fc-tabs{margin:4px 0 10px}
+.fc-c{padding:10px 12px}.fc-h{display:flex;align-items:center;gap:8px;min-width:0}.fc-h b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fc-h .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.fc-st{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;flex:none}.fc-st.ok{color:var(--inc);background:color-mix(in srgb,var(--inc) 12%,transparent)}.fc-st.bad{color:var(--exp);background:color-mix(in srgb,var(--exp) 12%,transparent)}.fc-st.warn{color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,transparent)}
+.fc-bar{position:relative;height:8px;border-radius:99px;background:var(--bg);margin:8px 0 6px;overflow:visible}.fc-bar .a{position:absolute;inset-block:0;inset-inline-start:0;border-radius:99px;background:var(--accent)}.fc-bar .p{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--fg);opacity:.55}
+.fc-n{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--muted)}.fc-n b{font-size:14px;color:var(--fg)}.fc-n b.amt-exp{color:var(--exp)}.fc-n b.amt-inc{color:var(--inc)}
+.fc-tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;background:var(--surface);max-width:100%}
+.fc-t{border-collapse:collapse;width:100%;font-size:12.5px;white-space:nowrap}.fc-t th,.fc-t td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:start}.fc-t th{background:var(--bg);font-weight:700;position:sticky;top:0}
+.fc-t td:first-child,.fc-t th:first-child{position:sticky;inset-inline-start:0;background:var(--surface);z-index:1;max-width:120px;overflow:hidden;text-overflow:ellipsis}.fc-t th:first-child{background:var(--bg)}
+.fc-t td.b{font-weight:800}.fc-t tr.tot td{font-weight:800;background:var(--bg);border-bottom:0}
+.fc-ov{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}.fc-ov:last-child{border-bottom:0}.fc-ov span{flex:1;min-width:0}.fc-ov .inp{width:110px;flex:none}
+.fc-t th small.fc-y{display:block;font-weight:400;font-size:10.5px;color:var(--muted)}
