@@ -244,7 +244,7 @@ function debtLinks(fix){const D=debts(),ids=new Set(D.map(d=>d.id)),I=[];let fix
     if(+d.totalN&&+d.paidN>+d.totalN)I.push('«'+d.name+'»: الأقساط المدفوعة أكثر من العدد الكلي');
     if(!(+d.balance>=0)||!isFinite(+d.balance))I.push('«'+d.name+'»: رصيد غير صحيح')});
   const RN=new Set(recs().map(r=>(r.name||'').trim()));const dbl=D.filter(d=>+d.balance>0&&RN.has((d.name||'').trim()));if(dbl.length)I.push('قسط «'+dbl[0].name+'» مضاف أيضًا كالتزام شهري (يُحسب مرتين)');
-  return {issues:I,fixed,count:D.length,pays:D.reduce((s,d)=>s+(d.pays||[]).filter(p=>p.tx&&S.tx[p.tx]).length,0),docs:(Vault.docs||[]).filter(x=>x.debt&&ids.has(x.debt)).length}}
+  return {issues:I,unl:unl.length,fixed,count:D.length,pays:D.reduce((s,d)=>s+(d.pays||[]).filter(p=>p.tx&&S.tx[p.tx]).length,0),docs:(Vault.docs||[]).filter(x=>x.debt&&ids.has(x.debt)).length}}
 async function dataHealth(){const L=list(),R=recs(),D=debts();const out=[];const add=(ok,t,d)=>out.push({ok,t,d});
   let lsOk=false,lsSize=0;try{const raw=localStorage.getItem('masareef:v1')||'';lsSize=raw.length;const p=JSON.parse(raw);lsOk=!!p&&Object.keys(p.tx||{}).length===L.length}catch(e){}
   add(lsOk,'الذاكرة الأساسية تُقرأ بالكامل',lsOk?countWord(L.length,'عملية واحدة','عمليتان','عمليات','عملية')+' · '+Math.ceil(lsSize/1024)+' كيلوبايت':'لم تُطابق، وستُعاد كتابتها');
@@ -254,7 +254,7 @@ async function dataHealth(){const L=list(),R=recs(),D=debts();const out=[];const
   add(!bad.length,'كل العمليات لها نوع ومبلغ وتاريخ صحيح',bad.length?bad.length+' عملية تحتاج مراجعة من السجل':'');
   const orphan=L.filter(t=>t.rec&&!R.some(r=>r.id===t.rec)).length;add(true,'دفعات الالتزامات مرتبطة بالتزاماتها',orphan?orphan+' دفعة لالتزامات حذفتها، محفوظة في السجل':'');
   const lostTx=D.reduce((s,d)=>s+(d.pays||[]).filter(p=>p.tx&&!S.tx[p.tx]).length,0);add(true,'دفعات الديون محفوظة داخل كل دين',countWord(D.reduce((s,d)=>s+(d.pays||[]).length,0),'دفعة واحدة','دفعتان','دفعات','دفعة')+(lostTx?' · '+lostTx+' منها حُذف مصروفها من السجل':''));
-  {const K=debtLinks(false);add(!K.issues.length,'ارتباطات الديون (الدفعات، السجل، المستندات، الشهرية)',K.issues.length?K.issues.join(' · '):countWord(K.count,'دين واحد','دينان','ديون','دينًا')+' · '+countWord(K.pays,'دفعة واحدة','دفعتان','دفعات','دفعة')+' مرتبطة بالسجل'+(K.docs?' · '+countWord(K.docs,'مستند واحد','مستندان','مستندات','مستندًا'):'')+' ✓')}
+  {const K=debtLinks(false);if(K.unl)out.push({ok:false,t:'دفعات ديون في السجل غير مربوطة بالدين',d:countWord(K.unl,'عملية واحدة','عمليتان','عمليات','عملية')+' سداد تحتاج ربطًا: اضغط «إصلاح»',fix:'dlink'});add(!K.issues.filter(x=>!/غير مسجّلة في دفعات الدين/.test(x)).length,'ارتباطات الديون (الدفعات، السجل، المستندات، الشهرية)',K.issues.filter(x=>!/غير مسجّلة في دفعات الدين/.test(x)).length?K.issues.filter(x=>!/غير مسجّلة في دفعات الدين/.test(x)).join(' · '):countWord(K.count,'دين واحد','دينان','ديون','دينًا')+' · '+countWord(K.pays,'دفعة واحدة','دفعتان','دفعات','دفعة')+' مرتبطة بالسجل'+(K.docs?' · '+countWord(K.docs,'مستند واحد','مستندان','مستندات','مستندًا'):'')+' ✓')}
   const dup={};L.forEach(t=>{const k=[t.date,t.type,t.cat,(+t.amount).toFixed(3),t.note||''].join('|');dup[k]=(dup[k]||0)+1});const dups=Object.values(dup).filter(n=>n>1).length;
   add(true,'العمليات المكررة المحتملة',dups?dups+' مجموعة متشابهة (نفس اليوم والمبلغ والبيان)، راجعها في السجل':'لا يوجد');
   let pers=null;try{pers=navigator.storage&&navigator.storage.persisted?await navigator.storage.persisted():null}catch(e){}
@@ -266,6 +266,7 @@ async function refreshAll(btn){if(btn)btn.disabled=true;const t0=Date.now();
   try{migrateRecs();debts().forEach(d=>{try{debtSync(d)}catch(e){}});try{const K=debtLinks(true);if(K.fixed)putSettings()}catch(e){}secSeed();cacheSave();await mirrorFlush();const H=await dataHealth();if(Sync.linked())Sync.soon();render();
     const bad=H.filter(h=>!h.ok);const c=dataCounts();
     toast(bad.length?'تم التحديث · '+countWord(bad.length,'ملاحظة واحدة','ملاحظتان','ملاحظات','ملاحظة')+': '+bad[0].t:'✓ تم تحديث البيانات وقراءتها: '+countWord(c.tx,'عملية واحدة','عمليتان','عمليات','عملية')+' · '+countWord(c.debts,'دين','دينان','ديون','دينًا')+' · '+countWord(c.recurring,'التزام','التزامان','التزامات','التزامًا'),null,6000);
+    if(bad.some(h=>h.fix==='dlink')){openDebtLinkFix();return}
     if(document.querySelector('#layer .dbstat'))openDataCenter()}
   catch(e){toast('تعذّر التحديث: '+(e&&e.message||e))}if(btn)btn.disabled=false}
 /* مركز قاعدة البيانات */
@@ -284,7 +285,7 @@ async function openDataCenter(){const L=document.getElementById('layer');L.inner
     <div class="${lbd===null||lbd>14?'amt-exp':''}"><b>5. ملف نسخة احتياطية عندك</b><span>${lb?'آخر نسخة '+fmtD(lb)+(lbd>14?' · مرّ '+daysWord(lbd)+'، احفظ نسخة جديدة':''):'لم تحفظ نسخة كملف بعد، احفظ واحدة الآن'}</span></div>
     ${est&&est.usage?`<div><b>المساحة المستخدمة</b><span>${(est.usage/1048576).toFixed(1)} ميجابايت</span></div>`:''}</div>
    <h3>الأقسام</h3><div class="panel dbsecs">${secRows.map(([k,n,v,d])=>`<div class="dbsec"><div><b>${n}</b>${d?`<small>${d}</small>`:''}</div><b class="num">${v}</b>${k?`<button class="chip" data-dbx="${k}" aria-label="تصدير ${n}">📊</button>`:'<span></span>'}</div>`).join('')}</div>
-   <h3>فحص السلامة</h3><div class="panel dbchecks">${H.map(h=>`<div class="${h.ok?'':'bad'}"><span>${h.ok?'✓':'⚠'}</span><div><b>${h.t}</b>${h.d?`<small>${esc(h.d)}</small>`:''}</div></div>`).join('')}</div>
+   <h3>فحص السلامة</h3><div class="panel dbchecks">${H.map(h=>`<div class="${h.ok?'':'bad'}"><span>${h.ok?'✓':'⚠'}</span><div><b>${h.t}</b>${h.d?`<small>${esc(h.d)}</small>`:''}${h.fix?`<button class="chip pay" data-hfix="${h.fix}" style="margin-top:6px">🔧 إصلاح</button>`:''}</div></div>`).join('')}</div>
    <h3>اللقطات المحفوظة</h3><div class="panel dbsnaps">${SN.length?SN.map(s=>`<div class="dbsnap"><div><b>${esc(s.label)}</b><small>${fmtAt(s.at)}${s.counts?' · '+s.counts.tx+' عملية · '+s.counts.debts+' دين · '+s.counts.recurring+' التزام':''}</small></div><div class="chips"><button class="chip" data-snapsave="${esc(s.id)}">حفظ كملف</button><button class="chip" data-snaprest="${esc(s.id)}">استعادة</button></div></div>`).join(''):'<p class="note" style="margin:6px">لا توجد لقطات بعد.</p>'}
     <button class="btn ghost block" id="snapNow" style="margin-top:8px">أخذ لقطة الآن</button></div>
    <h3>الحفظ والاستخراج</h3><div class="stack">
@@ -298,6 +299,7 @@ async function openDataCenter(){const L=document.getElementById('layer');L.inner
   draw();fillStorage(document.getElementById('dcStor'));L.oninput=null;
   L.onchange=e=>{if(e.target.id==='restoreFile2'&&e.target.files[0]){const r=new FileReader();r.onload=()=>openRestore(r.result,'من ملف');r.readAsText(e.target.files[0]);e.target.value=''}};
   L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+    if(x.dataset.hfix==='dlink'){openDebtLinkFix();return}
     if(x.id==='dcBackup'){await saveBackupFile();openDataCenter();return}
     if(x.id==='dcXlsx'){openExport();return}
     if(x.id==='dcRefresh'){refreshAll(x);return}
@@ -2857,7 +2859,7 @@ function admAsk(then,why){let el=document.getElementById('admLayer');if(!el){el=
   if(!c.bio)setTimeout(()=>{const i=document.getElementById('admPin');if(i)i.focus()},60)}
 /* كل زر تعديل أو حذف أو تراجع أو اعتماد يمر من هنا أولًا */
 const ADM_SEL=['[data-edit]','[data-txdel]','[data-txedit]','[data-dpe]','[data-redit]','[data-dedit]','[data-tedit]','[data-cedit]','[data-gedit]','[data-pedit]','[data-sedit]','[data-rpedit]',
-  '[data-apv]','[data-apedit]','#syncEncOff','[data-purge]','#pgGo','#dpGo','#fcBud','[data-unpay]','[data-recpick]','[data-secadd]','[data-early]','[data-icoedit]','#rzOn','[data-rzpos]','[data-payedit]','#payAdd','[data-mdi]','#plOn','[data-plscope]','[data-plbefore]','[data-rename]','#lblEdit','[data-acedit]','#acAdd','[data-trdel]','[data-subadd]','#dnEdit','#wdEdit','#apvAll','[id$="DelAsk"]','#pdYes','.toast button','#clearSample','#restoreBtn','label[for="restoreFile"]','label[for="restoreFile2"]','[data-snaprest]','#syncUnlink','#vaultReset','#admOff','#admPinChange','#admApprove','#admBioSet'].join(',');
+  '[data-apv]','[data-apedit]','#syncEncOff','[data-purge]','#pgGo','#dpGo','#fcBud','#dlGo','[data-unpay]','[data-recpick]','[data-secadd]','[data-early]','[data-icoedit]','#rzOn','[data-rzpos]','[data-payedit]','#payAdd','[data-mdi]','#plOn','[data-plscope]','[data-plbefore]','[data-rename]','#lblEdit','[data-acedit]','#acAdd','[data-trdel]','[data-subadd]','#dnEdit','#wdEdit','#apvAll','[id$="DelAsk"]','#pdYes','.toast button','#clearSample','#restoreBtn','label[for="restoreFile"]','label[for="restoreFile2"]','[data-snaprest]','#syncUnlink','#vaultReset','#admOff','#admPinChange','#admApprove','#admBioSet'].join(',');
 document.addEventListener('click',e=>{if(!admOn())return;if(e.target.closest('#admLayer'))return;
   if(admOpen()){if(e.target.closest('button,label'))Adm.last=Date.now();return}
   const b=e.target.closest(ADM_SEL);if(!b)return;e.preventDefault();e.stopImmediatePropagation();
@@ -3228,8 +3230,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.45.0';
+const APP_VERSION='2.45.1';
 const CHANGELOG=[
+ {v:'2.45.1',d:'2026-10-17',items:['إصلاح ملاحظة «عمليات سداد دين في السجل غير مسجّلة في دفعات الدين»: زر «🔧 إصلاح» في فحص السلامة يفتح «🔗 ربط عمليات سداد الديون»، ولكل عملية: ربطها بالدفعة الموجودة في نفس الشهر، أو تسجيلها دفعة (مع خصمها من الرصيد أو بدونه)، أو فك الارتباط، بعد لقطة احتياطية. واستيراد الكشف لم يعد يربط القسط بالدين إلا إذا اخترت «ربط بالدين»']},
  {v:'2.45.0',d:'2026-10-17',items:['الشهر من الراتب إلى الراتب بدقة: يتعرف التطبيق على راتبك من الكشوفات (المبلغ المتكرر كل شهر ويوم نزوله) ويعرض «💼 اكتشفت راتبك» في التحليل، وبضغطة «تطبيق» يبدأ كل شهر من يوم نزول الراتب (مثل 23) حتى اليوم السابق للراتب التالي (22)، فتُحسب مصروفات وإيداعات كل شهر على هذا الأساس في كل التحاليل والتقارير','إذا نزل الراتب قبل موعده أو بعده (عطلة أو عيد) يبدأ الشهر من يوم نزوله الفعلي كما في كشف البنك، ويمكن إيقاف ذلك من الضبط','التواريخ واضحة في كل التحاليل والتقارير والطباعة وملفات Excel: كل شهر يظهر معه من أي يوم إلى أي يوم، مع سطر يشرح كيف يُحسب الشهر، وزر للتبديل بين أشهر الراتب والأشهر الميلادية']},
  {v:'2.44.0',d:'2026-10-17',items:['«📊 تحليل كشوفات البنوك»: كل ما تستورده من كشوفات بنك مسقط والبنك الوطني وأي بنك تضيفه مستقبلًا يُدمج في قاعدة واحدة ويُفرز مصروفات وإيداعات، والتحويلات بين حساباتك مستبعدة','التحليل: الإيداعات والمصروفات والصافي، وكل بنك وحده مع آخر رصيد، وشهرًا بشهر برسم، والمصروفات حسب الفئة، والإيداعات حسب المصدر، وأكثر الجهات صرفًا، والتحويلات للأشخاص، والفوائد والغرامات التي دفعتها للبنك','العمليات المدمجة: تصفية مصروفات أو إيداعات، وحسب البنك والفترة والفئة، وترتيب بالأحدث أو الأكبر، والضغط على أي عملية يفتحها للتعديل','«خطة الشهر القادم»: الدخل المتوقع، والتزاماتك وأقساطك، وسقف مقترح لكل فئة من متوسط كشوفاتك، وما يبقى للادخار، مع توصيات (الغرامات، المطاعم، المصاريف الصغيرة، التحويلات)، وتعتمد الأسقف كميزانيات بضغطة','طباعة التحليل كاملًا في تقرير PDF واحد، أو ملف Excel واحد فيه 6 أوراق: العمليات المدمجة، حسب البنك، شهريًا، حسب الفئة، الجهات، خطة الشهر القادم','بعد كل استيراد يفتح التحليل مباشرة، وقائمة بالكشوفات التي استوردتها','في الضبط «🧹 مسح بيانات الإدخال وإعادة إدخالها»: تختار شهرًا أو عدة أشهر أو سنة أو كل الفترات، والمستورد من الكشوفات فقط أو كل العمليات، وحسابًا معينًا ومصروفات أو إيداعات، وترى المعاينة ثم تمسح بعد لقطة احتياطية تلقائية، ثم «أرفق كشف هذه الفترة» فتُستورد عملياتها فقط وتُفرز تلقائيًا','دفعات الديون المرتبطة بالعمليات الممسوحة تُحذف من سجل الدين ويُعاد المبلغ إلى رصيده، فلا يُخصم القسط مرتين عند إعادة الاستيراد','المسح يشمل بيانات الإدخال (العمليات) فقط: الخطط الشهرية ومخطط السداد والالتزامات والأقساط والديون وتقسيم الصرف والميزانيات والمصاريف الموسمية والحسابات والفئات تبقى كما هي، مع خيار «إبقاء دفعات الديون والالتزامات المسجّلة» حتى لا يتغير رصيد أي قرض أو حالة أي التزام','منع تكرار الكشوفات: السطر المستورد من قبل لا يُستورد مرة ثانية حتى لو أرفقت نفس الكشف أو كشفًا متداخلًا، والصفوف المتطابقة فعلًا في نفس الكشف تُحسب صحيحة، والعملية التي أدخلتها يدويًا تُطابَق مع سطر واحد فقط من الكشف، ويظهر في أعلى المراجعة كم عملية مكررة لن تُستورد ولماذا، والضغط مرتين على «استيراد» لا يكرر شيئًا','استيراد عدة كشوفات PDF أو Excel معًا: اختر كل الملفات مرة واحدة فيتعرف التطبيق على بنك كل ملف ورقم حسابه، ويجمع ملفات نفس الحساب في كشف واحد مرتب بالتاريخ، ويحذف الأسطر المتكررة بين الكشوفات المتداخلة (مع إبقاء العمليات المتطابقة فعلًا في نفس الكشف)، ثم تراجع كل حساب وتستورده، ويتذكر أي حساب في التطبيق يتبع كل رقم حساب','«🖨️ طباعة مرتبة» للكشوفات: ملخص لكل بنك (الفترة والإيداعات والمصروفات والرصيد الافتتاحي والختامي والمكرر)، ثم جدول لكل شهر بالتاريخ والبيان والفئة والمدين والدائن والرصيد وحالة كل سطر، مع المجاميع','«📈 التوقعات ومقارنة الأشهر» في الرئيسية وفي إدارة البيانات: يتعلم من أشهرك الماضية في كشوفات البنك (أو كل العمليات) معدل كل فئة وأعلى وأقل شهر واتجاهها، ويقارن الشهر الحالي بها (حتى الآن، والمتوقع بنهاية الشهر، وتنبيه «تجاوز التوقع» أو «أسرع من المعدل»)، ويتوقع الأشهر الثلاثة القادمة: الدخل والالتزامات والمصاريف المتوقعة والموسمية وما يبقى','جدول الأشهر مرتب: كل فئة شهرًا بشهر مع المعدل وهذا الشهر والتوقع وصف المجموع، للمصروفات والالتزامات والإيداعات','يحفظ توقع كل شهر عند بدايته، وبعد انتهائه يعرض «التوقع مقابل الفعلي» ودقة التوقع فئة بفئة','الإدارة: عدد الأشهر التي يتعلم منها (3 أو 6 أو 12)، المصدر (الكشوفات أو كل العمليات)، استبعاد شهر غير طبيعي، الشهر الذي لا يغطيه الكشف كاملًا يُستبعد تلقائيًا، تعديل توقع أي فئة يدويًا، واعتماد التوقع كميزانيات','طباعة تقرير PDF منظم وملف Excel من 5 أوراق مع المجاميع','«🔍 فحص تكرار عمليات الكشوفات» في الضبط وفي تحليل الكشوفات: يفحص كل بياناتك ويعرض المكرر (سطر كشف مستورد مرتين، أو عملية يدوية موجودة أيضًا في الكشف)، ويبقي نسخة واحدة: نسخة الكشف مع فئتك وملاحظتك اليدوية، وإن كانت اليدوية دفعة دين تبقى وتُربط بالكشف، ويحذف الزائد بعد لقطة احتياطية']},
  {v:'2.43.0',d:'2026-10-17',items:['«🏦 استيراد كشف حساب البنك»: تختار ملف الكشف PDF أو Excel أو CSV من بنك مسقط أو البنك الوطني العُماني أو أي بنك، فيقرأ التطبيق كل العمليات داخل هاتفك بدون إنترنت ولا يُرسل الكشف لأي مكان','يقرأ البيان حتى لو امتد على أكثر من سطر، ويميّز السحب من الإيداع، ويتحقق من تسلسل الرصيد سطرًا بسطر ويعرض «✓ مطابق»، ويطلب كلمة المرور إذا كان الكشف محميًا','يقترح الفئة من البيان: المها وشل ونفط عمان = وقود، البقالات والمطاعم والصيدليات والعيادات وأوريدو وعمانتل… والتحويلات إلى الأشخاص ومنهم، ويتعلّم من تصنيفاتك في كل استيراد','يجمع أسطر القرض في بنك مسقط (الأصل والفوائد والفوائد المتأخرة وغرامات التأخير) في عملية واحدة بتفصيلها، ويربطها بدينك كدفعة إن أردت','صفحة مراجعة قبل الحفظ: تعدّل الفئة والبيان وتلغي ما لا تريده، والمكرر والمستورد سابقًا يُعلَّم ولا يُضاف مرتين، والسحب النقدي غير محدد افتراضيًا، ثم يُحدَّث رصيد الحساب إلى الرصيد الختامي في الكشف','يتعرّف على التحويلات بين حساباتك (مثل تحويلك من الوطني إلى مسقط) من رقم الحساب، فلا يحسبها دخلًا ولا مصروفًا','«📊 حفظ الكشف Excel»: يحوّل كشف PDF إلى ملف Excel مرتب (التاريخ، البيان، ملاحظتي، الفئة، مدين، دائن، الرصيد، يُستورد)، تعدّله في Numbers ثم تستورده من نفس الزر فتُقرأ فئاتك وملاحظاتك منه']},
@@ -5908,7 +5911,7 @@ function openStmtReview(P,st,fname,after){const L=document.getElementById('layer
       const learn=Object.assign({},S.settings.stmtLearn||{});let n=0,nl=0;const batch=[];
       for(const z of on){const note=(z.note||'').trim()||catOf(z.cat).n;
         if(z.link&&z.debt){const d=S.settings.debts.find(q=>q.id===z.debt);if(d){const p=await applyDebtPayment(d,z.amount,z.date,true);const t=S.tx[p.tx];if(t){t.acc=st.acc;t.note=note;t.bref=z.bref;t.src='stmt';t.bank=st.bank;t.skind=z.kind;if(z.parts)t.parts=z.parts;await putTx(t)}n++;nl++;continue}}
-        const t={id:uidGen(),type:z.type,amount:z.amount,cat:z.cat,date:z.date,method:z.kind==='cash'?'cash':'transfer',note,acc:st.acc,createdAt:new Date().toISOString(),bref:z.bref,src:'stmt'};if(z.debt&&z.kind!=='normal')t.debt=z.debt;if(z.kind==='own')t.own=1;t.bank=st.bank;t.skind=z.kind;if(z.parts)t.parts=z.parts;batch.push(t);n++;
+        const t={id:uidGen(),type:z.type,amount:z.amount,cat:z.cat,date:z.date,method:z.kind==='cash'?'cash':'transfer',note,acc:st.acc,createdAt:new Date().toISOString(),bref:z.bref,src:'stmt'};if(z.kind==='own')t.own=1;t.bank=st.bank;t.skind=z.kind;if(z.parts)t.parts=z.parts;batch.push(t);n++;
         z.raw.forEach(r=>{const k=stLearnKey(r);if(k&&z.kind==='normal')learn[k]={cat:z.cat,type:z.type,note:z.catSet||z.note!==stClean(r)?note:''}})}
       if(batch.length)await putTxMany(batch);
       S.settings.stmtOwn=[...new Set((S.settings.stmtOwn||[]).concat(P.own||[]))].slice(-12);
@@ -6111,7 +6114,7 @@ function openDupScan(){const L=document.getElementById('layer');let G=dupFind();
       for(const g of on){if(g.kind==='stmt'){g.del.forEach(t=>ids.add(t.id));continue}
         const m=S.tx[g.man.id],s=S.tx[g.st.id];if(!m||!s)continue;
         if(dupPayOf(m.id)){['acc','bref','src','bank','skind','parts'].forEach(k=>{if(s[k]!=null)m[k]=s[k]});if(!m.note)m.note=s.note;upd.push(m);ids.add(s.id)}
-        else{s.cat=m.cat;if((m.note||'').trim())s.note=m.note;if(m.debt&&!s.debt)s.debt=m.debt;upd.push(s);ids.add(m.id)}}
+        else{s.cat=m.cat;if((m.note||'').trim())s.note=m.note;upd.push(s);ids.add(m.id)}}
       if(upd.length)await putTxMany(upd);
       for(const d of (S.settings.debts||[])){for(const p of (d.pays||[]).slice()){if(p.tx&&ids.has(p.tx)){await delDebtPay(d,p);ids.delete(p.tx)}}}
       if(ids.size)await delTxMany([...ids]);await putSettings();try{memoClear()}catch(er){}
@@ -6313,6 +6316,39 @@ async function salApply(){const d=salDetect();if(!d){toast('لم أجد راتب
   S.settings.payday=day;if(!(+S.settings.salaryAmt>0))S.settings.salaryAmt=d.amt;S.settings.payMonth=true;
   const up=d.tx.filter(t=>t.cat!=='salary').map(t=>Object.assign({},t,{cat:'salary',note:t.note&&!/^(تحويل|إيداع)/.test(t.note)?t.note:'راتب'}));if(up.length)await putTxMany(up);
   await putSettings();S.month=curM();render();toast('صار كل شهر يبدأ من نزول الراتب');return true}
+
+/* ===================== ربط عمليات سداد الديون بدفعاتها =====================
+ * عملية في السجل مرتبطة بدين لكنها ليست ضمن دفعاته (من استيراد قديم أو إدخال يدوي).
+ * لكل عملية: ربطها بدفعة موجودة في نفس الشهر، أو تسجيلها دفعة جديدة (مع خصمها من الرصيد أو بدون)، أو فك الارتباط فتبقى مصروفًا فقط. */
+function dlItems(){const D=debts();return list().filter(t=>t.debt&&D.some(d=>d.id===t.debt)&&!(D.find(d=>d.id===t.debt).pays||[]).some(p=>p.tx===t.id)).sort((a,b)=>a.date.localeCompare(b.date)).map(t=>{const d=D.find(x=>x.id===t.debt);
+  const free=(d.pays||[]).find(p=>(!p.tx||!S.tx[p.tx])&&p.date&&mOf(p.date)===mOf(t.date)&&Math.abs((+p.amt||0)-(+t.amount))<=Math.max(1,(+t.amount)*0.05));
+  const last=(d.pays||[]).map(p=>p.date).filter(Boolean).sort().pop()||'';
+  return{t,d,free,act:free?'attach':'pay',ded:!free&&t.date>last}})}
+function openDebtLinkFix(){const L=document.getElementById('layer');let IT=dlItems();
+  const draw=()=>{L.innerHTML=`${sheetTop('ربط سداد الديون')}<h2 style="margin-top:0">🔗 ربط عمليات سداد الديون</h2>
+    ${!IT.length?`<div class="okbox">✓ كل عمليات سداد الديون مربوطة بدفعاتها.</div>`:`<p class="note" style="margin-top:0">هذه العمليات في السجل مكتوب أنها سداد دين، لكنها غير مسجّلة في دفعات الدين، فلا يظهر الشهر «مدفوعًا» ولا يتغير الرصيد. اخترت لكل عملية الإجراء المناسب، وتستطيع تغييره:</p>
+     <ul class="note dl-help"><li><b>ربط بالدفعة الموجودة</b>: توجد دفعة مسجّلة في نفس الشهر بنفس المبلغ بدون عملية، فتُربط بها (لا يتغير الرصيد).</li><li><b>تسجيل كدفعة</b>: تُضاف لدفعات الدين ويظهر الشهر مدفوعًا. «يُخصم من الرصيد» للدفعات الأحدث من آخر دفعة مسجّلة فقط، والأقدم لا تُخصم لأن رصيدك الحالي يشملها غالبًا.</li><li><b>فك الارتباط</b>: تبقى مصروفًا عاديًا في السجل.</li></ul>
+     <div class="stack">${IT.map((x,i)=>`<div class="panel dl-r"><div class="sumrow"><span><b>${esc(x.d.name)}</b><small class="note" style="display:block">${fmtD(x.t.date)} · ${esc(x.t.note||catOf(x.t.cat).n)}${x.t.src==='stmt'?' · من كشف':''}</small></span><b class="num amt-exp">${money(x.t.amount)}</b></div>
+       <div class="seg${x.free?' seg3':''}">${[['attach','ربط بالدفعة الموجودة'],['pay','تسجيل كدفعة'],['unlink','فك الارتباط']].filter(([k])=>k!=='attach'||x.free).map(([k,n])=>`<button class="n" data-dla="${i}|${k}" aria-pressed="${x.act===k}">${n}</button>`).join('')}</div>
+       ${x.act==='pay'?`<label class="pg-keep" style="margin-top:6px"><input type="checkbox" data-dld="${i}"${x.ded?' checked':''}><span>يُخصم من رصيد الدين (المتبقي الآن ${money(x.d.balance)})</span></label>`:''}</div>`).join('')}</div>
+     <div class="actions"><button class="btn block" id="dlGo"><span class="lk">🔒 </span>تطبيق على ${countWord(IT.length,'عملية واحدة','عمليتين','عمليات','عملية')}</button></div>`}
+    <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`};
+  L.oninput=null;L.onchange=e=>{const c=e.target.closest('[data-dld]');if(c)IT[+c.dataset.dld].ded=c.checked};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+    if(x.dataset.dla){const [i,k]=x.dataset.dla.split('|');IT[+i].act=k;const y=L.querySelector('.sheet').scrollTop;draw();L.querySelector('.sheet').scrollTop=y;return}
+    if(x.id==='dlGo'){if(!confirm('تطبيق الإجراءات على '+IT.length+' عملية؟ تُحفظ لقطة احتياطية قبلها.'))return;x.disabled=true;try{await snapTake('قبل ربط سداد الديون',false)}catch(er){}
+      let na=0,np=0,nu=0;const up=[];
+      for(const it of IT){const t=S.tx[it.t.id];if(!t)continue;const d=debts().find(q=>q.id===it.d.id);if(!d){delete t.debt;up.push(t);nu++;continue}
+        if(it.act==='unlink'){delete t.debt;up.push(t);nu++;continue}
+        if(it.act==='attach'&&it.free&&(d.pays||[]).includes(it.free)){it.free.tx=t.id;delete it.free.txGone;debtLog(d,'رُبطت دفعة '+fmtD(it.free.date)+' بعملية السجل');debtSync(d);na++;continue}
+        if(it.ded){const p=await applyDebtPayment(d,+t.amount,t.date,false);p.tx=t.id}
+        else{const p={id:uidGen(),date:t.date,amt:+t.amount,int:0,prin:0,bal:+d.balance,tx:t.id,noBal:1};d.pays=(d.pays||[]).concat([p]).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).slice(-240);debtLog(d,'سُجّلت دفعة '+money(t.amount)+' بتاريخ '+fmtD(t.date)+' بدون خصم من الرصيد');debtSync(d)}
+        np++}
+      if(up.length)await putTxMany(up);await putSettings();try{memoClear()}catch(er){}
+      aud('debt','ربط سداد الديون',[na?na+' رُبطت':'',np?np+' سُجّلت دفعات':'',nu?nu+' فُك ارتباطها':''].filter(Boolean).join(' · '),'');
+      toast('✓ '+[na?countWord(na,'عملية رُبطت','عمليتان رُبطتا','عمليات رُبطت','عملية رُبطت'):'',np?countWord(np,'دفعة سُجّلت','دفعتان سُجّلتا','دفعات سُجّلت','دفعة سُجّلت'):'',nu?countWord(nu,'عملية فُك ارتباطها','عمليتان فُك ارتباطهما','عمليات فُك ارتباطها','عملية فُك ارتباطها'):''].filter(Boolean).join(' · '));
+      IT=dlItems();draw();render();return}};
+  draw()}
 
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 document.addEventListener('keydown',e=>{if(((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')||(e.key==='/'&&!e.target.closest('input,textarea,select,[contenteditable]'))){e.preventDefault();openSearch()}});
