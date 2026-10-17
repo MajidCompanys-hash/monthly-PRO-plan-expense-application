@@ -1433,3 +1433,20 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 @media (prefers-reduced-motion:reduce){#ptr.spin i{animation:none}}
 #ptr .srchi{display:none}#ptr.srch i{transform:none}
 #ptr i.sr{display:none}#ptr.srch i.sr{display:grid;transform:scale(calc(.7 + var(--p,0)*.3))}#ptr.srch i.rf{display:none}
+/* حركات iPhone: مؤشر التحديث الدوّار، وانتقال الصفحات */
+#ptr{padding:0;border:0;box-shadow:none;background:transparent;transform:translate(-50%,0);transition:opacity .15s;flex-direction:column;gap:4px;color:var(--muted)}
+#ptr.vis{opacity:1;transform:translate(-50%,0)}
+#ptr i.rf{width:30px;height:30px;transform:none;color:var(--muted)}#ptr i.rf svg{width:30px;height:30px}
+#ptr i.rf rect{fill:currentColor;opacity:0}#ptr.vis i.rf rect{opacity:calc(.18 + (1 - var(--i)/12)*.7)}
+#ptr i.rf rect{visibility:hidden}
+#ptr.vis i.rf svg rect:nth-child(1){visibility:visible}
+#ptr span{font-size:11.5px;font-weight:600;min-height:14px}
+#ptr.spin i.rf{animation:ptrspin .9s steps(12) infinite}#ptr.spin i.rf rect{visibility:visible!important}
+#ptr.srch i.sr{display:grid;width:30px;height:30px;color:var(--accent);transform:scale(calc(.55 + var(--p,0)*.45))}
+#view{will-change:auto}
+.pg-in{animation:pgIn .26s cubic-bezier(.2,.8,.2,1)}.pg-back{animation:pgBack .26s cubic-bezier(.2,.8,.2,1)}
+@keyframes pgIn{from{opacity:.35;transform:translate3d(-28px,0,0)}to{opacity:1;transform:none}}
+@keyframes pgBack{from{opacity:.35;transform:translate3d(28px,0,0)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.pg-in,.pg-back{animation:none}}
+
+#ptr.vis.n1 i.rf svg rect:nth-child(-n+1){visibility:visible}#ptr.vis.n2 i.rf svg rect:nth-child(-n+2){visibility:visible}#ptr.vis.n3 i.rf svg rect:nth-child(-n+3){visibility:visible}#ptr.vis.n4 i.rf svg rect:nth-child(-n+4){visibility:visible}#ptr.vis.n5 i.rf svg rect:nth-child(-n+5){visibility:visible}#ptr.vis.n6 i.rf svg rect:nth-child(-n+6){visibility:visible}#ptr.vis.n7 i.rf svg rect:nth-child(-n+7){visibility:visible}#ptr.vis.n8 i.rf svg rect:nth-child(-n+8){visibility:visible}#ptr.vis.n9 i.rf svg rect:nth-child(-n+9){visibility:visible}#ptr.vis.n10 i.rf svg rect:nth-child(-n+10){visibility:visible}#ptr.vis.n11 i.rf svg rect:nth-child(-n+11){visibility:visible}#ptr.vis.n12 i.rf svg rect:nth-child(-n+12){visibility:visible}

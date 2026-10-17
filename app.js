@@ -3232,8 +3232,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.47.1';
+const APP_VERSION='2.48.0';
 const CHANGELOG=[
+ {v:'2.48.0',d:'2026-10-17',items:['حركات اللمس مثل تطبيقات iPhone: عند السحب للأسفل تنزل الصفحة مع إصبعك بمقاومة مطاطية، ويظهر مؤشر iPhone الدوّار تدريجيًا مع اهتزاز خفيف عند الوصول للحد، ثم تبقى الصفحة نازلة أثناء التحديث وترجع بنعومة','سحب أي نافذة للأسفل من أعلاها يغلقها، أو يرجعك للنافذة السابقة إن فتحتها من نافذة أخرى، والسحب القصير يرجعها مكانها','السحب من حافة الشاشة اليمنى نحو اليسار يرجع للصفحة أو النافذة السابقة والصفحة تتحرك مع إصبعك، كما في iPhone بالعربية','انتقال ناعم عند فتح صفحة من صفحة (تدخل من اليسار) وعند الرجوع (تدخل من اليمين)']},
  {v:'2.47.1',d:'2026-10-17',items:['السحب للأسفل من أعلى الصفحة صار حسب القسم: في الرئيسية يفتح البحث مباشرة، وفي «إدارة البيانات» و«التقارير» يحدّث كل شيء (مزامنة Google Drive، وتحديث التطبيق، وتحديث البيانات وفحص سلامتها) ثم يعرض ملخصًا']},
  {v:'2.47.0',d:'2026-10-17',items:['اسحب الصفحة الرئيسية للأسفل من أعلاها وأفلت للتحديث: مزامنة Google Drive الآن، والبحث عن إصدار جديد للتطبيق وتثبيته، وإعادة قراءة البيانات وحساب الديون والأقسام وفحص السلامة، ثم ملخص بالنتيجة. بدون إنترنت تُحدَّث البيانات في الهاتف فقط']},
  {v:'2.46.0',d:'2026-10-17',items:['«🧾 عمليات الكشوفات المستوردة» في إدارة البيانات وفي تحليل الكشوفات: كل العمليات المستوردة من بنك مسقط والوطني في قائمة واحدة، مع البحث بالوصف أو المبلغ، والتصفية حسب البنك والشهر (من الراتب إلى الراتب مع تاريخ البداية والنهاية) والتصنيف وفرد العائلة والنوع، والترتيب، ومجموع المصروفات والإيداعات للمعروض','تعديل أي عملية: المبلغ والتاريخ والنوع والتصنيف والوصف وفرد العائلة (مع إضافة فرد جديد) و«بين حساباتي». إذا كانت دفعة دين يُعدَّل رصيد الدين تلقائيًا، والحذف بعد التأكيد ويُعاد مبلغ دفعة الدين إلى رصيده','تحديد عدة عمليات معًا لتغيير تصنيفها أو حذفها (بعد لقطة احتياطية)','تصدير العمليات (كلها أو المعروضة) إلى Excel مع عمود «المعرّف»، وتعديلها في Numbers أو Excel ثم استيرادها: تظهر معاينة بالتعديلات والجديدة والمتجاهلة قبل التطبيق، والسطر المكرر لا يُضاف مرتين. ونسخة احتياطية خاصة بعمليات الكشوفات (مع سجل الكشوفات والتصنيفات المتعلَّمة وأفراد العائلة) تُستعاد بالدمج بدون تكرار','«🏷️ التصنيف السريع» في الرئيسية وإدارة البيانات وعمليات الكشوفات: العمليات مجمّعة حسب الجهة (مطعم، محل، محطة وقود، تحويل لشخص…) مع عددها ومجموعها، تضغط على الجهة وتختار تصنيفها من أيقونات واضحة فتتصنّف كل عملياتها مرة واحدة','التطبيق يتذكر: كل جهة تصنّفها تُحفظ قاعدة، وتُطبَّق تلقائيًا على كل كشف تستورده مستقبلًا، وكذلك عند تغيير التصنيف في مراجعة الكشف أو في تعديل العملية (مع خيار تطبيقه على العمليات المشابهة). القواعد تُراجع وتُحذف من «القواعد المحفوظة» وتُحفظ في النسخة الاحتياطية','البحث في أعلى الرئيسية مثبّت تحت الشريط العلوي ويبقى ظاهرًا أثناء التمرير، وزر العدسة 🔍 ظاهر بجانب القائمة ☰ في كل الأقسام للبحث بضغطة','إصلاح: الشريط العلوي يبقى ثابتًا أعلى الشاشة أثناء التمرير']},
@@ -5134,7 +5135,7 @@ const NAV_TABN={home:'الرئيسية',monthly:'الشهرية',log:'السجل
 window.addEventListener('scroll',()=>{if(!NAV.busy)NAV.y=window.scrollY},{passive:true});
 function navPush(e){NAV.st.push(e);if(NAV.st.length>40)NAV.st.shift();try{history.pushState({nav:NAV.st.length},'')}catch(er){}navUI()}
 function navTabChanged(){const L=document.getElementById('layer');if(NAV.lastTab===null){NAV.lastTab=S.tab;NAV.lastMonth=S.month;return}
-  if(S.tab!==NAV.lastTab){if(!NAV.busy){const i=NAV.st.map(x=>x.t==='tab'&&x.tab).lastIndexOf(S.tab);if(S.tab==='home'&&!(L&&L.innerHTML)){NAV.st=NAV.st.filter(x=>x.t!=='tab')}else navPush({t:'tab',tab:NAV.lastTab,month:NAV.lastMonth,y:NAV.y})}NAV.lastTab=S.tab}NAV.lastMonth=S.month;navUI()}
+  if(S.tab!==NAV.lastTab){try{const v=document.getElementById('view');if(v&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){v.classList.remove('pg-in','pg-back');void v.offsetWidth;v.classList.add(NAV.busy?'pg-back':'pg-in');setTimeout(()=>v.classList.remove('pg-in','pg-back'),320)}}catch(er){}if(!NAV.busy){const i=NAV.st.map(x=>x.t==='tab'&&x.tab).lastIndexOf(S.tab);if(S.tab==='home'&&!(L&&L.innerHTML)){NAV.st=NAV.st.filter(x=>x.t!=='tab')}else navPush({t:'tab',tab:NAV.lastTab,month:NAV.lastMonth,y:NAV.y})}NAV.lastTab=S.tab}NAV.lastMonth=S.month;navUI()}
 function sheetKey(L){const sh=L.querySelector('.sheet');if(!sh)return '';const a=sh.getAttribute('aria-label')||'';if(a)return a;const h=L.querySelector('h2');return h?h.textContent.trim().slice(0,40):''}
 function navLayerChanged(){const L=document.getElementById('layer');if(!L)return;const has=!!L.querySelector('.sheet');
   if(NAV.busy){NAV.cur=has?{k:sheetKey(L),nodes:[...L.childNodes],h:[L.onclick,L.oninput,L.onchange]}:null;navInject();return}
@@ -6538,17 +6539,34 @@ function openCatQuick(o){const L=document.getElementById('layer');o=Object.assig
 /* ===================== السحب للأسفل في الرئيسية للتحديث =====================
  * اسحب الصفحة الرئيسية للأسفل من أعلاها وأفلت: مزامنة Google Drive الآن (إن كانت مربوطة)، والبحث عن إصدار جديد للتطبيق،
  * وإعادة قراءة البيانات وحساب الديون والأقسام وفحص السلامة. بدون إنترنت يُحدّث البيانات المحلية فقط. */
-const PTR={y0:null,dy:0,busy:false,on:false};
-function ptrEl(){let el=document.getElementById('ptr');if(!el){el=document.createElement('div');el.id='ptr';el.setAttribute('aria-hidden','true');el.innerHTML='<i class="rf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg></i><i class="sr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></i><span></span>';document.body.appendChild(el)}return el}
-/* الرئيسية: السحب يفتح البحث · إدارة البيانات والتقارير: السحب يحدّث المزامنة والتطبيق والبيانات */
+/* ===== حركات اللمس مثل تطبيقات iPhone =====
+ * 1) السحب للأسفل: الصفحة تنزل مع الإصبع بمقاومة مطاطية، ومؤشر iPhone الدوّار يظهر تدريجيًا، واهتزاز خفيف عند الوصول للحد،
+ *    ثم تبقى الصفحة نازلة أثناء التحديث وترجع بنعومة. الرئيسية: يفتح البحث · إدارة البيانات والتقارير: مزامنة + تحديث التطبيق + البيانات.
+ * 2) سحب النافذة للأسفل من أعلاها يغلقها (أو يرجع للنافذة السابقة) كما في iPhone.
+ * 3) السحب من حافة الشاشة اليمنى (اتجاه العربية) يرجع للصفحة أو النافذة السابقة، والصفحة تتحرك مع الإصبع.
+ * 4) انتقال ناعم عند فتح صفحة أو الرجوع منها. */
+const PTR={y0:null,dy:0,off:0,busy:false,on:false,hit:false,mode:''};
+const IOS_SPIN='<svg viewBox="0 0 30 30" aria-hidden="true">'+[...Array(12)].map((_,i)=>`<rect x="13.6" y="2" width="2.8" height="8" rx="1.4" transform="rotate(${i*30} 15 15)" style="--i:${i}"/>`).join('')+'</svg>';
+function ptrEl(){let el=document.getElementById('ptr');if(!el){el=document.createElement('div');el.id='ptr';el.setAttribute('aria-hidden','true');el.innerHTML='<i class="rf">'+IOS_SPIN+'</i><i class="sr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></i><span></span>';document.body.appendChild(el)}return el}
 function ptrMode(){return S.tab==='home'?'search':(S.tab==='budget'||S.tab==='reports')?'sync':''}
 function ptrOk(){return !!ptrMode()&&!PTR.busy&&!document.querySelector('#layer .sheet')&&(()=>{const mn=document.getElementById('hdrMenu');return !mn||mn.hidden})()&&(window.scrollY||document.documentElement.scrollTop||0)<=0}
-function ptrShow(p,txt){const el=ptrEl();el.classList.add('vis');el.style.setProperty('--p',Math.min(1,p));el.querySelector('span').textContent=txt;try{const hd=document.querySelector('header.top');el.style.top=((hd?hd.getBoundingClientRect().bottom:56)+6)+'px'}catch(e){}}
-function ptrHide(){const el=document.getElementById('ptr');if(el){el.classList.remove('vis','spin');el.style.removeProperty('--p')}}
-document.addEventListener('touchstart',e=>{if(e.touches.length!==1||!ptrOk()||e.target.closest('input,textarea,select,.sheet,#hdrMenu')){PTR.y0=null;return}PTR.y0=e.touches[0].clientY;PTR.x0=e.touches[0].clientX;PTR.dy=0;PTR.on=false;PTR.mode=ptrMode()},{passive:true});
-document.addEventListener('touchmove',e=>{if(PTR.y0==null||PTR.busy)return;const dy=e.touches[0].clientY-PTR.y0,dx=Math.abs(e.touches[0].clientX-PTR.x0);if((window.scrollY||0)>0||dx>dy){if(PTR.on){ptrHide();PTR.on=false}PTR.y0=null;return}PTR.dy=dy;if(dy>12){PTR.on=true;const sr=PTR.mode==='search';ptrShow(dy/80,dy>=80?(sr?'أفلت لفتح البحث':'أفلت للتحديث'):(sr?'اسحب للبحث':'اسحب للتحديث'));ptrEl().classList.toggle('srch',sr)}},{passive:true});
-document.addEventListener('touchend',()=>{if(PTR.y0==null)return;const go=PTR.on&&PTR.dy>=80;PTR.y0=null;if(go&&PTR.mode==='search'){ptrHide();openSearch()}else if(go)ptrRun();else ptrHide();PTR.on=false},{passive:true});
-async function ptrRun(){if(PTR.busy)return;PTR.busy=true;const el=ptrEl();el.classList.remove('srch');el.classList.add('spin');const msgs=[];const step=t=>ptrShow(1,t);
+function rubber(x,d){return (1-(1/((x*0.55/d)+1)))*d}
+function hapt(){try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}try{let s=document.getElementById('hapt');if(!s){s=document.createElement('label');s.id='hapt';s.innerHTML='<input type="checkbox" switch>';s.style.cssText='position:fixed;opacity:0;pointer-events:none;width:1px;height:1px;overflow:hidden';document.body.appendChild(s)}s.click()}catch(e){}}
+function ptrPlace(off){const el=ptrEl();const v=document.getElementById('view');const hd=document.querySelector('header.top');const top=PTR.base!=null?PTR.base:v?v.getBoundingClientRect().top-(PTR.cur||0):(hd?hd.getBoundingClientRect().bottom:56);el.style.top=(top+Math.max(-4,off/2-22))+'px'}
+function ptrShow(p,txt){const el=ptrEl();el.classList.add('vis');el.style.setProperty('--p',Math.min(1,p));const n=Math.max(1,Math.round(Math.min(1,p)*12));for(let k=1;k<=12;k++)el.classList.toggle('n'+k,k===n);el.querySelector('span').textContent=txt||''}
+function ptrHide(){const el=document.getElementById('ptr');if(el){el.classList.remove('vis','spin','srch');el.style.removeProperty('--p')}}
+function viewY(y,anim){const v=document.getElementById('view');if(!v)return;PTR.cur=y||0;v.style.transition=anim?'transform .38s cubic-bezier(.2,.8,.2,1)':'none';v.style.transform=y?'translate3d(0,'+y+'px,0)':'';if(!y&&anim)setTimeout(()=>{if(!PTR.on&&!PTR.busy){v.style.transition='';v.style.transform=''}},400)}
+document.addEventListener('touchstart',e=>{PTR.y0=null;if(e.touches.length!==1||!ptrOk()||e.target.closest('input,textarea,select,.sheet,#hdrMenu,.tabs'))return;PTR.y0=e.touches[0].clientY;PTR.x0=e.touches[0].clientX;PTR.dy=0;PTR.off=0;try{PTR.base=document.getElementById('view').getBoundingClientRect().top}catch(er){PTR.base=null}PTR.on=false;PTR.hit=false;PTR.mode=ptrMode()},{passive:true});
+document.addEventListener('touchmove',e=>{if(PTR.y0==null||PTR.busy)return;const dy=e.touches[0].clientY-PTR.y0,dx=Math.abs(e.touches[0].clientX-PTR.x0);
+  if(!PTR.on&&((window.scrollY||0)>0||dx>dy||dy<0)){PTR.y0=null;return}
+  if(dy<=0){if(PTR.on){viewY(0,false);ptrHide();PTR.on=false}return}
+  if(e.cancelable)e.preventDefault();PTR.dy=dy;PTR.off=rubber(dy,window.innerHeight||800);PTR.on=true;viewY(PTR.off,false);ptrPlace(PTR.off);
+  const p=PTR.off/64,sr=PTR.mode==='search';ptrEl().classList.toggle('srch',sr);ptrShow(p,p>=1?(sr?'أفلت لفتح البحث':'أفلت للتحديث'):'');
+  if(p>=1&&!PTR.hit){PTR.hit=true;hapt()}else if(p<0.85)PTR.hit=false},{passive:false});
+document.addEventListener('touchend',()=>{if(PTR.y0==null)return;PTR.y0=null;if(!PTR.on)return;const go=PTR.off>=64;PTR.on=false;
+  if(go&&PTR.mode==='search'){viewY(0,true);ptrHide();setTimeout(openSearch,120)}else if(go){viewY(58,true);ptrPlace(58);ptrRun()}else{viewY(0,true);ptrHide()}},{passive:true});
+document.addEventListener('touchcancel',()=>{if(PTR.y0==null)return;PTR.y0=null;if(PTR.on){PTR.on=false;viewY(0,true);ptrHide()}},{passive:true});
+async function ptrRun(){if(PTR.busy)return;PTR.busy=true;const t0=Date.now();const el=ptrEl();el.classList.remove('srch');el.classList.add('spin');const msgs=[];const step=t=>{ptrShow(1,t);ptrPlace(58)};
   try{const on=navigator.onLine!==false;
     if(on&&Sync.linked()){step('مزامنة Google Drive…');try{await Promise.race([Promise.resolve(Sync.now()),new Promise(r=>setTimeout(r,25000))])}catch(e){}const s=document.querySelector('#sync span');msgs.push('☁️ '+(s?s.textContent.trim():'تمت المزامنة'))}
     else msgs.push(on?'☁️ المزامنة غير مربوطة':'📴 بدون إنترنت: حُدّثت البيانات في الهاتف فقط');
@@ -6558,7 +6576,30 @@ async function ptrRun(){if(PTR.busy)return;PTR.busy=true;const el=ptrEl();el.cla
     if(R){const bad=R.bad.filter(h=>!/حماية التخزين/.test(h.t));msgs.push(bad.length?'⚠️ '+bad[0].t:'✓ البيانات سليمة: '+countWord(R.c.tx,'عملية واحدة','عمليتان','عمليات','عملية'));if(bad.some(h=>h.fix==='dlink'))setTimeout(()=>openDebtLinkFix(),400)}
     S.month=curM();render();toast(msgs.join(' · '),null,6000)}
   catch(e){toast('تعذّر التحديث: '+(e&&e.message||e))}
-  finally{PTR.busy=false;ptrHide()}}
+  finally{const w=700-(Date.now()-t0);if(w>0)await new Promise(r=>setTimeout(r,w));ptrHide();PTR.busy=false;viewY(0,true)}}
+
+/* ===== سحب النافذة للأسفل لإغلاقها، والسحب من حافة الشاشة للرجوع (مثل iPhone) ===== */
+function goBack(){let st=null;try{st=history.state}catch(e){}if(st&&st.nav)history.back();else navBack()}
+const SW={on:false,kind:'',x0:0,y0:0,t0:0,el:null,dx:0,dy:0,lock:''};
+function swCanBackTab(){const b=document.getElementById('navBack');return !!(b&&!b.hidden)}
+document.addEventListener('touchstart',e=>{SW.on=false;if(e.touches.length!==1||PTR.busy)return;const t=e.touches[0];const L=document.getElementById('layer');const sh=L&&L.querySelector('.sheet');const W=window.innerWidth;
+  const edge=t.clientX>=W-22;
+  if(edge?e.target.closest('input[type=range],textarea,[contenteditable]'):e.target.closest('input,textarea,select,[contenteditable],.mq-in,.rzpage,.fc-tw,.st-f,.ba-f,.chips'))return;
+  if(sh&&!sh.classList.contains('quran')&&!sh.closest('[data-noback]')){if(edge){Object.assign(SW,{on:true,kind:'edge',el:sh})}else if(e.target.closest('.sheet')&&sh.scrollTop<=0){Object.assign(SW,{on:true,kind:'down',el:sh})}}
+  else if(!sh&&edge&&swCanBackTab()){Object.assign(SW,{on:true,kind:'edge',el:document.getElementById('view')})}
+  if(SW.on){SW.x0=t.clientX;SW.y0=t.clientY;SW.t0=Date.now();SW.dx=0;SW.dy=0;SW.lock=''}},{passive:true});
+document.addEventListener('touchmove',e=>{if(!SW.on)return;const t=e.touches[0];const dx=t.clientX-SW.x0,dy=t.clientY-SW.y0;
+  if(!SW.lock){if(Math.abs(dx)<6&&Math.abs(dy)<6)return;SW.lock=SW.kind==='down'?(dy>0&&dy>Math.abs(dx)?'y':'no'):(dx<0&&-dx>Math.abs(dy)?'x':'no');if(SW.lock==='no'){SW.on=false;return}SW.el.style.transition='none';if(SW.kind==='down'&&SW.el.scrollTop>0){SW.on=false;return}}
+  if(e.cancelable)e.preventDefault();const sc=document.querySelector('#layer .scrim');
+  if(SW.lock==='y'){SW.dy=Math.max(0,dy);SW.el.style.transform='translate3d(0,'+SW.dy+'px,0)';if(sc)sc.style.opacity=String(Math.max(.15,1-SW.dy/500))}
+  else{SW.dx=Math.min(0,dx);SW.el.style.transform='translate3d('+SW.dx+'px,0,0)';SW.el.style.boxShadow='8px 0 24px rgb(0 0 0 / .18)';if(sc)sc.style.opacity=String(Math.max(.15,1+SW.dx/window.innerWidth))}},{passive:false});
+function swEnd(cancel){if(!SW.on)return;SW.on=false;if(!SW.lock)return;const el=SW.el,sc=document.querySelector('#layer .scrim');const dt=Math.max(1,Date.now()-SW.t0);
+  const W=window.innerWidth,H=window.innerHeight;const go=!cancel&&(SW.lock==='y'?(SW.dy>110||(SW.dy>40&&SW.dy/dt>.55)):(-SW.dx>W*.33||(-SW.dx>50&&-SW.dx/dt>.5)));
+  el.style.transition='transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s';
+  if(go){el.style.transform=SW.lock==='y'?'translate3d(0,'+H+'px,0)':'translate3d('+(-W)+'px,0,0)';if(sc){sc.style.transition='opacity .28s';sc.style.opacity='0'}
+    setTimeout(()=>{goBack();setTimeout(()=>{const v=document.getElementById('view');[el,v].forEach(x=>{if(x){x.style.transition='';x.style.transform='';x.style.boxShadow=''}});const s2=document.querySelector('#layer .scrim');if(s2){s2.style.opacity='';s2.style.transition=''}},60)},240)}
+  else{el.style.transform='';el.style.boxShadow='';if(sc){sc.style.transition='opacity .28s';sc.style.opacity=''}setTimeout(()=>{el.style.transition=''},300)}}
+document.addEventListener('touchend',()=>swEnd(false),{passive:true});document.addEventListener('touchcancel',()=>swEnd(true),{passive:true});
 
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 document.addEventListener('keydown',e=>{if(((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')||(e.key==='/'&&!e.target.closest('input,textarea,select,[contenteditable]'))){e.preventDefault();openSearch()}});
