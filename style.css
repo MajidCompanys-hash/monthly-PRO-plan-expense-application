@@ -1425,3 +1425,11 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .srchpin{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--hdrH,58px));z-index:4;background:var(--bg);margin:-4px -2px 4px;padding:2px 2px 8px}
 .srchpin .srchbar{margin:0;gap:10px}.srchpin .srchbar svg{width:20px;height:20px;flex:none;color:var(--accent)}.srchpin .srchbar span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #srchBtn.srchfab{color:var(--accent)}
+/* السحب للتحديث */
+#ptr{position:fixed;left:50%;top:70px;z-index:60;display:flex;align-items:center;gap:8px;padding:8px 14px 8px 10px;border-radius:999px;background:var(--surface);color:var(--fg);border:1px solid var(--line);box-shadow:var(--shadow);font-size:13px;font-weight:700;opacity:0;pointer-events:none;transform:translate(-50%,-14px) scale(.9);transition:opacity .15s,transform .15s}
+#ptr.vis{opacity:calc(.35 + var(--p,0)*.65);transform:translate(-50%,calc(var(--p,0)*6px)) scale(1)}
+#ptr i{width:24px;height:24px;display:grid;place-items:center;color:var(--accent);transform:rotate(calc(var(--p,0)*300deg))}#ptr i svg{width:20px;height:20px}
+#ptr.spin i{animation:ptrspin .8s linear infinite}@keyframes ptrspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#ptr.spin i{animation:none}}
+#ptr .srchi{display:none}#ptr.srch i{transform:none}
+#ptr i.sr{display:none}#ptr.srch i.sr{display:grid;transform:scale(calc(.7 + var(--p,0)*.3))}#ptr.srch i.rf{display:none}

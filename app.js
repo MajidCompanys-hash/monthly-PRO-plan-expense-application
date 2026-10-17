@@ -262,9 +262,9 @@ async function dataHealth(){const L=list(),R=recs(),D=debts();const out=[];const
   add(pers||inst,'حماية التخزين من الحذف التلقائي',pers?'محمي دائمًا':inst?'التطبيق مثبّت على الشاشة الرئيسية، فلا يحذف النظام بياناته تلقائيًا':'افتح التطبيق من أيقونته على الشاشة الرئيسية وليس من Safari، واحفظ نسخة احتياطية كملف بانتظام');
   return out}
 /* 🔄 تحديث البيانات: إعادة قراءة كل البيانات من الحفظ، وإعادة حساب الديون والأقسام، ومطابقة قاعدة البيانات الداخلية، ثم فحص السلامة */
-async function refreshAll(btn){if(btn)btn.disabled=true;const t0=Date.now();
+async function refreshAll(btn,quiet){if(btn)btn.disabled=true;const t0=Date.now();
   try{migrateRecs();debts().forEach(d=>{try{debtSync(d)}catch(e){}});try{const K=debtLinks(true);if(K.fixed)putSettings()}catch(e){}secSeed();cacheSave();await mirrorFlush();const H=await dataHealth();if(Sync.linked())Sync.soon();render();
-    const bad=H.filter(h=>!h.ok);const c=dataCounts();
+    const bad=H.filter(h=>!h.ok);const c=dataCounts();if(quiet){if(btn)btn.disabled=false;return{bad,c}}
     toast(bad.length?'تم التحديث · '+countWord(bad.length,'ملاحظة واحدة','ملاحظتان','ملاحظات','ملاحظة')+': '+bad[0].t:'✓ تم تحديث البيانات وقراءتها: '+countWord(c.tx,'عملية واحدة','عمليتان','عمليات','عملية')+' · '+countWord(c.debts,'دين','دينان','ديون','دينًا')+' · '+countWord(c.recurring,'التزام','التزامان','التزامات','التزامًا'),null,6000);
     if(bad.some(h=>h.fix==='dlink')){openDebtLinkFix();return}
     if(document.querySelector('#layer .dbstat'))openDataCenter()}
@@ -3232,8 +3232,10 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.46.0';
+const APP_VERSION='2.47.1';
 const CHANGELOG=[
+ {v:'2.47.1',d:'2026-10-17',items:['السحب للأسفل من أعلى الصفحة صار حسب القسم: في الرئيسية يفتح البحث مباشرة، وفي «إدارة البيانات» و«التقارير» يحدّث كل شيء (مزامنة Google Drive، وتحديث التطبيق، وتحديث البيانات وفحص سلامتها) ثم يعرض ملخصًا']},
+ {v:'2.47.0',d:'2026-10-17',items:['اسحب الصفحة الرئيسية للأسفل من أعلاها وأفلت للتحديث: مزامنة Google Drive الآن، والبحث عن إصدار جديد للتطبيق وتثبيته، وإعادة قراءة البيانات وحساب الديون والأقسام وفحص السلامة، ثم ملخص بالنتيجة. بدون إنترنت تُحدَّث البيانات في الهاتف فقط']},
  {v:'2.46.0',d:'2026-10-17',items:['«🧾 عمليات الكشوفات المستوردة» في إدارة البيانات وفي تحليل الكشوفات: كل العمليات المستوردة من بنك مسقط والوطني في قائمة واحدة، مع البحث بالوصف أو المبلغ، والتصفية حسب البنك والشهر (من الراتب إلى الراتب مع تاريخ البداية والنهاية) والتصنيف وفرد العائلة والنوع، والترتيب، ومجموع المصروفات والإيداعات للمعروض','تعديل أي عملية: المبلغ والتاريخ والنوع والتصنيف والوصف وفرد العائلة (مع إضافة فرد جديد) و«بين حساباتي». إذا كانت دفعة دين يُعدَّل رصيد الدين تلقائيًا، والحذف بعد التأكيد ويُعاد مبلغ دفعة الدين إلى رصيده','تحديد عدة عمليات معًا لتغيير تصنيفها أو حذفها (بعد لقطة احتياطية)','تصدير العمليات (كلها أو المعروضة) إلى Excel مع عمود «المعرّف»، وتعديلها في Numbers أو Excel ثم استيرادها: تظهر معاينة بالتعديلات والجديدة والمتجاهلة قبل التطبيق، والسطر المكرر لا يُضاف مرتين. ونسخة احتياطية خاصة بعمليات الكشوفات (مع سجل الكشوفات والتصنيفات المتعلَّمة وأفراد العائلة) تُستعاد بالدمج بدون تكرار','«🏷️ التصنيف السريع» في الرئيسية وإدارة البيانات وعمليات الكشوفات: العمليات مجمّعة حسب الجهة (مطعم، محل، محطة وقود، تحويل لشخص…) مع عددها ومجموعها، تضغط على الجهة وتختار تصنيفها من أيقونات واضحة فتتصنّف كل عملياتها مرة واحدة','التطبيق يتذكر: كل جهة تصنّفها تُحفظ قاعدة، وتُطبَّق تلقائيًا على كل كشف تستورده مستقبلًا، وكذلك عند تغيير التصنيف في مراجعة الكشف أو في تعديل العملية (مع خيار تطبيقه على العمليات المشابهة). القواعد تُراجع وتُحذف من «القواعد المحفوظة» وتُحفظ في النسخة الاحتياطية','البحث في أعلى الرئيسية مثبّت تحت الشريط العلوي ويبقى ظاهرًا أثناء التمرير، وزر العدسة 🔍 ظاهر بجانب القائمة ☰ في كل الأقسام للبحث بضغطة','إصلاح: الشريط العلوي يبقى ثابتًا أعلى الشاشة أثناء التمرير']},
  {v:'2.45.2',d:'2026-10-17',items:['التحويل بين حساباتك (من الوطني إلى مسقط مثلًا) لم يعد يُحسب مصروفًا: عند استيراد عدة كشوفات معًا تُعرف أرقام كل حساباتك أولًا، وعند استيراد كشف الحساب الثاني يُصحَّح الطرف المقابل في الكشف الأول إلى «بين حساباتي». إذا استوردت الكشوفات من قبل، أرفق كشف بنك مسقط مرة أخرى واضغط «تصحيح التحويلات بين حساباتك»']},
  {v:'2.45.1',d:'2026-10-17',items:['إصلاح ملاحظة «عمليات سداد دين في السجل غير مسجّلة في دفعات الدين»: زر «🔧 إصلاح» في فحص السلامة يفتح «🔗 ربط عمليات سداد الديون»، ولكل عملية: ربطها بالدفعة الموجودة في نفس الشهر، أو تسجيلها دفعة (مع خصمها من الرصيد أو بدونه)، أو فك الارتباط، بعد لقطة احتياطية. واستيراد الكشف لم يعد يربط القسط بالدين إلا إذا اخترت «ربط بالدين»']},
@@ -6532,6 +6534,31 @@ function openCatQuick(o){const L=document.getElementById('layer');o=Object.assig
       if(o.mem){ckSave(T[0]?T[0].note:g.name,g.type,cat)}await putSettings();try{memoClear()}catch(er){}
       toast('«'+g.name+'» ← '+catOf(cat).n+' ('+countWord(T.length,'عملية','عمليتان','عمليات','عملية')+')'+(o.mem?' · سيتذكرها':''));o.open='';draw();render();return}};
   draw()}
+
+/* ===================== السحب للأسفل في الرئيسية للتحديث =====================
+ * اسحب الصفحة الرئيسية للأسفل من أعلاها وأفلت: مزامنة Google Drive الآن (إن كانت مربوطة)، والبحث عن إصدار جديد للتطبيق،
+ * وإعادة قراءة البيانات وحساب الديون والأقسام وفحص السلامة. بدون إنترنت يُحدّث البيانات المحلية فقط. */
+const PTR={y0:null,dy:0,busy:false,on:false};
+function ptrEl(){let el=document.getElementById('ptr');if(!el){el=document.createElement('div');el.id='ptr';el.setAttribute('aria-hidden','true');el.innerHTML='<i class="rf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg></i><i class="sr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></i><span></span>';document.body.appendChild(el)}return el}
+/* الرئيسية: السحب يفتح البحث · إدارة البيانات والتقارير: السحب يحدّث المزامنة والتطبيق والبيانات */
+function ptrMode(){return S.tab==='home'?'search':(S.tab==='budget'||S.tab==='reports')?'sync':''}
+function ptrOk(){return !!ptrMode()&&!PTR.busy&&!document.querySelector('#layer .sheet')&&(()=>{const mn=document.getElementById('hdrMenu');return !mn||mn.hidden})()&&(window.scrollY||document.documentElement.scrollTop||0)<=0}
+function ptrShow(p,txt){const el=ptrEl();el.classList.add('vis');el.style.setProperty('--p',Math.min(1,p));el.querySelector('span').textContent=txt;try{const hd=document.querySelector('header.top');el.style.top=((hd?hd.getBoundingClientRect().bottom:56)+6)+'px'}catch(e){}}
+function ptrHide(){const el=document.getElementById('ptr');if(el){el.classList.remove('vis','spin');el.style.removeProperty('--p')}}
+document.addEventListener('touchstart',e=>{if(e.touches.length!==1||!ptrOk()||e.target.closest('input,textarea,select,.sheet,#hdrMenu')){PTR.y0=null;return}PTR.y0=e.touches[0].clientY;PTR.x0=e.touches[0].clientX;PTR.dy=0;PTR.on=false;PTR.mode=ptrMode()},{passive:true});
+document.addEventListener('touchmove',e=>{if(PTR.y0==null||PTR.busy)return;const dy=e.touches[0].clientY-PTR.y0,dx=Math.abs(e.touches[0].clientX-PTR.x0);if((window.scrollY||0)>0||dx>dy){if(PTR.on){ptrHide();PTR.on=false}PTR.y0=null;return}PTR.dy=dy;if(dy>12){PTR.on=true;const sr=PTR.mode==='search';ptrShow(dy/80,dy>=80?(sr?'أفلت لفتح البحث':'أفلت للتحديث'):(sr?'اسحب للبحث':'اسحب للتحديث'));ptrEl().classList.toggle('srch',sr)}},{passive:true});
+document.addEventListener('touchend',()=>{if(PTR.y0==null)return;const go=PTR.on&&PTR.dy>=80;PTR.y0=null;if(go&&PTR.mode==='search'){ptrHide();openSearch()}else if(go)ptrRun();else ptrHide();PTR.on=false},{passive:true});
+async function ptrRun(){if(PTR.busy)return;PTR.busy=true;const el=ptrEl();el.classList.remove('srch');el.classList.add('spin');const msgs=[];const step=t=>ptrShow(1,t);
+  try{const on=navigator.onLine!==false;
+    if(on&&Sync.linked()){step('مزامنة Google Drive…');try{await Promise.race([Promise.resolve(Sync.now()),new Promise(r=>setTimeout(r,25000))])}catch(e){}const s=document.querySelector('#sync span');msgs.push('☁️ '+(s?s.textContent.trim():'تمت المزامنة'))}
+    else msgs.push(on?'☁️ المزامنة غير مربوطة':'📴 بدون إنترنت: حُدّثت البيانات في الهاتف فقط');
+    let upd=false;if(on&&'serviceWorker' in navigator&&location.protocol!=='file:'){step('البحث عن تحديث للتطبيق…');try{const r=await navigator.serviceWorker.getRegistration();if(r){await Promise.race([r.update(),new Promise(z=>setTimeout(z,8000))]);upd=!!(r.installing||r.waiting)}}catch(e){}}
+    msgs.push(upd?'🆕 وُجد إصدار جديد، يُعاد تشغيل التطبيق':'✓ الإصدار '+APP_VERSION+' (آخر إصدار)');
+    step('تحديث البيانات…');const R=await refreshAll(null,true);
+    if(R){const bad=R.bad.filter(h=>!/حماية التخزين/.test(h.t));msgs.push(bad.length?'⚠️ '+bad[0].t:'✓ البيانات سليمة: '+countWord(R.c.tx,'عملية واحدة','عمليتان','عمليات','عملية'));if(bad.some(h=>h.fix==='dlink'))setTimeout(()=>openDebtLinkFix(),400)}
+    S.month=curM();render();toast(msgs.join(' · '),null,6000)}
+  catch(e){toast('تعذّر التحديث: '+(e&&e.message||e))}
+  finally{PTR.busy=false;ptrHide()}}
 
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 document.addEventListener('keydown',e=>{if(((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')||(e.key==='/'&&!e.target.closest('input,textarea,select,[contenteditable]'))){e.preventDefault();openSearch()}});
