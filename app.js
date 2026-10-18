@@ -1333,60 +1333,83 @@ function debtInstInfo(d){const inApp=(d.pays||[]).filter(p=>+p.amt>0).length;con
 /* متأخرات الدين المتبقية في الشهر m: تُخصم منها كل زيادة دُفعت فوق القسط في الأشهر التالية */
 function debtArrLeft(d,m){if(!(+d.arrears>0)||d.mode==='once')return 0;const since=d.arrSince||m;if(m<since)return 0;let left=+d.arrears;const inst=+d.payment||0;
   for(let k=since;k<m;k=shiftMonth(k,1)){left-=Math.max(0,debtPaidIn(d,k)-inst);if(left<=0.0005)return 0}const bl=Number(String(d.balance).replace(/,/g,''))||0;return r3(Math.min(left,Math.max(0,bl+debtPaidIn(d,m))))}
+/* ===== نماذج إدخال على خطوات: كل صفحة تسأل سؤالًا واضحًا واحدًا، بدون أسئلة مكررة =====
+ * wzHead: شريط الخطوات (يُضغط للتنقل)، wzNav: أزرار السابق/التالي/حفظ، wzRow: سطر في صفحة المراجعة مع «تعديل». */
+function wzHead(S_,cur,maxR,edit){return `<div class="wz-steps" style="grid-template-columns:repeat(${S_.length},minmax(0,1fr))">${S_.map((n,i)=>`<button type="button" class="wz-st${i===cur?' on':''}${i<cur||edit?' done':''}" data-wzs="${i}" ${i<=maxR||edit?'':'disabled'}><span>${i<cur||(edit&&i!==cur)?'✓':i+1}</span><small>${n}</small></button>`).join('')}</div>`}
+function wzNav(cur,last,edit,saveId){return `<p class="note wz-err" id="wzErr" hidden></p><div class="wz-nav">${cur>0?'<button type="button" class="btn ghost" data-wzp="1">‹ السابق</button>':'<button type="button" class="btn ghost" data-close>إلغاء</button>'}${cur<last?`<button type="button" class="btn" data-wzn="1">التالي ›</button>`:`<button type="button" class="btn" id="${saveId}">${edit?'حفظ التعديلات':'حفظ'}</button>`}</div>${edit&&cur<last?`<button type="button" class="btn ghost block" id="${saveId}" style="margin-top:6px">حفظ التعديلات الآن</button>`:''}`}
+function wzRow(lbl,val,step){return `<div class="wz-row"><span>${lbl}</span><b>${val}</b>${step!=null?`<button type="button" class="wz-ed" data-wzs="${step}">تعديل</button>`:''}</div>`}
+function wzErr(t){const e=document.getElementById('wzErr');if(e){e.hidden=false;e.textContent=t}return false}
+function dayChips(attr,val,payday){const D=[1,5,10,15,20,25,28];const pd=+payday||0;const v=+val||0;return `<div class="chips daychips">${pd?`<button type="button" class="chip" data-${attr}="${pd}" aria-pressed="${v===pd}">يوم الراتب (${pd})</button>`:''}${D.filter(x=>x!==pd).map(x=>`<button type="button" class="chip" data-${attr}="${x}" aria-pressed="${v===x}">${x}</button>`).join('')}</div>`}
+const REM_B=[[3,'قبل 3 أيام'],[2,'قبل يومين'],[1,'قبل يوم'],[0,'يوم الدفع'],[7,'قبل أسبوع']];
 function openRec(id,kind){
   const L=document.getElementById('layer');const R=S.settings.recurring||(S.settings.recurring=[]);const ex=id?R.find(x=>x.id===id):null;
-  const k=REC_KINDS[ex?ex.kind:kind]||REC_KINDS.custom;
-  const r=ex?Object.assign({},ex,{amount:amtIn(amtAt(ex,S.month))}):{id:uidGen(),kind:kind,name:kind==='custom'?'':k.n,amount:'',cat:k.cat,day:kind==='rent'?1:5,person:'',start:S.month};let askDel=false,scope='from';
-  const scopeHtml=()=>ex&&Math.abs(parseAmt(r.amount)-amtAt(ex,S.month))>0.0005?`<div class="field"><label>تطبيق المبلغ الجديد</label><div class="seg"><button class="n" data-rscope="from" aria-pressed="${scope==='from'}">من ${esc(mShort(S.month))} فصاعدًا</button><button class="n" data-rscope="only" aria-pressed="${scope==='only'}">${esc(mShort(S.month))} فقط</button></div><span class="note">${scope==='from'?'الأشهر السابقة تبقى بمبلغها القديم '+money(amtAt(ex,shiftMonth(S.month,-1)))+'.':'يعود المبلغ '+money(amtAt(ex,S.month))+' في الشهر التالي.'}</span></div>`:'';
-  const recPreview=()=>{const a=parseAmt(r.amount);if(!a)return '';const ms=[];for(let i=0,m=S.month;i<4;i++,m=shiftMonth(m,1)){const on=(!r.start||m>=r.start)&&(!r.until||m<=r.until);if(on)ms.push(mShort(m)+' '+money(scope==='only'&&ex&&m!==S.month?amtAt(ex,m):a))}
-    const nM=r.until?monthsSpan(r.start||S.month,r.until):0;
-    return '🔁 يتكرر كل شهر'+(r.until?' حتى '+monthName(r.until)+' ('+countWord(nM,'شهر واحد','شهران','أشهر','شهرًا')+' · المجموع '+money(a*nM)+' '+CUR+')':' بشكل مستمر')+(ms.length?': '+ms.join(' · ')+(r.until&&r.until<=shiftMonth(S.month,3)?'':' …'):'')};
-  const draw=()=>{L.innerHTML=`${sheetTop('التزام شهري')}
-   <h2 style="margin-top:0">${ex?'تعديل الالتزام':'التزام شهري جديد'}</h2><div class="stack">
-   <div class="field"><label for="rName">الاسم</label><input class="inp" id="rName" value="${esc(r.name)}" placeholder="مثال: اشتراك النادي" maxlength="40"></div>
-   <div class="row2"><div class="field"><label for="rAmt">المبلغ الشهري${k.variable?' (تقريبي)':''}</label><input class="inp num" id="rAmt" inputmode="decimal" value="${r.amount!==''?esc(r.amount):''}" placeholder="0.000" style="text-align:left"></div>
-   <div class="field"><label for="rDay">يوم الدفع في الشهر</label><input class="inp num" id="rDay" type="number" min="1" max="31" value="${esc(r.day)}" style="text-align:left"></div></div>
-   <div id="rScopeBox">${scopeHtml()}</div>
-   ${ex&&r.start&&r.since&&r.start<r.since?`<button class="chip" type="button" data-premonthsl="rec|${esc(ex.id)}">📆 الأشهر السابقة وتحديد المتأخر منها</button>`:''}
-   ${arrQHtml('r',r.arrQ!==undefined?r.arrQ:+r.arrears>0,r.arrears,'المبلغ المتأخر من الأشهر الماضية كما في الفاتورة أو الكشف. يُضاف لمستحق هذا الشهر، ويُخصم منه كل ما تدفعه.')}
-   <div class="field"><label>مدة التكرار</label><div class="chips durchips">${REC_DUR.map(([n,t])=>`<button class="chip" type="button" data-rdur="${n}" aria-pressed="${n?!!r.until&&monthsSpan(r.start||S.month,r.until)===n:!r.until}">${t}</button>`).join('')}<input class="inp num" id="rCount" type="number" min="1" max="600" inputmode="numeric" placeholder="عدد الأشهر" value="${r.until&&!REC_DUR.some(([n])=>n&&monthsSpan(r.start||S.month,r.until)===n)?monthsSpan(r.start||S.month,r.until):''}" aria-label="عدد أشهر التكرار" style="width:110px;padding:6px 10px"></div></div>
-   <div class="row2"><div class="field"><label for="rStart">يبدأ من شهر</label><input class="inp" type="month" id="rStart" value="${esc(r.start||'')}"></div>
-   <div class="field"><label for="rUntil">ينتهي في شهر (اختياري)</label><input class="inp" type="month" id="rUntil" value="${esc(r.until||'')}" placeholder="مستمر"></div></div>
-   <div class="recprev" id="rPrev">${recPreview()}</div>
-   <div class="stack recadv"><h3 style="margin:6px 0 0">خيارات إضافية</h3>
-   <div class="field"><label for="rRemind">يوم التذكير</label><input class="inp num" id="rRemind" type="number" min="1" max="31" value="${esc(r.remind||Math.max(1,(+r.day||1)-2))}" style="text-align:left"></div>
-   <div class="field"><label for="rBill">مبلغ فاتورة ${esc(monthName(S.month))}${k.variable?' (من الفاتورة الفعلية)':' (إن اختلف)'}</label><input class="inp num" id="rBill" inputmode="decimal" value="${(r.bills||{})[S.month]!==undefined?amtIn(r.bills[S.month]):''}" placeholder="${r.amount!==''?esc(r.amount):'0.000'}" style="text-align:left"></div>
-   <p class="note" style="margin:0">المتأخرات: المبلغ المستحق السابق كما يظهر في الفاتورة (مثل الكهرباء والمياه). يُضاف لفاتورة الشهر، ويُخصم منه كل ما تدفعه، فتعرف المتبقي عليك بالضبط.</p>
-   <div class="row2"><div class="field"><label for="rCat">الفئة</label><select class="inp" id="rCat">${EXP_CATS.map(c=>`<option value="${c.id}" ${r.cat===c.id?'selected':''}>${esc(c.n)}</option>`).join('')}</select></div>
-   <div class="field"><label for="rPerson">لمن؟</label><select class="inp" id="rPerson"><option value="">لي / للبيت</option>${people().map(p=>`<option value="${esc(p.id)}" ${r.person===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div></div>
-   ${k.variable?'<p class="note" style="margin:0">المبلغ يتغير كل شهر، لذلك عند الضغط على «دفعت» تكتب المبلغ الفعلي من الفاتورة.</p>':''}</div>
-   <p class="note" id="rErr" hidden style="color:var(--exp);margin:0"></p>
-   <button class="btn block" id="rSave">حفظ</button>
-   ${ex?(askDel?'<div class="confirm"><span>حذف هذا الالتزام؟ تبقى الدفعات السابقة في السجل.</span><div class="row2"><button class="btn danger" id="rDel">نعم، احذف</button><button class="btn ghost" id="rDelNo">تراجع</button></div></div>':'<button class="btn ghost block" id="rDelAsk" style="color:var(--exp)">حذف الالتزام</button>'):'<button class="btn ghost block" data-close>إلغاء</button>'}
-   </div></div></div>`};
-  const grab=()=>{r.arrQ=!!document.querySelector('#rArrBox:not([hidden])');r.name=document.getElementById('rName').value;r.amount=document.getElementById('rAmt').value;r.start=document.getElementById('rStart').value;r.until=document.getElementById('rUntil').value;r.day=document.getElementById('rDay').value;r.remind=document.getElementById('rRemind').value;r.arrearsIn=document.getElementById('rArr').value;r.billIn=document.getElementById('rBill').value;r.cat=document.getElementById('rCat').value;r.person=document.getElementById('rPerson').value};
-  const live=()=>{grab();const p=document.getElementById('rPrev');if(p)p.innerHTML=recPreview();const sb=document.getElementById('rScopeBox');if(sb)sb.innerHTML=scopeHtml()};
+  const k=REC_KINDS[ex?ex.kind:kind]||REC_KINDS.custom;const pd=+S.settings.payday||0;
+  const r=ex?Object.assign({},ex,{amount:amtIn(amtAt(ex,S.month))}):{id:uidGen(),kind:kind,name:kind==='custom'?'':k.n,amount:'',cat:k.cat,day:kind==='rent'?1:(pd||5),person:'',start:S.month};
+  r.arrQ=+r.arrears>0;r.arrearsIn=+r.arrears>0?amtIn(r.arrears):'';r.billIn=(r.bills||{})[S.month]!==undefined?amtIn(r.bills[S.month]):'';
+  r.durMode=!r.until?'ever':'until';r.durN=r.until?monthsSpan(r.start||S.month,r.until):'';
+  let rb=(()=>{const d=+r.day||1,rm=+r.remind||Math.max(1,d-2);const b=d-rm;return b>=0&&b<=7?b:2})();
+  let askDel=false,scope='from',step=ex?2:0,maxR=ex?2:0;const STEPS=['الأساسيات','المدة والمتأخرات','المراجعة'];
+  const amtChanged=()=>ex&&Math.abs(parseAmt(r.amount)-amtAt(ex,S.month))>0.0005;
+  const scopeHtml=()=>amtChanged()?`<div class="field"><label>المبلغ الجديد يُطبَّق على</label><div class="seg"><button type="button" class="n" data-rscope="from" aria-pressed="${scope==='from'}">${esc(mShort(S.month))} وما بعده</button><button type="button" class="n" data-rscope="only" aria-pressed="${scope==='only'}">${esc(mShort(S.month))} فقط</button></div><span class="note">${scope==='from'?'الأشهر السابقة تبقى بمبلغها القديم '+money(amtAt(ex,shiftMonth(S.month,-1)))+'.':'يعود المبلغ '+money(amtAt(ex,S.month))+' في الشهر التالي.'}</span></div>`:'';
+  const untilOf=()=>r.durMode==='ever'?'':r.durMode==='n'?(parseInt(r.durN)>0?shiftMonth(r.start||S.month,Math.min(600,parseInt(r.durN))-1):''):(r.until||'');
+  const durTxt=()=>{const u=untilOf();if(!u)return 'مستمر بلا نهاية';const n=monthsSpan(r.start||S.month,u);return countWord(n,'شهر واحد','شهران','أشهر','شهرًا')+' · حتى '+monthName(u)};
+  const recPreview=()=>{const a=parseAmt(r.amount);if(!a)return '';const u=untilOf();const nM=u?monthsSpan(r.start||S.month,u):0;return '🔁 '+money(a)+' '+CUR+' كل شهر يوم '+(+r.day||1)+(u?' لمدة '+countWord(nM,'شهر واحد','شهران','أشهر','شهرًا')+' · المجموع '+money(a*nM)+' '+CUR:' بشكل مستمر')};
+  const draw=()=>{const edit=!!ex;let body='';
+   if(step===0)body=`<div class="wz-q">${recBadge({kind:r.kind,cat:r.cat,id:r.id})}<div><b>${esc(k.n)}</b><small>اكتب الاسم والمبلغ ويوم الدفع</small></div></div>
+     <div class="field"><label for="rName">الاسم</label><input class="inp" id="rName" value="${esc(r.name)}" placeholder="مثال: اشتراك النادي" maxlength="40"></div>
+     <div class="field"><label for="rAmt">المبلغ الشهري${k.variable?' <small class="note">(تقريبي: المبلغ الفعلي تكتبه عند الدفع)</small>':''}</label><div class="amtbox sm"><input id="rAmt" inputmode="decimal" value="${r.amount!==''?esc(r.amount):''}" placeholder="0.000"><span>${CUR}</span></div></div>
+     <div id="rScopeBox">${scopeHtml()}</div>
+     <div class="field"><label>يوم الدفع في الشهر</label>${dayChips('rdayc',r.day,pd)}<div class="wz-inl"><span class="note">يوم آخر:</span><input class="inp num" id="rDay" type="number" min="1" max="31" inputmode="numeric" value="${esc(r.day)}" style="width:90px"></div></div>`;
+   else if(step===1)body=`<div class="field"><label for="rStart">أول شهر يُستحق فيه</label><input class="inp" type="month" id="rStart" value="${esc(r.start||'')}"></div>
+     <div class="field"><label>كم مدته؟</label><div class="seg seg3"><button type="button" class="n" data-rdm="ever" aria-pressed="${r.durMode==='ever'}">مستمر</button><button type="button" class="n" data-rdm="n" aria-pressed="${r.durMode==='n'}">عدد أشهر</button><button type="button" class="n" data-rdm="until" aria-pressed="${r.durMode==='until'}">حتى شهر</button></div>
+      ${r.durMode==='n'?`<div class="chips" style="margin-top:8px">${[6,12,24,36,60].map(n=>`<button type="button" class="chip" data-rdn="${n}" aria-pressed="${+r.durN===n}">${n<12?n+' أشهر':n===12?'سنة':n===24?'سنتان':n/12+' سنوات'}</button>`).join('')}<input class="inp num" id="rCount" type="number" min="1" max="600" inputmode="numeric" placeholder="عدد" value="${esc(r.durN||'')}" style="width:90px;padding:6px 10px" aria-label="عدد الأشهر"></div>`:''}
+      ${r.durMode==='until'?`<input class="inp" type="month" id="rUntil" value="${esc(r.until||'')}" style="margin-top:8px" aria-label="آخر شهر">`:''}</div>
+     <div class="recprev" id="rPrev">${recPreview()}</div>
+     ${arrQHtml('r',r.arrQ,r.arrearsIn,'اكتب المبلغ المتأخر كما في الفاتورة. يُضاف لمستحق هذا الشهر، ويُخصم منه كل ما تدفعه.')}
+     ${k.variable?`<div class="field"><label for="rBill">هل وصلت فاتورة ${esc(mShort(S.month))}؟ اكتب مبلغها (اختياري)</label><div class="amtbox sm"><input id="rBill" inputmode="decimal" value="${esc(r.billIn)}" placeholder="${r.amount!==''?esc(r.amount):'0.000'}"><span>${CUR}</span></div></div>`:''}`;
+   else{const a=parseAmt(r.amount);body=`<div class="wz-sum">${wzRow('الاسم',esc(r.name||'—'),0)}${wzRow('المبلغ الشهري',`<span class="num">${a?money(a):'—'}</span> ${CUR}${amtChanged()?' <small class="note">('+(scope==='only'?'هذا الشهر فقط':'من '+esc(mShort(S.month)))+')</small>':''}`,0)}${wzRow('يوم الدفع','يوم '+(+r.day||1)+(pd&&+r.day===pd?' (يوم الراتب)':''),0)}
+       ${wzRow('يبدأ من',esc(r.start?monthName(r.start):'منذ البداية'),1)}${wzRow('المدة',esc(durTxt()),1)}${wzRow('متأخرات سابقة',r.arrQ&&parseAmt(r.arrearsIn)?'<span class="num amt-exp">'+money(parseAmt(r.arrearsIn))+'</span>':'لا يوجد',1)}${k.variable&&String(r.billIn).trim()?wzRow('فاتورة '+esc(mShort(S.month)),'<span class="num">'+money(parseAmt(r.billIn))+'</span>',1):''}</div>
+      <div class="recprev">${recPreview()}</div>
+      <div class="field"><label>التذكير</label><div class="chips">${REM_B.map(([b,t])=>`<button type="button" class="chip" data-rrem="${b}" aria-pressed="${rb===b}">${t}</button>`).join('')}</div></div>
+      <div class="row2"><div class="field"><label for="rCat">الفئة</label><select class="inp" id="rCat">${EXP_CATS.map(c=>`<option value="${c.id}" ${r.cat===c.id?'selected':''}>${esc(c.n)}</option>`).join('')}</select></div>
+      <div class="field"><label for="rPerson">لمن؟</label><select class="inp" id="rPerson"><option value="">لي / للبيت</option>${people().map(p=>`<option value="${esc(p.id)}" ${r.person===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div></div>
+      ${ex&&r.start&&r.since&&r.start<r.since?`<button class="chip" type="button" data-premonthsl="rec|${esc(ex.id)}">📆 الأشهر السابقة وتحديد المتأخر منها</button>`:''}`}
+   L.innerHTML=`${sheetTop('التزام شهري')}<h2 style="margin-top:0">${ex?'تعديل '+esc(ex.name):'التزام جديد: '+esc(k.n)}</h2>${wzHead(STEPS,step,maxR,edit)}<div class="stack wz-body">${body}</div>${wzNav(step,2,edit,'rSave')}
+    ${ex&&step===2?(askDel?'<div class="confirm"><span>حذف هذا الالتزام؟ تبقى الدفعات السابقة في السجل.</span><div class="row2"><button class="btn danger" id="rDel">نعم، احذف</button><button class="btn ghost" id="rDelNo">تراجع</button></div></div>':'<button class="btn ghost block" id="rDelAsk" style="color:var(--exp);margin-top:6px">حذف الالتزام</button>'):''}</div></div>`;
+   if(step===0&&!ex&&!r.name)setTimeout(()=>{const n=document.getElementById('rName');n&&n.focus()},60)};
+  const g=i=>{const e=document.getElementById(i);return e?e.value:undefined};
+  const grab=()=>{const ab=document.getElementById('rArrBox');if(ab)r.arrQ=!ab.hidden;[['rName','name'],['rAmt','amount'],['rStart','start'],['rUntil','until'],['rDay','day'],['rArr','arrearsIn'],['rBill','billIn'],['rCat','cat'],['rPerson','person'],['rCount','durN']].forEach(([i,f])=>{const v=g(i);if(v!==undefined)r[f]=v})};
+  const live=(force)=>{grab();const p=document.getElementById('rPrev');if(p)p.innerHTML=recPreview();const sb=document.getElementById('rScopeBox');if(sb&&(force||!!sb.querySelector('[data-rscope]')!==!!amtChanged()))sb.innerHTML=scopeHtml()};
+  const check=s=>{if(s===0){if(!String(r.name).trim())return wzErr('اكتب اسم الالتزام');if(!parseAmt(r.amount))return wzErr('اكتب المبلغ الشهري، مثل 25.000');const d=parseInt(r.day);if(!(d>=1&&d<=31))return wzErr('اختر يوم الدفع (1 إلى 31)')}
+    if(s===1){if(!r.start&&!ex)return wzErr('اختر أول شهر يُستحق فيه');if(r.durMode==='n'&&!(parseInt(r.durN)>0))return wzErr('اكتب عدد الأشهر');if(r.durMode==='until'&&!r.until)return wzErr('اختر آخر شهر');if(r.durMode==='until'&&r.until<r.start)return wzErr('آخر شهر قبل شهر البداية');if(r.arrQ&&!parseAmt(r.arrearsIn))return wzErr('اكتب مبلغ المتأخرات، أو اختر «لا»')}return true};
+  const go=s=>{grab();step=s;maxR=Math.max(maxR,s);askDel=false;draw();const sh=L.querySelector('.sheet');if(sh)sh.scrollTop=0};
   L.onchange=e=>{if(['rAmt','rStart','rUntil'].includes(e.target.id))live()};
-  L.oninput=e=>{if(e.target.id==='rCount'){const n=parseInt(e.target.value);const st=document.getElementById('rStart').value||S.month;document.getElementById('rUntil').value=n>0?shiftMonth(st,Math.min(600,n)-1):'';live();L.querySelectorAll('[data-rdur]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.rdur===(n>0?n:0)));return}
+  L.oninput=e=>{if(e.target.id==='rCount'){r.durN=e.target.value;live();L.querySelectorAll('[data-rdn]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.rdn===+r.durN));return}
+    if(e.target.id==='rDay'){r.day=e.target.value;L.querySelectorAll('[data-rdayc]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.rdayc===+r.day));return}
     if(['rAmt','rStart','rUntil'].includes(e.target.id))live()};
   L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;
     if(x.hasAttribute('data-close')){L.innerHTML='';return}
-    if(x.dataset.rscope){grab();scope=x.dataset.rscope;live();return}
-    if(x.dataset.arrq){arrQToggle(x);return}
-    if(x.dataset.rdur!==undefined){grab();const n=+x.dataset.rdur;if(!r.start)r.start=S.month;r.until=n?shiftMonth(r.start,n-1):'';draw();return}
+    if(x.dataset.wzs!==undefined){const s=+x.dataset.wzs;grab();if(!ex&&s>step){for(let i=step;i<s;i++)if(!check(i))return}go(s);return}
+    if(x.dataset.wzn){grab();if(!check(step))return;go(step+1);return}
+    if(x.dataset.wzp){go(step-1);return}
+    if(x.dataset.rscope){grab();scope=x.dataset.rscope;live(true);return}
+    if(x.dataset.arrq){arrQToggle(x);r.arrQ=x.dataset.arrq==='1';return}
+    if(x.dataset.rdayc){r.day=x.dataset.rdayc;const i=document.getElementById('rDay');if(i)i.value=r.day;L.querySelectorAll('[data-rdayc]').forEach(b=>b.setAttribute('aria-pressed',b===x));return}
+    if(x.dataset.rdm){grab();r.durMode=x.dataset.rdm;if(r.durMode==='n'&&!r.durN)r.durN=12;draw();return}
+    if(x.dataset.rdn){r.durN=+x.dataset.rdn;const i=document.getElementById('rCount');if(i)i.value=r.durN;L.querySelectorAll('[data-rdn]').forEach(b=>b.setAttribute('aria-pressed',b===x));live();return}
+    if(x.dataset.rrem!==undefined){rb=+x.dataset.rrem;L.querySelectorAll('[data-rrem]').forEach(b=>b.setAttribute('aria-pressed',b===x));return}
     if(x.id==='rDelAsk'){grab();askDel=true;draw();return}
     if(x.id==='rDelNo'){grab();askDel=false;draw();return}
     if(x.id==='rDel'){S.settings.recurring=R.filter(y=>y.id!==r.id);L.innerHTML='';putSettings();render();toast('حُذف الالتزام');return}
-    if(x.id==='rSave'){grab();const er=document.getElementById('rErr');const amt=parseAmt(r.amount);const day=Math.min(31,Math.max(1,parseInt(r.day)||1));
-      if(!r.name.trim()){er.hidden=false;er.textContent='اكتب اسم الالتزام';return}
-      if(!amt){er.hidden=false;er.textContent='اكتب المبلغ الشهري، مثل 25.000';return}
-      if(r.until&&r.start&&r.until<r.start){er.hidden=false;er.textContent='شهر النهاية قبل شهر البداية';return}
-      const bills=Object.assign({},r.bills||{});const amtHist=Object.assign({},(ex&&ex.amtHist)||{});let base=amt;const changed=ex&&Math.abs(amt-amtAt(ex,S.month))>0.0005;
+    if(x.id==='rSave'){grab();for(let i=0;i<2;i++)if(!check(i)){if(step!==i){go(i);check(i)}return}
+      r.until=untilOf();const amt=parseAmt(r.amount);const day=Math.min(31,Math.max(1,parseInt(r.day)||1));
+      const bills=Object.assign({},r.bills||{});const amtHist=Object.assign({},(ex&&ex.amtHist)||{});let base=amt;const changed=amtChanged();
       if(changed){if(scope==='only'){bills[S.month]=amt;base=+ex.amount||amt}else{if(!Object.keys(amtHist).length)amtHist[ex.start||'0000-01']=+ex.amount||0;Object.keys(amtHist).filter(x=>x>S.month).forEach(x=>delete amtHist[x]);amtHist[S.month]=amt;delete bills[S.month]}}
       else if(ex)base=+ex.amount||amt;
-      if(String(r.billIn||'').trim()!=='')bills[S.month]=parseAmt(r.billIn);else if(!(changed&&scope==='only'))delete bills[S.month];
+      if(changed&&scope==='only'){}else if(k.variable&&String(r.billIn||'').trim()!=='')bills[S.month]=parseAmt(r.billIn);else if(k.variable&&!(changed&&scope==='only'))delete bills[S.month];
       const arrIn=r.arrQ?String(r.arrearsIn||'').trim():'';const arrears=arrIn===''?0:parseAmt(arrIn);
-      const rec={id:r.id,kind:r.kind,name:r.name.trim(),amount:base,amtHist,start:r.start||'',until:r.until||'',cat:r.cat,day,person:r.person||'',half:!!r.half,later:r.later||{},remind:Math.min(31,Math.max(1,parseInt(r.remind)||Math.max(1,day-2))),arrears,since:(ex&&ex.since&&+ex.arrears===arrears)?ex.since:S.month,bills};if(!ex)recLog(rec,'أُضيف الالتزام بمبلغ '+rial(amt)+' شهريًا'+(rec.start?' من '+monthName(rec.start):''));else{rec.log=(ex.log||[]).slice();
+      const rec={id:r.id,kind:r.kind,name:String(r.name).trim(),amount:base,amtHist,start:r.start||'',until:r.until||'',cat:r.cat,day,person:r.person||'',half:!!r.half,later:r.later||{},remind:Math.max(1,day-rb),arrears,since:(ex&&ex.since&&+ex.arrears===arrears)?ex.since:S.month,bills};
+      if(!ex)recLog(rec,'أُضيف الالتزام بمبلغ '+rial(amt)+' شهريًا'+(rec.start?' من '+monthName(rec.start):''));else{rec.log=(ex.log||[]).slice();
         if(changed)recLog(rec,scope==='only'?'مبلغ '+monthName(S.month)+' فقط: '+rial(amt)+' (بدل '+money(amtAt(ex,S.month))+')':'تغيير المبلغ من '+money(amtAt(ex,S.month))+' إلى '+rial(amt)+' من '+monthName(S.month));
         if(Math.abs((+ex.arrears||0)-arrears)>0.0005)recLog(rec,'تعديل المتأخرات السابقة إلى '+rial(arrears));
         if((ex.bills||{})[S.month]!==bills[S.month]&&bills[S.month]!==undefined&&!(changed&&scope==='only'))recLog(rec,'فاتورة '+monthName(S.month)+': '+rial(bills[S.month]));
@@ -2326,61 +2349,79 @@ function debtsManageHtml(){const Ds=debts(),P=debtPlan();DMODE='manage';
    <div id="debtRes" class="stack">${debtResHtml()}</div>
   </div><div id="debtCmp" style="margin-top:10px">${debtCompareHtml()}</div>`:''}`;
   DMODE='view';return r}
-function openDebt(id){const L=document.getElementById('layer');const A=S.settings.debts||(S.settings.debts=[]);const ex=id?A.find(x=>x.id===id):null;
-  const d=ex?Object.assign({},ex,{original:ex.original?money(ex.original):'',balance:money(ex.balance),payment:+ex.payment?money(ex.payment):'',rate:ex.rate||'',mode:ex.mode||'inst',start:debtStart(ex),end:ex.end||''}):{id:uidGen(),type:'loan',name:'',lender:'',original:'',balance:'',payment:'',rate:'',day:1,pays:[],mode:'inst',start:today(),end:'',trackFrom:today()};let askDel=false;
+function debtMonthsEst(bal,pay,rate){bal=+bal||0;pay=+pay||0;if(!(bal>0)||!(pay>0))return null;const i=(+rate||0)/1200;if(!i)return Math.ceil(bal/pay-1e-9);if(pay<=bal*i)return Infinity;return Math.ceil(-Math.log(1-i*bal/pay)/Math.log(1+i)-1e-9)}
+function openDebt(id){const L=document.getElementById('layer');const A=S.settings.debts||(S.settings.debts=[]);const ex=id?A.find(x=>x.id===id):null;const pd=+S.settings.payday||0;
+  const d=ex?Object.assign({},ex,{original:ex.original?money(ex.original):'',balance:money(ex.balance),payment:+ex.payment?money(ex.payment):'',rate:ex.rate||'',mode:ex.mode||'inst',start:debtStart(ex),end:ex.end||''}):{id:uidGen(),type:'loan',name:DEBT_T.loan[0],lender:'',original:'',balance:'',payment:'',rate:'',day:pd||1,pays:[],mode:'inst',start:today(),end:'',trackFrom:today()};let askDel=false;
   if(ex&&!d.trackFrom)d.trackFrom=debtTrackFrom(ex);
-  const draw=()=>{L.innerHTML=`${sheetTop('دين')}
-   <h2 style="margin-top:0">${ex?'تعديل الدين':'دين جديد'}</h2><div class="stack">
-   <div class="catgrid">${Object.entries(DEBT_T).map(([k,t])=>`<button class="cg" data-dtype="${k}" aria-pressed="${d.type===k}"><i style="background:${t[2]}1f;color:${t[2]}">${svgI(CI[t[1]])}</i>${t[0]}</button>`).join('')}</div>
-   <div class="row2"><div class="field"><label for="dName">اسم الدين</label><input class="inp" id="dName" value="${esc(d.name)}" placeholder="مثال: قرض شخصي" maxlength="30"></div>
-   <div class="field"><label for="dLender">${d.type==='people'?'اسم الشخص':'الجهة (اختياري)'}</label>${nameSelect('dLender',d.lender,d.type==='people'?['person']:['bank','person','gov','other'],d.type==='people'?'— اختر الشخص —':'— اختر الجهة —')}</div></div>
-   <div class="note dgroupnote">القسم: <b>${DEBT_G[debtGroup(d)][0]}</b></div>
-   <div class="seg" role="group" aria-label="طريقة السداد"><button class="n" data-dmode="inst" aria-pressed="${d.mode!=='once'}">أقساط شهرية</button><button class="n" data-dmode="once" aria-pressed="${d.mode==='once'}">دفعة واحدة بالمبلغ الإجمالي</button></div>
-   <div class="row2"><div class="field"><label for="dOrig">المبلغ الأصلي</label><input class="inp num" id="dOrig" inputmode="decimal" value="${esc(d.original)}" placeholder="0.000" style="text-align:left"></div>
-   <div class="field"><label for="dBal">المتبقي الآن</label><input class="inp num" id="dBal" inputmode="decimal" value="${esc(d.balance)}" placeholder="0.000" style="text-align:left"></div></div>
-   <div class="row2"><div class="field"${d.mode==='once'?' hidden':''}><label for="dPay">القسط الشهري</label><input class="inp num" id="dPay" inputmode="decimal" value="${esc(d.payment)}" placeholder="0.000" style="text-align:left"></div>
-   <div class="field"><label for="dRate">الفائدة السنوية % (اختياري)</label><input class="inp num" id="dRate" inputmode="decimal" value="${esc(d.rate)}" placeholder="0" style="text-align:left"></div></div>
-   <div class="field"${d.mode==='once'?' hidden':''}><label for="dDay">يوم دفع القسط في الشهر</label><input class="inp num" id="dDay" type="number" min="1" max="31" value="${esc(d.day)}" style="text-align:left"></div>
-   <div class="row2"><div class="field"><label for="dStart">تاريخ بداية الدين</label><input class="inp" type="date" id="dStart" value="${esc(d.start)}"></div>
-   <div class="field"><label for="dEnd">${d.mode==='once'?'موعد السداد':'موعد الانتهاء حسب العقد (اختياري)'}</label><input class="inp" type="date" id="dEnd" value="${esc(d.end)}"></div></div>
-   <div class="dsec"><b>📅 متابعة الدفع في التطبيق</b>
-    <div class="field"><label for="dTrack">بدأت متابعة الدفع في التطبيق من</label><input class="inp" type="date" id="dTrack" value="${esc(d.trackFrom||'')}"><span class="note" style="margin:0">الأشهر قبل هذا التاريخ تُعتبر مدفوعة بمبلغ القسط وتظهر في التقويم، إلا الأشهر التي تحددها متأخرة. ومنه يبدأ التطبيق قراءة الأقساط ومتابعتها.</span></div>
-    ${ex&&d.mode!=='once'?`<button class="chip" type="button" data-premonthsl="debt|${esc(ex.id)}">📆 الأشهر السابقة وتحديد المتأخر منها</button>`:''}
-    ${d.mode==='once'?'':`<div class="row2"><div class="field"><label for="dTotN">عدد الأقساط الكلي (اختياري)</label><input class="inp num" id="dTotN" type="number" min="0" inputmode="numeric" value="${esc(d.totalN||'')}" placeholder="مثال: 60" style="text-align:left"></div>
-    <div class="field"><label for="dPaidN">أقساط دفعتها قبل المتابعة</label><input class="inp num" id="dPaidN" type="number" min="0" inputmode="numeric" value="${esc(d.paidN||'')}" placeholder="${d.start&&d.trackFrom?Math.max(0,monthsSpan(d.start.slice(0,7),d.trackFrom.slice(0,7))-1):'0'}" style="text-align:left"></div></div>`}</div>
-   <div class="row2"><div class="field"><label for="dRef">رقم العقد / القرض (اختياري)</label><input class="inp" id="dRef" value="${esc(d.ref||'')}" maxlength="40" dir="ltr" style="text-align:left"></div>
-   <div class="field"><label for="dNote">ملاحظة (اختياري)</label><input class="inp" id="dNote" value="${esc(d.note||'')}" maxlength="80"></div></div>
-   ${d.mode==='once'?'':arrQHtml('d',d.arrQ!==undefined?d.arrQ:(ex?debtArrLeft(ex,curM())>0:false),d.arrQ!==undefined?d.arrIn:(ex?debtArrLeft(ex,curM()):''),'أقساط لم تُدفع من الأشهر الماضية. تُضاف لقسط هذا الشهر في «الشهرية» حتى تُسدَّد، وهي جزء من المتبقي.')}
-   <p class="note" style="margin:0">المتبقي تجده في كشف حساب البنك أو تطبيقه. والفائدة اتركها فارغة إن كان الدين بدون فائدة.</p>
-   <p class="note" id="dErr" hidden style="color:var(--exp);margin:0"></p>
-   <div class="actions"><button class="btn block" id="dSave">حفظ</button>
-   ${ex?(askDel?'<div class="confirm"><span>حذف هذا الدين؟ تبقى دفعاته في السجل.</span><div class="row2"><button class="btn danger" id="dDel">نعم، احذف</button><button class="btn ghost" id="dDelNo">تراجع</button></div></div>':'<button class="btn ghost block" id="dDelAsk" style="color:var(--exp)">حذف الدين</button>'):'<button class="btn ghost block" data-close>إلغاء</button>'}</div>
-   </div></div></div>`};
-  const v=i=>document.getElementById(i).value;
-  const grab=()=>{const g=i=>{const e=document.getElementById(i);return e?e.value:undefined};d.trackFrom=g('dTrack')??d.trackFrom;d.totalN=g('dTotN')??d.totalN;d.paidN=g('dPaidN')??d.paidN;d.ref=g('dRef')??d.ref;d.note=g('dNote')??d.note;const ab=document.getElementById('dArrBox');d.arrQ=!!(ab&&!ab.hidden);d.arrIn=document.getElementById('dArr')?v('dArr'):d.arrIn;d.name=v('dName');d.lender=v('dLender');d.original=v('dOrig');d.balance=v('dBal');d.payment=v('dPay');d.rate=v('dRate');d.day=v('dDay');d.start=v('dStart');d.end=v('dEnd')};
-  L.oninput=L.onchange=null;
+  {const a=ex?debtArrLeft(ex,curM()):0;d.arrQ=a>0.0005;d.arrIn=a>0.0005?amtIn(a):''}
+  d.trMode=!ex&&d.trackFrom===today()?'now':(d.trackFrom&&d.trackFrom.slice(0,7)===today().slice(0,7)?'now':'date');
+  const stepsOf=()=>d.mode==='once'?['النوع','المبلغ والموعد','المراجعة']:['النوع','المبالغ','الموعد والمتابعة','المراجعة'];
+  const last=()=>stepsOf().length-1;let step=ex?last():0,maxR=step;const isRev=()=>step===last();
+  const est=()=>{const n=debtMonthsEst(parseAmt(d.balance),parseAmt(d.payment),parseFloat(d.rate)||0);if(n==null)return '';if(n===Infinity)return '<span class="amt-exp">⚠️ القسط أقل من الفائدة الشهرية، فلن ينتهي الدين بهذا القسط.</span>';return '⏱️ ينتهي تقريبًا بعد '+countWord(n,'قسط واحد','قسطين','أقساط','قسطًا')+' · في '+esc(monthName(shiftMonth(curM(),n-1)))};
+  const draw=()=>{const edit=!!ex;const S_=stepsOf();let body='';const T=DEBT_T[d.type]||DEBT_T.other;const sn=isRev()?'rev':d.mode==='once'?['type','amt','rev'][step]:['type','amt','track','rev'][step];
+   if(sn==='type')body=`<div class="field"><label>ما نوع الدين؟</label><div class="catgrid">${Object.entries(DEBT_T).map(([k,t])=>`<button type="button" class="cg" data-dtype="${k}" aria-pressed="${d.type===k}"><i style="background:${t[2]}1f;color:${t[2]}">${svgI(CI[t[1]])}</i>${t[0]}</button>`).join('')}</div></div>
+     <div class="field"><label for="dName">اسم الدين</label><input class="inp" id="dName" value="${esc(d.name)}" placeholder="مثال: قرض شخصي" maxlength="30"></div>
+     <div class="field"><label for="dLender">${d.type==='people'?'لمن الدين؟ (اسم الشخص)':'الجهة الدائنة (اختياري)'}</label>${nameSelect('dLender',d.lender,d.type==='people'?['person']:['bank','person','gov','other'],d.type==='people'?'— اختر الشخص —':'— اختر الجهة —')}</div>
+     <div class="field"><label>كيف تسدّده؟</label><div class="seg"><button type="button" class="n" data-dmode="inst" aria-pressed="${d.mode!=='once'}">أقساط شهرية</button><button type="button" class="n" data-dmode="once" aria-pressed="${d.mode==='once'}">دفعة واحدة</button></div></div>`;
+   else if(sn==='amt')body=`<div class="field"><label for="dBal">كم المتبقي عليك الآن؟</label><div class="amtbox sm"><input id="dBal" inputmode="decimal" value="${esc(d.balance)}" placeholder="0.000"><span>${CUR}</span></div><span class="note">تجده في كشف الحساب أو تطبيق البنك.</span></div>
+     ${d.mode==='once'?`<div class="field"><label for="dEnd">متى موعد السداد؟</label><input class="inp" type="date" id="dEnd" value="${esc(d.end)}"></div>`
+     :`<div class="field"><label for="dPay">كم القسط الشهري؟</label><div class="amtbox sm"><input id="dPay" inputmode="decimal" value="${esc(d.payment)}" placeholder="0.000"><span>${CUR}</span></div></div>`}
+     <div class="field"><label for="dRate">الفائدة السنوية % <small class="note">(اتركها فارغة إن لم توجد)</small></label><input class="inp num" id="dRate" inputmode="decimal" value="${esc(d.rate)}" placeholder="0" style="text-align:left;max-width:140px"></div>
+     ${d.mode==='once'?'':`<div class="recprev" id="dEst">${est()}</div>`}
+     <details class="panel wz-more"${d.original||d.totalN||d.paidN||d.ref||(ex&&d.mode!=='once'&&d.end)?' open':''}><summary>📄 تفاصيل من العقد (اختياري)</summary><div class="stack" style="margin-top:8px">
+      <div class="row2"><div class="field"><label for="dOrig">المبلغ الأصلي</label><input class="inp num" id="dOrig" inputmode="decimal" value="${esc(d.original)}" placeholder="0.000" style="text-align:left"></div>
+      <div class="field"><label for="dStart">تاريخ بداية الدين</label><input class="inp" type="date" id="dStart" value="${esc(d.start)}"></div></div>
+      ${d.mode==='once'?'':`<div class="row2"><div class="field"><label for="dTotN">عدد الأقساط الكلي</label><input class="inp num" id="dTotN" type="number" min="0" inputmode="numeric" value="${esc(d.totalN||'')}" placeholder="مثال: 60" style="text-align:left"></div>
+      <div class="field"><label for="dEnd">تاريخ آخر قسط</label><input class="inp" type="date" id="dEnd" value="${esc(d.end)}"></div></div>`}
+      <div class="field"><label for="dRef">رقم العقد / القرض</label><input class="inp" id="dRef" value="${esc(d.ref||'')}" maxlength="40" dir="ltr" style="text-align:left"></div></div></details>`;
+   else if(sn==='track')body=`<div class="field"><label>في أي يوم ينزل القسط؟</label>${dayChips('ddayc',d.day,pd)}<div class="wz-inl"><span class="note">يوم آخر:</span><input class="inp num" id="dDay" type="number" min="1" max="31" inputmode="numeric" value="${esc(d.day)}" style="width:90px"></div></div>
+     ${arrQHtml('d',d.arrQ,d.arrIn,'أقساط لم تُدفع من الأشهر الماضية. تُضاف لقسط هذا الشهر حتى تُسدَّد، وهي جزء من المتبقي.')}
+     <div class="field"><label>من متى يتابع التطبيق أقساطك؟</label><div class="seg"><button type="button" class="n" data-dtr="now" aria-pressed="${d.trMode==='now'}">من هذا الشهر</button><button type="button" class="n" data-dtr="date" aria-pressed="${d.trMode==='date'}">من تاريخ سابق</button></div>
+      ${d.trMode==='date'?`<input class="inp" type="date" id="dTrack" value="${esc(d.trackFrom||'')}" style="margin-top:8px" aria-label="تاريخ بدء المتابعة"><span class="note">الأشهر قبل هذا التاريخ تُعتبر مدفوعة.</span>`:'<span class="note">الأشهر السابقة تُعتبر مدفوعة، والمتأخر منها تكتبه في سؤال المتأخرات.</span>'}</div>
+     ${d.trMode==='date'||d.paidN?`<div class="field"><label for="dPaidN">كم قسطًا دفعت قبل بدء المتابعة؟ <small class="note">(اختياري)</small></label><input class="inp num" id="dPaidN" type="number" min="0" inputmode="numeric" value="${esc(d.paidN||'')}" placeholder="${d.start&&d.trackFrom?Math.max(0,monthsSpan(d.start.slice(0,7),d.trackFrom.slice(0,7))-1):'0'}" style="text-align:left;max-width:140px"></div>`:''}`;
+   else{const bal=parseAmt(d.balance),pay=parseAmt(d.payment);const iS=S_.length===4?2:null;
+     body=`<div class="wz-q"><span class="cg-i" style="background:${T[2]}1f;color:${T[2]}">${svgI(CI[T[1]])}</span><div><b>${esc(d.name||T[0])}</b><small>${esc(T[0])}${d.lender?' · '+esc(d.lender):''} · ${DEBT_G[debtGroup(d)][0]}</small></div></div>
+      <div class="wz-sum">${wzRow('طريقة السداد',d.mode==='once'?'دفعة واحدة':'أقساط شهرية',0)}${wzRow('المتبقي','<span class="num amt-exp">'+(bal?money(bal):'—')+'</span> '+CUR,1)}
+       ${d.mode==='once'?wzRow('موعد السداد',d.end?fmtD(d.end):'—',1):wzRow('القسط الشهري','<span class="num">'+(pay?money(pay):'—')+'</span> '+CUR,1)}${wzRow('الفائدة',parseFloat(d.rate)?parseFloat(d.rate)+'%':'بدون',1)}
+       ${d.mode==='once'?'':wzRow('يوم القسط','يوم '+(+d.day||1)+(pd&&+d.day===pd?' (يوم الراتب)':''),iS)+wzRow('متأخرات سابقة',d.arrQ&&parseAmt(d.arrIn)?'<span class="num amt-exp">'+money(parseAmt(d.arrIn))+'</span>':'لا يوجد',iS)+wzRow('بدء المتابعة',d.trMode==='now'?'من هذا الشهر':fmtD(d.trackFrom||today()),iS)}</div>
+      ${d.mode==='once'?'':`<div class="recprev">${est()}</div>`}
+      <div class="field"><label for="dNote">ملاحظة (اختياري)</label><input class="inp" id="dNote" value="${esc(d.note||'')}" maxlength="80"></div>
+      ${ex&&d.mode!=='once'?`<button class="chip" type="button" data-premonthsl="debt|${esc(ex.id)}">📆 الأشهر السابقة وتحديد المتأخر منها</button>`:''}`}
+   L.innerHTML=`${sheetTop('دين')}<h2 style="margin-top:0">${ex?'تعديل '+esc(ex.name):'دين جديد'}</h2>${wzHead(S_,step,maxR,edit)}<div class="stack wz-body">${body}</div>${wzNav(step,last(),edit,'dSave')}
+    ${ex&&isRev()?(askDel?'<div class="confirm"><span>حذف هذا الدين؟ تبقى دفعاته في السجل.</span><div class="row2"><button class="btn danger" id="dDel">نعم، احذف</button><button class="btn ghost" id="dDelNo">تراجع</button></div></div>':'<button class="btn ghost block" id="dDelAsk" style="color:var(--exp);margin-top:6px">حذف الدين</button>'):''}</div></div>`};
+  const g=i=>{const e=document.getElementById(i);return e?e.value:undefined};
+  const grab=()=>{const ab=document.getElementById('dArrBox');if(ab)d.arrQ=!ab.hidden;[['dName','name'],['dLender','lender'],['dOrig','original'],['dBal','balance'],['dPay','payment'],['dRate','rate'],['dDay','day'],['dStart','start'],['dEnd','end'],['dTrack','trackFrom'],['dTotN','totalN'],['dPaidN','paidN'],['dRef','ref'],['dNote','note'],['dArr','arrIn']].forEach(([i,f])=>{const v=g(i);if(v!==undefined)d[f]=v})};
+  const check=sn=>{const once=d.mode==='once';const bal=parseAmt(d.balance),pay=parseAmt(d.payment),rate=parseFloat(String(d.rate).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[^\d.]/g,''))||0;
+    if(sn==='type'){if(!String(d.name).trim())return wzErr('اكتب اسم الدين');if(d.type==='people'&&!String(d.lender||'').trim())return wzErr('اختر أو اكتب اسم الشخص صاحب الدين')}
+    if(sn==='amt'){if(!bal&&!(ex&&ex.closed))return wzErr('اكتب المبلغ المتبقي');if(once&&!d.end)return wzErr('حدّد موعد السداد');if(!once&&!pay&&bal)return wzErr('اكتب القسط الشهري، أو ارجع واختر «دفعة واحدة»');
+      if(!once&&bal&&pay<=bal*rate/1200)return wzErr('القسط أقل من الفائدة الشهرية ('+money(bal*rate/1200)+')، فلن ينتهي الدين. راجع المبالغ');if(d.end&&d.start&&d.end<d.start)return wzErr('تاريخ النهاية قبل تاريخ البداية');
+      const tn=parseInt(d.totalN)||0;if(tn&&parseInt(d.paidN)>tn)return wzErr('الأقساط المدفوعة أكثر من العدد الكلي')}
+    if(sn==='track'){const dy=parseInt(d.day);if(!(dy>=1&&dy<=31))return wzErr('اختر يوم القسط');if(d.arrQ&&!parseAmt(d.arrIn))return wzErr('اكتب مبلغ المتأخرات، أو اختر «لا»');if(d.trMode==='date'&&!d.trackFrom)return wzErr('اختر تاريخ بدء المتابعة');if(d.trMode==='date'&&d.start&&d.trackFrom<d.start.slice(0,10)){if(!ex)d.start=d.trackFrom;else return wzErr('تاريخ بدء المتابعة قبل تاريخ بداية الدين (عدّله من «تفاصيل من العقد»)')}}
+    return true};
+  const snOf=i=>d.mode==='once'?['type','amt','rev'][i]:['type','amt','track','rev'][i];
+  const go=s=>{grab();step=Math.min(s,last());maxR=Math.max(maxR,step);askDel=false;draw();const sh=L.querySelector('.sheet');if(sh)sh.scrollTop=0};
+  L.onchange=null;
+  L.oninput=e=>{if(['dBal','dPay','dRate'].includes(e.target.id)){grab();const el=document.getElementById('dEst');if(el)el.innerHTML=est();return}
+    if(e.target.id==='dDay'){d.day=e.target.value;L.querySelectorAll('[data-ddayc]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.ddayc===+d.day))}};
   L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;
     if(x.hasAttribute('data-close')){L.innerHTML='';return}
-    if(x.dataset.dmode){grab();d.mode=x.dataset.dmode;draw();return}
-    if(x.dataset.arrq){arrQToggle(x);return}
-    if(x.dataset.dtype){grab();d.type=x.dataset.dtype;if(d.type==='people'&&!ex&&d.mode!=='once'&&!d.payment)d.mode='once';if(!d.name.trim()||Object.values(DEBT_T).some(t=>t[0]===d.name))d.name=DEBT_T[d.type][0];draw();return}
+    if(x.dataset.wzs!==undefined){const s=+x.dataset.wzs;grab();if(!ex&&s>step){for(let i=step;i<s;i++)if(!check(snOf(i)))return}go(s);return}
+    if(x.dataset.wzn){grab();if(!check(snOf(step)))return;go(step+1);return}
+    if(x.dataset.wzp){go(step-1);return}
+    if(x.dataset.dmode){grab();const was=last();d.mode=x.dataset.dmode;if(step===was)step=last();maxR=Math.min(maxR,last());draw();return}
+    if(x.dataset.arrq){arrQToggle(x);d.arrQ=x.dataset.arrq==='1';return}
+    if(x.dataset.ddayc){d.day=x.dataset.ddayc;const i=document.getElementById('dDay');if(i)i.value=d.day;L.querySelectorAll('[data-ddayc]').forEach(b=>b.setAttribute('aria-pressed',b===x));return}
+    if(x.dataset.dtr){grab();d.trMode=x.dataset.dtr;if(d.trMode==='now')d.trackFrom=ex&&ex.trackFrom&&ex.trackFrom.slice(0,7)===today().slice(0,7)?ex.trackFrom:today();draw();return}
+    if(x.dataset.dtype){grab();d.type=x.dataset.dtype;if(d.type==='people'&&!ex&&d.mode!=='once'&&!d.payment)d.mode='once';if(!String(d.name).trim()||Object.values(DEBT_T).some(t=>t[0]===d.name))d.name=DEBT_T[d.type][0];draw();return}
     if(x.id==='dDelAsk'){grab();askDel=true;draw();return}
     if(x.id==='dDelNo'){grab();askDel=false;draw();return}
     if(x.id==='dDel'){S.settings.debts=A.filter(y=>y.id!==d.id);L.innerHTML='';putSettings();render();toast('حُذف الدين');return}
-    if(x.id==='dSave'){grab();const er=document.getElementById('dErr');const bal=parseAmt(d.balance),pay=parseAmt(d.payment),rate=parseFloat(String(d.rate).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[^\d.]/g,''))||0;
-      const once=d.mode==='once',wasDone=ex&&ex.closed;
-      if(!d.name.trim()){er.hidden=false;er.textContent='اكتب اسم الدين';return}
-      if(d.type==='people'&&!d.lender.trim()){er.hidden=false;er.textContent='اكتب اسم الشخص صاحب الدين';return}
-      if(!bal&&!wasDone){er.hidden=false;er.textContent='اكتب المبلغ المتبقي';return}
-      if(once&&!d.end){er.hidden=false;er.textContent='حدّد موعد السداد';return}
-      if(d.end&&d.start&&d.end<d.start){er.hidden=false;er.textContent='موعد الانتهاء قبل تاريخ البداية';return}
-      if(!once&&!pay&&bal){er.hidden=false;er.textContent='اكتب القسط الشهري، أو اختر «دفعة واحدة»';return}
-      if(!once&&bal&&pay<=bal*rate/1200){er.hidden=false;er.textContent='القسط أقل من الفائدة الشهرية ('+money(bal*rate/1200)+')، فلن ينتهي الدين. راجع المبالغ';return}
-      const rec={id:d.id,type:d.type,name:d.name.trim(),lender:d.lender.trim(),original:Math.max(parseAmt(d.original),bal),balance:bal,payment:once?0:pay,rate,day:once?+d.end.slice(8,10):Math.min(31,Math.max(1,parseInt(d.day)||1)),mode:once?'once':'inst',start:d.start||today(),end:d.end||'',pays:(ex&&ex.pays)||[],log:(ex&&ex.log)||[]};
+    if(x.id==='dSave'){grab();for(let i=0;i<last();i++){if(!check(snOf(i))){if(step!==i){go(i);check(snOf(i))}return}}
+      const bal=parseAmt(d.balance),pay=parseAmt(d.payment),rate=parseFloat(String(d.rate).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[^\d.]/g,''))||0;
+      const once=d.mode==='once',wasDone=ex&&ex.closed;if(d.trMode==='now')d.trackFrom=(ex&&ex.trackFrom&&ex.trackFrom.slice(0,7)===today().slice(0,7))?ex.trackFrom:today();
+      const rec={id:d.id,type:d.type,name:String(d.name).trim(),lender:String(d.lender||'').trim(),original:Math.max(parseAmt(d.original),bal),balance:bal,payment:once?0:pay,rate,day:once?+d.end.slice(8,10):Math.min(31,Math.max(1,parseInt(d.day)||1)),mode:once?'once':'inst',start:d.start||today(),end:d.end||'',pays:(ex&&ex.pays)||[],log:(ex&&ex.log)||[]};
       if(wasDone)rec.closed=Object.assign({},ex.closed,{start:rec.start});
-      if(d.trackFrom&&d.start&&d.trackFrom<d.start.slice(0,10)){er.hidden=false;er.textContent='تاريخ بدء المتابعة قبل تاريخ بداية الدين';return}
-      rec.trackFrom=d.trackFrom||today();const tn=parseInt(d.totalN)||0,pn=parseInt(d.paidN);if(tn>0)rec.totalN=tn;if(!isNaN(pn)&&pn>=0)rec.paidN=pn;else if(d.start&&rec.trackFrom&&!once)rec.paidN=Math.max(0,monthsSpan(d.start.slice(0,7),rec.trackFrom.slice(0,7))-1);
-      if(tn&&rec.paidN>tn){er.hidden=false;er.textContent='الأقساط المدفوعة أكثر من العدد الكلي';return}
+      rec.trackFrom=d.trackFrom||today();if(rec.trackFrom<rec.start.slice(0,10))rec.trackFrom=rec.start.slice(0,10);const tn=parseInt(d.totalN)||0,pn=parseInt(d.paidN);if(tn>0)rec.totalN=tn;if(!isNaN(pn)&&pn>=0)rec.paidN=pn;else if(d.start&&rec.trackFrom&&!once)rec.paidN=Math.max(0,monthsSpan(d.start.slice(0,7),rec.trackFrom.slice(0,7))-1);
       const rf=lblClean(d.ref||''),nt=lblClean(d.note||'');if(rf)rec.ref=rf;if(nt)rec.note=nt;
       if(ex&&(ex.trackFrom||'')!==rec.trackFrom&&ex.trackFrom)debtLog(rec,'بدء المتابعة من '+fmtD(rec.trackFrom));
       {const cm=curM(),aIn=!once&&d.arrQ?parseAmt(String(d.arrIn||'')):0,aOld=ex?debtArrLeft(ex,cm):0;if(Math.abs((aIn||0)-aOld)>0.0005||!ex){if(aIn>0){rec.arrears=Math.min(aIn,bal);rec.arrSince=cm}else{delete rec.arrears;delete rec.arrSince}}else if(ex&&ex.arrears){rec.arrears=ex.arrears;rec.arrSince=ex.arrSince}
@@ -3273,9 +3314,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.57.0';
+const APP_VERSION='2.58.0';
 const CHANGELOG=[
- {v:'2.57.0',d:'2026-10-18',items:['📍 الجهات والمحلات: كم صرفت في كل محطة ومحل ومطعم خلال الأسبوع أو الشهر أو السنة أو فترة تختارها، مع المقارنة بالفترة السابقة','🔗 توحيد فروع الجهة الواحدة تلقائيًا (مثل كل محطات المها أو عمان أويل أو فروع لولو ونستو)، مع تسمية الجهة ودمج جهتين أو فصل فرع، ويتذكرها التطبيق','📊 صفحة لكل جهة: مجموعها في الأسبوع والشهر والسنة، متوسط المرة، كم مرة تزورها، رسم آخر 12 شهرًا، فروعها وعملياتها','🧾 فلترة حسب الفئة (وقود، بقالة، مطاعم…) ومقارنة الجهات داخلها، مع طباعة PDF وتصدير Excel','📬 التقارير الدورية صارت تعرض أكثر الجهات صرفًا']},{v:'2.56.0',d:'2026-10-18',items:['🧭 الأولويات وخطة التخلص من الديون: تقييم كل التزام وقسط من 100 بخمسة عوامل (الضرورة، عاقبة عدم الدفع، التأخير، قرب الموعد، الفائدة) وترتيبها عاجل/مهم/عادي/يمكن تأجيله، مع توزيع المتاح من الراتب بالترتيب وبيان العجز','🏁 مقارنة ثلاث طرق لسداد الديون (الأعلى فائدة، الأصغر رصيدًا، التوازن) واختيار الأنسب، وترتيب السداد وتاريخ التحرر، واعتماد الخطة بضغطة','💡 توصيات ذكية وتقرير ملخص للطباعة PDF','📬 التقارير الدورية: يومي وأسبوعي وشهري وسنوي، فيها التقدم وتفاصيل الديون والمستحقات والمستوى العام للأداء المالي، مع المقارنة بالفترة السابقة','📤 إرسال التقرير كنص عبر واتساب أو البريد، أو طباعته PDF، وتذكير تلقائي في الرئيسية وكإشعار']},{v:'2.55.0',d:'2026-10-18',items:['الالتزامات بحساب أوضح وأدق: فاتورة كل شهر تخصّه وحده وتظهر «مدفوعة» أو «غير مدفوعة» فيه، ولا تُضاف إلى الشهر التالي كمتأخرات إلا إذا فات يوم سدادها ولم تُدفع. قبل الموعد لا يحدث شيء، فلم تعد فواتير الشهر القادم تزيد قبل وقتها. الدفع الجزئي يُرحّل الباقي فقط، والزائد رصيد لصالحك','قفل الدفع صار افتراضيًا «مع نزول الراتب»: تُفتح التزامات كل شهر من يوم نزول الراتب (مثل 23)، والدفع قبل ذلك من وضع المدير فقط. تستطيع اختيار «يوم الموعد» أو «قبله بأيام» من الضبط ← الأمان ← قفل الدفع']},
+ {v:'2.58.0',d:'2026-10-18',items:['🧾 إضافة الالتزامات والفواتير صارت على 3 صفحات واضحة: الأساسيات (الاسم، المبلغ، يوم الدفع)، ثم المدة والمتأخرات، ثم مراجعة قبل الحفظ','🏦 إضافة الديون على خطوات: النوع، المبالغ، الموعد والمتابعة، ثم المراجعة. والدين بدفعة واحدة 3 خطوات فقط','📅 يوم الدفع بأزرار سريعة (منها يوم الراتب)، والمدة بخيار واحد (مستمر / عدد أشهر / حتى شهر) بدل ثلاث خانات','⏱️ حساب فوري لموعد انتهاء الدين من المتبقي والقسط والفائدة، وتحذير إن كان القسط لا يغطي الفائدة','✂️ إزالة الأسئلة المكررة: التذكير صار «قبل يومين» بدل رقم يوم، وتفاصيل العقد اختيارية في قسم مطوي','✏️ التعديل يفتح على صفحة المراجعة مباشرة مع «تعديل» بجانب كل بند']},{v:'2.57.0',d:'2026-10-18',items:['📍 الجهات والمحلات: كم صرفت في كل محطة ومحل ومطعم خلال الأسبوع أو الشهر أو السنة أو فترة تختارها، مع المقارنة بالفترة السابقة','🔗 توحيد فروع الجهة الواحدة تلقائيًا (مثل كل محطات المها أو عمان أويل أو فروع لولو ونستو)، مع تسمية الجهة ودمج جهتين أو فصل فرع، ويتذكرها التطبيق','📊 صفحة لكل جهة: مجموعها في الأسبوع والشهر والسنة، متوسط المرة، كم مرة تزورها، رسم آخر 12 شهرًا، فروعها وعملياتها','🧾 فلترة حسب الفئة (وقود، بقالة، مطاعم…) ومقارنة الجهات داخلها، مع طباعة PDF وتصدير Excel','📬 التقارير الدورية صارت تعرض أكثر الجهات صرفًا']},{v:'2.56.0',d:'2026-10-18',items:['🧭 الأولويات وخطة التخلص من الديون: تقييم كل التزام وقسط من 100 بخمسة عوامل (الضرورة، عاقبة عدم الدفع، التأخير، قرب الموعد، الفائدة) وترتيبها عاجل/مهم/عادي/يمكن تأجيله، مع توزيع المتاح من الراتب بالترتيب وبيان العجز','🏁 مقارنة ثلاث طرق لسداد الديون (الأعلى فائدة، الأصغر رصيدًا، التوازن) واختيار الأنسب، وترتيب السداد وتاريخ التحرر، واعتماد الخطة بضغطة','💡 توصيات ذكية وتقرير ملخص للطباعة PDF','📬 التقارير الدورية: يومي وأسبوعي وشهري وسنوي، فيها التقدم وتفاصيل الديون والمستحقات والمستوى العام للأداء المالي، مع المقارنة بالفترة السابقة','📤 إرسال التقرير كنص عبر واتساب أو البريد، أو طباعته PDF، وتذكير تلقائي في الرئيسية وكإشعار']},{v:'2.55.0',d:'2026-10-18',items:['الالتزامات بحساب أوضح وأدق: فاتورة كل شهر تخصّه وحده وتظهر «مدفوعة» أو «غير مدفوعة» فيه، ولا تُضاف إلى الشهر التالي كمتأخرات إلا إذا فات يوم سدادها ولم تُدفع. قبل الموعد لا يحدث شيء، فلم تعد فواتير الشهر القادم تزيد قبل وقتها. الدفع الجزئي يُرحّل الباقي فقط، والزائد رصيد لصالحك','قفل الدفع صار افتراضيًا «مع نزول الراتب»: تُفتح التزامات كل شهر من يوم نزول الراتب (مثل 23)، والدفع قبل ذلك من وضع المدير فقط. تستطيع اختيار «يوم الموعد» أو «قبله بأيام» من الضبط ← الأمان ← قفل الدفع']},
  {v:'2.54.0',d:'2026-10-18',items:['الرئيسية بأسلوب التطبيقات الاحترافية: بطاقة «💎 صافي ثروتك» أولًا (أرصدة حساباتك ناقص ديونك مع خط تغيّره خلال 6 أشهر)، ثم «🗓️ الأيام السبعة القادمة» (شريط الأيام مع الأقساط والفواتير ونزول الراتب ومجموع المستحق)، ثم «💡 ملاحظات ذكية» تُسحب أفقيًا (فئة تجاوزت معدلها، نسبة ادخارك، أكبر زيادة عن الشهر الماضي، تقدّم سداد الديون، عمليات بدون تصنيف)','ثيمات مريحة للعين بخلفيات هادئة وتباين ناعم: هادئ مريح (الجديد الافتراضي)، سماوي ناعم، حجري دافئ، لافندر، إضافة إلى الثيمات السابقة، ولكل منها وضع فاتح وداكن. تغيّرها من الضبط ← المظهر ← «ثيم التطبيق» أو من القائمة ☰']},
  {v:'2.53.0',d:'2026-10-17',items:['الرئيسية الديناميكية: بطاقات تُسحب يمينًا ويسارًا مع نقاط تحتها: المتبقي من الراتب (مع نسبة ما صرفته من دخلك ونسبة ما مضى من الدورة)، تستطيع أن تنفق اليوم، ديوني (نسبة السداد)، الالتزامات (المدفوع والباقي بالنسبة)، ويتذكر آخر بطاقة','أزرار سريعة: مصروف، دخل، دفع التزام، كشف البنك، اسأل','رسم «إنفاقك» تفاعلي: يومي (أعمدة لكل يوم مع خط المعدل، اضغط على أي يوم لترى مصروفه)، الفئات (دائرة ملونة مع النسب المئوية لأكبر 5 فئات)، و6 أشهر (الدخل والمصاريف)']},
  {v:'2.52.0',d:'2026-10-17',items:['الرئيسية مرتبة من جديد: بطاقة «تستطيع أن تنفق اليوم» واحدة بدل بطاقتين كانتا تعرضان رقمين مختلفين (مع أيام الراتب المتبقية وما صرفته اليوم والأسبوع)، ثم «تحتاج انتباهك» تجمع الفواتير والتنبيهات (أهم 3 مع «عرض الكل») والسيارات وأقل رصيد متوقع والنسخة الاحتياطية، ثم «أدواتي» مربعات، ثم آخر العمليات وديوني وخططي، وفي الأسفل وضعي المالي ومستشاري وملخص التقارير']},

@@ -1586,3 +1586,30 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .mx-b{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px}
 .mx-b i{display:block;width:100%;max-width:22px;background:var(--accent);border-radius:5px 5px 2px 2px;min-height:2px}.mx-b span{font-size:9.5px;color:var(--muted)}.mx-b small{font-size:9.5px;color:var(--muted);white-space:nowrap}
 @media (max-width:360px){.mx-k3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* 2.58 نماذج الإدخال على خطوات */
+.wz-steps{display:grid;gap:4px;margin:2px 0 14px;position:relative}
+.wz-st{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:0;font:inherit;color:var(--muted);cursor:pointer;position:relative}
+.wz-st:disabled{cursor:default;opacity:.55}
+.wz-st span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--surface-2);border:2px solid var(--line);color:var(--muted);position:relative;z-index:1}
+.wz-st small{font-size:11.5px;text-align:center;line-height:1.3}
+.wz-st::before{content:"";position:absolute;top:14px;inset-inline-start:50%;width:100%;height:2px;background:var(--line);z-index:0}
+.wz-st:last-child::before{display:none}
+.wz-st.done span{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.wz-st.done::before{background:var(--accent)}
+.wz-st.on span{background:var(--accent);border-color:var(--accent);color:var(--on-accent,#fff)}
+.wz-st.on small{color:var(--fg);font-weight:600}
+.wz-body{min-height:180px}
+.wz-q{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--accent-soft)}
+.wz-q>div{display:flex;flex-direction:column;min-width:0}.wz-q small{color:var(--muted);font-size:12px}
+.cg-i{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:0 0 38px}.cg-i svg{width:22px;height:22px}
+.wz-nav{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:14px}
+.wz-err{color:var(--exp);margin:8px 0 0}
+.wz-sum{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
+.wz-row{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.wz-row:last-child{border-bottom:0}
+.wz-row>span{color:var(--muted);font-size:13px;flex:0 0 auto}.wz-row>b{flex:1;text-align:end;font-weight:600;min-width:0}
+.wz-ed{border:0;background:none;color:var(--accent);font:inherit;font-size:12.5px;padding:2px 4px;cursor:pointer;flex:0 0 auto}
+.wz-inl{display:flex;align-items:center;gap:8px;margin-top:8px}
+.daychips .chip{min-width:40px;justify-content:center}
+.sheet .amtbox.sm,.amtbox.sm{margin:0;padding:6px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);justify-content:flex-start;align-items:center}.amtbox.sm input{font-size:22px;max-width:none;text-align:left}
+.wz-more summary{cursor:pointer;font-weight:600;font-size:14px}
+.seg.seg3{grid-template-columns:repeat(3,1fr)}
