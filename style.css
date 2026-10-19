@@ -1738,3 +1738,6 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .srt-row .inp{flex:1;max-width:220px;padding:8px 10px;min-height:38px}
 .srt-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 8px}
 .srt-chips .chip[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* 2.75 plan print */
+.mp-no{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:11px;background:var(--accent);color:#fff;font-size:.78em;margin-inline-end:6px;padding:0 5px}
+.mp-bt{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
