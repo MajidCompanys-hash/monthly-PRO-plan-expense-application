@@ -1714,3 +1714,8 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 @media (max-width:420px){.monthbar.m-past .mlabel,.monthbar.m-fut .mlabel{font-size:14.5px}}
 @media (max-width:350px){.monthbar.m-past .mlabel,.monthbar.m-fut .mlabel{font-size:13px}.monthbar .ml-car{display:none}}
 @media (max-width:350px){.monthbar button:not(.mlabel){width:32px;height:34px}.monthbar.m-past .mlabel,.monthbar.m-fut .mlabel{font-size:12.5px;padding:0 4px}}
+/* 2.68 المدخلات */
+.xi-r{display:grid;grid-template-columns:1fr auto;gap:4px 8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.xi-r.got .xi-m b{color:var(--inc)}.xi-m{display:flex;flex-direction:column;min-width:0}.xi-m small{color:var(--muted);font-size:12px}
+.xi-a{display:flex;flex-direction:column;align-items:flex-end;gap:3px}.xi-b{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
+.xm-r{padding:4px 0}
