@@ -1698,3 +1698,19 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .log-sel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.log-sel .inp{padding:8px 8px;font-size:13px;min-width:0}
 .log-tools #logClear{align-self:flex-start}
 .dh-t{display:flex;gap:10px;font-size:12.5px}.dayhead b{color:var(--fg)}.dayhead .cbadge{width:22px;height:22px;display:inline-grid;vertical-align:middle}
+/* 2.67 شريط الشهر الملوّن */
+.monthbar{background:linear-gradient(135deg,var(--hero-a),var(--hero-b));border-color:transparent;color:#fff;box-shadow:0 4px 14px rgb(0 0 0 / .18)}
+.monthbar.m-past{background:linear-gradient(135deg,#8A4B12,#C26A1C)}
+.monthbar.m-fut{background:linear-gradient(135deg,#4B2C83,#7448B8)}
+.monthbar button{color:#fff}.monthbar button:hover{background:rgb(255 255 255 / .16)}
+.monthbar .mlabel{color:#fff!important;background:rgb(255 255 255 / .12)}
+.monthbar .mlabel .ml-ic svg{color:#fff}.monthbar .mlabel .ml-car{color:rgb(255 255 255 / .8)}
+.ml-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgb(255 255 255 / .22);color:#fff;white-space:nowrap;font-family:inherit}
+.ml-tag.past,.ml-tag.fut{background:#fff;color:#8A4B12}.ml-tag.fut{color:#4B2C83}
+:root[data-cards="flat"] .monthbar{border-radius:12px}
+@media (max-width:360px){.ml-tag{font-size:10px;padding:2px 6px}.monthbar .mlabel{font-size:14px;gap:5px}}
+.monthbar.m-past .ml-ic,.monthbar.m-fut .ml-ic{display:none}
+.monthbar .mlabel{padding:0 6px;gap:5px}
+@media (max-width:420px){.monthbar.m-past .mlabel,.monthbar.m-fut .mlabel{font-size:14.5px}}
+@media (max-width:350px){.monthbar.m-past .mlabel,.monthbar.m-fut .mlabel{font-size:13px}.monthbar .ml-car{display:none}}
+@media (max-width:350px){.monthbar button:not(.mlabel){width:32px;height:34px}.monthbar.m-past .mlabel,.monthbar.m-fut .mlabel{font-size:12.5px;padding:0 4px}}
