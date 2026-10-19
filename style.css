@@ -1729,3 +1729,7 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .mp-r{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px}.mp-r.df{opacity:.85;border-style:dashed}
 .mp-t{display:flex;flex-direction:column}.mp-f{display:flex;justify-content:space-between;font-size:13px}
 .mp-sum{position:sticky;bottom:0;background:var(--bg);padding:8px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:4px;z-index:2}
+/* 2.73 فحص التكرار الشامل */
+.dup-g{padding:8px 10px}.dup-g.off{opacity:.5}.dup-h{display:flex;gap:8px;align-items:center;font-weight:600;font-size:13.5px;margin-bottom:4px}
+.dup-r{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}.dup-r .srch-m{flex:1;min-width:0;display:flex;flex-direction:column}.dup-r .srch-m small{color:var(--muted);font-size:11.5px}
+.dp-k{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--exp-soft);color:var(--exp);white-space:nowrap}.dup-r.keep .dp-k{background:var(--inc-soft);color:var(--inc)}
