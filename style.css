@@ -1687,3 +1687,14 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 .bz-chart{display:flex;align-items:flex-end;gap:3px;height:150px;padding:10px 8px 6px}
 .bz-c{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px}.bz-c small{font-size:9.5px;color:var(--muted);white-space:nowrap}
 .bz-b2{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:1px}.bz-b2 i{display:block;width:45%;max-width:10px;min-height:2px;border-radius:3px 3px 1px 1px;background:var(--inc)}.bz-b2 i.e{background:var(--exp);opacity:.75}
+/* 2.66 السجل */
+.log-sum{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--hdrH,58px));z-index:4;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;background:var(--bg);padding:6px 0 8px;margin-bottom:4px}
+.ls-c{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 10px;display:flex;flex-direction:column;min-width:0;box-shadow:var(--shadow)}
+.ls-c span{font-size:11.5px;color:var(--muted)}.ls-c b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-c.inc b{color:var(--inc)}.ls-c.exp b{color:var(--exp)}.ls-c.neg b{color:var(--exp)}.ls-c.pos b{color:var(--fg)}
+.ls-c.inc{border-top:3px solid var(--inc)}.ls-c.exp{border-top:3px solid var(--exp)}.ls-c.neg,.ls-c.pos{border-top:3px solid var(--accent)}
+.ls-meta{grid-column:1/-1;font-size:11.5px;color:var(--muted);text-align:center}
+.log-tools{display:flex;flex-direction:column;gap:8px;margin:8px 0 4px}
+.log-sel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.log-sel .inp{padding:8px 8px;font-size:13px;min-width:0}
+.log-tools #logClear{align-self:flex-start}
+.dh-t{display:flex;gap:10px;font-size:12.5px}.dayhead b{color:var(--fg)}.dayhead .cbadge{width:22px;height:22px;display:inline-grid;vertical-align:middle}
