@@ -1817,3 +1817,47 @@ button.mdrow.cm-r{width:100%;background:none;border-inline:0;border-bottom:0;fon
 .ai-warn{margin-top:6px;padding:6px 10px;border-radius:10px;background:#FFF7DB;border:1px solid #E9D48A;color:#6B4E00;font-size:12.5px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ai-warn{background:#3A3115;border-color:#6B5A22;color:#F1D98A}}
 :root[data-theme="dark"] .ai-warn{background:#3A3115;border-color:#6B5A22;color:#F1D98A}
+/* ===== 2.80: خطة الدفع في بطاقات الشهرية ===== */
+.pay-view{margin:10px 0 4px}
+.pc-plan{display:block;margin-top:4px;padding:3px 8px;border-radius:8px;font-size:11.5px;font-weight:600;line-height:1.5;white-space:normal;text-align:center}
+.pc-plan b{font-size:12.5px}
+.pm-full,.pm-todo{background:color-mix(in srgb,#3E7CB1 13%,var(--surface));color:#2F6698;border:1px solid color-mix(in srgb,#3E7CB1 35%,transparent)}
+.pm-part{background:#FFF7DB;color:#7A5B00;border:1px solid #E9D48A}
+.pm-defer,.pm-out{background:color-mix(in srgb,#8b8fa3 14%,var(--surface));color:var(--muted);border:1px dashed #8b8fa3}
+.pm-done{background:var(--inc);color:#fff;border:1px solid var(--inc)}
+.pm-extra{background:color-mix(in srgb,var(--inc) 14%,var(--surface));color:var(--inc);border:1px solid color-mix(in srgb,var(--inc) 40%,transparent)}
+.pcard.pl-todo{border-inline-start-color:#3E7CB1}
+.pcard.pl-partial{border-inline-start-color:#E0A800;background:color-mix(in srgb,#FFE58F 12%,var(--surface))}
+.pcard.pl-defer{border-inline-start-color:#8b8fa3;border-style:dashed;border-inline-start-style:solid;opacity:.9}
+.pcard.pl-done{border-inline-start-color:var(--inc)}
+.pl-no{flex:none;display:inline-grid;place-items:center;min-width:24px;height:24px;border-radius:12px;background:#3E7CB1;color:#fff;font-size:12.5px;font-weight:800;margin-inline-end:4px}
+.pcard.pl-partial .pl-no{background:#E0A800}
+.pay-g.g-pl-now>.pg-h b{color:#2F6698}.pay-g.g-pl-defer>.pg-h b{color:var(--muted)}
+.mp-prog{margin-top:8px}.mp-pt{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12.5px}
+.mp-bar{height:9px;border-radius:6px;background:var(--line);overflow:hidden;margin:5px 0 3px}.mp-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#3E7CB1,var(--inc))}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pm-part{background:#3A3115;border-color:#6B5A22;color:#F1D98A}:root:not([data-theme="light"]) .pm-full,:root:not([data-theme="light"]) .pm-todo{color:#9CC3EA}}
+:root[data-theme="dark"] .pm-part{background:#3A3115;border-color:#6B5A22;color:#F1D98A}:root[data-theme="dark"] .pm-full,:root[data-theme="dark"] .pm-todo{color:#9CC3EA}
+.pc-a{max-width:52%}.pc-a .pc-plan{font-size:11.5px}.pc-a .pc-plan b{font-size:12.5px}
+.pc-a .pm-full,.pc-a .pm-todo{color:#2F6698}.pc-a .pm-part{color:#7A5B00}.pc-a .pm-defer,.pc-a .pm-out{color:var(--muted)}.pc-a .pm-done{color:#fff}.pc-a .pm-extra{color:var(--inc)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pc-a .pm-part{color:#F1D98A}:root:not([data-theme="light"]) .pc-a .pm-full{color:#9CC3EA}}
+:root[data-theme="dark"] .pc-a .pm-part{color:#F1D98A}:root[data-theme="dark"] .pc-a .pm-full{color:#9CC3EA}
+/* المدفوعة مقسّمة + سجل الديون المنتهية */
+.paid-sub{margin-top:10px}.ps-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 10px;border-radius:10px;margin-bottom:6px}
+.ps-fin .ps-h{background:linear-gradient(90deg,color-mix(in srgb,#E0A800 22%,var(--surface)),var(--surface));border:1px solid #E9D48A}
+.ps-plan .ps-h{background:color-mix(in srgb,var(--inc) 13%,var(--surface));border:1px solid color-mix(in srgb,var(--inc) 35%,transparent)}.ps-plan .ps-h b{color:var(--inc)}
+.ps-other .ps-h{background:var(--bg);border:1px solid var(--line)}
+.ps-fin .pcard{border-inline-start-color:#E0A800;background:color-mix(in srgb,#FFE58F 14%,var(--surface))}
+.darch-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;text-align:center;padding:10px 6px;margin-top:8px}
+.darch-sum span{display:block;font-size:11.5px;color:var(--muted)}.darch-sum b{font-size:16px}
+.darch-new{margin:8px 0}
+.darch-y{margin-top:8px}.darch-y>summary{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:8px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line);cursor:pointer;list-style:none}
+.darch-y>summary::-webkit-details-marker{display:none}.darch-y>.stack{margin-top:8px}
+/* قارئ الأدعية الذكي */
+.dua-meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;margin:8px 0 4px;font-size:12.5px;color:var(--muted)}
+.dua-no{display:inline-grid;place-items:center;min-width:30px;height:30px;border-radius:15px;background:var(--accent);color:#fff;font-size:15px;font-weight:800;margin:0 auto 6px}
+.dua-ai{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 2px;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--accent) 8%,transparent);font-size:12.5px}
+.dua-ai>span{font-weight:700}.dua-ai .chip small{opacity:.75}
+.wd-prog{position:sticky;top:0;z-index:2;height:4px;border-radius:3px;background:var(--line);margin:6px 0 2px;overflow:hidden}.wd-prog i{display:block;height:100%;width:0;background:var(--inc);transition:width .15s}
+.qdua .dua-no{display:flex;margin:0 auto 6px;width:28px;min-width:28px;height:28px;font-size:14px;justify-content:center;align-items:center}
+@keyframes pend{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--inc) 50%,transparent)}50%{box-shadow:0 0 0 8px transparent}}
+#wdDone.pulse-end{animation:pend 1.4s ease-in-out infinite;background:var(--inc);border-color:var(--inc);color:#fff}
