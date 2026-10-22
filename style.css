@@ -1741,3 +1741,79 @@ input[type=date]::-webkit-date-and-time-value{text-align:right}
 /* 2.75 plan print */
 .mp-no{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:11px;background:var(--accent);color:#fff;font-size:.78em;margin-inline-end:6px;padding:0 5px}
 .mp-bt{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+/* 2.76 plan amount in monthly hero */
+.ph-plan{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:4px;align-self:flex-start;margin:2px 0;padding:4px 10px;border-radius:9px;border:1px solid #E9D48A;background:#FFF7DB;color:#7A5B00;font:inherit;font-size:12.5px;cursor:pointer;text-align:start}
+.ph-plan b{font-size:14px;color:#6B4E00}.ph-plan .ph-sep{opacity:.5}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ph-plan{background:#3A3115;border-color:#6B5A22;color:#F1D98A}:root:not([data-theme="light"]) .ph-plan b{color:#FFE7A3}}
+:root[data-theme="dark"] .ph-plan{background:#3A3115;border-color:#6B5A22;color:#F1D98A}:root[data-theme="dark"] .ph-plan b{color:#FFE7A3}
+/* ===== 2.77: الأقسام، الخانة الموحّدة، الوقود، التحديد المتعدد، المدفوعة ===== */
+.md-tabs{grid-template-columns:repeat(6,minmax(0,1fr))}
+.md-tab{font-size:11.5px}
+.log-sel .log-ent{grid-column:1/-1}
+.log-acts{display:flex;flex-wrap:wrap;gap:6px}.log-acts:empty{display:none}
+.grp-chips .chip[aria-pressed="true"]{background:var(--gc,var(--accent));border-color:var(--gc,var(--accent));color:#fff}
+.grp-ics{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+.grp-ic{font-size:20px;padding:6px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer}
+.grp-ic[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+.grp-cs{display:flex;flex-wrap:wrap;gap:10px}.grp-c{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+.grp-c[aria-pressed="true"]{border-color:var(--fg);box-shadow:0 0 0 2px var(--bg) inset}
+.cm-sum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;text-align:center;padding:10px 6px}
+.cm-sum span{display:block;font-size:11.5px;color:var(--muted)}.cm-sum b{font-size:16px}
+.cm-f{margin:10px 0 4px}.cm-f .chip.on{background:var(--gc,var(--accent));border-color:var(--gc,var(--accent));color:#fff}
+.cm-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;margin:4px 0}
+.cm-tools .srt-chips{margin:0}
+.cm-bar{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--hdrH,58px) + 4px);z-index:4;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 12px;margin:8px 0;border-radius:14px;background:var(--surface);border:1.5px solid var(--accent);box-shadow:var(--shadow)}
+.cm-bar>b{flex:1;min-width:120px;font-size:13.5px}
+.cm-mv{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:100%;padding-top:6px;border-top:1px dashed var(--line)}
+.cm-g{margin-top:12px}
+.cm-gh{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px 12px 0 0;background:color-mix(in srgb,var(--gc) 14%,var(--surface));border-inline-start:4px solid var(--gc)}
+.cm-gh b{font-size:15px}.cm-gh small{flex:1}.cm-gi{font-size:18px}
+.cm-g>.panel{border-radius:0 0 14px 14px;margin-top:0}
+.cm-ge{padding:4px 10px}
+button.mdrow.cm-r{width:100%;background:none;border-inline:0;border-bottom:0;font:inherit;color:inherit;text-align:start;cursor:pointer}
+.cm-ck{flex:none;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:7px;border:2px solid var(--line);font-size:13px;font-weight:800;color:#fff}
+.mdrow.cm-r.on .cm-ck,.tx-sel.on .cm-ck,.ck-g.sel .cm-ck{background:var(--accent);border-color:var(--accent)}
+.mdrow.cm-r.on{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.tx-sel{gap:8px}.tx-sel.on{background:color-mix(in srgb,var(--accent) 9%,transparent);border-radius:10px}
+.ck-selrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 8px}
+.ck-bulk{position:sticky;top:0;z-index:3;margin-bottom:8px;border:1.5px solid var(--accent)}
+.ck-g.sel{border-color:var(--accent)}
+/* الوقود */
+.fuel{margin-top:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.fuel-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.fuel-h small{flex:1}
+.fuel-in{gap:8px}.fuel-in .field{margin:0}
+.fuel-r{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;text-align:center}
+.fuel-r>div{padding:8px 4px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
+.fuel-r span{display:block;font-size:11.5px;color:var(--muted)}.fuel-r b{font-size:17px;display:block}.fuel-r small{font-size:11px;color:var(--muted)}
+.fuel-r .hl{background:#FFF7DB;border-color:#E9D48A}.fuel-r .hl b{color:#6B4E00}
+.fuel-sum{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.fuel-p{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.fuel-p label{display:flex;flex-direction:column;gap:4px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fuel-r .hl{background:#3A3115;border-color:#6B5A22}:root:not([data-theme="light"]) .fuel-r .hl b{color:#FFE7A3}}
+:root[data-theme="dark"] .fuel-r .hl{background:#3A3115;border-color:#6B5A22}:root[data-theme="dark"] .fuel-r .hl b{color:#FFE7A3}
+/* الفاتورة المدفوعة في الشهرية: خضراء، مشطوبة بخط عريض، «تم الدفع» */
+.pcard.g-paid{background:color-mix(in srgb,var(--inc) 9%,var(--surface));border-color:color-mix(in srgb,var(--inc) 40%,var(--line));border-inline-start-color:var(--inc);opacity:1}
+.pcard.g-paid .pc-m b{text-decoration:line-through;text-decoration-thickness:3px;text-decoration-color:var(--inc);color:color-mix(in srgb,var(--fg) 70%,transparent)}
+.pcard.g-paid .pc-a b{color:var(--inc)}
+.pill.pd-big{font-weight:800;font-size:13px;background:var(--inc);color:#fff;border-color:var(--inc)}
+.pay-g.g-paid>summary b{color:var(--inc)}
+.fuel-h small{order:3;flex-basis:100%}.fuel-h b{flex:1}
+/* ===== 2.79: المساعد الذكي ===== */
+.ai-card{margin:0 0 10px;padding:10px 12px;border:1.5px solid color-mix(in srgb,var(--accent) 35%,var(--line));background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 6%,var(--surface)),var(--surface))}
+.ai-h{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:2px 0;font:inherit;color:inherit;cursor:pointer;text-align:start}
+.ai-h b{font-size:15px}.ai-h small{flex:1}.ai-ic{font-size:20px}.ai-car{color:var(--muted)}
+.ai-i{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.ai-i:first-of-type{margin-top:6px}
+.ai-x{flex:none;font-size:18px;line-height:1.3}.ai-i>div{flex:1;min-width:0}
+.ai-i b{display:block;font-size:14px}.ai-i small{display:block;color:var(--muted);font-size:12.5px;line-height:1.6;margin-top:2px}
+.ai-i.lv0 b{color:var(--accent)}.ai-i.lv1 b{color:var(--exp)}
+.ai-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ai-more{margin:4px 0}
+.ai-ask{display:flex;gap:6px;margin-top:8px}.ai-ask .inp{flex:1;min-width:0}
+.ai-qs{margin-top:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.ai-qs::-webkit-scrollbar{display:none}.ai-qs .chip{flex:none}
+.ai-ans{margin-top:8px}.ai-ans .ask-h{display:flex;align-items:center;gap:6px}.ai-ans .ask-h small{flex:1}.ai-ans .ask-h .chip{padding:2px 9px}
+.ai-foot{display:block;margin-top:8px;text-align:center;font-size:11px}
+.ai-pay{display:flex;gap:8px;align-items:flex-start;margin:8px 0;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--accent) 7%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 25%,var(--line))}
+.ai-pay.match{border-color:var(--accent)}.ai-pay>div{flex:1;min-width:0}.ai-pay b{display:block;font-size:13.5px}.ai-pay small{display:block;font-size:12.5px;color:var(--muted);line-height:1.6}
+.ai-warn{margin-top:6px;padding:6px 10px;border-radius:10px;background:#FFF7DB;border:1px solid #E9D48A;color:#6B4E00;font-size:12.5px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ai-warn{background:#3A3115;border-color:#6B5A22;color:#F1D98A}}
+:root[data-theme="dark"] .ai-warn{background:#3A3115;border-color:#6B5A22;color:#F1D98A}
