@@ -2039,3 +2039,30 @@ nav.tabs button[aria-current="page"] svg{transform:scale(1.18) translateY(-1px);
 
 .fuel-big.fb3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .fuel-q{grid-column:1/-1;width:100%;box-sizing:border-box}
+
+/* 2.95 تاريخ ووقت القراءة */
+.or-dt .inp{min-width:0}
+.tr-se{display:block}
+.tr-ed{border:0;background:none;padding:0 4px;font-size:12px;cursor:pointer}
+
+/* 2.96 لوحة المشاوير */
+.tb-car{display:flex;flex-direction:column;gap:6px}
+.tb-car.open{border-inline-start:4px solid var(--warn)}
+.tb-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tb-sel{display:flex;align-items:center;gap:6px;min-width:0}
+.tb-sel input{width:18px;height:18px}
+.tb-b{display:flex;gap:8px}.tb-b .btn{flex:1}
+.tb-tot{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.tb-msg{margin:8px 0}
+
+/* 2.96 تصغير خانة السيارة */
+.carcard{position:relative}
+.car-fold{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;background:var(--surface-2);border:0;border-radius:10px;padding:7px 10px;margin:4px 0 6px;cursor:pointer;color:inherit;font:inherit;text-align:start}
+.car-fold .cf-s{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}
+.car-fold .cf-c{transition:transform .2s;font-size:14px;color:var(--muted)}
+.carcard.fold .car-body{display:none}
+.carcard.fold .cf-c{transform:rotate(90deg)}
+.car-tg{display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px}
+.tb-h .tb-fb{margin-inline-start:4px}
+.tb-car.fold .tb-body{display:none}
+.tb-more{display:flex;gap:8px;flex-wrap:wrap}
