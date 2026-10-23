@@ -1986,3 +1986,17 @@ details.pay-g.g-grp .pg-bar i{background:var(--gc,var(--inc))}
 .mq-wrap{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;-webkit-line-clamp:unset!important;-webkit-mask-image:none!important;mask-image:none!important}
 .seg .n{white-space:normal;line-height:1.25;min-width:0;overflow-wrap:anywhere}
 .md-tab{overflow:visible}
+/* 2.89 الخانة الحالية في الشريط السفلي: تتغير الأيقونة فقط (ممتلئة وأكبر وبلون التطبيق) بدون أي لون في الخلفية */
+nav.tabs button{background:transparent!important;box-shadow:none!important}
+nav.tabs button svg{transition:transform .2s,stroke-width .2s}
+nav.tabs button[aria-current="page"]{color:var(--accent);font-weight:700}
+nav.tabs button[aria-current="page"] svg{transform:scale(1.18) translateY(-1px);stroke:var(--accent);stroke-width:2.4;fill:color-mix(in srgb,var(--accent) 22%,transparent)}
+
+/* 2.90 تنبيه بداية الشهر الجديد مع الراتب */
+.cyc-edge{border-inline-start:4px solid var(--accent);display:flex;flex-direction:column;gap:8px}
+.cyc-edge .ce-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cyc-edge .ce-h b{min-width:0}
+.cyc-edge p{margin:0}
+.cyc-edge .ce-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cyc-edge .ce-n{display:flex;flex-direction:column;flex:1;min-width:0}
+.cyc-edge .ce-r>.chip{margin-inline-start:auto}
