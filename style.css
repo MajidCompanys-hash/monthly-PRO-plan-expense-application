@@ -1968,3 +1968,10 @@ details.pay-g.g-grp>summary.pg-sum{border-inline-start:5px solid var(--gc,#7A849
 details.pay-g.g-grp>summary .pg-t b{color:color-mix(in srgb,var(--gc,#7A8494) 75%,var(--fg))}
 details.pay-g.g-grp .pg-bar i{background:var(--gc,var(--inc))}
 .mo-hint{padding:8px 10px;border-radius:12px;background:var(--surface);border:1px dashed var(--line);font-size:12px}
+/* 2.87 تبويبات إدارة البيانات: أربع خانات، وإذا زادت تُسحب يمينًا ويسارًا */
+.md-tabs{grid-template-columns:repeat(var(--n,4),minmax(0,1fr))}
+.md-tabs.md-scroll{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.md-tabs.md-scroll::-webkit-scrollbar{display:none}.md-tabs.md-scroll .md-tab{flex:0 0 calc(25% - 3px);scroll-snap-align:start}
+.md-tab{white-space:normal;text-align:center;line-height:1.2}
+.md-custom>summary{display:flex;flex-direction:column;gap:2px;cursor:pointer}
+.md-lists>summary{display:flex;flex-direction:column;gap:2px;cursor:pointer}
