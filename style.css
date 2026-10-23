@@ -1975,3 +1975,14 @@ details.pay-g.g-grp .pg-bar i{background:var(--gc,var(--inc))}
 .md-tab{white-space:normal;text-align:center;line-height:1.2}
 .md-custom>summary{display:flex;flex-direction:column;gap:2px;cursor:pointer}
 .md-lists>summary{display:flex;flex-direction:column;gap:2px;cursor:pointer}
+/* ===== 2.88 توحيد أسلوب الصفحات + الجمل المتحركة ===== */
+.hgrid small{display:block;-webkit-line-clamp:unset;white-space:nowrap;overflow:hidden}
+#view h2.fold-h,#view .backrow.fold-h{display:flex;align-items:center;gap:6px;padding:9px 12px;margin:14px 0 8px;border-radius:14px;background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--accent);box-shadow:var(--shadow)}
+#view .backrow.fold-h>h2{margin:0!important;flex:1}
+#view h2.fold-h{font-size:15.5px}
+#view h2.fold-h.fold-closed,#view .backrow.fold-h.fold-closed{background:color-mix(in srgb,var(--surface) 70%,var(--bg))}
+#view h3.fold-h{padding:6px 10px;margin:10px 0 6px;border-radius:12px;background:color-mix(in srgb,var(--accent) 6%,transparent);border-inline-start:3px solid color-mix(in srgb,var(--accent) 50%,transparent)}
+.dg-chip[aria-pressed="true"]{background:var(--gc);border-color:var(--gc);color:#fff}
+.mq-wrap{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;-webkit-line-clamp:unset!important;-webkit-mask-image:none!important;mask-image:none!important}
+.seg .n{white-space:normal;line-height:1.25;min-width:0;overflow-wrap:anywhere}
+.md-tab{overflow:visible}
