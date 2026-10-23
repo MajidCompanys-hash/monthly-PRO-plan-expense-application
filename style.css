@@ -2000,3 +2000,6 @@ nav.tabs button[aria-current="page"] svg{transform:scale(1.18) translateY(-1px);
 .cyc-edge .ce-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cyc-edge .ce-n{display:flex;flex-direction:column;flex:1;min-width:0}
 .cyc-edge .ce-r>.chip{margin-inline-start:auto}
+
+/* 2.92 أعداد المدفوع من المجموع في صفحة الدفع */
+.mo-sum .ms-st .ms-cnt{white-space:nowrap}
