@@ -2020,3 +2020,22 @@ nav.tabs button[aria-current="page"] svg{transform:scale(1.18) translateY(-1px);
 .trip-g>summary::-webkit-details-marker{display:none}
 .trip-g>summary>b:first-child{flex:1;min-width:0}
 .trip-g[open]>summary{border-bottom:1px solid var(--line)}
+
+/* 2.94 المقارنة مع كشف البنك */
+.fuel-cmp{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.fuel-cmp .fc-k{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fuel-cmp .fc-k small{flex:1;min-width:0}
+.fuel-cmp .fc-tx summary{cursor:pointer}
+
+/* 2.94 الوقود السريع */
+.fuel-q{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.fuel-q .fq-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fuel-q .fq-h b{min-width:0}
+.fuel-q .fq-n{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px}
+.fuel-q .fq-n>span{display:flex;flex-direction:column;gap:2px;background:var(--surface-2);border-radius:12px;padding:8px 10px;font-size:12px;color:var(--muted);min-width:0}
+.fuel-q .fq-n b{font-size:16px;color:var(--fg)}
+.fuel-q .fq-b{display:flex;flex-wrap:wrap;gap:8px}
+.fuel-q .fq-b .btn{flex:1 1 auto}
+
+.fuel-big.fb3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.fuel-q{grid-column:1/-1;width:100%;box-sizing:border-box}
