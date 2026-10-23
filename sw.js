@@ -1,6 +1,6 @@
 /* إدارة شؤوني - يحفظ ملفات التطبيق في الجهاز ليعمل بدون إنترنت. لا يرسل أي بيانات.
  * عند كل تحديث يتغيّر رقم CACHE، فيحمّل الجهاز الملفات الجديدة ويحذف القديمة. */
-const CACHE = 'masareef-v2.80.0';
+const CACHE = 'masareef-v2.84.0';
 const FILES = [
   './', './index.html', './style.css', './app.js', './business.js', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'
@@ -17,15 +17,21 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE && k !== OCR_CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
 // ملفات التطبيق من الذاكرة أولًا، وما ليس فيها من الإنترنت ثم يُحفظ.
 // طلبات Google (المزامنة) لا تمر من هنا.
+// قارئ العداد (مجلد ocr) كبير الحجم: يُحفظ في ذاكرة مستقلة عند أول استخدام ولا يُحذف مع التحديثات
+const OCR_CACHE = 'masareef-ocr-v1';
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
+  if (new URL(e.request.url).pathname.includes('/ocr/')) {
+    e.respondWith(caches.open(OCR_CACHE).then(c => c.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request).then(res => { if (res.ok) c.put(e.request, res.clone()); return res; }))));
+    return;
+  }
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request).then(res => {
       // نحفظ الردود السليمة فقط، حتى لا تُحفظ صفحة خطأ مكان ملف حقيقي
