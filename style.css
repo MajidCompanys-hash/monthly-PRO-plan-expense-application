@@ -2003,3 +2003,20 @@ nav.tabs button[aria-current="page"] svg{transform:scale(1.18) translateY(-1px);
 
 /* 2.92 أعداد المدفوع من المجموع في صفحة الدفع */
 .mo-sum .ms-st .ms-cnt{white-space:nowrap}
+
+/* 2.93 سجل المشاوير */
+.trip-q{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.trip-q .note{flex-basis:100%}
+.trip-k{margin:8px 0}
+.seg.seg4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.trip-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0 10px}
+.trip-nav b{flex:1;text-align:center;min-width:0}
+.trip-r{display:flex;align-items:center;gap:8px;padding:9px 2px;border-bottom:1px solid var(--line)}
+.trip-r:last-child{border-bottom:0}
+.trip-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.trip-v{display:flex;flex-direction:column;align-items:flex-end;gap:2px;white-space:nowrap}
+.trip-g{border:1px solid var(--line);border-radius:12px;padding:0 10px;margin-bottom:8px;background:var(--surface)}
+.trip-g>summary{display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer;list-style:none;flex-wrap:wrap}
+.trip-g>summary::-webkit-details-marker{display:none}
+.trip-g>summary>b:first-child{flex:1;min-width:0}
+.trip-g[open]>summary{border-bottom:1px solid var(--line)}
