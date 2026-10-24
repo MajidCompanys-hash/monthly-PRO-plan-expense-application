@@ -2066,3 +2066,22 @@ nav.tabs button[aria-current="page"] svg{transform:scale(1.18) translateY(-1px);
 .tb-h .tb-fb{margin-inline-start:4px}
 .tb-car.fold .tb-body{display:none}
 .tb-more{display:flex;gap:8px;flex-wrap:wrap}
+
+/* 2.97 ختم الدفع تحت المبلغ */
+.pr-stamp{display:flex;align-items:center;gap:10px;margin:6px 2px 2px;padding:8px 12px;border-radius:12px;background:color-mix(in srgb,var(--inc) 12%,transparent);border:1.5px solid color-mix(in srgb,var(--inc) 45%,transparent)}
+.pr-stamp.part{background:color-mix(in srgb,var(--part) 12%,transparent);border-color:color-mix(in srgb,var(--part) 55%,transparent)}
+.pr-stamp .ps-ic{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--inc);color:#fff;font-weight:800;font-size:16px}
+.pr-stamp.part .ps-ic{background:var(--part)}
+.pr-stamp .ps-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pr-stamp .ps-t b{font-size:16px;line-height:1.35;color:var(--inc)}
+.pr-stamp.part .ps-t b{color:var(--part)}
+.pr-stamp .ps-t small{font-size:13.5px;color:var(--fg);font-weight:600}
+
+/* 2.97 لون الدفع الجزئي (بنفسجي، خاص به وحده) */
+:root{--part:#7C3AED}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--part:#B79CFF}}
+:root[data-theme="dark"]{--part:#B79CFF}
+.pcard.prow.is-part{border-inline-start:5px solid var(--part)!important;background:color-mix(in srgb,var(--part) 6%,var(--surface))}
+.pcard.prow.is-part .pc-m small{color:var(--part);font-weight:700}
+.pcard.prow.is-part .pc-a b{color:var(--part)!important}
+.pcard.prow.is-part .pc-a small{color:var(--part)}
