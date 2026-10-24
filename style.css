@@ -2242,3 +2242,26 @@ nav.tabs button[aria-current="page"] svg{transform:scale(1.18) translateY(-1px);
 .mb-t{display:flex;justify-content:space-between;gap:8px}
 .sim-in .field{margin:0}
 .sim-res .sumrow span:last-child{display:flex;flex-direction:column;align-items:flex-end}
+
+/* 2.103 التقديري وترشيد المصاريف */
+.est-c{color:#B07A12;font-style:italic}
+:root[data-theme="dark"] .est-c{color:#E8C46A}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .est-c{color:#E8C46A}}
+.pill.est{background:color-mix(in srgb,#E0A21B 16%,transparent);color:#B07A12;border:1px dashed #E0A21B}
+.est-l{display:flex;align-items:center;gap:6px;background:none;border:0;padding:4px 0 0;color:var(--muted);font:inherit;font-size:12.5px;cursor:pointer;text-align:start}
+.est-box{border:1.5px dashed #E0A21B;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.est-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sg-r{display:flex;flex-direction:column;gap:4px;padding:8px 0;border-bottom:1px solid var(--line)}.sg-r:last-child{border-bottom:0}
+.sg-t{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:700}
+.sg-b{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sp-tip{display:block;margin-top:3px;color:var(--fg)!important}
+
+/* 2.103 زر ＋: ادفع الآن */
+.qa-pay{display:flex;flex-direction:column;gap:6px;margin-bottom:6px}
+.qa-pay:not(.all) .qa-p:nth-child(n+5){display:none}
+.qa-p{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:inherit;font:inherit;text-align:start;cursor:pointer;width:100%}
+.qa-p.late{border-inline-start:4px solid var(--exp)}.qa-p.part{border-inline-start:4px solid var(--part)}
+.qa-p .qp-m{flex:1;min-width:0;display:flex;flex-direction:column}.qa-p .qp-m small{color:var(--muted);font-size:12px}
+.qa-p>b{white-space:nowrap}
+.qa-mr{margin-bottom:6px}
+.qa-new>summary{cursor:pointer;list-style:none}.qa-new>summary::-webkit-details-marker{display:none}
