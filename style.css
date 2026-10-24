@@ -2077,10 +2077,10 @@ nav.tabs button[aria-current="page"] svg{transform:scale(1.18) translateY(-1px);
 .pr-stamp.part .ps-t b{color:var(--part)}
 .pr-stamp .ps-t small{font-size:13.5px;color:var(--fg);font-weight:600}
 
-/* 2.97 لون الدفع الجزئي (بنفسجي، خاص به وحده) */
-:root{--part:#7C3AED}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--part:#B79CFF}}
-:root[data-theme="dark"]{--part:#B79CFF}
+/* 2.97 لون الدفع الجزئي (أزرق، خاص به وحده) */
+:root{--part:#2563EB}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--part:#6EA8FE}}
+:root[data-theme="dark"]{--part:#6EA8FE}
 .pcard.prow.is-part{border-inline-start:5px solid var(--part)!important;background:color-mix(in srgb,var(--part) 6%,var(--surface))}
 .pcard.prow.is-part .pc-m small{color:var(--part);font-weight:700}
 .pcard.prow.is-part .pc-a b{color:var(--part)!important}
