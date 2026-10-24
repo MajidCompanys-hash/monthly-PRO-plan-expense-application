@@ -2265,3 +2265,43 @@ nav.tabs button[aria-current="page"] svg{transform:scale(1.18) translateY(-1px);
 .qa-p>b{white-space:nowrap}
 .qa-mr{margin-bottom:6px}
 .qa-new>summary{cursor:pointer;list-style:none}.qa-new>summary::-webkit-details-marker{display:none}
+
+/* 2.104 ويدجت بتصميم التطبيق الكلاسيكي */
+.wprev{background:var(--surface);color:var(--fg);border-radius:22px;padding:0;overflow:hidden;box-shadow:0 10px 26px rgb(0 0 0 / .14);border:1px solid var(--line)}
+.wprev .wp-h{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,var(--wb),var(--wa));color:#fff;padding:10px 14px;font-size:13px}
+.wprev .wp-h span{opacity:.82;font-size:11px}
+.wp-in{padding:12px 14px 14px;display:flex;flex-direction:column}
+.wp-l{font-size:11px;color:var(--muted)}.wp-big{font-size:28px;line-height:1.2}.wp-big small{font-size:12px;color:var(--muted);font-weight:400}
+.wp-s{font-size:11px;color:var(--muted)}.wprev .est-c{font-size:11px}
+.wp-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
+.wpt{background:var(--surface-2);border-radius:12px;padding:7px 8px;display:flex;flex-direction:column;min-width:0}
+.wpt span{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wpt b{font-size:13px}.wpt small{font-size:9.5px;color:var(--muted)}
+.wpt .wp-acc{color:var(--wb)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .wpt .wp-acc{color:var(--wc)}}:root[data-theme="dark"] .wpt .wp-acc{color:var(--wc)}
+.wp-day{background:var(--surface-2);border-radius:12px;padding:8px 10px;margin-top:8px}
+.wp-day>div:first-child{display:flex;justify-content:space-between;align-items:baseline;font-size:12px}
+.wp-day small{font-size:10px;color:var(--muted)}
+.wprev .wp-bar{height:6px;border-radius:3px;background:var(--line);margin:5px 0 3px;overflow:hidden}
+.wprev .wp-bar i{display:block;height:100%;background:#1E7A4F;border-radius:3px}.wprev .wp-bar i.warn{background:#C98A00}.wprev .wp-bar i.bad{background:#B3261E}
+.wp-nx{margin-top:10px;font-size:12px}.wp-nx>b{font-size:12px}
+.wp-nx>div{display:flex;justify-content:space-between;gap:8px;margin-top:4px}.wp-nx>div span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wp-nx>div small{color:var(--muted);white-space:nowrap}.wp-nx .late,.wp-nx .late small{color:var(--exp,#B3261E)}.wp-nx .ok{color:var(--inc,#1E7A4F)}
+
+.wst{margin-bottom:10px}.wst-n{margin:8px 0 0}
+.wprev.old{background:linear-gradient(135deg,var(--wb,#1F5AA6),var(--wa,#163C74));color:#fff;border:0;padding:14px 16px;box-shadow:0 10px 24px #163C7440}
+.wprev.old .wp-h{background:none;padding:0;display:flex;justify-content:space-between;align-items:baseline}.wprev.old .wp-h span{opacity:.72}
+.wprev.old .wp-bar{background:#ffffff2e;margin-top:8px}.wprev.old .wp-bar i{background:#7EE0B0}
+
+.wsk{display:flex;flex-wrap:wrap;gap:8px}
+.wsk-b{width:34px;height:34px;border-radius:50%;border:2px solid transparent;box-shadow:0 0 0 1px var(--line);padding:0;cursor:pointer}
+.wsk-b[aria-pressed="true"]{border-color:var(--surface);box-shadow:0 0 0 2px var(--accent)}
+.wsk-b.auto{width:auto;border-radius:17px;padding:0 12px;background:var(--surface-2);color:var(--fg);font-size:12px;font-weight:600}
+.wprev.mini{background:color-mix(in srgb,var(--wb) 10%,#fff);text-align:center;padding:14px 14px 12px;display:flex;flex-direction:column;align-items:center;border:0}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .wprev.mini{background:var(--wa)}}:root[data-theme="dark"] .wprev.mini{background:var(--wa)}
+.wm-t{font-size:11px;font-weight:600;color:var(--wb);margin-bottom:6px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .wm-t{color:var(--wc)}}:root[data-theme="dark"] .wm-t{color:var(--wc)}
+.wm-big{font-size:32px;line-height:1.15}
+.wm-pill{background:var(--surface);border-radius:10px;padding:4px 12px;margin-top:8px;font-size:12px;font-weight:600}
+.wm-box{background:var(--surface);border-radius:12px;padding:8px 10px;margin-top:10px;width:100%;text-align:right}
+.wm-box>div{display:flex;justify-content:space-between;font-size:12px;margin-top:3px}.wm-box span{color:var(--muted)}
+.wprev.mini .wp-acc{color:var(--wb)}
