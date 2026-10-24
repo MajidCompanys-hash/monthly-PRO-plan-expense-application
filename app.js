@@ -4026,8 +4026,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.97.1';
+const APP_VERSION='2.98.0';
 const CHANGELOG=[
+ {v:'2.98.0',d:'2026-10-24',items:['☑️ قائمة مراجعة الدفع التفاعلية بجانب خطة الدفع وزر الطباعة: كل الالتزامات بعلامات اختيار، وما دفعته والباقي، ومبلغ تعدّله لكل بند','💰 مقارنة مباشرة: الرصيد المتبقي لديك (تلقائي أو تكتبه أنت) − الادخار المحمي (المدخر هذا الشهر والباقي لخطة الادخار) = المتاح للدفع، مقابل المحدد، مع تنبيه إن كان الدفع سيأخذ من مدخراتك','📝 والمتبقي على الخطة المعتمدة، وأزرار سريعة: حسب الخطة، المتأخر، الكل، إلغاء التحديد، وملاحظات','🖨️ تُحفظ القائمة تلقائيًا وتُطبع من أسفلها أو من زر الطباعة في صفحة الدفع (يسألك: خطة الدفع أم قائمة المراجعة)']},
  {v:'2.97.1',d:'2026-10-24',items:['🔵 لون الدفع الجزئي صار أزرق بدل البنفسجي (حسب اختيارك)، واضح في الوضعين الفاتح والداكن']},
  {v:'2.97.0',d:'2026-10-24',items:['✅ في صفحة الدفع: أي فاتورة أو قسط دفعت منه (مبلغًا بسيطًا، أو حسب الخطة، أو كاملًا) يظهر تحته بخط كبير وواضح «تم الدفع: المبلغ» مع يوم الدفع وتاريخه، وعدد الدفعات إن كانت أكثر من دفعة، والباقي إن لم يكتمل','🔵 الدفع الجزئي بلون مميز خاص به في الصف كله: حدّ ملون وخلفية خفيفة وعلامة «🔵 دفع جزئي · باقي …» والباقي بنفس اللون، فلا يختلط بالمدفوع كاملًا (أخضر) ولا بالمتأخر أو القريب']},
  {v:'2.96.0',d:'2026-10-23',items:['🚗 لوحة المشاوير لكل السيارات: افتح مشوارًا في أكثر من سيارة في نفس الوقت، وأنهِ أي سيارة متى انتهت (كل سيارة مستقلة)، أو ابدأ وأنهِ للسيارات المحددة بضغطة واحدة','Σ مع كل إنهاء: كيلومترات مشوار تلك السيارة وتكلفته التقريبية، ومجموع كل السيارات لليوم، وكم مشوارًا ما زال مفتوحًا','📍 زر المشاوير في الرئيسية وصفحة الدفع وزر ＋ يفتح اللوحة إذا كان عندك أكثر من سيارة، ويُظهر عدد المشاوير المفتوحة','↕️ تصغير خانة كل سيارة وتكبيرها: في لوحة المشاوير، وفي إدارة البيانات › السيارات (مع «تكبير الكل» و«تصغير الكل»). الخانة المصغّرة تعرض الملخص: مشوار مفتوح، كيلومترات اليوم، وقود الشهر، والتنبيهات','📄 من لوحة المشاوير: «سجل السيارة» و«ملف السيارة» يفتح صفحتها كاملة']},
@@ -8232,14 +8233,71 @@ function planOf(i,m){const P=mpGet(m);if(!P||!P.ok)return null;const key=i.kind+
 function planProgress(m){const P=mpGet(m);if(!P||!P.ok)return null;let tgt=0,done=0,n=0,nd=0;monthItems(m).forEach(i=>{const q=planOf(i,m);if(!q||q.out||q.mode==='defer')return;n++;tgt+=q.amt;done+=Math.min(q.amt,i.isPaid?q.amt:q.ps);if(q.status==='done')nd++});
   return{tgt:r3(tgt),done:r3(done),n,nd,pct:tgt>0.0005?Math.min(100,Math.round(done/tgt*100)):0}}
 function mpHtml(m){const P=mpGet(m);const I=mpItems(m);if(!I.length&&!P)return '';
-  if(!P||!P.ok)return `<div class="panel mp-card"><div><b>📝 خطة الدفع لـ${esc(mShort(m))}</b><small class="note">حدّد كم تدفع لكل بند حسب المتاح، وشاهد ما سيُرحَّل للشهر القادم.</small></div><div class="mp-bt"><button class="btn sm" data-mplan="${m}">إعداد الخطة</button><button class="chip" data-mpprint="${m}" aria-label="طباعة خطة الدفع">🖨️ طباعة</button></div></div>`;
+  if(!P||!P.ok)return `<div class="panel mp-card"><div><b>📝 خطة الدفع لـ${esc(mShort(m))}</b><small class="note">حدّد كم تدفع لكل بند حسب المتاح، وشاهد ما سيُرحَّل للشهر القادم.</small></div><div class="mp-bt"><button class="btn sm" data-mplan="${m}">إعداد الخطة</button><button class="chip" data-pchk="${m}">☑️ قائمة المراجعة</button><button class="chip" data-mpprint="${m}" aria-label="طباعة">🖨️ طباعة</button></div></div>`;
   const st={avail:P.avail,items:P.items};const C=mpCalc(m,st);const paid=r3(Object.keys(P.items).reduce((s,k)=>s,0));
   const PG=planProgress(m);
-  return `<div class="panel mp-card ok"><div class="mp-h"><b>📝 خطة الدفع المعتمدة</b><span class="mp-bt"><button class="chip" data-mpprint="${m}" aria-label="طباعة خطة الدفع">🖨️</button><button class="chip" data-mplan="${m}">عرض / تعديل</button></span></div>
+  return `<div class="panel mp-card ok"><div class="mp-h"><b>📝 خطة الدفع المعتمدة</b><span class="mp-bt"><button class="chip" data-pchk="${m}">☑️ قائمة المراجعة</button><button class="chip" data-mpprint="${m}" aria-label="طباعة">🖨️</button><button class="chip" data-mplan="${m}">عرض / تعديل</button></span></div>
    ${PG&&PG.n?`<div class="mp-prog"><div class="mp-pt"><span>نُفّذ من الخطة <b class="num">${money(PG.done)}</b> من <b class="num">${money(PG.tgt)}</b></span><b class="num">${PG.pct}%</b></div><div class="mp-bar"><i style="width:${PG.pct}%"></i></div><small class="note">${ofN(PG.nd,PG.n,'بند','بنود','بندًا')} دُفعت حسب الخطة</small></div>`:''}
    <button class="btn sm mpr-btn" data-mprep="${m}">📊 التقرير والمتابعة</button>
    <details class="mp-more"><summary class="note">تفاصيل الخطة (المخطط، المتبقي، المُرحَّل، المتاح)</summary><div class="mp-g"><div><span>المخطط دفعه</span><b class="num">${money(C.plan)}</b></div><div><span>المتبقي من المستحق</span><b class="num">${money(C.due)}</b></div><div class="${C.carry>0.0005?'warn':''}"><span>يُرحَّل للشهر القادم</span><b class="num">${money(C.carry)}</b></div><div class="${C.left<0?'bad':''}"><span>${C.left<0?'عجز في المتاح':'يبقى من المتاح'}</span><b class="num">${money(Math.abs(C.left))}</b></div></div></details>
    ${C.rows.some(r=>r.mode==='defer')?`<small class="note">مؤجل حسب الخطة: ${C.rows.filter(r=>r.mode==='defer').map(r=>esc(r.i.name)).join('، ')}</small>`:''}</div>`}
+/* ===================== ☑️ قائمة مراجعة الدفع التفاعلية (2.98) =====================
+ * بجانب خطة الدفع: كل الالتزامات بعلامات اختيار، والمدفوع والباقي ومبلغ كل بند، مقارنة بالرصيد المتبقي لديك
+ * والمتبقي من الخطة والمدخر هذا الشهر، لتعرف هل يكفي المحدد دون المساس بأموال الادخار. تُحفظ تلقائيًا وتُطبع. */
+function pchkGet(m){const A=S.settings.pchk||{};const o=A[m]||{};return{c:Object.assign({},o.c||{}),a:Object.assign({},o.a||{}),bal:o.bal==null?'':o.bal,note:o.note||''}}
+async function pchkSave(m,o){const A=Object.assign({},S.settings.pchk||{});A[m]={c:o.c,a:o.a,bal:o.bal,note:o.note,at:odoNowT()};const ks=Object.keys(A).sort();while(ks.length>12)delete A[ks.shift()];S.settings.pchk=A;await putSettings()}
+function pchkData(m,o){o=o||pchkGet(m);const td=today();
+  const rows=monthItems(m).filter(i=>!i.pre).map(i=>{const key=i.kind+'|'+i.id;const rem=r3(Math.max(0,i.amount-(i.paidAmt||0)));const q=planOf(i,m);const pq=q&&!q.out?q:null;const planLeft=pq&&pq.mode!=='defer'?r3(Math.max(0,pq.amt-pq.ps)):0;
+    const def=pq?(pq.mode==='defer'?0:Math.min(rem,planLeft||rem)):rem;const ov=o.a[key];const amt=i.isPaid?0:ov!=null&&ov!==''?r3(Math.min(rem,Math.max(0,+ov||0))):r3(def);
+    return{i,key,name:i.kind==='debt'?i.ref.name:i.name,kind:i.kind,due:dueOf(i,m),total:r3(Math.max(i.amount,i.paidAmt||0)),paid:r3(i.paidAmt||0),rem,pq,planLeft,amt,on:i.isPaid||!!o.c[key],isPaid:i.isPaid,late:!i.isPaid&&(m<curM()||dueOf(i,m)<td)}})
+   .sort((x,y)=>(x.isPaid?1:0)-(y.isPaid?1:0)||(y.late?1:0)-(x.late?1:0)||x.due.localeCompare(y.due));
+  const F=monthFlow(m);const balAuto=r3(F.left);const bal=o.bal!==''&&o.bal!=null&&isFinite(+o.bal)?r3(+o.bal):balAuto;
+  const savedM=r3((S.settings.goals||[]).reduce((s,g)=>s+(+((g.log||{})[m])||0),0));let savLeft=0,savPlan=0;try{const GS=goalsSummary();savLeft=m===curM()?r3(GS.total||0):0;savPlan=r3(GS.plan||0)}catch(e){}
+  const sel=r3(rows.filter(r=>r.on&&!r.isPaid).reduce((s,r)=>s+r.amt,0));const remAll=r3(rows.reduce((s,r)=>s+r.rem,0));const paid=r3(rows.reduce((s,r)=>s+r.paid,0));const total=r3(rows.reduce((s,r)=>s+r.total,0));
+  const PG=planProgress(m);const safe=r3(bal-savedM-savLeft);const after=r3(safe-sel);const afterAll=r3(bal-sel);
+  return{o,rows,bal,balAuto,balMan:o.bal!==''&&o.bal!=null,savedM,savLeft,savPlan,sel,remAll,paid,total,PG,safe,after,afterAll,nSel:rows.filter(r=>r.on&&!r.isPaid).length,nPaid:rows.filter(r=>r.isPaid).length}}
+function openPayCheck(m){m=m||S.month;const L=document.getElementById('layer');const o=pchkGet(m);let tmr=null;const saveSoon=()=>{clearTimeout(tmr);tmr=setTimeout(()=>pchkSave(m,o),400)};
+  const draw=()=>{const D=pchkData(m,o);const N=v=>`<b class="num">${money(v)}</b>`;
+    const res=D.after>=-0.0005?`<div class="pk-res ok"><b>✓ المحدد يكفيه رصيدك دون المساس بالادخار</b><small>يبقى لك بعد دفعه <span class="num">${money(D.after)}</span> ${CUR}</small></div>`
+      :D.afterAll>=-0.0005?`<div class="pk-res warn"><b>⚠️ لو دفعت كل المحدد ستأخذ من أموال الادخار <span class="num">${money(-D.after)}</span> ${CUR}</b><small>خفّف المحدد أو أجّل بعض البنود لتحمي مدخراتك</small></div>`
+      :`<div class="pk-res bad"><b>⛔ المحدد أكبر من رصيدك كله بـ <span class="num">${money(-D.afterAll)}</span> ${CUR}</b><small>حتى مع أموال الادخار لا يكفي. أجّل أو ادفع جزءًا</small></div>`;
+    L.innerHTML=`${sheetTop('قائمة المراجعة')}<h2 style="margin-top:0">☑️ قائمة مراجعة الدفع</h2><p class="note" style="margin-top:-6px">${esc(monthName(m))} · اختر ما ستدفعه وعدّل المبلغ، وقارنه برصيدك ومدخراتك. تُحفظ تلقائيًا.</p>
+     <div class="pk-k"><div class="pk-bal"><span>💰 الرصيد المتبقي لديك</span><div class="pk-bi"><input class="inp num" id="pkBal" inputmode="decimal" value="${D.balMan?amtIn(D.bal):''}" placeholder="${money(D.balAuto)}" aria-label="الرصيد المتبقي لديك"><span>${CUR}</span></div><small class="note">${D.balMan?'رقمك أنت · <button type="button" class="linkbtn" data-pkbalauto="1">رجوع للتلقائي ('+money(D.balAuto)+')</button>':'تلقائي: دخل الشهر − مصروفه. اكتب رصيدك الفعلي إن كان مختلفًا'}</small></div>
+      <div><span>🐷 المدخر هذا الشهر</span>${N(D.savedM)}<small class="note">${D.savLeft>0.0005?'وباقٍ لخطة الادخار '+money(D.savLeft):D.savPlan?'خطة الادخار الشهرية '+money(D.savPlan):'لا خطة ادخار'}</small></div>
+      <div><span>📝 الخطة المعتمدة</span>${D.PG&&D.PG.n?N(r3(D.PG.tgt-D.PG.done))+`<small class="note">باقٍ عليها · نُفّذ ${D.PG.pct}% (${money(D.PG.done)} من ${money(D.PG.tgt)})</small>`:'<b>—</b><small class="note">لا خطة معتمدة</small>'}</div>
+      <div><span>✅ دفعت هذا الشهر</span>${N(D.paid)}<small class="note">${ofN(D.nPaid,D.rows.length,'بند','بنود','بندًا')} مكتملة · الباقي ${money(D.remAll)}</small></div></div>
+     <div class="pk-calc"><div><span>الرصيد</span><b class="num">${money(D.bal)}</b></div><i>−</i><div><span>الادخار المحمي</span><b class="num">${money(r3(D.savedM+D.savLeft))}</b></div><i>=</i><div><span>المتاح للدفع</span><b class="num">${money(D.safe)}</b></div><i>−</i><div><span>المحدد (${D.nSel})</span><b class="num">${money(D.sel)}</b></div></div>
+     ${res}
+     <div class="chips pk-q"><button class="chip" data-pksel="plan">📝 حسب الخطة</button><button class="chip" data-pksel="late">🔴 المتأخر</button><button class="chip" data-pksel="all">☑️ الكل</button><button class="chip" data-pksel="none">⬜ إلغاء التحديد</button></div>
+     <div class="pk-list">${D.rows.map((r,k)=>`<div class="pk-r${r.isPaid?' paid':''}${r.on&&!r.isPaid?' on':''}${r.late?' late':''}${!r.isPaid&&r.paid>0.0005?' part':''}"><button class="pk-ck" data-pkck="${esc(r.key)}" ${r.isPaid?'disabled':''} aria-pressed="${r.on}" aria-label="${esc(r.name)}">${r.on?'✓':''}</button>
+       <div class="pk-m"><b>${esc(r.name)}</b><small class="note">${r.isPaid?'✓ مدفوع كاملًا '+money(r.paid):(r.late?'<span class="amt-exp">متأخر · '+dmy(r.due)+'</span>':'موعده '+dmy(r.due))+(r.paid>0.0005?' · دفعت '+money(r.paid):'')+' · الباقي '+money(r.rem)}${r.pq?(r.pq.mode==='defer'?' · ⏸️ مؤجل في الخطة':' · 📝 الخطة '+money(r.pq.amt)):''}</small></div>
+       ${r.isPaid?`<b class="num amt-inc">${money(r.paid)}</b>`:`<div class="pk-a"><input class="inp num" data-pkamt="${esc(r.key)}" inputmode="decimal" value="${amtIn(r.amt)}" aria-label="مبلغ ${esc(r.name)}"${r.on?'':' disabled'}><small class="note">من ${money(r.rem)}</small></div>`}</div>`).join('')}</div>
+     <div class="pk-tot"><span>المجموع</span><span>المستحق <b class="num">${money(D.total)}</b></span><span>المدفوع <b class="num amt-inc">${money(D.paid)}</b></span><span>المحدد <b class="num">${money(D.sel)}</b></span><span>الباقي بعده <b class="num">${money(r3(D.remAll-D.sel))}</b></span></div>
+     <div class="field"><label for="pkNote">ملاحظات</label><textarea class="inp" id="pkNote" rows="2" maxlength="300" placeholder="مثال: أؤجل النادي للشهر القادم">${esc(o.note)}</textarea></div>
+     <div class="actions"><button class="btn block" id="pkPrint">🖨️ طباعة القائمة</button><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`};
+  draw();
+  L.oninput=e=>{const t=e.target;if(t.dataset.pkamt){o.a[t.dataset.pkamt]=t.value;saveSoon();return}if(t.id==='pkNote'){o.note=t.value;saveSoon();return}if(t.id==='pkBal'){o.bal=t.value.trim()===''?'':parseAmt(t.value);saveSoon()}};
+  L.onchange=e=>{const t=e.target;if(t.dataset.pkamt||t.id==='pkBal'){const f=t.id||('[data-pkamt="'+t.dataset.pkamt+'"]');draw();const el=t.id?document.getElementById(t.id):null;if(el){el.focus()}}};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){clearTimeout(tmr);await pchkSave(m,o);L.innerHTML='';render();return}
+    if(x.dataset.pkck){const k=x.dataset.pkck;if(o.c[k])delete o.c[k];else o.c[k]=1;saveSoon();draw();return}
+    if(x.dataset.pkbalauto){o.bal='';saveSoon();draw();return}
+    if(x.dataset.pksel){const D=pchkData(m,o);const v=x.dataset.pksel;o.c={};D.rows.filter(r=>!r.isPaid).forEach(r=>{if(v==='all'||(v==='late'&&r.late)||(v==='plan'&&r.pq&&r.pq.mode!=='defer'&&r.planLeft>0.0005))o.c[r.key]=1});
+      if(v==='plan'&&!(mpGet(m)&&mpGet(m).ok))toast('لا توجد خطة معتمدة لهذا الشهر');saveSoon();draw();return}
+    if(x.id==='pkPrint'){clearTimeout(tmr);await pchkSave(m,o);pchkPrint(m);return}}}
+function pchkPrint(m){const D=pchkData(m);const now=new Date();const N=v=>`<span class="n">${v<0?'−':''}${money(Math.abs(v))}</span>`;
+  const h=`<header class="rh"><div><div class="rapp">${REP_LOGO}إدارة شؤوني</div><h1>قائمة مراجعة الدفع</h1><div class="rper">${esc(monthName(m))} · ${esc(mRng(m))}</div></div><div class="rmeta">${repOwner()}أُعدّت في ${fmtD(today())} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}<br>العملة: ر.ع.</div></header>
+   <section><h2>الملخص</h2><div class="kpis"><div><span>الرصيد المتبقي لديك</span><b>${N(D.bal)}</b></div><div><span>المدخر هذا الشهر${D.savLeft>0.0005?' + الباقي لخطته':''}</span><b class="ok">${N(r3(D.savedM+D.savLeft))}</b></div><div><span>المتاح للدفع دون الادخار</span><b>${N(D.safe)}</b></div><div><span>المحدد للدفع</span><b>${N(D.sel)}</b></div></div>
+    <p class="hint ${D.after<0?'no':''}">${D.after>=-0.0005?'✓ يكفي، ويبقى بعد الدفع '+money(D.after)+' ر.ع.':D.afterAll>=-0.0005?'⚠️ سيُؤخذ من أموال الادخار '+money(-D.after)+' ر.ع.':'⛔ المحدد أكبر من الرصيد كله بـ '+money(-D.afterAll)+' ر.ع.'}${D.PG&&D.PG.n?' · الخطة المعتمدة: نُفّذ '+money(D.PG.done)+' من '+money(D.PG.tgt)+' ('+D.PG.pct+'%)، باقٍ '+money(r3(D.PG.tgt-D.PG.done)):''}</p></section>
+   <section><h2>البنود</h2><table><thead><tr><th>☐</th><th>#</th><th>البند</th><th>الموعد</th><th>المستحق</th><th>المدفوع</th><th>الباقي</th><th>الخطة</th><th>المحدد للدفع</th><th>✓ دفعت</th></tr></thead><tbody>
+    ${D.rows.map((r,k)=>`<tr><td class="ck">${r.isPaid?'☑':r.on?'☑':'☐'}</td><td class="idx">${k+1}</td><td>${esc(r.name)}${r.late?' <small class="no">(متأخر)</small>':''}</td><td class="nw">${dmy(r.due)}</td><td class="nw">${N(r.total)}</td><td class="nw ok">${r.paid?N(r.paid):'—'}</td><td class="nw ${r.rem>0.0005?'no':''}">${r.rem?N(r.rem):'—'}</td><td class="nw">${r.pq?(r.pq.mode==='defer'?'مؤجل':N(r.pq.amt)):'—'}</td><td class="nw">${r.isPaid?'مدفوع':r.on?N(r.amt):'—'}</td><td class="wr"></td></tr>`).join('')}
+    <tr class="tot"><td></td><td></td><td>المجموع</td><td></td><td class="nw">${N(D.total)}</td><td class="nw">${N(D.paid)}</td><td class="nw">${N(D.remAll)}</td><td></td><td class="nw">${N(D.sel)}</td><td></td></tr></tbody></table></section>
+   ${D.o.note?`<section><h2>ملاحظات</h2><p>${esc(D.o.note)}</p></section>`:''}
+   <footer class="rf">قائمة مراجعة الدفع من تطبيق «إدارة شؤوني» · المتاح للدفع = الرصيد − المدخر هذا الشهر − الباقي لخطة الادخار</footer>`;
+  prStyle('portrait');let el=document.getElementById('printArea');if(!el){el=document.createElement('div');el.id='printArea';document.body.appendChild(el)}el.className='rep';el.innerHTML=h;
+  const old=document.title;document.title='قائمة مراجعة الدفع '+mShort(m);window.addEventListener('afterprint',()=>{document.title=old},{once:true});try{window.print()}catch(e){toast('تعذّرت الطباعة هنا')}setTimeout(()=>{document.title=old},3000)}
+/* زر الطباعة في صفحة الدفع: اختيار خطة الدفع أو قائمة المراجعة */
+function openPrintPick(m){const L=document.getElementById('layer');L.innerHTML=`${sheetTop('طباعة')}<h2 style="margin-top:0">🖨️ ماذا تطبع؟</h2><div class="stack"><button class="btn block" data-pp="plan">📝 خطة الدفع</button><button class="btn block ghost" data-pp="chk">☑️ قائمة مراجعة الدفع</button><button class="btn ghost block" data-close>إلغاء</button></div></div></div>`;
+  L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}L.innerHTML='';if(x.dataset.pp==='plan')mpPrint(m);else pchkPrint(m)}}
 function mpAutoItems(m,avail){let left=+avail||0;const it={};mpItems(m).forEach(x=>{const a=r3(Math.min(x.rem,Math.max(0,left)));left=r3(left-a);it[x.key]=a>=x.rem-0.0005?{mode:'full'}:a>0.0005?{mode:'part',amt:a}:{mode:'defer'}});return it}
 /* طباعة خطة الدفع: جدول مرقّم بنفس ترتيب شاشة الخطة، مع أعمدة فارغة للكتابة باليد ثم إدخالها في البرنامج */
 /* ===== 📊 تقرير ومتابعة خطة الدفع: جدول بالالتزامات، المقرر، المدفوع، المتبقي على الخطة، والإجمالي ===== */
@@ -8504,7 +8562,8 @@ document.addEventListener('click',async e=>{
   if(b.dataset.apopen){openApprovals();return}
   if(b.dataset.dgrp){S.debtGrp=b.dataset.dgrp;render();return}
   if(b.dataset.dsort){S.debtSort=b.dataset.dsort;render();return}
-  if(b.dataset.mpprint){mpPrint(b.dataset.mpprint);return}
+  if(b.dataset.mpprint){openPrintPick(b.dataset.mpprint);return}
+  if(b.dataset.pchk){openPayCheck(b.dataset.pchk);return}
   if(b.dataset.payview){S.payView=b.dataset.payview;render();return}
   if(b.dataset.prx){const k=b.dataset.prx;S.prOpen=Object.assign({},S.prOpen||{});const row=b.closest('.prow');const on=!S.prOpen[k];if(on)S.prOpen[k]=1;else delete S.prOpen[k];if(row){row.classList.toggle('open',on);b.setAttribute('aria-expanded',on)}return}
   if(b.dataset.prbill){const [rid,mm]=b.dataset.prbill.split('|');const r=recs().find(x=>x.id===rid);const inp=document.getElementById('pb-rec'+rid);const v=parseAmt(inp&&inp.value);if(!r||!(v>0)){toast('اكتب مبلغ الفاتورة');return}r.bills=Object.assign({},r.bills||{});r.bills[mm]=r3(v);recLog(r,'فاتورة '+monthName(mm)+': '+rial(v));await putSettings();render();toast('حُفظت فاتورة '+r.name+': '+rial(v));return}
