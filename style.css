@@ -2305,3 +2305,38 @@ nav.tabs button[aria-current="page"] svg{transform:scale(1.18) translateY(-1px);
 .wm-box{background:var(--surface);border-radius:12px;padding:8px 10px;margin-top:10px;width:100%;text-align:right}
 .wm-box>div{display:flex;justify-content:space-between;font-size:12px;margin-top:3px}.wm-box span{color:var(--muted)}
 .wprev.mini .wp-acc{color:var(--wb)}
+
+/* 2.105 قائمة المراجعة مجمّعة حسب المجموعات */
+.pk-g{border-inline-start:3px solid var(--gc,var(--accent));border-radius:12px;background:var(--surface);padding:8px 10px 6px;margin-bottom:10px;box-shadow:var(--shadow)}
+.pk-gh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}.pk-gh b{font-size:14px}
+.pk-gt{display:flex;flex-wrap:wrap;gap:4px 12px;justify-content:space-between;font-size:12px;border-top:1px dashed var(--line);margin-top:6px;padding-top:6px}.pk-gt>span:first-child{font-weight:700;width:100%}
+.pk-sum{margin-top:4px}.pk-st{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}.pk-st th{color:var(--muted);font-weight:600;text-align:start;padding:4px 2px;border-bottom:1px solid var(--line)}
+.pk-st td{padding:5px 2px;border-bottom:1px solid var(--line)}.pk-st td.num{white-space:nowrap}.pk-st tr.tot td{font-weight:700;border-bottom:0;border-top:2px solid var(--fg)}
+.pk-debts{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 10px;background:var(--exp-soft);border-radius:12px;padding:10px 12px;margin:8px 0}.pk-debts small{width:100%}
+#printArea.rep table.pk-pt tr.grp td{background:#EEF2F6;font-weight:700;font-size:12.5px;padding-top:7px}
+#printArea.rep table.pk-pt tr.sub td{font-weight:700;border-top:1px solid #9AA6B6;background:#FAFBFC}
+
+/* 2.105 الرصيد اليومي */
+.bl-am{border:1px solid var(--accent-soft);background:linear-gradient(180deg,var(--accent-soft),var(--surface) 70%);margin-bottom:12px}
+.bl-amh{display:flex;flex-direction:column;gap:2px;margin-bottom:8px}
+.bl-in{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}.bl-in .inp{font-size:20px;font-weight:700;text-align:center}
+.bl-amf{display:flex;justify-content:space-between;margin-top:6px}
+.bl-strip{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;width:100%;border:0;background:var(--surface);border-radius:14px;padding:10px 12px;margin-bottom:10px;box-shadow:var(--shadow);color:var(--fg);text-align:start;cursor:pointer}
+.bl-strip>span:first-child{flex:1;font-size:13px}.bl-strip small{width:100%}
+.bl-dl{display:flex;flex-wrap:wrap;gap:2px 12px;justify-content:space-between;font-size:12px;color:var(--muted);padding:2px 6px 6px}
+.bl-today{background:var(--surface-2);border-radius:14px;padding:10px 12px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px}.bl-today.ok{flex-direction:row;justify-content:space-between;align-items:center}
+.bl-nav{display:flex;justify-content:space-between;align-items:center;margin:4px 0 8px}
+.bl-k{margin-bottom:10px}
+.bl-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.bl-r{display:grid;grid-template-columns:64px 1fr auto;gap:8px;align-items:center;border:0;background:var(--surface);border-radius:12px;padding:9px 10px;box-shadow:var(--shadow);color:var(--fg);text-align:start;cursor:pointer}
+.bl-r.open{opacity:.8;border:1px dashed var(--line)}.bl-r.neg{border-inline-start:3px solid var(--inc)}
+.bl-rd{display:flex;flex-direction:column}.bl-rd small{font-size:10.5px;color:var(--muted)}
+.bl-rm{display:flex;flex-direction:column;font-size:12px;min-width:0}.bl-rm small{font-size:10.5px}
+.bl-rv{display:flex;flex-direction:column;align-items:flex-end;text-align:end}.bl-rv b{font-size:16px}.bl-rv small{font-size:10px}
+.bl-st b{font-size:13px}
+.bl-wd{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-items:end;height:130px}
+.bl-wd>div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:2px}
+.bl-wd i{display:block;width:70%;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}.bl-wd b{font-size:9.5px}.bl-wd small{font-size:9.5px;color:var(--muted)}
+
+/* 2.105 أسهم التنقل في التاريخ: رسم ثابت لا ينقلب في الاتجاه العربي (الحروف ‹ › ينعكس شكلها في بعض المتصفحات) */
+svg.chev{color:inherit !important;width:1.15em;height:1.15em;fill:none !important;stroke:currentColor !important;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;display:inline-block;pointer-events:none}
