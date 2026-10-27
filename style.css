@@ -2405,3 +2405,25 @@ body.hv2-on header.top .brand{visibility:hidden}
 .bl-accs{font-size:11px;line-height:1.5}
 .bl-ay{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 10px;background:var(--surface-2);border-radius:12px;padding:8px 10px;font-size:12.5px}.bl-ay small{width:100%}
 .bl-tb{display:flex;gap:6px;flex-wrap:wrap}.bl-today.ok{flex-wrap:wrap;gap:8px}
+/* 2.108 دُفع حسب الخطة (أو أكثر) = أخضر كمدفوع */
+.pcard.prow.is-plandone{border-inline-start:5px solid var(--inc)!important;background:color-mix(in srgb,var(--inc) 7%,var(--surface))}
+.pcard.prow.is-plandone .pc-m small{color:var(--inc);font-weight:700}
+.pcard.prow.is-plandone .pc-a b{color:var(--inc)!important}
+
+/* 2.108 أقل من الخطة = أحمر */
+.pcard.prow.is-planless{border-inline-start:5px solid var(--exp)!important;background:color-mix(in srgb,var(--exp) 6%,var(--surface))}
+.pcard.prow.is-planless .pc-m small,.pc-plan.pm-low{color:var(--exp);font-weight:700}
+.pcard.prow.is-planless .pr-stamp.part{border-color:color-mix(in srgb,var(--exp) 40%,var(--line))}.pcard.prow.is-planless .pr-stamp.part .ps-ic{background:var(--exp);color:#fff}
+.plcmp{margin-top:6px;font-size:12.5px;border-radius:10px;padding:7px 10px;background:var(--surface-2)}
+.plcmp.low{background:var(--exp-soft);color:var(--exp)}.plcmp.ok{background:var(--inc-soft);color:var(--inc)}
+.amtbox:has(#rpAmt.pl-low),.amtbox:has(#dpAmt.pl-low){outline:2px solid var(--exp);border-radius:14px}
+.amtbox:has(#rpAmt.pl-ok),.amtbox:has(#dpAmt.pl-ok){outline:2px solid var(--inc);border-radius:14px}
+#rpAmt.pl-low,#dpAmt.pl-low{color:var(--exp)}#rpAmt.pl-ok,#dpAmt.pl-ok{color:var(--inc)}
+.pcard.prow.is-planless .pr-stamp.part{background:var(--exp-soft)!important;border-color:color-mix(in srgb,var(--exp) 45%,var(--line))!important;color:var(--exp)!important}
+.pcard.prow.is-planless .pr-stamp.part b,.pcard.prow.is-planless .pr-stamp.part small{color:var(--exp)!important}
+.pcard.prow.is-planless .pr-stamp.part .ps-ic{background:var(--exp)!important;color:#fff!important}
+.pc-plan.pm-low{background:var(--exp-soft)!important;border-color:color-mix(in srgb,var(--exp) 40%,var(--line))!important;color:var(--exp)!important}
+.pc-plan.pm-done{background:var(--inc-soft)!important;color:var(--inc)!important}
+
+.ps-eq{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px;margin-top:4px;font-size:11.5px;color:var(--fg)}.ps-eq i{font-style:normal;color:var(--muted);font-weight:700}
+.ps-over{display:inline-block;margin-top:4px;background:var(--inc-soft);color:var(--inc);border-radius:8px;padding:2px 8px;font-size:11.5px}
