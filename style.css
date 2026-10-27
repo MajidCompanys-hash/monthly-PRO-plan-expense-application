@@ -2427,3 +2427,11 @@ body.hv2-on header.top .brand{visibility:hidden}
 
 .ps-eq{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px;margin-top:4px;font-size:11.5px;color:var(--fg)}.ps-eq i{font-style:normal;color:var(--muted);font-weight:700}
 .ps-over{display:inline-block;margin-top:4px;background:var(--inc-soft);color:var(--inc);border-radius:8px;padding:2px 8px;font-size:11.5px}
+
+/* 2.110 أقل من الخطة = أحمر في كل التطبيق */
+.mpr-t tr.st-low .mpr-st{background:var(--exp-soft);color:var(--exp);border-color:color-mix(in srgb,var(--exp) 40%,transparent)}
+#printArea.rep tr.st-low td .mpr-st,#printArea.rep tr.st-low .mpr-st{color:#B3261E;font-weight:700}
+.mg-c.low{border-color:var(--exp)!important;background:var(--exp-soft)!important}.mg-c.low small{color:var(--exp)!important;font-weight:700}
+.pk-r.low{border-inline-start:4px solid var(--exp);background:color-mix(in srgb,var(--exp) 5%,var(--surface))}
+.pk-r.pdone{border-inline-start:4px solid var(--inc)}
+.pc-mv{margin:6px 10px 2px;padding:8px 10px;border-radius:10px;background:var(--accent-soft);font-size:12px;line-height:1.7}.pc-mv .chip{margin-inline-start:4px}
