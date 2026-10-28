@@ -2852,7 +2852,7 @@ function fuelCmpHtml(from,to,cid,est,km,canFix){const X=fuelCmp(from,to,cid);if(
 /* ===== 2.94 مبلغ الوقود = المدفوع فعلًا (كشف الحساب البنكي + الإدخال اليدوي)، والكيلومترات لمعرفة تكلفة الكيلومتر ===== */
 function kmIn(from,to,cid){let km=0;cars().filter(c=>!cid||c.id===cid).forEach(c=>{if((c.odoReads||[]).length){odoSegs(c).filter(g=>g.d>=from&&g.d<=to).forEach(g=>km+=g.km);return}
     for(let m=mOf(from);m<=mOf(to);m=shiftMonth(m,1)){const s=mStart(m)>from?mStart(m):from,e=mEnd(m)<to?mEnd(m):to;const d=dDiff(s,e)+1;if(d<=0)continue;const f=fuelCalc(c,m);if(f.km!=null)km+=f.km*d/fuelMonthDays(m)}});return Math.round(km)}
-function svcIn(from,to,cid){return r3(cars().filter(c=>!cid||c.id===cid).reduce((s,c)=>s+(c.svc||[]).filter(v=>v.date&&v.date>=from&&v.date<=to).reduce((x,v)=>x+(+v.cost||0),0),0))}
+function svcIn(from,to,cid){return r3(cars().filter(c=>!cid||c.id===cid).reduce((s,c)=>s+carSvcs(c).filter(v=>v.date&&v.date>=from&&v.date<=to).reduce((x,v)=>x+(+v.cost||0),0),0))}
 function fuelRate(from,to,cid){const km=kmIn(from,to,cid);const X=fuelCmp(from,to,cid);const sv=svcIn(from,to,cid);return{km,paid:X.total,bank:X.bank,other:X.other,X,svc:sv,perKm:km>0&&X.total>0?X.total/km:0,allKm:km>0&&(X.total+sv)>0?(X.total+sv)/km:0}}
 function pkm(v){return v>0?v.toFixed(3):'—'}
 function fuelQuickHtml(where){const C=cars();if(!C.length)return '';const m=curM();const R=C.map(c=>fuelCalc(c,m)).filter(f=>f.cost!=null);const km=R.reduce((s,f)=>s+f.km,0),v=r3(R.reduce((s,f)=>s+f.cost,0));
@@ -3037,11 +3037,13 @@ function openFuelReport(o){const L=document.getElementById('layer');o=Object.ass
       ${D.rows.filter(r=>r.has).map(r=>`<tr${r.m===cm?' class="st-todo"':''}><td><b>${esc(mShort(r.m))}</b>${r.hasKm?'':'<small class="note" style="display:block">بدون قراءة عداد</small>'}${B&&r.paid?`<small class="note" style="display:block">${r.paid>B?'🔴 فوق الخطة':'🟢 ضمن الخطة'}</small>`:''}</td><td class="nw">${r.hasKm?r.km.toLocaleString('en-US'):'—'}</td><td class="nw">${r.paid?money(r.paid):'—'}</td><td class="nw">${pkm(r.perKm)}</td><td class="nw c-mode">${r.hasKm?money(r.cost):'—'}</td><td class="nw c-carry">${r.paid?money(r3(r.paid/r.days)):'—'}</td></tr>`).join('')||'<tr><td colspan="6" class="note">لا بيانات وقود في هذه السنة بعد.</td></tr>'}
       <tr class="tot"><td>المجموع</td><td class="nw">${D.T.km.toLocaleString('en-US')}</td><td class="nw">${money(D.T.paid)}</td><td class="nw">${pkm(D.T.perKm)}</td><td class="nw c-mode">${money(D.T.cost)}</td><td class="nw c-carry">${money(D.avgD)}</td></tr></tbody></table></div>
      ${D.H.length?`<h3>📊 المحسوب والمصروف شهريًا</h3><div class="panel fr-ch">${D.rows.map(r=>`<div class="fr-c" title="${esc(mShort(r.m))}"><div class="fr-bars"><i style="height:${r.cost/mx*70}px" class="a"></i><i style="height:${r.spent/mx*70}px" class="b"></i></div><small>${MONTHS[+r.m.slice(5)-1].slice(0,3)}</small></div>`).join('')}</div><small class="note">■ المتوقع حسب الاستهلاك ■ المدفوع فعلًا (كشف البنك والإدخال اليدوي)</small>`:''}
+     ${(()=>{const SD=svcData({cid:o.cid,y:o.y});return `<h3>🔧 الصيانة ${o.y}</h3><button class="panel svr-sum" data-frsvc="1"><span><b class="num">${money(SD.total)}</b> ${CUR} · ${countWord(SD.rows.length,'مرة واحدة','مرتان','مرات','مرة')}${SD.parts.length?' · '+countWord(SD.parts.length,'قطعة','قطعتان','قطع','قطعة'):''}</span><small class="note">${SD.rows[0]?'آخرها '+esc(SD.rows[0].s.type)+' '+fmtD(SD.rows[0].s.date):'لا صيانة مسجّلة'} · عرض السجل وقطع الغيار ‹</small></button>`})()}
      <div class="actions"><button class="btn block" id="frPrint">🖨️ طباعة / PDF</button><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`};
   draw();L.oninput=null;L.onchange=e=>{if(e.target.id==='frY'){o.y=e.target.value;draw()}if(e.target.id==='frC'){o.cid=e.target.value;draw()}};
   L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
     if(x.dataset.frbav){document.getElementById('frB').value=amtIn(+x.dataset.frbav);return}
     if(x.id==='frBs'){S.settings.fuelBudget=parseAmt(document.getElementById('frB').value)||0;await putSettings();draw();toast(S.settings.fuelBudget?'حُفظت خطة الوقود: '+rial(S.settings.fuelBudget)+' شهريًا':'أُلغيت خطة الوقود');return}
+    if(x.dataset.frsvc){openSvcReport({cid:o.cid,y:o.y});return}
     if(x.id==='frPrint'){fuelRepPrint(o);return}}}
 function fuelRepPrint(o){const D=fuelYear(o.y,o.cid);const B=fuelBudget();const now=new Date();const N=v=>`<span class="n">${money(v)}</span>`;const car=o.cid?(cars().find(c=>c.id===o.cid)||{}).name:'كل السيارات';
   const h=`<header class="rh"><div><div class="rapp">${REP_LOGO}إدارة شؤوني</div><h1>تقرير الوقود ${o.y}</h1><div class="rper">${esc(car||'')}</div></div><div class="rmeta">${repOwner()}أُعدّ في ${fmtD(today())} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}<br>العملة: ر.ع.</div></header>
@@ -3050,6 +3052,7 @@ function fuelRepPrint(o){const D=fuelYear(o.y,o.cid);const B=fuelBudget();const 
    <section><h2>الأشهر</h2><table><thead><tr><th>الشهر</th><th>العداد (بداية ← نهاية)</th><th>كم</th><th>المدفوع</th><th>تكلفة الكم</th><th>المتوقع</th><th>يوميًا</th>${B?'<th>الخطة</th>':''}</tr></thead><tbody>
     ${D.rows.filter(r=>r.has).map(r=>{const rd=cars().filter(c=>!o.cid||c.id===o.cid).map(c=>{const f=fuelCalc(c,r.m);return f.km!=null?f.s.toLocaleString('en-US')+' ← '+f.e.toLocaleString('en-US'):''}).filter(Boolean).join('<br>');return `<tr><td>${esc(monthName(r.m))}</td><td class="nw">${rd||'—'}</td><td class="nw">${r.hasKm?r.km.toLocaleString('en-US'):'—'}</td><td class="nw">${r.paid?N(r.paid):'—'}</td><td class="nw">${pkm(r.perKm)}</td><td class="nw">${r.hasKm?N(r.cost):'—'}</td><td class="nw">${r.paid?N(r3(r.paid/r.days)):'—'}</td>${B?`<td>${r.paid?(r.paid>B?'فوق الخطة':'ضمنها'):'—'}</td>`:''}</tr>`}).join('')}
     <tr class="tot"><td>المجموع</td><td></td><td class="nw">${D.T.km.toLocaleString('en-US')}</td><td class="nw">${N(D.T.paid)}</td><td class="nw">${pkm(D.T.perKm)}</td><td class="nw">${N(D.T.cost)}</td><td class="nw">${N(D.avgD)}</td>${B?'<td></td>':''}</tr></tbody></table></section>
+   ${(()=>{const SD=svcData({cid:o.cid,y:o.y});return SD.rows.length?`<section><h2>سجل الصيانة ${o.y} (${money(SD.total)} ر.ع.)</h2>${svcLogTable(SD,{cid:o.cid},N)}</section>`:''})()}
    <footer class="rf">تقرير الوقود من تطبيق «إدارة شؤوني» · المدفوع من كشف الحساب البنكي والإدخال اليدوي · تكلفة الكيلومتر = المدفوع ÷ الكيلومترات · المتوقع = الكيلومترات ÷ الاستهلاك × سعر اللتر</footer>`;
   prStyle('portrait');let el=document.getElementById('printArea');if(!el){el=document.createElement('div');el.id='printArea';document.body.appendChild(el)}el.className='rep';el.innerHTML=h;
   const old=document.title;document.title='تقرير الوقود '+o.y+' - إدارة شؤوني';window.addEventListener('afterprint',()=>{document.title=old},{once:true});try{window.print()}catch(e){toast('تعذّرت الطباعة هنا')}setTimeout(()=>{document.title=old},3000)}
@@ -3076,7 +3079,7 @@ function vCars(inMd){
       <div class="recact">${due.some(x=>x.due)?'<span class="pill late">مستحقة</span>':due.length?'<span class="pill paid">لا شيء مستحق</span>':''}</div></div>
       ${svcs.length?`<details style="margin-top:4px"><summary class="note" style="cursor:pointer">سجل الصيانة (${svcs.length})</summary><div style="margin-top:6px">${svcs.map(s=>`<button class="svc" data-sedit="${esc(c.id)}:${esc(s.id)}"><span><b style="font-weight:500">${esc(s.type)}</b><small>${fmtD(s.date)}${s.odo?' · <span class="num">'+(+s.odo).toLocaleString('en-US')+'</span> كم':''}${s.note?' · '+esc(s.note):''}</small></span><span class="num amt-exp">${s.cost?money(s.cost):''}</span></button>`).join('')}</div></details>`:''}
       ${fuelHtml(c)}
-      <div class="gbtns" style="margin-top:8px"><button class="chip pay" data-sadd="${esc(c.id)}">+ صيانة</button><button class="chip" data-cedit="${esc(c.id)}">تعديل السيارة</button>${c.insExpiry||c.regExpiry?`<button class="chip" data-cics="${esc(c.id)}">أضف التذكير للتقويم</button>`:''}</div></div></div>`};
+      <div class="gbtns" style="margin-top:8px"><button class="chip pay" data-sadd="${esc(c.id)}">+ صيانة</button><button class="chip" data-svrep="${esc(c.id)}">🔧 تقرير الصيانة</button><button class="chip" data-cedit="${esc(c.id)}">تعديل السيارة</button>${c.insExpiry||c.regExpiry?`<button class="chip" data-cics="${esc(c.id)}">أضف التذكير للتقويم</button>`:''}</div></div></div>`};
   const mine=C.filter(c=>!c.owner),others=C.filter(c=>c.owner);
   const notif=('Notification' in window)?Notification.permission:'na';
   const cards=carAlertsHtml()+(notif==='default'&&C.length?`<div class="panel" style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px"><span class="note" style="flex:1;min-width:180px">فعّل إشعارات الهاتف ليصلك تنبيه عند اقتراب انتهاء التأمين أو الملكية.</span><button class="chip pay" id="askNotify">تفعيل الإشعارات</button></div>`:'')
@@ -3084,6 +3087,7 @@ function vCars(inMd){
     +(others.length?`<div class="backrow" style="margin-top:18px"><h2 style="margin:0">سيارات الأهل والآخرين</h2></div>`+others.map(card).join(''):'');
   return `${inMd?'':`<div class="backrow"><h2 style="margin:4px 0">${esc(lbl('sec.cars'))}</h2><button class="chip" data-tab="home">الرئيسية ‹</button></div>`}${(()=>{try{return odoBannerHtml()}catch(e){return ''}})()}${fuelSummaryHtml()}
    <div class="row2" style="margin-bottom:12px"><button class="btn" data-cadd="me">+ سيارتي</button><button class="btn ghost" data-cadd="other">+ سيارة للأهل</button></div>
+   ${C.length?`<button class="btn ghost block" data-svrep="" style="margin-bottom:12px">🔧 تقرير الصيانة وقطع الغيار لكل سياراتي</button>`:''}
    ${C.length>1?`<div class="pg-tg car-tg"><button class="chip" data-carfoldall="0">⊕ تكبير الكل</button><button class="chip" data-carfoldall="1">⊖ تصغير الكل</button></div>`:''}
    ${C.length?cards:`<div class="panel empty"><b>تابع تأمين سيارتك وملكيتها وصيانتها</b>أضف سيارتك مع تاريخ انتهاء التأمين والملكية، وسيذكّرك التطبيق قبل الموعد بشهر، ويحسب لك كم تدّخر لهما شهريًا.</div>`}
    `;
@@ -3146,9 +3150,68 @@ function carToGoal(ref){const [cid,k]=ref.split(':');const c=cars().find(x=>x.id
   const G=S.settings.goals||(S.settings.goals=[]);if(carGoal(c,k))return;
   G.push({id:uidGen(),kind:k==='ins'?'insurance':'mulkiya',name:(k==='ins'?'تأمين ':'ملكية ')+c.name,target:c[k+'Cost'],saved:0,due:c[k+'Expiry'],repeat:'yearly',log:{},carRef:c.id+':'+k});
   putSettings();render();toast('أُضيف إلى خطة الادخار')}
+/* ===================== 🔧 تقرير الصيانة وقطع الغيار (2.111) =====================
+ * لكل سيارة أو لكل السيارات، لسنة أو كل السنوات: السجل بالتواريخ، وتكلفة كل سيارة، والقطع المغيّرة، والتكلفة حسب النوع. */
+function carSvcs(c){return (c.services||[]).concat(c.svc||[])}
+function svcParts(txt){return String(txt||'').split(/\n|،|,/).map(l=>l.trim()).filter(Boolean).map(l=>{const m=normDigits(l).match(/^(.*?)[\s:\-–]*([\d]+(?:\.\d+)?)\s*(?:ر\.?\s?ع\.?|ريال)?$/);return m&&m[1].trim()?{n:m[1].trim(),c:r3(+m[2])}:{n:l,c:0}})}
+function svcPartsTxt(P){return (P||[]).map(p=>p.n+(p.c?' '+amtIn(p.c):'')).join('\n')}
+function svcData(o){const C=cars().filter(c=>!o.cid||c.id===o.cid);const rows=[];
+  C.forEach(c=>carSvcs(c).forEach(s=>{if(!s.date)return;if(o.y!=='all'&&s.date.slice(0,4)!==o.y)return;rows.push({c,s,cost:r3(+s.cost||0),parts:s.parts||[]})}));
+  rows.sort((a,b)=>b.s.date.localeCompare(a.s.date));
+  const total=r3(rows.reduce((x,r)=>x+r.cost,0));
+  const byCar=C.map(c=>{const R=rows.filter(r=>r.c.id===c.id);const od=R.map(r=>+r.s.odo||0).filter(Boolean);const km=od.length>1?Math.max(...od)-Math.min(...od):0;const t=r3(R.reduce((x,r)=>x+r.cost,0));
+    return{c,n:R.length,t,last:R[0]?R[0].s:null,km,perKm:km>0?t/km:0}}).filter(x=>x.n||!o.cid);
+  const byType={};rows.forEach(r=>{const k=r.s.type||'أخرى';const g=byType[k]=byType[k]||{k,n:0,t:0,last:''};g.n++;g.t=r3(g.t+r.cost);if(r.s.date>g.last)g.last=r.s.date});
+  const parts=[];rows.forEach(r=>r.parts.forEach(p=>parts.push({n:p.n,c:r3(+p.c||0),date:r.s.date,odo:+r.s.odo||0,car:r.c,type:r.s.type})));
+  const byPart={};parts.forEach(p=>{const k=p.n.replace(/\s+/g,' ').trim();const g=byPart[k]=byPart[k]||{n:k,times:0,t:0,last:'',lastOdo:0,cars:new Set()};g.times++;g.t=r3(g.t+p.c);if(p.date>g.last){g.last=p.date;g.lastOdo=p.odo}g.cars.add(p.car.name)});
+  return{rows,total,byCar,byType:Object.values(byType).sort((a,b)=>b.t-a.t),parts,byPart:Object.values(byPart).sort((a,b)=>b.last.localeCompare(a.last)),avg:rows.length?r3(total/rows.length):0,
+    partsT:r3(parts.reduce((x,p)=>x+p.c,0))}}
+function svcYears(){const Y=new Set([today().slice(0,4)]);cars().forEach(c=>carSvcs(c).forEach(s=>{if(s.date)Y.add(s.date.slice(0,4))}));return [...Y].sort().reverse()}
+function openSvcReport(o){const L=document.getElementById('layer');o=Object.assign({cid:'',y:today().slice(0,4),v:'log'},o||{});const C=cars();
+  const draw=()=>{const D=svcData(o);const km=v=>(+v||0).toLocaleString('en-US');
+    const tabs=`<div class="seg seg3">${[['log','📋 السجل'],['parts','🔩 قطع الغيار'],['type','🧰 حسب النوع']].map(([k,n])=>`<button class="n" data-svv="${k}" aria-pressed="${o.v===k}">${n}</button>`).join('')}</div>`;
+    let body='';
+    if(!D.rows.length)body=`<div class="panel empty"><b>لا صيانة مسجّلة${o.y!=='all'?' في '+o.y:''}</b>سجّل الصيانة من خانة السيارة ← «+ صيانة»، واكتب القطع المغيّرة وسعرها.</div>`;
+    else if(o.v==='log')body=`<div class="svr-list">${D.rows.map(r=>`<button class="svr-r" data-sedit="${esc(r.c.id)}:${esc(r.s.id)}"><div class="svr-h"><b>${esc(r.s.type)}</b><b class="num">${r.cost?money(r.cost):'—'}</b></div>
+       <small class="note">${fmtD(r.s.date)}${o.cid?'':' · 🚗 '+esc(r.c.name)}${r.s.odo?' · <span class="num">'+km(r.s.odo)+'</span> كم':''}${r.s.note?' · '+esc(r.s.note):''}</small>
+       ${r.parts.length?`<div class="svr-p">${r.parts.map(p=>`<span>🔩 ${esc(p.n)}${p.c?' <b class="num">'+money(p.c)+'</b>':''}</span>`).join('')}</div>`:''}</button>`).join('')}</div>`;
+    else if(o.v==='parts')body=D.byPart.length?`<div class="mpr-wrap"><table class="mpr-t"><thead><tr><th>القطعة</th><th>مرات التغيير</th><th>آخر تغيير</th><th>التكلفة</th></tr></thead><tbody>${D.byPart.map(g=>`<tr><td><b>${esc(g.n)}</b>${o.cid?'':`<small class="note" style="display:block">${esc([...g.cars].join('، '))}</small>`}</td><td class="nw">${g.times}</td><td class="nw">${fmtD(g.last)}${g.lastOdo?'<small class="note" style="display:block">'+km(g.lastOdo)+' كم</small>':''}</td><td class="nw">${g.t?money(g.t):'—'}</td></tr>`).join('')}
+       <tr class="tot"><td>المجموع</td><td class="nw">${D.parts.length}</td><td></td><td class="nw">${money(D.partsT)}</td></tr></tbody></table></div>
+       <h3>كل القطع بالتاريخ</h3><div class="svr-list">${D.parts.map(p=>`<div class="svr-pr"><span>🔩 <b>${esc(p.n)}</b><small class="note"> · ${fmtD(p.date)}${o.cid?'':' · '+esc(p.car.name)}${p.odo?' · '+km(p.odo)+' كم':''} · ${esc(p.type)}</small></span><b class="num">${p.c?money(p.c):'—'}</b></div>`).join('')}</div>`
+      :`<div class="panel empty"><b>لم تُسجَّل قطع غيار بعد</b>عند تسجيل أي صيانة اكتب القطع المغيّرة في خانة «القطع المستبدلة»، قطعة في كل سطر مع سعرها إن أردت.</div>`;
+    else body=`<div class="mpr-wrap"><table class="mpr-t"><thead><tr><th>نوع الصيانة</th><th>المرات</th><th>آخر مرة</th><th>التكلفة</th></tr></thead><tbody>${D.byType.map(g=>`<tr><td><b>${esc(g.k)}</b></td><td class="nw">${g.n}</td><td class="nw">${fmtD(g.last)}</td><td class="nw">${money(g.t)}</td></tr>`).join('')}<tr class="tot"><td>المجموع</td><td class="nw">${D.rows.length}</td><td></td><td class="nw">${money(D.total)}</td></tr></tbody></table></div>`;
+    L.innerHTML=`${sheetTop('تقرير الصيانة')}<h2 style="margin-top:0">🔧 تقرير الصيانة وقطع الغيار</h2>
+     <div class="row2"><select class="inp" id="svC" aria-label="السيارة"><option value="">كل سياراتي</option>${C.map(c=>`<option value="${esc(c.id)}"${o.cid===c.id?' selected':''}>${esc(c.name)}</option>`).join('')}</select><select class="inp" id="svY" aria-label="الفترة"><option value="all"${o.y==='all'?' selected':''}>كل السنوات</option>${svcYears().map(y=>`<option${y===o.y?' selected':''}>${y}</option>`).join('')}</select></div>
+     <div class="mpr-k"><div><span>تكلفة الصيانة</span><b class="num amt-exp">${money(D.total)}</b><small class="note">${o.y==='all'?'كل السنوات':o.y}</small></div><div><span>عدد مرات الصيانة</span><b class="num">${D.rows.length}</b><small class="note">متوسط ${money(D.avg)}</small></div><div><span>قطع مغيّرة</span><b class="num">${D.parts.length}</b><small class="note">${D.partsT?'بتكلفة '+money(D.partsT):''}</small></div><div><span>آخر صيانة</span><b class="num" style="font-size:14px">${D.rows[0]?fmtD(D.rows[0].s.date):'—'}</b><small class="note">${D.rows[0]?esc(D.rows[0].s.type):''}</small></div></div>
+     ${!o.cid&&D.byCar.length>1?`<div class="panel"><b>🚗 تكلفة كل سيارة</b><table class="pk-st"><thead><tr><th>السيارة</th><th>المرات</th><th>آخر صيانة</th><th>التكلفة</th></tr></thead><tbody>${D.byCar.map(x=>`<tr><td><button class="linkbtn" data-svcar="${esc(x.c.id)}">${esc(x.c.name)}</button></td><td class="num">${x.n}</td><td class="num">${x.last?fmtD(x.last.date):'—'}</td><td class="num">${money(x.t)}</td></tr>`).join('')}<tr class="tot"><td>الكل</td><td class="num">${D.rows.length}</td><td></td><td class="num">${money(D.total)}</td></tr></tbody></table></div>`:''}
+     ${o.cid&&D.byCar[0]&&D.byCar[0].perKm?`<p class="note">تكلفة الصيانة لكل كيلومتر: <b class="num">${pkm(D.byCar[0].perKm)}</b> (على ${km(D.byCar[0].km)} كم بين أول وآخر صيانة)</p>`:''}
+     ${tabs}${body}
+     <div class="actions"><div class="row2"><button class="btn" id="svPrint">🖨️ طباعة / PDF</button>${o.cid?`<button class="btn ghost" data-sadd="${esc(o.cid)}">+ صيانة</button>`:'<button class="btn ghost" data-close>إغلاق</button>'}</div>${o.cid?'<button class="btn ghost block" data-close>إغلاق</button>':''}</div></div></div>`};
+  const redraw=()=>keepSheetPos(L,draw);draw();L.oninput=null;
+  L.onchange=e=>{if(e.target.id==='svC'){o.cid=e.target.value;draw()}if(e.target.id==='svY'){o.y=e.target.value;draw()}};
+  L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+    if(x.dataset.svv){o.v=x.dataset.svv;redraw();return}
+    if(x.dataset.svcar){o.cid=x.dataset.svcar;draw();return}
+    if(x.dataset.sedit){const [cid,sid]=x.dataset.sedit.split(':');openSvc(cid,sid);return}
+    if(x.dataset.sadd){openSvc(x.dataset.sadd);return}
+    if(x.id==='svPrint'){svcRepPrint(o);return}}}
+function svcLogTable(D,o,N){return `<table><thead><tr><th>#</th><th>التاريخ</th>${o.cid?'':'<th>السيارة</th>'}<th>نوع الصيانة</th><th>العداد</th><th>القطع المغيّرة</th><th>الورشة / ملاحظة</th><th>التكلفة</th></tr></thead><tbody>
+  ${D.rows.map((r,k)=>`<tr><td class="idx">${k+1}</td><td class="nw">${dmy(r.s.date)}</td>${o.cid?'':`<td>${esc(r.c.name)}</td>`}<td>${esc(r.s.type)}</td><td class="nw">${r.s.odo?(+r.s.odo).toLocaleString('en-US'):'—'}</td><td>${r.parts.length?r.parts.map(p=>esc(p.n)+(p.c?' ('+money(p.c)+')':'')).join('، '):'—'}</td><td>${esc(r.s.note||'')}</td><td class="nw">${r.cost?N(r.cost):'—'}</td></tr>`).join('')}
+  <tr class="tot"><td></td><td>المجموع</td>${o.cid?'':'<td></td>'}<td></td><td></td><td></td><td></td><td class="nw">${N(D.total)}</td></tr></tbody></table>`}
+function svcRepPrint(o){const D=svcData(o);const now=new Date();const N=v=>`<span class="n">${money(v)}</span>`;const car=o.cid?(cars().find(c=>c.id===o.cid)||{}).name:'كل السيارات';
+  const h=`<header class="rh"><div><div class="rapp">${REP_LOGO}إدارة شؤوني</div><h1>تقرير الصيانة وقطع الغيار</h1><div class="rper">${esc(car||'')} · ${o.y==='all'?'كل السنوات':o.y}</div></div><div class="rmeta">${repOwner()}أُعدّ في ${fmtD(today())} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}<br>العملة: ر.ع.</div></header>
+   <section><h2>الملخص</h2><div class="kpis"><div><span>تكلفة الصيانة</span><b class="no">${N(D.total)}</b></div><div><span>عدد مرات الصيانة</span><b>${D.rows.length}</b></div><div><span>متوسط الصيانة</span><b>${N(D.avg)}</b></div><div><span>قطع مغيّرة</span><b>${D.parts.length}</b></div></div></section>
+   ${!o.cid&&D.byCar.length>1?`<section><h2>تكلفة الصيانة لكل سيارة</h2><table><thead><tr><th>السيارة</th><th>عدد المرات</th><th>آخر صيانة</th><th>التكلفة</th></tr></thead><tbody>${D.byCar.map(x=>`<tr><td>${esc(x.c.name)}</td><td class="nw">${x.n}</td><td class="nw">${x.last?dmy(x.last.date)+' · '+esc(x.last.type):'—'}</td><td class="nw">${N(x.t)}</td></tr>`).join('')}<tr class="tot"><td>المجموع</td><td class="nw">${D.rows.length}</td><td></td><td class="nw">${N(D.total)}</td></tr></tbody></table></section>`:''}
+   <section><h2>سجل الصيانة بالتواريخ</h2>${D.rows.length?svcLogTable(D,o,N):'<p class="hint">لا صيانة مسجّلة.</p>'}</section>
+   ${D.byPart.length?`<section><h2>قطع الغيار المغيّرة</h2><table><thead><tr><th>القطعة</th>${o.cid?'':'<th>السيارة</th>'}<th>مرات التغيير</th><th>آخر تغيير</th><th>العداد</th><th>التكلفة</th></tr></thead><tbody>${D.byPart.map(g=>`<tr><td>${esc(g.n)}</td>${o.cid?'':`<td>${esc([...g.cars].join('، '))}</td>`}<td class="nw">${g.times}</td><td class="nw">${dmy(g.last)}</td><td class="nw">${g.lastOdo?g.lastOdo.toLocaleString('en-US'):'—'}</td><td class="nw">${g.t?N(g.t):'—'}</td></tr>`).join('')}<tr class="tot"><td>المجموع</td>${o.cid?'':'<td></td>'}<td class="nw">${D.parts.length}</td><td></td><td></td><td class="nw">${N(D.partsT)}</td></tr></tbody></table></section>`:''}
+   <section><h2>التكلفة حسب نوع الصيانة</h2><table class="nototal"><thead><tr><th>النوع</th><th>المرات</th><th>آخر مرة</th><th>التكلفة</th></tr></thead><tbody>${D.byType.map(g=>`<tr><td>${esc(g.k)}</td><td class="nw">${g.n}</td><td class="nw">${dmy(g.last)}</td><td class="nw">${N(g.t)}</td></tr>`).join('')}</tbody></table></section>
+   <footer class="rf">تقرير الصيانة من تطبيق «إدارة شؤوني» · التكلفة من سجل الصيانة لكل سيارة</footer>`;
+  prStyle('portrait');let el=document.getElementById('printArea');if(!el){el=document.createElement('div');el.id='printArea';document.body.appendChild(el)}el.className='rep';el.innerHTML=h;
+  const old=document.title;document.title='تقرير الصيانة - '+(car||'')+' - إدارة شؤوني';window.addEventListener('afterprint',()=>{document.title=old},{once:true});try{window.print()}catch(e){toast('تعذّرت الطباعة هنا')}setTimeout(()=>{document.title=old},3000)}
+
 function openSvc(cid,sid){
   const c=cars().find(x=>x.id===cid);if(!c)return;c.services=c.services||[];const ex=sid?c.services.find(x=>x.id===sid):null;
-  const s=ex?Object.assign({},ex):{id:uidGen(),type:'',date:today(),odo:c.odo||'',cost:'',note:'',nextDate:'',nextOdo:''};let askDel=false;
+  const s=ex?Object.assign({},ex,{partsTxt:svcPartsTxt(ex.parts)}):{id:uidGen(),type:'',date:today(),odo:c.odo||'',cost:'',note:'',nextDate:'',nextOdo:'',partsTxt:''};let askDel=false;
   const L=document.getElementById('layer');
   const draw=()=>{L.innerHTML=`${sheetTop('صيانة')}
    <h2 style="margin-top:0">${ex?'تعديل الصيانة':'صيانة جديدة'} · ${esc(c.name)}</h2><div class="stack">
@@ -3157,6 +3220,7 @@ function openSvc(cid,sid){
    <div class="field"><label for="sCost">التكلفة (${CUR})</label><input class="inp num" id="sCost" inputmode="decimal" value="${s.cost?amtIn(s.cost):''}" placeholder="0.000" style="text-align:left"></div></div>
    <div class="row2"><div class="field"><label for="sOdo">العداد وقتها (كم)</label><input class="inp num" id="sOdo" inputmode="numeric" value="${esc(s.odo)}" style="text-align:left"></div>
    <div class="field"><label for="sNote">الورشة / ملاحظة</label><input class="inp" id="sNote" value="${esc(s.note)}" maxlength="40"></div></div>
+   <div class="field"><label for="sParts">🔩 القطع المستبدلة (اختياري)</label><textarea class="inp" id="sParts" rows="3" placeholder="قطعة في كل سطر، وسعرها إن أردت&#10;مثال:&#10;فلتر زيت 3.500&#10;زيت محرك 5W-30 12&#10;فلتر هواء">${esc(s.partsTxt||'')}</textarea><small class="note" id="sPartsSum">${(()=>{const P=svcParts(s.partsTxt);const t=r3(P.reduce((x,p)=>x+p.c,0));return P.length?countWord(P.length,'قطعة واحدة','قطعتان','قطع','قطعة')+(t?' · مجموع أسعارها '+money(t)+' '+CUR:''):'تظهر في تقرير الصيانة ← قطع الغيار'})()}</small></div>
    <h2 style="margin:6px 0 0;font-size:15px">الموعد القادم (اختياري)</h2>
    <div class="row2"><div class="field"><label for="sNextD">بتاريخ</label><input class="inp" type="date" id="sNextD" value="${esc(s.nextDate)}"></div>
    <div class="field"><label for="sNextO">أو عند العداد (كم)</label><input class="inp num" id="sNextO" inputmode="numeric" value="${esc(s.nextOdo)}" style="text-align:left"></div></div>
@@ -3166,8 +3230,8 @@ function openSvc(cid,sid){
    ${ex?(askDel?'<div class="confirm"><span>حذف هذه الصيانة ومصروفها من السجل؟</span><div class="row2"><button class="btn danger" id="sDel">نعم، احذف</button><button class="btn ghost" id="sDelNo">تراجع</button></div></div>':'<button class="btn ghost block" id="sDelAsk" style="color:var(--exp)">حذف</button>'):'<button class="btn ghost block" data-close>إلغاء</button>'}
    </div></div></div>`};
   const v=i=>document.getElementById(i).value;
-  const grab=()=>{s.date=v('sDate');s.cost=v('sCost');s.odo=v('sOdo');s.note=v('sNote');s.nextDate=v('sNextD');s.nextOdo=v('sNextO')};
-  L.onchange=L.oninput=null;
+  const grab=()=>{s.date=v('sDate');s.cost=v('sCost');s.odo=v('sOdo');s.note=v('sNote');s.nextDate=v('sNextD');s.nextOdo=v('sNextO');s.partsTxt=v('sParts')};
+  L.onchange=null;L.oninput=e=>{if(e.target.id==='sParts'){const P=svcParts(e.target.value);const t=r3(P.reduce((x,p)=>x+p.c,0));const el=document.getElementById('sPartsSum');if(el)el.textContent=P.length?countWord(P.length,'قطعة واحدة','قطعتان','قطع','قطعة')+(t?' · مجموع أسعارها '+money(t)+' '+CUR:''):'تظهر في تقرير الصيانة ← قطع الغيار';const cst=document.getElementById('sCost');if(cst&&!cst.value.trim()&&t)cst.placeholder=amtIn(t)}};
   L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;
     if(x.hasAttribute('data-close')){L.innerHTML='';return}
     if(x.dataset.stype){grab();s.type=x.dataset.stype;draw();return}
@@ -3176,7 +3240,8 @@ function openSvc(cid,sid){
     if(x.id==='sDel'){c.services=c.services.filter(y=>y.id!==s.id);L.innerHTML='';await putSettings();if(s.txId&&S.tx[s.txId])await delTx(s.txId);else render();toast('حُذفت');return}
     if(x.id==='sSave'){grab();if(!s.type){const er=document.getElementById('sErr');er.hidden=false;er.textContent='اختر نوع الصيانة';return}
       const num=q=>parseInt(String(q||'').replace(/[^\d]/g,''))||0;
-      const rec={id:s.id,type:s.type,date:s.date||today(),cost:parseAmt(s.cost),odo:num(s.odo),note:(s.note||'').trim(),nextDate:s.nextDate||'',nextOdo:num(s.nextOdo),txId:s.txId||''};
+      const parts=svcParts(s.partsTxt);if(!String(s.cost||'').trim()&&parts.length){const t=r3(parts.reduce((x,p)=>x+p.c,0));if(t)s.cost=String(t)}
+      const rec={id:s.id,type:s.type,date:s.date||today(),cost:parseAmt(s.cost),parts,odo:num(s.odo),note:(s.note||'').trim(),nextDate:s.nextDate||'',nextOdo:num(s.nextOdo),txId:s.txId||''};
       if(rec.odo>(+c.odo||0))c.odo=rec.odo;
       let txp=null;
       if(rec.cost){const old=rec.txId&&S.tx[rec.txId];const t=Object.assign({},old||{id:uidGen(),createdAt:new Date().toISOString(),method:'card'},{type:'exp',amount:rec.cost,cat:'car',date:rec.date,note:'صيانة: '+rec.type+' - '+c.name,car:c.id});rec.txId=t.id;txp=t}
@@ -4575,8 +4640,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.110.0';
+const APP_VERSION='2.111.0';
 const CHANGELOG=[
+ {v:'2.111.0',d:'2026-10-28',items:['🔧 تقرير الصيانة وقطع الغيار: لكل سياراتك أو لسيارة واحدة، لسنة أو لكل السنوات. فيه تكلفة الصيانة وعدد المرات والمتوسط وآخر صيانة، وجدول تكلفة كل سيارة','📋 ثلاث طرق للعرض: السجل بالتواريخ (النوع والعداد والورشة والقطع والتكلفة)، وقطع الغيار (كل قطعة: كم مرة غُيّرت وآخر تغيير والعداد والتكلفة)، وحسب نوع الصيانة. ويُطبع PDF','🔩 في نموذج الصيانة خانة جديدة «القطع المستبدلة»: قطعة في كل سطر مع سعرها إن أردت، وإذا تركت التكلفة فارغة تُحسب من مجموع أسعار القطع','⛽ تقرير الوقود صار يشمل الصيانة في نفس السنة، مع رابط للتقرير الكامل، وفي طباعته سجل الصيانة','🐞 إصلاح: تكلفة الصيانة لم تكن تُحسب في تقارير السيارات (تكلفة الكيلومتر مع الصيانة)']},
  {v:'2.110.0',d:'2026-10-27',items:['🐞 إصلاح مهم: الفاتورة التي دفعتها قبل نزول الراتب عن الشهر الجديد كانت تبقى «غير مدفوعة» وحمراء في الشهر الجديد، لأن التطبيق كان يتجاهل الدفعات التي تاريخها قبل بداية الدورة. صارت تُحسب في كل مكان','💡 على بطاقة البند في صفحة الدفع: إذا دفعته قبل نزول الراتب وحُسبت الدفعة للشهر السابق يظهر تنبيه دائم مع زر «احسبها لهذا الشهر» (كان التنبيه يختفي بعد أيام)','🎨 نظام ألوان الخطة صار في كل التطبيق، وليس صفحة الدفع فقط: غطّيت الخطة أو زدت = أخضر «مدفوع حسب الخطة» مع الزائد، أقل من الخطة = أحمر «أقل من الخطة: دُفع كذا من كذا». يظهر في إدارة البيانات، وبطاقات الديون، وجدول الأشهر، وتقرير الخطة وطباعته، وقائمة المراجعة']},
  {v:'2.109.0',d:'2026-10-27',items:['🔗 قائمة المراجعة مربوطة بصفحة الدفع: أي التزام تدفعه كاملًا أو جزئيًا يتحدث فيها تلقائيًا، والمبلغ المقترح لكل بند = الباقي على الخطة (المخطط − ما دفعته منه)','✓ البند الذي غطّيت خطته يظهر «تمت الخطة: دُفع كذا من كذا» محددًا ومقفلًا، مع ما يُرحَّل من الفاتورة، ولا يدخل في «المحدد»','🧹 المبلغ الذي كتبته في القائمة لبند ما يُلغى تلقائيًا إذا دفعت عليه بعدها، فتظهر الأرقام الصحيحة دائمًا','📊 «باقٍ على الخطة» لكل مجموعة وفي ملخص المجموعات وفي الطباعة','👆 الضغط على ✓ مباشرة بعد كتابة مبلغ لا يضيع']},
  {v:'2.108.0',d:'2026-10-27',items:['🟢 في صفحة الدفع: إذا دفعت مبلغ الخطة أو أكثر يظهر البند بالأخضر «✓ دُفع حسب الخطة» (ومعه «أكثر بـ…» إن زاد)، حتى لو بقي جزء من الفاتورة يُرحَّل','🔴 إذا دفعت أقل من مبلغ الخطة يظهر البند بالأحمر «دُفع أقل من الخطة: كذا من كذا» مع الباقي على الخطة','🧮 تحت كل بند مدفوع جزئيًا تظهر المعادلة بوضوح: المستحق − دُفع = الباقي (أو يُرحَّل)، وإذا دفعت أكثر من الخطة يظهر الزائد بالأخضر: «+كذا فوق الخطة (دُفع − الخطة)»','💳 في شاشة الدفع نفسها: أثناء كتابة المبلغ تتلون الخانة بالأحمر إذا كان أقل من الخطة وبالأخضر إذا غطّاها أو زاد عليها، مع الفرق بالضبط (للفواتير والأقساط)','☑️ قائمة مراجعة الدفع صارت سلسة: وضع علامة ✓ أو تعديل أي مبلغ أو التحديد السريع لا يرجعك لأعلى الصفحة، وتبقى في مكانك. ونفس الشيء في صفحة الرصيد اليومي']},
@@ -9427,6 +9493,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.cedit){openCar(b.dataset.cedit);return}
   if(b.dataset.crenew){openRenew(b.dataset.crenew);return}
   if(b.dataset.csave){carToGoal(b.dataset.csave);return}
+  if(b.dataset.svrep!==undefined){openSvcReport({cid:b.dataset.svrep});return}
   if(b.dataset.sadd){openSvc(b.dataset.sadd);return}
   if(b.dataset.sedit){const [c1,s1]=b.dataset.sedit.split(':');openSvc(c1,s1);return}
   if(b.dataset.padd){openPerson();return}

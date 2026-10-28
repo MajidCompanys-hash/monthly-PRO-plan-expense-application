@@ -2435,3 +2435,11 @@ body.hv2-on header.top .brand{visibility:hidden}
 .pk-r.low{border-inline-start:4px solid var(--exp);background:color-mix(in srgb,var(--exp) 5%,var(--surface))}
 .pk-r.pdone{border-inline-start:4px solid var(--inc)}
 .pc-mv{margin:6px 10px 2px;padding:8px 10px;border-radius:10px;background:var(--accent-soft);font-size:12px;line-height:1.7}.pc-mv .chip{margin-inline-start:4px}
+
+/* 2.111 تقرير الصيانة */
+.svr-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.svr-r{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:9px 11px;display:flex;flex-direction:column;gap:3px;text-align:start;color:var(--fg);cursor:pointer}
+.svr-h{display:flex;justify-content:space-between;gap:8px}.svr-r small{font-size:11.5px}
+.svr-p{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}.svr-p span{background:var(--surface-2);border-radius:8px;padding:2px 7px;font-size:11.5px}
+.svr-pr{display:flex;justify-content:space-between;gap:8px;align-items:baseline;border-bottom:1px solid var(--line);padding:6px 2px;font-size:12.5px}
+.svr-sum{display:flex;flex-direction:column;gap:2px;width:100%;text-align:start;border:1px solid var(--line);cursor:pointer;color:var(--fg)}
