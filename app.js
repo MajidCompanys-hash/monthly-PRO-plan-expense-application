@@ -919,10 +919,170 @@ function txRowBase(t){const c=catOf(t.cat);const cls=t.type==='inc'?'amt-inc':'a
  * الشريط السفلي: الرئيسية · الدفع · الميزانية · الادخار · المزيد. وكل الصفحات الأخرى في «المزيد» بدون حذف أي ميزة. */
 const MORE_TABS=['log','budget','reports','cars','docs','trusts','house','advisor','settings','sim','spend'];
 function navOf(t){return MORE_TABS.includes(t)?'more':t}
+/* ===================== 🛒 مشتريات السوبر ماركت (2.112) =====================
+ * فاتورة PDF إلكترونية أو صورة فاتورة (عربي وإنجليزي) ← قراءة الأصناف ← مراجعة ← حفظ،
+ * وربطها بعملية المصروف نفسها (بلا تكرار)، ثم مقارنة الأشهر: المجموع والأقسام والكميات وتغيّر الأسعار.
+ * كل شيء داخل الهاتف: pdf.js لقراءة PDF، وTesseract (عربي + إنجليزي) لقراءة الصور. */
+const GRC_CATS=[['veg','🥬 خضار وفواكه',/خضار|فواك|طماط|خيار|بصل|بطاط|ثوم|ليمون|موز|تفاح|برتقال|عنب|بطيخ|فراول|خس|جزر|فلفل|باذنج|كوسا|بقدونس|كزبر|نعناع|مانجو|رمان|تمر|tomato|cucumber|onion|potato|garlic|lemon|banana|apple|orange|grape|melon|lettuce|carrot|pepper|veg|fruit|herb|mango|dates/i],
+ ['meat','🍗 لحوم ودواجن وأسماك',/لحم|دجاج|فراخ|سمك|روبيان|ربيان|تونة|كبدة|مفروم|ستيك|برجر|نقانق|meat|beef|mutton|lamb|chicken|fish|shrimp|prawn|tuna|liver|mince|steak|burger|sausage|frozen chicken/i],
+ ['dairy','🥛 ألبان وأجبان وبيض',/حليب|لبن|زبادي|روب|جبن|جبنة|قشطة|زبدة|بيض|لبنة|كريمة|milk|laban|yogh|yog|cheese|cream|butter|egg|labneh/i],
+ ['bakery','🍞 مخبوزات',/خبز|صمون|توست|كعك|كيك|معجنات|كرواسون|bread|toast|bun|cake|croissant|bakery|pita|samoon/i],
+ ['pantry','🍚 أرز وبقوليات وزيوت',/أرز|ارز|رز|عدس|حمص|فول|طحين|دقيق|سكر|ملح|زيت|سمن|معكرون|مكرون|باستا|شعيرية|بهار|توابل|كركم|هيل|شاي|قهوة|نسكافيه|rice|lentil|chickpea|beans|flour|sugar|salt|oil|ghee|pasta|macaroni|noodle|spice|tea|coffee|nescafe/i],
+ ['canned','🥫 معلبات وصلصات',/معلب|صلصة|كاتشب|مايونيز|معجون|مربى|عسل|زيتون|ketchup|mayo|sauce|paste|jam|honey|olive|canned|tin/i],
+ ['drinks','🧃 مشروبات',/ماء|مياه|عصير|مشروب|بيبسي|كولا|غازي|water|juice|drink|pepsi|cola|soda|7up|mirinda|laban up|energy/i],
+ ['snacks','🍫 سناكس وحلويات',/شوكولا|شيكولا|بسكويت|شيبس|حلويات|حلوى|آيس|ايسكريم|مكسرات|chocolate|biscuit|chips|candy|sweet|ice cream|nuts|snack|cookies|wafer/i],
+ ['clean','🧴 منظفات ومنزل',/منظف|صابون غسيل|مسحوق|كلوركس|ديتول|مناديل|محارم|أكياس|اكياس|فيري|معطر|مبيد|ورق|detergent|clorox|dettol|tissue|bags|fairy|freshener|bleach|softener|dish|cleaner|foil|wrap/i],
+ ['care','🧼 عناية شخصية',/شامبو|صابون|معجون أسنان|فرشاة|مزيل|كريم|حفاض|فوط|shampoo|soap|toothpaste|brush|deodorant|lotion|diaper|pampers|razor|sanitary/i],
+ ['other','📦 أخرى',null]];
+function grcCatName(k){const c=GRC_CATS.find(x=>x[0]===k);return c?c[1]:'📦 أخرى'}
+function grcStore(){const G=S.settings.grc||(S.settings.grc={});G.rc=G.rc||[];G.alias=G.alias||{};G.cat=G.cat||{};return G}
+function grcNorm(s){return normDigits(String(s||'').normalize('NFKC')).toLowerCase().replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^ء-يa-z0-9 ]/g,' ').replace(/\s+/g,' ').trim()}
+function grcCanon(name){const G=grcStore();const k=grcNorm(name);return G.alias[k]||name.trim()}
+function grcKey(name){return grcNorm(grcCanon(name))}
+function grcAutoCat(name){const G=grcStore();const k=grcKey(name);if(G.cat[k])return G.cat[k];const c=GRC_CATS.find(x=>x[2]&&x[2].test(name));return c?c[0]:'other'}
+const GRC_STORES=[[/lulu|لولو/i,'لولو'],[/carrefour|كارفور/i,'كارفور'],[/al ?fair|الفير/i,'الفير'],[/nesto|نستو/i,'نستو'],[/sultan center|مركز سلطان/i,'مركز سلطان'],[/al ?meera|الميرة/i,'الميرة'],[/safeer|سفير/i,'سفير'],[/spar|سبار/i,'سبار'],[/khimji|خمجي/i,'خمجي'],[/hypermarket|هايبر/i,'هايبرماركت'],[/supermarket|سوبر ?ماركت/i,'سوبرماركت']];
+const GRC_SKIP=/sub ?total|total|vat|tax|cash|change|card|visa|master|balance|tender|paid|amount due|net amount|round|items? ?count|no\.? ?of items|qty total|tel|phone|mobile|fax|c\.?r\.?|vatin|tin|invoice|receipt|bill no|thank|welcome|cashier|counter|date|time|points|loyalty|saved|savings|www|http|@|المجموع|الإجمالي|اجمالي|إجمالي|المبلغ|ضريب|القيمه المضافه|القيمة المضافة|نقد|الباقي|المتبقي|بطاق|فيزا|رقم|هاتف|جوال|فاتور|التاريخ|الوقت|الكاشير|الصندوق|نقاط|وفرت|شكرا|اهلا|أهلا|سجل تجاري|الرقم الضريبي/i;
+const GRC_TOT=/grand total|net total|total amount|amount due|net amount|net payable|^\s*total\b|المجموع|الإجمالي|اجمالي|إجمالي|الصافي|المبلغ المستحق|المطلوب/i;
+const GRC_DISC=/discount|promo|offer|saving|coupon|خصم|عرض|تخفيض|كوبون/i;
+function grcNum(s){return +String(s).replace(',','.')}
+/* يحوّل سطور الفاتورة إلى بيانات: المحل والتاريخ والمجموع والأصناف */
+function grcParse(lines){const L=lines.map(l=>normDigits(String(l||'').normalize('NFKC')).replace(/[‏‎]/g,'').replace(/٫/g,'.').replace(/(\d),(\d{2,3})(?!\d)/g,'$1.$2').replace(/\s+/g,' ').trim()).filter(Boolean);
+  const all=L.join('\n');let store='';for(const [re,n] of GRC_STORES)if(re.test(all)){store=n;break}
+  if(!store)store=(L.slice(0,5).find(l=>/[A-Za-zء-ي]{3}/.test(l)&&!/\d{3}/.test(l)&&!GRC_SKIP.test(l))||'').slice(0,30);
+  let date='';const dm=all.match(/\b(20\d{2})[-\/.](\d{1,2})[-\/.](\d{1,2})\b/)||all.match(/\b(\d{1,2})[-\/.](\d{1,2})[-\/.](20\d{2}|\d{2})\b/);
+  if(dm){let y,mo,d;if(dm[1].length===4){y=dm[1];mo=dm[2];d=dm[3]}else{d=dm[1];mo=dm[2];y=dm[3].length===2?'20'+dm[3]:dm[3]}if(+mo>12&&+d<=12){const t=mo;mo=d;d=t}if(+mo>=1&&+mo<=12&&+d>=1&&+d<=31)date=y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+  let total=0;L.forEach(l=>{if(GRC_TOT.test(l)&&!/sub ?total|items?|qty|عدد/i.test(l)){const ns=(l.match(/-?\d+\.\d{2,3}/g)||[]).map(grcNum);if(ns.length){const v=Math.max(...ns);if(v>total)total=v}}});
+  const items=[];let pend='';
+  L.forEach(l=>{const money=(l.match(/-?\d+\.\d{2,3}(?!\d)/g)||[]);const hasTxt=/[A-Za-zء-ي]{2}/.test(l);
+    if(GRC_TOT.test(l)||(GRC_SKIP.test(l)&&!GRC_DISC.test(l))){pend='';return}
+    if(!money.length){pend=hasTxt&&!/\d{6,}/.test(l)?l:(hasTxt?l.replace(/\d{6,}/g,'').trim():'');return}
+    let name=l.replace(/-?\d+(?:\.\d+)?/g,' ').replace(/\b(x|@|kg|kgs|g|gm|pcs|pc|ea|each|qty|ltr|l|ml|omr|ro|r\.o)\b|ر\.?\s?ع\.?|كجم|كغ|جم|حبة|حبه|عدد|لتر|مل|×|\*/gi,' ').replace(/[|:;_=#]+/g,' ').replace(/\s+/g,' ').trim();
+    if(!/[A-Za-zء-ي]{2}/.test(name)){if(pend)name=pend;else return}else if(pend&&name.length<3)name=pend+' '+name;pend='';
+    const nums=money.map(grcNum);const t=nums[nums.length-1];const disc=GRC_DISC.test(l)||t<0;
+    let q=1,u=Math.abs(t);const qm=l.match(/(\d+(?:\.\d+)?)\s*(?:x|×|\*|@)\s*(\d+\.\d{2,3})/i)||l.match(/(\d+\.\d{2,3})\s*(?:x|×|\*|@)\s*(\d+(?:\.\d+)?)/i);
+    if(qm){const a=grcNum(qm[1]),b=grcNum(qm[2]);if(Math.abs(a*b-Math.abs(t))<0.011){if(/\.\d{2,3}$/.test(qm[2])&&!/\.\d{2,3}$/.test(qm[1])){q=a;u=b}else if(/\.\d{2,3}$/.test(qm[1])&&!/\.\d{2,3}$/.test(qm[2])){q=b;u=a}else{q=a;u=b}}}
+    else if(nums.length>=2){const c=nums[nums.length-2];if(c>0&&Math.abs(t)>c+0.0005){const r=Math.abs(t)/c;if(Math.abs(r-Math.round(r))<0.01){q=Math.round(r);u=c}else if(/kg|كجم|كغ/i.test(l)){q=r3(r);u=c}}else if(c>0&&Math.abs(c-Math.abs(t))<0.0005){q=1;u=c}else if(c>0&&Math.abs(t)<c-0.0005&&!GRC_DISC.test(l)){q=r3(Math.abs(t)/c);u=c}
+      const wq=l.match(/(\d+\.\d{3})\s*(?:kg|كجم|كغ)/i);if(wq){const w=grcNum(wq[1]);if(w>0&&Math.abs(w*c-Math.abs(t))<0.02){q=w;u=c}}}
+    items.push({r:name,n:grcCanon(name).slice(0,60),q:r3(q),u:r3(u),t:r3(disc?-Math.abs(t):t),c:disc?'other':grcAutoCat(name),d:disc?1:0})});
+  const sum=r3(items.reduce((s,i)=>s+i.t,0));if(!total)total=sum;
+  return{store,date,total:r3(total),items,sum}}
+/* قراءة الملف: PDF نصي مباشرة، وPDF ممسوح أو صورة بقراءة الصورة (عربي + إنجليزي) */
+let GRC_W=null;
+async function grcWorker(st){if(GRC_W)return GRC_W;await odoLoad();GRC_W=await Tesseract.createWorker('ara+eng',1,{workerPath:'./ocr/worker.min.js',corePath:'./ocr/',langPath:'./ocr/',gzip:true,workerBlobURL:false,logger:m=>{if(st&&m&&m.status==='recognizing text')st(Math.round((m.progress||0)*100))}});return GRC_W}
+function grcPrep(src){const c=document.createElement('canvas');const sc=Math.min(2.2,Math.max(1,1800/Math.max(src.width,1)));c.width=Math.round(src.width*sc);c.height=Math.round(src.height*sc);const x=c.getContext('2d');x.drawImage(src,0,0,c.width,c.height);
+  try{const d=x.getImageData(0,0,c.width,c.height),p=d.data;for(let i=0;i<p.length;i+=4){const g=0.299*p[i]+0.587*p[i+1]+0.114*p[i+2];const v=g>165?255:g<95?0:Math.round((g-95)*255/70);p[i]=p[i+1]=p[i+2]=v}x.putImageData(d,0,0)}catch(e){}return c}
+async function grcOcr(canvas,st){const w=await grcWorker(st);const r=await w.recognize(grcPrep(canvas));return String(r.data.text||'').split('\n')}
+/* سطر PDF: بعض الملفات تخزن العربي حرفًا حرفًا بالترتيب المرئي (من اليسار)، فنجمع الحروف كلمات ونعيد ترتيبها من اليمين */
+function grcPdfLine(items){const AR=/[\u0600-\u06FF\uFB50-\uFDFF\uFE70-\uFEFF]/;const I=items.slice().sort((a,b)=>a.x-b.x);const W=[];
+  I.forEach(o=>{const s=String(o.s);const last=W[W.length-1];const gap=last?o.x-(last.x2):99;if(last&&AR.test(s)&&last.ar&&s.trim().length<=2&&gap<=1.6){last.g.push(s);last.x2=o.x+(o.w||0);return}
+    W.push({g:[s],x2:o.x+(o.w||0),ar:AR.test(s)&&s.trim().length<=2})});
+  const words=W.map(w=>({s:w.ar?w.g.slice().reverse().join(''):w.g.join(''),ar:AR.test(w.g.join('')),int:/^\d{1,3}$/.test(w.g.join('').trim())}));
+  const out=[];for(let i=0;i<words.length;){if(words[i].ar){let j=i;while(j+1<words.length&&(words[j+1].ar||(words[j+1].int&&words.slice(j+2).some((z,k)=>z.ar&&words.slice(j+2,j+2+k).every(y=>y.int||y.ar)))))j++;
+      const seg=words.slice(i,j+1).reverse();seg.forEach(z=>out.push(z.s));i=j+1}else{out.push(words[i].s);i++}}
+  return out.join(' ').replace(/\s+/g,' ').trim()}
+async function grcReadFile(f,st){const isPdf=/pdf/i.test(f.type)||/\.pdf$/i.test(f.name);
+  if(isPdf){const buf=await f.arrayBuffer();const P=await stReadPdf(buf.slice(0));
+    if(P.txt.replace(/\s/g,'').length>40){const lines=[];P.pages.forEach(pg=>{const rows=[];pg.items.slice().sort((a,b)=>a.y-b.y).forEach(o=>{const r=rows.find(z=>Math.abs(z.y-o.y)<=3);if(r)r.it.push(o);else rows.push({y:o.y,it:[o]})});rows.forEach(r=>lines.push(grcPdfLine(r.it)))});return{lines,via:'pdf'}}
+    st&&st(0,'ملف PDF مصوّر: جارٍ قراءة النص من الصفحات…');const lib=await stLib();const doc=await lib.getDocument({data:new Uint8Array(buf),isEvalSupported:false}).promise;let lines=[];
+    for(let i=1;i<=Math.min(doc.numPages,4);i++){const pg=await doc.getPage(i);const vp=pg.getViewport({scale:2.4});const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;lines=lines.concat(await grcOcr(c,st))}
+    return{lines,via:'ocr'}}
+  const url=URL.createObjectURL(f);try{const img=await new Promise((ok,er)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=er;im.src=url});const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;c.getContext('2d').drawImage(img,0,0);return{lines:await grcOcr(c,st),via:'ocr'}}finally{URL.revokeObjectURL(url)}}
+function grcPick(){let i=document.getElementById('grcFile');if(!i){i=document.createElement('input');i.type='file';i.id='grcFile';i.accept='application/pdf,image/*';i.hidden=true;document.body.appendChild(i);
+  i.addEventListener('change',async()=>{const f=i.files&&i.files[0];i.value='';if(!f)return;const L=document.getElementById('layer');
+    L.innerHTML=`${sheetTop('قراءة الفاتورة')}<h2 style="margin-top:0">🧾 قراءة الفاتورة</h2><div class="odo-st"><span class="spin"></span> <span id="grcSt">جارٍ قراءة ${esc(f.name)}…</span><small class="note" id="grcPg"></small></div><p class="note">أول قراءة لصورة تأخذ وقتًا أطول لتحميل قارئ العربي والإنجليزي، ثم تعمل بدون إنترنت.</p></div></div>`;
+    try{const R=await grcReadFile(f,(p,msg)=>{const a=document.getElementById('grcPg');if(a)a.textContent=p?'تقدم القراءة '+p+'%':'';if(msg){const b=document.getElementById('grcSt');if(b)b.textContent=msg}});
+      const P=grcParse(R.lines);const rc={id:uidGen(),store:P.store,date:P.date&&P.date<=today()?P.date:today(),total:P.total,items:P.items,via:R.via,raw:R.lines.slice(0,400).join('\n'),file:f.name};openGrcReview(rc,true)}
+    catch(e){L.innerHTML=`${sheetTop('قراءة الفاتورة')}<h2 style="margin-top:0">🧾 تعذّرت القراءة</h2><p class="note">${esc(e&&e.message==='lib'?'قارئ PDF غير متاح الآن':'لم أستطع قراءة الملف. جرّب صورة أوضح أو ملف PDF آخر')}</p><div class="actions"><button class="btn block" data-grcpick="1">اختيار ملف آخر</button><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;L.onclick=e2=>{const x=e2.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}if(x.dataset.grcpick)grcPick()}}})}
+  i.click()}
+/* الربط بالمصروف: نفس المبلغ (±5 بيسة) خلال يومين، ولم يُربط بفاتورة أخرى */
+function grcMatchTx(rc){const used=new Set(grcStore().rc.filter(x=>x.id!==rc.id&&x.txId).map(x=>x.txId));
+  return list().filter(t=>t.type==='exp'&&!t.own&&!used.has(t.id)&&Math.abs((+t.amount)-rc.total)<0.0055&&Math.abs(dDiff(t.date,rc.date))<=2).sort((a,b)=>Math.abs(dDiff(a.date,rc.date))-Math.abs(dDiff(b.date,rc.date)))[0]||null}
+function openGrcReview(rc,isNew){const L=document.getElementById('layer');const st={rc:JSON.parse(JSON.stringify(rc)),mk:isNew&&!rc.txId?'auto':''};
+  const draw=()=>{const r=st.rc;const sum=r3(r.items.reduce((s,i)=>s+(+i.t||0),0));const diff=r3((+r.total||0)-sum);const m=r.txId&&S.tx[r.txId]?S.tx[r.txId]:grcMatchTx(r);
+    L.innerHTML=`${sheetTop('مراجعة الفاتورة')}<h2 style="margin-top:0">🧾 ${isNew?'راجع الفاتورة قبل الحفظ':'تعديل الفاتورة'}</h2>
+     ${r.via?`<p class="note" style="margin-top:-6px">${r.via==='pdf'?'قُرئت من PDF إلكتروني':'قُرئت من صورة: راجع الأسماء والأسعار'}${r.file?' · '+esc(r.file):''}</p>`:''}
+     <div class="row2"><div class="field"><label for="grS">المحل</label><input class="inp" id="grS" value="${esc(r.store||'')}" placeholder="مثال: لولو"></div><div class="field"><label for="grD">التاريخ</label><input class="inp" type="date" id="grD" value="${esc(r.date)}"></div></div>
+     <div class="field"><label for="grT">مجموع الفاتورة (${CUR})</label><input class="inp num" id="grT" inputmode="decimal" value="${amtIn(r.total)}"></div>
+     <div class="${Math.abs(diff)>0.0055?'warnbox':'okbox'}" style="margin:6px 0 10px">${r.items.length} صنف · مجموعها <b class="num">${money(sum)}</b>${Math.abs(diff)>0.0055?' · يختلف عن مجموع الفاتورة بـ <b class="num">'+money(Math.abs(diff))+'</b> (صحّح صنفًا أو أضف الناقص)':' · ✓ يطابق مجموع الفاتورة'}</div>
+     <div class="grc-items">${r.items.map((i,k)=>`<div class="grc-it${i.d?' disc':''}"><div class="grc-r1"><input class="inp" data-gri="${k}|n" value="${esc(i.n)}" aria-label="اسم الصنف"><button class="iconbtn sm" data-grdel="${k}" aria-label="حذف الصنف">✕</button></div>
+       <div class="grc-r2"><label><small>الكمية</small><input class="inp num" data-gri="${k}|q" inputmode="decimal" value="${amtIn(i.q)}"></label><label><small>سعر الوحدة</small><input class="inp num" data-gri="${k}|u" inputmode="decimal" value="${amtIn(i.u)}"></label><label><small>المجموع</small><input class="inp num" data-gri="${k}|t" inputmode="decimal" value="${amtIn(i.t)}"></label></div>
+       <select class="inp grc-cat" data-gric="${k}" aria-label="القسم">${GRC_CATS.map(c=>`<option value="${c[0]}"${i.c===c[0]?' selected':''}>${c[1]}</option>`).join('')}</select></div>`).join('')}</div>
+     <button class="btn ghost block" data-gradd="1">＋ إضافة صنف</button>
+     <div class="panel grc-link">${m?`<b>🔗 مرتبطة بمصروف مسجّل</b><small class="note">${esc(m.note||catOf(m.cat).n)} · ${money(m.amount)} · ${fmtD(m.date)}. لن يُسجَّل مصروف جديد، فلا تكرار.</small>`:`<label class="toggle"><input type="checkbox" id="grMk" ${st.mk!=='no'?'checked':''}><span>سجّلها مصروفًا جديدًا (بقالة وطعام) بقيمة المجموع</span></label><small class="note">إذا كانت مسجّلة من قبل أو ستأتي في كشف البنك اتركها، فالكشف يتجاهل المكرر تلقائيًا.</small>`}</div>
+     ${r.raw?`<details class="panel"><summary class="note">النص المقروء من الفاتورة</summary><pre class="grc-raw">${esc(r.raw)}</pre></details>`:''}
+     <div class="actions"><button class="btn block" id="grcSave">💾 حفظ الفاتورة</button>${!isNew?'<button class="btn ghost block" id="grcDel" style="color:var(--exp)">حذف الفاتورة</button>':''}<button class="btn ghost block" data-close>إلغاء</button></div></div></div>`};
+  const redraw=()=>keepSheetPos(L,draw);draw();
+  L.oninput=e=>{const t=e.target;const r=st.rc;if(t.dataset.gri){const [k,f]=t.dataset.gri.split('|');const it=r.items[+k];if(!it)return;if(f==='n')it.n=t.value;else{it[f]=parseAmt(t.value)||0;if(f!=='t'){it.t=r3((+it.q||0)*(+it.u||0)*(it.d?-1:1))}}return}
+    if(t.id==='grS')r.store=t.value;if(t.id==='grD')r.date=t.value;if(t.id==='grT')r.total=parseAmt(t.value)||0;if(t.id==='grMk')st.mk=t.checked?'auto':'no'};
+  L.onchange=e=>{const t=e.target;if(t.dataset.gric){st.rc.items[+t.dataset.gric].c=t.value;return}if(t.dataset.gri||t.id==='grT')redraw()};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}const r=st.rc;
+    if(x.dataset.grdel){r.items.splice(+x.dataset.grdel,1);redraw();return}
+    if(x.dataset.gradd){r.items.push({r:'',n:'',q:1,u:0,t:0,c:'other'});redraw();setTimeout(()=>{const ins=L.querySelectorAll('[data-gri$="|n"]');const el=ins[ins.length-1];if(el)el.focus()},60);return}
+    if(x.id==='grcDel'){if(!confirm('حذف هذه الفاتورة من مشترياتك؟ (لا يُحذف المصروف المرتبط)'))return;const G=grcStore();G.rc=G.rc.filter(z=>z.id!==r.id);const tx=r.txId&&S.tx[r.txId];if(tx&&tx.grc===r.id){delete tx.grc;await putTx(tx)}await putSettings();L.innerHTML='';render();toast('حُذفت الفاتورة');return}
+    if(x.id==='grcSave'){const G=grcStore();r.items=r.items.filter(i=>String(i.n||'').trim()&&Math.abs(+i.t||0)>0.0005).map(i=>{const n=String(i.n).trim().slice(0,60);
+        if(i.r&&grcNorm(i.r)&&grcNorm(i.r)!==grcNorm(n))G.alias[grcNorm(i.r)]=n;const k=grcNorm(n);if(i.c&&i.c!==grcAutoCatRaw(n))G.cat[k]=i.c;return{n,k,q:r3(+i.q||1),u:r3(+i.u||Math.abs(+i.t)),t:r3(+i.t),c:i.c||'other',d:i.d?1:0}});
+      if(!r.items.length){toast('أضف صنفًا واحدًا على الأقل');return}if(!(+r.total>0))r.total=r3(r.items.reduce((s,i)=>s+i.t,0));r.store=String(r.store||'').trim().slice(0,30);
+      let m=r.txId&&S.tx[r.txId]?S.tx[r.txId]:grcMatchTx(r);
+      if(!m&&st.mk!=='no'){m={id:uidGen(),type:'exp',amount:r3(r.total),cat:'food',date:r.date||today(),method:'card',note:'مشتريات '+(r.store||'السوبر ماركت'),createdAt:new Date().toISOString()}}
+      if(m){r.txId=m.id;await putTx(Object.assign({},m,{grc:r.id}))}
+      const rec={id:r.id,store:r.store,date:r.date||today(),total:r3(+r.total),items:r.items,via:r.via||'',txId:r.txId||'',file:r.file||'',at:new Date().toISOString()};
+      const i=G.rc.findIndex(z=>z.id===rec.id);if(i>=0)G.rc[i]=rec;else G.rc.push(rec);await putSettings();L.innerHTML='';render();
+      toast('🛒 حُفظت الفاتورة: '+countWord(rec.items.length,'صنف','صنفان','أصناف','صنفًا')+' · '+rial(rec.total)+(m?' · مرتبطة بالمصروف':''),null,5000);openGrc(mOf(rec.date));return}}}
+function grcAutoCatRaw(name){const c=GRC_CATS.find(x=>x[2]&&x[2].test(name));return c?c[0]:'other'}
+/* التحليل والمقارنة */
+function grcIn(from,to){return grcStore().rc.filter(r=>r.date>=from&&r.date<=to)}
+function grcAgg(R){const by={},cat={};R.forEach(r=>r.items.forEach(i=>{if(i.d){cat.disc=r3((cat.disc||0)+i.t);return}const k=i.k||grcNorm(i.n);const o=by[k]=by[k]||{k,n:i.n,c:i.c,q:0,t:0,cnt:0};o.q=r3(o.q+(+i.q||0));o.t=r3(o.t+(+i.t||0));o.cnt++;o.c=i.c;o.n=i.n;cat[i.c]=r3((cat[i.c]||0)+(+i.t||0))}));
+  Object.values(by).forEach(o=>o.u=o.q>0?r3(o.t/o.q):0);return{by,cat,total:r3(R.reduce((s,r)=>s+(+r.total||0),0)),n:R.length}}
+function grcLastPrice(k,before){let best=null;grcStore().rc.forEach(r=>{if(r.date>=before)return;r.items.forEach(i=>{if((i.k||grcNorm(i.n))===k&&!i.d&&(+i.q||0)>0&&(!best||r.date>best.d))best={d:r.date,u:r3((+i.t)/(+i.q)),s:r.store}})});return best}
+function grcMonth(m){const A=grcAgg(grcIn(mStart(m),mEnd(m)));const pm=shiftMonth(m,-1);const B=grcAgg(grcIn(mStart(pm),mEnd(pm)));
+  const avg3=(()=>{let s=0,n=0;for(let k=1;k<=3;k++){const mm=shiftMonth(m,-k);const X=grcIn(mStart(mm),mEnd(mm));if(X.length){s+=X.reduce((a,r)=>a+(+r.total||0),0);n++}}return n?r3(s/n):0})();
+  const items=Object.values(A.by).map(o=>{const p=B.by[o.k];const lp=grcLastPrice(o.k,mStart(m));const ch=lp&&lp.u>0?Math.round((o.u/lp.u-1)*100):null;return Object.assign(o,{pq:p?p.q:0,pt:p?p.t:0,lp,ch,isNew:!lp})}).sort((a,b)=>b.t-a.t);
+  const up=items.filter(o=>o.ch!=null&&o.ch>=5).sort((a,b)=>b.ch-a.ch),down=items.filter(o=>o.ch!=null&&o.ch<=-5).sort((a,b)=>a.ch-b.ch),more=items.filter(o=>o.pq>0&&o.q>=o.pq*1.5&&o.q-o.pq>=1);
+  return{m,A,B,avg3,items,up,down,more,newI:items.filter(o=>o.isNew)}}
+function openGrc(m){m=m||curM();const L=document.getElementById('layer');let view='sum',q='';
+  const draw=()=>{const D=grcMonth(m);const A=D.A,B=D.B;const pct=(a,b)=>b>0.0005?Math.round((a/b-1)*100):null;const pc=pct(A.total,B.total);
+    const cats=GRC_CATS.map(c=>({k:c[0],n:c[1],v:A.cat[c[0]]||0,p:B.cat[c[0]]||0})).filter(x=>x.v||x.p);const mx=Math.max(1,...cats.map(x=>Math.max(x.v,x.p)));
+    const R=grcIn(mStart(m),mEnd(m)).sort((a,b)=>b.date.localeCompare(a.date));
+    let body='';
+    if(!grcStore().rc.length)body=`<div class="panel empty"><b>ابدأ بأول فاتورة</b>اضغط «🧾 إضافة فاتورة» واختر ملف PDF أو صورة فاتورة السوبر ماركت (عربي أو إنجليزي). تراجع الأصناف ثم تحفظ، ومع كل شهر تظهر المقارنات تلقائيًا.</div>`;
+    else if(view==='sum')body=`${A.n?'':`<div class="panel empty"><b>لا فواتير في ${esc(mShort(m))}</b>أضف فواتير هذا الشهر، أو انتقل لشهر آخر.</div>`}
+      ${cats.length?`<div class="panel"><b>🧺 الأقسام مقارنة بـ${esc(mShort(shiftMonth(m,-1)))}</b><div class="grc-cats">${cats.sort((a,b)=>b.v-a.v).map(x=>{const p=pct(x.v,x.p);return `<div class="grc-c"><div class="grc-cl"><span>${esc(x.n)}</span><b class="num">${money(x.v)}</b>${p!=null?`<small class="${p>0?'amt-exp':'amt-inc'}">${p>0?'▲':'▼'} ${Math.abs(p)}%</small>`:x.p?'':'<small class="note">جديد</small>'}</div><div class="grc-bars"><i style="width:${x.v/mx*100}%"></i><i class="p" style="width:${x.p/mx*100}%"></i></div></div>`}).join('')}</div><small class="note">■ هذا الشهر ■ الشهر الماضي</small></div>`:''}
+      ${D.up.length?`<div class="panel"><b>📈 ارتفعت أسعارها</b>${D.up.slice(0,8).map(o=>`<div class="sumrow"><span>${esc(o.n)} <small class="note">كان ${money(o.lp.u)} (${fmtD(o.lp.d)})</small></span><b class="num amt-exp">${money(o.u)} · +${o.ch}%</b></div>`).join('')}</div>`:''}
+      ${D.down.length?`<div class="panel"><b>📉 انخفضت أسعارها</b>${D.down.slice(0,6).map(o=>`<div class="sumrow"><span>${esc(o.n)} <small class="note">كان ${money(o.lp.u)}</small></span><b class="num amt-inc">${money(o.u)} · ${o.ch}%</b></div>`).join('')}</div>`:''}
+      ${D.more.length?`<div class="panel"><b>🛒 اشتريت منها أكثر من الشهر الماضي</b>${D.more.slice(0,6).map(o=>`<div class="sumrow"><span>${esc(o.n)}</span><b class="num">${o.pq} ← ${o.q}</b></div>`).join('')}</div>`:''}
+      ${D.items.length?`<div class="panel"><b>💰 الأكثر تكلفة هذا الشهر</b>${D.items.slice(0,6).map(o=>`<div class="sumrow"><span>${esc(o.n)} <small class="note">× ${o.q}</small></span><b class="num">${money(o.t)}</b></div>`).join('')}</div>`:''}
+      ${A.cat.disc?`<p class="note">🏷️ وفّرت من الخصومات والعروض ${money(Math.abs(A.cat.disc))} ${CUR}</p>`:''}`;
+    else if(view==='items'){const I=D.items.filter(o=>!q||grcNorm(o.n).includes(grcNorm(q)));body=`<input class="search" id="grQ" type="search" placeholder="🔍 ابحث عن صنف" value="${esc(q)}"><div class="mpr-wrap"><table class="mpr-t grc-t"><thead><tr><th>الصنف</th><th>الكمية</th><th>الماضي</th><th>السعر</th><th>التغيّر</th><th>المجموع</th></tr></thead><tbody>${I.map(o=>`<tr><td><b>${esc(o.n)}</b><small class="note" style="display:block">${esc(grcCatName(o.c))}${o.isNew?' · جديد':''}</small></td><td class="nw">${o.q}</td><td class="nw">${o.pq||'—'}</td><td class="nw">${money(o.u)}</td><td class="nw ${o.ch>0?'amt-exp':o.ch<0?'amt-inc':''}">${o.ch==null?'—':(o.ch>0?'+':'')+o.ch+'%'}</td><td class="nw">${money(o.t)}</td></tr>`).join('')||'<tr><td colspan="6" class="note">لا أصناف</td></tr>'}</tbody></table></div>`}
+    else if(view==='rc')body=R.length?`<div class="svr-list">${R.map(r=>`<button class="svr-r" data-grced="${esc(r.id)}"><div class="svr-h"><b>${esc(r.store||'سوبر ماركت')}</b><b class="num">${money(r.total)}</b></div><small class="note">${fmtD(r.date)} · ${countWord(r.items.length,'صنف','صنفان','أصناف','صنفًا')} · ${r.via==='pdf'?'PDF':'صورة'}${r.txId&&S.tx[r.txId]?' · 🔗 مرتبطة بالمصروف':''}</small></button>`).join('')}</div>`:`<div class="panel empty"><b>لا فواتير في ${esc(mShort(m))}</b></div>`;
+    else{const y=m.slice(0,4);const rows=[];for(let k=1;k<=12;k++){const mm=y+'-'+String(k).padStart(2,'0');const X=grcIn(mStart(mm),mEnd(mm));if(X.length)rows.push({mm,t:r3(X.reduce((s,r)=>s+(+r.total||0),0)),n:X.length})}
+      const my=Math.max(1,...rows.map(r=>r.t));const tot=r3(rows.reduce((s,r)=>s+r.t,0));
+      body=rows.length?`<div class="panel">${rows.map(r=>`<div class="grc-y"><span>${esc(mShort(r.mm))}</span><div class="grc-bars"><i style="width:${r.t/my*100}%"></i></div><b class="num">${money(r.t)}</b></div>`).join('')}<div class="sumrow" style="margin-top:8px"><b>مجموع ${y}</b><b class="num">${money(tot)}</b></div><div class="sumrow"><span>متوسط الشهر</span><b class="num">${money(r3(tot/rows.length))}</b></div></div>`:`<div class="panel empty"><b>لا فواتير في ${y}</b></div>`}
+    L.innerHTML=`${sheetTop('مشترياتي')}<h2 style="margin-top:0">🛒 مشتريات السوبر ماركت</h2>
+     <button class="btn block" data-grcpick="1">🧾 إضافة فاتورة (PDF أو صورة)</button>
+     <div class="bl-nav"><button class="iconbtn" data-grm="-1" aria-label="الشهر السابق"><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button><b>${esc(monthName(m))}</b><button class="iconbtn" data-grm="1" aria-label="الشهر التالي"${m>=curM()?' disabled':''}><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button></div>
+     <div class="mpr-k"><div><span>مشتريات الشهر</span><b class="num">${money(A.total)}</b><small class="note">${countWord(A.n,'فاتورة','فاتورتان','فواتير','فاتورة')}</small></div><div><span>مقارنة بالشهر الماضي</span><b class="num ${pc==null?'':pc>0?'amt-exp':'amt-inc'}">${pc==null?'—':(pc>0?'▲ ':'▼ ')+Math.abs(pc)+'%'}</b><small class="note">الماضي ${money(B.total)}</small></div><div><span>متوسط آخر 3 أشهر</span><b class="num">${money(D.avg3)}</b><small class="note">${D.avg3&&A.total?(A.total>D.avg3?'أعلى بـ ':'أقل بـ ')+money(Math.abs(r3(A.total-D.avg3))):''}</small></div><div><span>أصناف مختلفة</span><b class="num">${D.items.length}</b><small class="note">${D.newI.length?D.newI.length+' جديدة':''}</small></div></div>
+     <div class="seg grc-tabs">${[['sum','📊 الملخص'],['items','🥫 الأصناف'],['rc','🧾 الفواتير'],['year','🗓️ السنة']].map(([k,n])=>`<button class="n" data-grv="${k}" aria-pressed="${view===k}">${n}</button>`).join('')}</div>
+     ${body}
+     <div class="actions"><div class="row2"><button class="btn ghost" id="grPrint">🖨️ طباعة / PDF</button><button class="btn ghost" data-close>إغلاق</button></div></div></div></div>`};
+  const redraw=()=>keepSheetPos(L,draw);draw();
+  L.oninput=e=>{if(e.target.id==='grQ'){q=e.target.value;clearTimeout(L._gq);L._gq=setTimeout(()=>{redraw();const s=document.getElementById('grQ');if(s){s.focus();s.setSelectionRange(s.value.length,s.value.length)}},250)}};L.onchange=null;
+  L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+    if(x.dataset.grcpick){grcPick();return}if(x.dataset.grv){view=x.dataset.grv;redraw();return}if(x.dataset.grm){m=shiftMonth(m,+x.dataset.grm);draw();return}
+    if(x.dataset.grced){const r=grcStore().rc.find(z=>z.id===x.dataset.grced);if(r)openGrcReview(r,false);return}
+    if(x.id==='grPrint'){grcPrint(m);return}}}
+function grcPrint(m){const D=grcMonth(m);const A=D.A,B=D.B;const now=new Date();const N=v=>`<span class="n">${money(v)}</span>`;
+  const h=`<header class="rh"><div><div class="rapp">${REP_LOGO}إدارة شؤوني</div><h1>تقرير مشتريات السوبر ماركت</h1><div class="rper">${esc(monthName(m))} · ${esc(mRng(m))}</div></div><div class="rmeta">${repOwner()}أُعدّ في ${fmtD(today())} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}<br>العملة: ر.ع.</div></header>
+   <section><h2>الملخص</h2><div class="kpis"><div><span>مشتريات الشهر</span><b>${N(A.total)}</b></div><div><span>الشهر الماضي</span><b>${N(B.total)}</b></div><div><span>متوسط 3 أشهر</span><b>${N(D.avg3)}</b></div><div><span>عدد الفواتير</span><b>${A.n}</b></div></div></section>
+   <section><h2>الأقسام</h2><table><thead><tr><th>القسم</th><th>هذا الشهر</th><th>الشهر الماضي</th><th>الفرق</th></tr></thead><tbody>${GRC_CATS.filter(c=>A.cat[c[0]]||B.cat[c[0]]).map(c=>`<tr><td>${esc(c[1])}</td><td class="nw">${N(A.cat[c[0]]||0)}</td><td class="nw">${N(B.cat[c[0]]||0)}</td><td class="nw">${N(r3((A.cat[c[0]]||0)-(B.cat[c[0]]||0)))}</td></tr>`).join('')}</tbody></table></section>
+   <section><h2>الأصناف</h2><table><thead><tr><th>الصنف</th><th>القسم</th><th>الكمية</th><th>الشهر الماضي</th><th>سعر الوحدة</th><th>تغيّر السعر</th><th>المجموع</th></tr></thead><tbody>${D.items.map(o=>`<tr><td>${esc(o.n)}</td><td>${esc(grcCatName(o.c))}</td><td class="nw">${o.q}</td><td class="nw">${o.pq||'—'}</td><td class="nw">${N(o.u)}</td><td class="nw">${o.ch==null?'—':(o.ch>0?'+':'')+o.ch+'%'}</td><td class="nw">${N(o.t)}</td></tr>`).join('')}</tbody></table></section>
+   <footer class="rf">تقرير المشتريات من تطبيق «إدارة شؤوني» · من فواتير السوبر ماركت التي أضفتها</footer>`;
+  prStyle('portrait');let el=document.getElementById('printArea');if(!el){el=document.createElement('div');el.id='printArea';document.body.appendChild(el)}el.className='rep';el.innerHTML=h;
+  const old=document.title;document.title='مشتريات '+monthName(m)+' - إدارة شؤوني';window.addEventListener('afterprint',()=>{document.title=old},{once:true});try{window.print()}catch(e){toast('تعذّرت الطباعة هنا')}setTimeout(()=>{document.title=old},3000)}
+
 function vMore(){const cm=curM();const nTx=inMonth(cm).length;const Ds=debts().filter(d=>+d.balance>0.0005);const dT=r3(Ds.reduce((s,d)=>s+(+d.balance||0),0));
   const T=[['log','🧾','السجل',countWord(nTx,'عملية','عمليتان','عمليات','عملية')+' هذا الشهر','data-tab="log"'],['budget','🗂️','إدارة البيانات','الالتزامات والديون والسيارات والإعدادات','data-tab="budget"'],
     ['debt','🏦','الديون',Ds.length?countWord(Ds.length,'دين','دينان','ديون','دينًا')+' · '+money(dT):'لا ديون','data-mdjump="debt"'],['reports','📊','التقارير','يومي · شهري · سنوي · طباعة','data-tab="reports"'],
-    ['ballog','📒','الرصيد اليومي',blHas(today())?'سجّلت رصيد اليوم ✓':'سجّل رصيد حسابك هذا الصباح','data-ballog="1"'],['sim','🧪','ماذا لو؟','جرّب قراراتك قبل اعتمادها','data-tab="sim"'],['spend','🎯','ترشيد المصاريف','أهداف لكل قسم، والصرف العشوائي، والتقدير حتى يصل الكشف','data-tab="spend"'],['cars','🚗','السيارات والوقود',cars().length?countWord(cars().length,'سيارة','سيارتان','سيارات','سيارة'):'أضف سيارتك','data-tab="cars"'],
+    ['grc','🛒','مشتريات السوبر ماركت',(()=>{try{const X=grcIn(mStart(cm),mEnd(cm));return X.length?countWord(X.length,'فاتورة','فاتورتان','فواتير','فاتورة')+' · '+money(r3(X.reduce((s,r)=>s+(+r.total||0),0))):'فواتير PDF أو صور ومقارنة الأشهر'}catch(e){return ''}})(),'data-grcopen="1"'],['ballog','📒','الرصيد اليومي',blHas(today())?'سجّلت رصيد اليوم ✓':'سجّل رصيد حسابك هذا الصباح','data-ballog="1"'],['sim','🧪','ماذا لو؟','جرّب قراراتك قبل اعتمادها','data-tab="sim"'],['spend','🎯','ترشيد المصاريف','أهداف لكل قسم، والصرف العشوائي، والتقدير حتى يصل الكشف','data-tab="spend"'],['cars','🚗','السيارات والوقود',cars().length?countWord(cars().length,'سيارة','سيارتان','سيارات','سيارة'):'أضف سيارتك','data-tab="cars"'],
     ['house','👨‍👩‍👧','البيت والأهل','المصروف لكل شخص','data-tab="house"'],['docs','📄','مستنداتي','خزنة مشفّرة','data-tab="docs"'],['trusts','🤝','الأمانات','أمانات لك وعليك','data-tab="trusts"'],
     ['advisor','🧭','المستشار','صحتك المالية واقتراحات','data-tab="advisor"'],['settings','⚙️','الإعدادات','الراتب، التنبيهات، المزامنة، وضع المدير','data-tab="settings"']];
   return `<h2 style="margin:4px 0 10px">المزيد</h2><div class="more-g">${T.map(([k,ic,t,s,at])=>`<button class="more-t" ${at}><span class="mt-ic">${ic}</span><b>${esc(t)}</b><small>${esc(s)}</small></button>`).join('')}</div>`}
@@ -4240,7 +4400,7 @@ document.addEventListener('click',e=>{if(!admOn())return;if(e.target.closest('#a
  * التحقق يتم داخل الهاتف نفسه (Face ID / Touch ID) بدون إنترنت، ولا تخرج أي بيانات من الجهاز.
  * إن لم تتوفر البصمة في جهاز ما (مثل ماك بلا Touch ID) يُطلب رمز المدير بدلًا منها. */
 const Fin={at:0,pass:false};
-const FIN_SEL=['#dSave','#ffSave','#fSave','#fSaveMore','#rpSave','#dpSave','#paConfirm','#spSave','#nSave','#sSave','#iAdd','#stGo','#smImpGo','#xgSave','#sdSave','[data-quick]','[data-xppaynow]'].join(',');
+const FIN_SEL=['#grcSave','#dSave','#ffSave','#fSave','#fSaveMore','#rpSave','#dpSave','#paConfirm','#spSave','#nSave','#sSave','#iAdd','#stGo','#smImpGo','#xgSave','#sdSave','[data-quick]','[data-xppaynow]'].join(',');
 function finOn(){const c=admCfg();return !!(c&&c.fin)}
 function finFresh(){return Date.now()-Fin.at<60000}
 function finWhy(b){return b.matches('#sdSave')?'إيداع في الادخار':b.matches('#xgSave')?'تسجيل دخل':b.matches('#rpSave,#paConfirm')?'دفع فاتورة':b.matches('#dpSave')?'دفع قسط':b.matches('#stGo,#smImpGo,#iAdd')?'إضافة عمليات من الكشف أو الرسائل':'تسجيل مصروف أو دخل'}
@@ -4640,8 +4800,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.111.0';
+const APP_VERSION='2.112.0';
 const CHANGELOG=[
+ {v:'2.112.0',d:'2026-10-29',items:['🛒 جديد: مشتريات السوبر ماركت. أضف فاتورة PDF إلكترونية أو صورة فاتورة ورقية (عربي وإنجليزي) من «المزيد» أو زر ＋، فيقرأ التطبيق المحل والتاريخ والمجموع وكل صنف بكميته وسعره، داخل الهاتف وبدون إنترنت','🧾 شاشة مراجعة قبل الحفظ: تصحح أي اسم أو سعر أو قسم، وترى هل مجموع الأصناف يطابق مجموع الفاتورة. والتطبيق يتذكر تصحيحاتك (أسماء الأصناف وأقسامها) للفواتير القادمة','🔗 بدون تكرار: إذا كان المصروف مسجّلًا (من كشف البنك أو يدويًا) تُربط به الفاتورة، وإلا تُسجَّل مصروفًا واحدًا في «بقالة وطعام»','📊 المقارنة بين الأشهر: المجموع والأقسام مقارنة بالشهر الماضي ومتوسط 3 أشهر، والأصناف التي ارتفعت أو انخفضت أسعارها، وما اشتريت منه أكثر، والأكثر تكلفة، وجدول كل الأصناف مع تغيّر السعر، وعرض السنة، والطباعة PDF','🔤 أُضيف قارئ اللغة العربية للصور (ملف جديد في مجلد ocr)']},
  {v:'2.111.0',d:'2026-10-28',items:['🔧 تقرير الصيانة وقطع الغيار: لكل سياراتك أو لسيارة واحدة، لسنة أو لكل السنوات. فيه تكلفة الصيانة وعدد المرات والمتوسط وآخر صيانة، وجدول تكلفة كل سيارة','📋 ثلاث طرق للعرض: السجل بالتواريخ (النوع والعداد والورشة والقطع والتكلفة)، وقطع الغيار (كل قطعة: كم مرة غُيّرت وآخر تغيير والعداد والتكلفة)، وحسب نوع الصيانة. ويُطبع PDF','🔩 في نموذج الصيانة خانة جديدة «القطع المستبدلة»: قطعة في كل سطر مع سعرها إن أردت، وإذا تركت التكلفة فارغة تُحسب من مجموع أسعار القطع','⛽ تقرير الوقود صار يشمل الصيانة في نفس السنة، مع رابط للتقرير الكامل، وفي طباعته سجل الصيانة','🐞 إصلاح: تكلفة الصيانة لم تكن تُحسب في تقارير السيارات (تكلفة الكيلومتر مع الصيانة)']},
  {v:'2.110.0',d:'2026-10-27',items:['🐞 إصلاح مهم: الفاتورة التي دفعتها قبل نزول الراتب عن الشهر الجديد كانت تبقى «غير مدفوعة» وحمراء في الشهر الجديد، لأن التطبيق كان يتجاهل الدفعات التي تاريخها قبل بداية الدورة. صارت تُحسب في كل مكان','💡 على بطاقة البند في صفحة الدفع: إذا دفعته قبل نزول الراتب وحُسبت الدفعة للشهر السابق يظهر تنبيه دائم مع زر «احسبها لهذا الشهر» (كان التنبيه يختفي بعد أيام)','🎨 نظام ألوان الخطة صار في كل التطبيق، وليس صفحة الدفع فقط: غطّيت الخطة أو زدت = أخضر «مدفوع حسب الخطة» مع الزائد، أقل من الخطة = أحمر «أقل من الخطة: دُفع كذا من كذا». يظهر في إدارة البيانات، وبطاقات الديون، وجدول الأشهر، وتقرير الخطة وطباعته، وقائمة المراجعة']},
  {v:'2.109.0',d:'2026-10-27',items:['🔗 قائمة المراجعة مربوطة بصفحة الدفع: أي التزام تدفعه كاملًا أو جزئيًا يتحدث فيها تلقائيًا، والمبلغ المقترح لكل بند = الباقي على الخطة (المخطط − ما دفعته منه)','✓ البند الذي غطّيت خطته يظهر «تمت الخطة: دُفع كذا من كذا» محددًا ومقفلًا، مع ما يُرحَّل من الفاتورة، ولا يدخل في «المحدد»','🧹 المبلغ الذي كتبته في القائمة لبند ما يُلغى تلقائيًا إذا دفعت عليه بعدها، فتظهر الأرقام الصحيحة دائمًا','📊 «باقٍ على الخطة» لكل مجموعة وفي ملخص المجموعات وفي الطباعة','👆 الضغط على ✓ مباشرة بعد كتابة مبلغ لا يضيع']},
@@ -8539,7 +8700,7 @@ function openQuickAdd(){const L=document.getElementById('layer');const have={};r
   const tile=(attr,ic,t,s,adm)=>`<button class="qa-t" ${attr}${adm?' data-fqadm="1"':''}><span class="qa-ic">${ic}</span><b>${adm?'<span class="lk">🔒 </span>':''}${t}</b>${s?`<small>${s}</small>`:''}</button>`;
   const SN={elec:'كهرباء',water:'ماء',wifi:'إنترنت',phone:'هاتف',rent:'إيجار',family:'مصروف الأهل',maid:'العاملة',custom:'التزام آخر'};const BILL=['elec','water','wifi','phone','rent'].filter(k=>REC_KINDS[k]);const COM=['family','maid','custom'].filter(k=>REC_KINDS[k]);
   L.innerHTML=`${sheetTop('إضافة')}<h2 style="margin-top:0">ماذا تريد أن تضيف؟</h2>
-   <div class="qa-main"><button class="qa-big e" data-fq="exp"><span>💸</span><b>مصروف</b><small>عملية صرف اليوم</small></button><button class="qa-big i" data-fq="inc"><span>💰</span><b>دخل</b><small>راتب أو مبلغ وصلك</small></button></div>
+   <div class="qa-main"><button class="qa-big e" data-fq="exp"><span>💸</span><b>مصروف</b><small>عملية صرف اليوم</small></button><button class="qa-big i" data-fq="inc"><span>💰</span><b>دخل</b><small>راتب أو مبلغ وصلك</small></button></div><button class="qa-grc" data-grcpick="1"><span>🧾</span><b>فاتورة سوبر ماركت</b><small>PDF أو صورة · تُقرأ الأصناف وتُقارن بالأشهر</small></button>
    ${(()=>{try{return qaPayHtml()}catch(e){return ''}})()}
    ${cars().length?`<div class="qa-h">⛽ الوقود</div><div class="qa-grid">${tile('data-fqodo="1"','<span class="cbadge">📍</span>','قراءة العداد','بداية أو نهاية مشوار')}${tile('data-fqfill="1"','<span class="cbadge">⛽</span>','تعبئة وقود','مصروف للسيارة')}${tile('data-fqtrips="1"','<span class="cbadge">🧾</span>','سجل المشاوير','')}</div>`:''}
    <details class="qa-new"${(()=>{try{return qaPayList().length||debts().some(d=>+d.balance>0.0005)?'':' open'}catch(e){return ' open'}})()}><summary class="qa-h">＋ إضافة فاتورة أو التزام أو دين جديد</summary>
@@ -8549,7 +8710,7 @@ function openQuickAdd(){const L=document.getElementById('layer');const have={};r
    </details>
    <p class="note" style="text-align:center;margin-top:10px">💡 اضغط مطوّلًا على زر ＋ لإضافة مصروف مباشرة.</p>
    <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
-  L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+  L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}if(x.dataset.grcpick){grcPick();return}
     if(x.dataset.fq){openSheet(null,x.dataset.fq==='inc'?{type:'inc'}:null);return}
     if(x.dataset.qapay){const [k,id]=x.dataset.qapay.split('|');L.innerHTML='';if(k==='debt')openDebtPay(id);else openRecPay(id,curM());return}
     if(x.dataset.qamore){const b=L.querySelector('.qa-pay');if(b)b.classList.add('all');x.remove();return}
@@ -9493,6 +9654,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.cedit){openCar(b.dataset.cedit);return}
   if(b.dataset.crenew){openRenew(b.dataset.crenew);return}
   if(b.dataset.csave){carToGoal(b.dataset.csave);return}
+  if(b.dataset.grcopen){openGrc(S.month);return}
   if(b.dataset.svrep!==undefined){openSvcReport({cid:b.dataset.svrep});return}
   if(b.dataset.sadd){openSvc(b.dataset.sadd);return}
   if(b.dataset.sedit){const [c1,s1]=b.dataset.sedit.split(':');openSvc(c1,s1);return}

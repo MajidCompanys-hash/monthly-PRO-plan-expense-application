@@ -2443,3 +2443,20 @@ body.hv2-on header.top .brand{visibility:hidden}
 .svr-p{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}.svr-p span{background:var(--surface-2);border-radius:8px;padding:2px 7px;font-size:11.5px}
 .svr-pr{display:flex;justify-content:space-between;gap:8px;align-items:baseline;border-bottom:1px solid var(--line);padding:6px 2px;font-size:12.5px}
 .svr-sum{display:flex;flex-direction:column;gap:2px;width:100%;text-align:start;border:1px solid var(--line);cursor:pointer;color:var(--fg)}
+
+/* 2.112 مشتريات السوبر ماركت */
+.qa-grc{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;width:100%;margin-top:8px;border:1px dashed var(--line);background:var(--surface-2);border-radius:14px;padding:10px 12px;text-align:start;color:var(--fg);cursor:pointer}
+.qa-grc span{grid-row:1/3;font-size:24px}.qa-grc small{color:var(--muted);font-size:11px}
+.grc-items{display:flex;flex-direction:column;gap:8px}
+.grc-it{border:1px solid var(--line);border-radius:12px;padding:8px;background:var(--surface);display:flex;flex-direction:column;gap:6px}.grc-it.disc{background:var(--inc-soft)}
+.grc-r1{display:flex;gap:6px;align-items:center}.grc-r1 .inp{flex:1;min-width:0}
+.grc-r2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.grc-r2 label{display:flex;flex-direction:column;gap:2px;min-width:0}.grc-r2 small{font-size:10.5px;color:var(--muted)}.grc-r2 .inp{text-align:center;padding:6px 4px}
+.grc-cat{font-size:12.5px;padding:6px 8px}
+.grc-link{margin-top:10px;display:flex;flex-direction:column;gap:4px}
+.grc-raw{white-space:pre-wrap;font-size:11px;max-height:220px;overflow:auto;direction:ltr;text-align:left;margin:8px 0 0}
+.grc-tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important;margin:10px 0}
+.grc-cats{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.grc-cl{display:flex;align-items:baseline;gap:8px;font-size:12.5px}.grc-cl span{flex:1;min-width:0}.grc-cl small{font-size:11px}
+.grc-bars{display:flex;flex-direction:column;gap:2px;margin-top:3px;flex:1}.grc-bars i{display:block;height:6px;border-radius:3px;background:var(--accent);min-width:2px}.grc-bars i.p{background:var(--line)}
+.grc-y{display:grid;grid-template-columns:70px 1fr auto;gap:8px;align-items:center;font-size:12.5px;margin-bottom:6px}
+.grc-t td small{font-size:10.5px}
