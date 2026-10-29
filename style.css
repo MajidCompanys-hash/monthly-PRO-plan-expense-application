@@ -2454,9 +2454,16 @@ body.hv2-on header.top .brand{visibility:hidden}
 .grc-cat{font-size:12.5px;padding:6px 8px}
 .grc-link{margin-top:10px;display:flex;flex-direction:column;gap:4px}
 .grc-raw{white-space:pre-wrap;font-size:11px;max-height:220px;overflow:auto;direction:ltr;text-align:left;margin:8px 0 0}
-.grc-tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important;margin:10px 0}
+.grc-tabs{display:flex!important;overflow-x:auto;gap:4px;margin:10px 0;scrollbar-width:none}.grc-tabs::-webkit-scrollbar{display:none}.grc-tabs .n{flex:0 0 auto;white-space:nowrap;padding:9px 12px}
 .grc-cats{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .grc-cl{display:flex;align-items:baseline;gap:8px;font-size:12.5px}.grc-cl span{flex:1;min-width:0}.grc-cl small{font-size:11px}
 .grc-bars{display:flex;flex-direction:column;gap:2px;margin-top:3px;flex:1}.grc-bars i{display:block;height:6px;border-radius:3px;background:var(--accent);min-width:2px}.grc-bars i.p{background:var(--line)}
 .grc-y{display:grid;grid-template-columns:70px 1fr auto;gap:8px;align-items:center;font-size:12.5px;margin-bottom:6px}
 .grc-t td small{font-size:10.5px}
+.grc-row{cursor:pointer}.grc-row:active{background:var(--surface-2)}
+.grc-sv{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line)}.grc-svi{font-size:20px}.grc-sv>div{display:flex;flex-direction:column;min-width:0}.grc-sv>b{white-space:nowrap}.grc-sv>b small{font-size:10px;color:var(--muted);font-weight:400}
+.grc-lq{max-width:64px;text-align:center}
+.grc-li{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}.grc-li:last-child{border-bottom:0}
+.grc-li>span{min-width:0}.grc-li.done>span{text-decoration:line-through;opacity:.6}.grc-li .iconbtn{width:32px;height:32px;font-size:13px}
+.grc-ck{width:28px;height:28px;border-radius:8px;border:2px solid var(--line);background:var(--surface);color:#fff;font-weight:800;display:grid;place-items:center;padding:0}
+.grc-ck[aria-pressed="true"]{background:var(--inc);border-color:var(--inc)}
