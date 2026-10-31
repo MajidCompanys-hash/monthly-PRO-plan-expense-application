@@ -2467,3 +2467,58 @@ body.hv2-on header.top .brand{visibility:hidden}
 .grc-li>span{min-width:0}.grc-li.done>span{text-decoration:line-through;opacity:.6}.grc-li .iconbtn{width:32px;height:32px;font-size:13px}
 .grc-ck{width:28px;height:28px;border-radius:8px;border:2px solid var(--line);background:var(--surface);color:#fff;font-weight:800;display:grid;place-items:center;padding:0}
 .grc-ck[aria-pressed="true"]{background:var(--inc);border-color:var(--inc)}
+/* 2.114 الادخار المحمي */
+.svl{border-inline-start:4px solid var(--inc);display:flex;flex-direction:column;gap:8px}
+.svl.lv-pace{border-inline-start-color:#d99a1e}.svl.lv-near{border-inline-start-color:#e07a1f}.svl.lv-breach{border-inline-start-color:var(--exp)}
+.svl-ask{border-inline-start-color:var(--line)}
+.svl-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.svl-p{font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap}
+.svl-p.ok{background:color-mix(in srgb,var(--inc) 15%,transparent);color:var(--inc)}.svl-p.warn{background:#d99a1e22;color:#b07a0e}.svl-p.near{background:#e07a1f22;color:#c4620e}.svl-p.bad{background:color-mix(in srgb,var(--exp) 15%,transparent);color:var(--exp)}
+.svl-k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.svl-k>div{background:var(--surface-2);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.svl-k span{font-size:11px;color:var(--muted)}.svl-k b{font-size:16px}.svl-k small{font-size:10.5px}
+.svl-bar{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--surface-2)}
+.svl-bar i{display:block;height:100%}.svl-bar .k{background:var(--inc)}.svl-bar .x{background:repeating-linear-gradient(45deg,var(--exp),var(--exp) 4px,color-mix(in srgb,var(--exp) 60%,#fff) 4px,color-mix(in srgb,var(--exp) 60%,#fff) 8px)}.svl-bar .r{background:#9db8d6}
+.svl-lg{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}.svl-lg .d{display:inline-block;width:9px;height:9px;border-radius:3px;margin-inline-end:3px;vertical-align:middle}
+.svl-lg .d.k,.svl-lg .d.a{background:var(--inc)}.svl-lg .d.x{background:var(--exp)}.svl-lg .d.r{background:#9db8d6}.svl-lg .d.t{background:var(--line)}
+.svl-m{font-size:13.5px;line-height:1.6;padding:8px 10px;border-radius:10px;background:var(--surface-2)}
+.lv-breach .svl-m{background:color-mix(in srgb,var(--exp) 10%,transparent)}.lv-near .svl-m,.lv-pace .svl-m{background:#e07a1f14}
+.svl-a{display:flex;gap:6px;flex-wrap:wrap}
+.svl-cf{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--inc) 10%,transparent);font-size:13px}
+.svl-sg{display:flex;flex-wrap:wrap;gap:6px}
+.svl-y{display:flex;flex-direction:column;gap:6px}
+.svl-row{display:grid;grid-template-columns:minmax(70px,auto) 1fr auto;gap:8px;align-items:center;font-size:12.5px}
+.svl-row b small{font-weight:400;color:var(--muted);font-size:10.5px}
+.svl-mb{position:relative;height:12px}.svl-mb i{position:absolute;inset-inline-start:0;border-radius:99px}.svl-mb .t{top:0;height:12px;background:var(--line)}.svl-mb .a{top:3px;height:6px;background:var(--inc)}.svl-mb .a.no{background:var(--exp)}
+/* 2.114 حسابات الأبناء */
+.kd-card{display:flex;flex-direction:column;gap:8px;width:100%;text-align:start;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;color:inherit;font:inherit}
+.kd-h{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}.kd-h>div{display:flex;flex-direction:column;min-width:0}
+.kd-ic{font-size:28px;width:44px;height:44px;border-radius:14px;background:var(--surface-2);display:grid;place-items:center}.kd-t{font-size:18px}
+.kd-jars{display:flex;flex-wrap:wrap;gap:6px}
+.kd-j{position:relative;overflow:hidden;font-size:12px;padding:4px 9px 6px;border-radius:99px;background:var(--surface-2)}
+.kd-j i{position:absolute;inset-inline-start:0;bottom:0;height:3px;width:var(--p);background:var(--inc)}
+.kd-sg{display:block}
+.kd-jar{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.kd-jh{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.kd-sp{display:grid;grid-template-columns:1fr 110px;gap:8px;align-items:center;padding:4px 0}
+.kd-je{display:flex;flex-direction:column;gap:6px}
+/* 2.114 خطة الصيانة */
+.mt-k{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:8px 0}
+.mt-k>div{background:var(--surface-2);border-radius:12px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.mt-k span{font-size:10.5px;color:var(--muted)}.mt-k b{font-size:17px}.mt-k small{font-size:10px}
+.mt-k .bad b{color:var(--exp)}.mt-k .warn b{color:var(--warn)}
+.mt-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.mt-row:last-of-type{border-bottom:0}
+.mt-b{display:flex;flex-direction:column;min-width:0}.mt-b small{line-height:1.5}
+.mt-row.st-late .mt-ck{border-color:var(--exp)}.mt-row.st-soon .mt-ck{border-color:var(--warn)}
+.mt-row.st-late .mt-b>b{color:var(--exp)}
+.mt-row.st-done .mt-ck{background:var(--inc);border-color:var(--inc)}.mt-row.st-done .mt-b>b{text-decoration:line-through;opacity:.7}
+.mt-row .iconbtn{width:32px;height:32px;font-size:13px}
+.mt-cars{margin-bottom:4px}.mt-open .pill{margin-inline-start:6px}
+#printArea .ck{font-size:16px;text-align:center}#printArea tr.grp td{background:#f2f5f3}
+.mt-car{padding:8px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px}.mt-car:last-of-type{border-bottom:0}
+.mt-gh{font-weight:700;font-size:13px;margin:10px 0 2px;color:var(--muted)}
+.mt-mg{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}.mt-mg>span:first-child{min-width:0}
+.mt-mg.off{opacity:.55}.mt-ma{display:flex;gap:4px;flex:0 0 auto}.mt-mg .iconbtn{width:32px;height:32px;font-size:13px}
+.mt-cb{display:flex;flex-direction:row;gap:0;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden}.mt-cb i{display:block;height:8px;min-width:0;border-radius:0}.mt-cb i.p{background:#9db8d6!important;border-radius:0}
+.mt-mp,.mt-pay{border-inline-start:4px solid #3E7CB1}
+.mt-pr{display:grid;grid-template-columns:1fr auto;gap:6px 8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.mt-pr .seg{grid-column:1/-1}.mt-pr.df{opacity:.65}
