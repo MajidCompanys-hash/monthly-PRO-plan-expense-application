@@ -2550,3 +2550,4 @@ body.hv2-on header.top .brand{visibility:hidden}
 .gd-src{font-size:11px;color:var(--muted);margin-top:2px}.gd-src a{color:inherit;text-decoration:underline}
 .gd-it{margin-top:8px;padding:9px 11px;border-radius:12px;background:linear-gradient(135deg,#fff8e1,#fdf0c4);color:#5b4310;display:flex;flex-direction:column;gap:3px;font-size:13px;line-height:1.7}
 @media (prefers-color-scheme:dark){.gd-it{background:linear-gradient(135deg,#3a3020,#2c2416);color:#f1d894}}
+.md-left{display:block;font-size:12px;color:var(--accent);margin-top:2px}
