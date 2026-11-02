@@ -2552,3 +2552,4 @@ body.hv2-on header.top .brand{visibility:hidden}
 @media (prefers-color-scheme:dark){.gd-it{background:linear-gradient(135deg,#3a3020,#2c2416);color:#f1d894}}
 .md-left{display:block;font-size:12px;color:var(--accent);margin-top:2px}
 .seas-one{margin:6px 0 10px}.seas-kids{display:block;margin-top:4px}
+.imp-acc{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0}.imp-acc select{flex:1;min-width:120px}.imp-bal{display:flex;gap:8px;align-items:flex-start;margin:4px 0 6px;line-height:1.6}.imp-bal input{width:18px;height:18px;flex:0 0 auto;margin-top:3px}
