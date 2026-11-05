@@ -2505,3 +2505,26 @@ body.hv2-on header.top .brand{visibility:hidden}
 .seas-one{margin:6px 0 10px}.seas-kids{display:block;margin-top:4px}
 .imp-acc{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0}.imp-acc select{flex:1;min-width:120px}.imp-bal{display:flex;gap:8px;align-items:flex-start;margin:4px 0 6px;line-height:1.6}.imp-bal input{width:18px;height:18px;flex:0 0 auto;margin-top:3px}
 .ph-card{border-inline-start:4px solid #7A6CC0;margin-top:8px}.ph-card .row2{margin-top:6px}.ph-b{color:#6a5bb0}
+.clipchip{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));inset-inline:16px;max-width:420px;margin:0 auto;z-index:25;display:flex;align-items:center;gap:6px;justify-content:center;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font:inherit;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.18);animation:clipIn .25s ease}
+.clipchip .x{margin-inline-start:auto;opacity:.6;padding:0 6px}
+@keyframes clipIn{from{transform:translateY(-12px);opacity:0}to{transform:none;opacity:1}}
+.arow-btns{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.wkbox{padding:12px 14px;margin-block:10px}
+.wkhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
+.wkhead small{color:var(--muted);font-size:12px}
+.wkrow{padding-block:7px}
+.wkrow+.wkrow{border-top:1px solid var(--line)}
+.wkt{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.wkt b{font-weight:500}
+.wkbar{height:8px;border-radius:6px;background:var(--line);overflow:hidden;margin:6px 0 4px}
+.wkbar i{display:block;height:100%;border-radius:6px;background:var(--inc)}
+.wkrow.warn .wkbar i{background:#D08A2E}
+.wkrow.over .wkbar i{background:var(--exp)}
+.wkrow small{color:var(--muted);font-size:12px}
+.wkacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.wkin{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:10px;align-items:center}
+.wkin small{display:block;color:var(--muted);font-size:12px}
+.wkin .inp{text-align:left}
+.wktbl td small,.wktbl th small{color:var(--muted);font-size:11px}
+.wktbl tr.cur td{font-weight:600}
+.wktbl .wkw{color:#B06A1A}
