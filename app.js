@@ -543,7 +543,7 @@ const LBL_DEF={};LBL_GROUPS.forEach(([,L])=>L.forEach(([k,d])=>LBL_DEF[k]=d));
 function lbl(k){const v=((S.settings&&S.settings.labels)||{})[k];return v&&String(v).trim()?String(v).trim():(LBL_DEF[k]||k)}
 function lblClean(v){return String(v||'').replace(/[<>&"'`]/g,'').replace(/\s+/g,' ').trim().slice(0,40)}
 function lblSet(map){const L=Object.assign({},S.settings.labels||{});Object.entries(map).forEach(([k,v])=>{v=lblClean(v);if(!v||v===LBL_DEF[k])delete L[k];else L[k]=v});S.settings.labels=L;putSettings();render();applyTabLabels()}
-function applyTabLabels(){document.querySelectorAll('nav.tabs [data-tab]').forEach(b=>{const k='tab.'+b.dataset.tab;if(!LBL_DEF[k])return;const t=[...b.childNodes].reverse().find(n=>n.nodeType===3);if(t&&t.textContent!==lbl(k))t.textContent=lbl(k)})}
+function applyTabLabels(){document.querySelectorAll('nav.tabs [data-tab]').forEach(b=>{const k='tab.'+b.dataset.tab;if(!LBL_DEF[k])return;const t=[...b.childNodes].reverse().find(n=>n.nodeType===3);const want=k==='tab.mbud'&&uiV3()&&!((S.settings.labels||{})[k]||'').trim()?'خطتي':lbl(k);if(t&&t.textContent!==want)t.textContent=want})}
 /* زر ✏️ صغير بجانب العنوان، يظهر للمدير فقط */
 function renBtn(k){return admOn()?`<button class="chip ren" type="button" data-rename="${k}" aria-label="تعديل اسم ${esc(lbl(k))}"><span class="lk">🔒 </span>✏️</button>`:''}
 function openRename(k){const L=document.getElementById('layer');
@@ -927,7 +927,8 @@ function txRowBase(t){const c=catOf(t.cat);const cls=t.type==='inc'?'amt-inc':'a
 /* ===================== 🎨 إعادة التصميم (2.102): الخطة المالية الذكية المتكاملة =====================
  * الشريط السفلي: الرئيسية · الدفع · الميزانية · الادخار · المزيد. وكل الصفحات الأخرى في «المزيد» بدون حذف أي ميزة. */
 const MORE_TABS=['log','budget','reports','cars','docs','trusts','house','advisor','settings','sim','spend'];
-function navOf(t){return MORE_TABS.includes(t)?'more':t}
+function uiV3(){try{return Look.get().ui!=='v2'}catch(e){return false}}
+function navOf(t){if(t==='smartsav'&&uiV3())return 'mbud';return MORE_TABS.includes(t)?'more':t}
 /* ===================== 🛒 مشتريات السوبر ماركت (2.112) =====================
  * فاتورة PDF إلكترونية أو صورة فاتورة (عربي وإنجليزي) ← قراءة الأصناف ← مراجعة ← حفظ،
  * وربطها بعملية المصروف نفسها (بلا تكرار)، ثم مقارنة الأشهر: المجموع والأقسام والكميات وتغيّر الأسعار.
@@ -1231,10 +1232,11 @@ function mbData(m){const MF=monthFlow(m);const inc=r3(MF.inc);const o=mbGet(m);c
   return{m,inc,R,alloc,left,act,cap:+S.settings.monthlyBudget||0,custom:!!(S.settings.mbud&&((S.settings.mbud.m||{})[m]||S.settings.mbud.def))}}
 function mbDonut(D,size){const tot=Math.max(D.inc,D.alloc,0.001);let acc=0;const st=MB_K.filter(([k])=>D.R[k].p>0.0005).map(([k,,c])=>{const a=acc/tot*100;acc+=D.R[k].p;const b=Math.min(100,acc/tot*100);return `${c} ${a}% ${b}%`});if(acc<tot)st.push(`var(--surface-2) ${acc/tot*100}% 100%`);
   return `<div class="mb-d" style="--sz:${size||190}px;background:conic-gradient(${st.join(',')})"><div class="mb-dc"><span>الدخل الإجمالي</span><b class="num">${money(D.inc)}</b><small>${CUR}</small></div></div>`}
+function planSegHtml(on){if(!uiV3())return '';return `<div class="plseg" role="tablist" aria-label="خطتي"><button role="tab" data-tab="mbud" aria-selected="${on==='mbud'}">الميزانية</button><button role="tab" data-tab="smartsav" aria-selected="${on==='smartsav'}">الادخار</button></div>`}
 function vMBud(){const m=S.month;const D=mbData(m);
   const rows=MB_K.filter(([k])=>k!=='left'||D.left>0.0005).map(([k,n,c])=>{const x=D.R[k];const pc=D.inc>0?Math.round(x.p/D.inc*100):0;const xa=r3(x.a+(x.e||0));const ap=x.p>0.0005?Math.min(100,Math.round(xa/x.p*100)):0;const over=xa>x.p+0.0005&&k!=='left';
     return `<div class="mb-r"><span class="mb-dot" style="background:${c}"></span><div class="mb-m"><div class="mb-t"><b>${esc(n)}</b><b class="num">${money(x.p)}</b></div>${k==='left'?'<small class="note">غير موزّع، وزّعه على الادخار أو الاحتياطي</small>':`<div class="meter"><i style="width:${ap}%;background:${over?'var(--exp)':c}"></i></div><small class="note">${pc}% من الدخل · صُرف/دُفع ${money(x.a)}${x.e>0.0005?' + <span class="est-c">≈ '+money(x.e)+' تقديري</span>':''}${over?' · <span class="amt-exp">تجاوز بـ '+money(r3(xa-x.p))+'</span>':x.p>0.0005?' · باقٍ '+money(r3(x.p-xa)):''}${x.auto?' · تلقائي من التزاماتك':''}</small>`}</div></div>`}).join('');
-  return `<div class="backrow"><h2 style="margin:4px 0">🍩 الميزانية الشهرية</h2><button class="chip" data-tab="sim">🧪 ماذا لو؟</button></div><p class="note" style="margin-top:-4px">${esc(monthName(m))} · وزّع كل ريال من دخلك بدون تكرار</p>${safe('ميزانية الأسبوع',()=>wkHtml('mbud')||(m===curM()?wkInviteHtml():''))}
+  return `${planSegHtml('mbud')}<div class="backrow"><h2 style="margin:4px 0">🍩 الميزانية الشهرية</h2><button class="chip" data-tab="sim">🧪 ماذا لو؟</button></div><p class="note" style="margin-top:-4px">${esc(monthName(m))} · وزّع كل ريال من دخلك بدون تكرار</p>${safe('ميزانية الأسبوع',()=>wkHtml('mbud')||(m===curM()?wkInviteHtml():''))}
    <div class="panel mb-top">${mbDonut(D)}<div class="mb-sum"><div><span>الموزّع</span><b class="num">${money(D.alloc)}</b></div><div><span>${D.left<0?'زيادة عن الدخل':'غير موزّع'}</span><b class="num ${D.left<-0.0005?'amt-exp':D.left>0.0005?'':'amt-inc'}">${money(Math.abs(D.left))}</b></div><div><span>المصروف/المدفوع فعلًا</span><b class="num">${money(D.act)}</b></div></div>
     ${D.left<-0.0005?`<div class="warnbox">⚠️ مجموع الميزانية أكبر من الدخل بـ ${money(-D.left)}. خفّض بندًا أو أكثر حتى يتساوى المجموع مع الدخل.</div>`:Math.abs(D.left)<=0.0005?'<div class="okbox">✓ كل ريال من دخلك موزّع</div>':''}</div>
    <div class="panel mb-list">${rows}</div>
@@ -2985,7 +2987,7 @@ function vSmartSav(){savPlanSnap();const G=(S.settings.goals||[]);const tot=savT
       ${!c.done&&g.due&&c.days>0?`<small class="note md-left">⏳ باقٍ ${mdTxt(g.due)} حتى ${esc(g.name)} (${dmy(g.due)})</small>`:''}${seasKidsHtml(g.seasKey||g.kind)}
       <small class="note ${et.late?'amt-exp':''}">${c.done?'✓ اكتمل الهدف':et.date?'📅 تحققه المتوقع: '+esc(monthName(mOf(et.date)))+' بمعدل '+money(et.avg)+' شهريًا'+(g.due?(et.late?' · بعد موعدك '+dmy(g.due):' · قبل موعدك ✓'):''):'📅 لا يمكن توقع موعد التحقق قبل أول إيداع'}</small>
       <div class="ss-gb"><button class="chip pay" data-gdep="${esc(g.id)}">＋ إيداع</button>${+g.saved>0?`<button class="chip" data-gspend="${esc(g.id)}">➖ سحب</button>`:''}<button class="chip" data-gedit="${esc(g.id)}">✏️</button></div></div></div>`}).join('');
-  return `<div class="backrow"><h2 style="margin:4px 0">💰 الادخار الذكي</h2><button class="chip" data-tab="home">الرئيسية ‹</button></div>${safe('الادخار المحمي',()=>svlHtml(curM(),'home'))}<button class="xphome" data-kidsopen="1"><span>👨‍👧</span><span><b>حسابات الأبناء</b><small>${esc(kdHomeLine())}</small></span><span class="xph-go">‹</span></button><button class="xphome" data-goldopen="1"><span>🪙</span><span><b>استثمار الذهب</b><small>${esc(gdHomeLine())}</small></span><span class="xph-go">‹</span></button>
+  return `${planSegHtml('smartsav')}<div class="backrow"><h2 style="margin:4px 0">💰 الادخار الذكي</h2><button class="chip" data-tab="home">الرئيسية ‹</button></div>${safe('الادخار المحمي',()=>svlHtml(curM(),'home'))}<button class="xphome" data-kidsopen="1"><span>👨‍👧</span><span><b>حسابات الأبناء</b><small>${esc(kdHomeLine())}</small></span><span class="xph-go">‹</span></button><button class="xphome" data-goldopen="1"><span>🪙</span><span><b>استثمار الذهب</b><small>${esc(gdHomeLine())}</small></span><span class="xph-go">‹</span></button>
    <p class="note" style="margin-top:-4px">خطتك المالية نحو أهدافك</p>
    <div class="savcard ss-top"><span class="lbl">إجمالي المدخرات</span><div class="big"><span class="num">${money(tot)}</span> <small>${CUR}</small></div><div class="ss-bar"><i style="width:${pct}%"></i></div><span class="lbl">${pct}% من مجموع أهدافك ${money(tgt)}</span>
     <div class="row2" style="margin-top:10px"><button class="btn light" id="savDep">＋ أودعت مبلغًا</button><button class="btn light ghost2" data-savgo="log">🧾 السجل</button></div></div>
@@ -5451,12 +5453,15 @@ function syncHtml(){const c=Sync.cfg();
 }
 
 /* ---------- 23. المظهر والثيمات ---------- */
-const SKINS={calm:['هادئ مريح','#2F5D57','#3F7A70','#6A9A8B'],mist:['سماوي ناعم','#2C5878','#3D7AA0','#6FA3C0'],stone:['حجري دافئ','#4A4238','#6B5E4E','#9A8A72'],lavender:['لافندر','#4B4278','#6E5BB0','#9A8BD0'],royal:['أزرق ملكي','#163C74','#2461AE','#178486'],emerald:['زمردي','#0B4D3C','#12805F','#1A9A8A'],burgundy:['عنابي','#5A1428','#8E2A44','#B5523A'],
+const SKINS={night:['ليل مسقط (الجديد)','#0B1621','#2559E8','#0E8A5F'],calm:['هادئ مريح','#2F5D57','#3F7A70','#6A9A8B'],mist:['سماوي ناعم','#2C5878','#3D7AA0','#6FA3C0'],stone:['حجري دافئ','#4A4238','#6B5E4E','#9A8A72'],lavender:['لافندر','#4B4278','#6E5BB0','#9A8BD0'],royal:['أزرق ملكي','#163C74','#2461AE','#178486'],emerald:['زمردي','#0B4D3C','#12805F','#1A9A8A'],burgundy:['عنابي','#5A1428','#8E2A44','#B5523A'],
  gold:['ذهبي ليلي','#2B2416','#5A4416','#9A6B12'],violet:['بنفسجي','#2E1F66','#5B3FB0','#3F6FD0'],sand:['رملي','#5B3A1E','#8A5A2B','#B98545']};
-const Look=(()=>{const K='masareef:look';let v={skin:'calm',mode:'auto',text:'md',cards:'soft'};try{Object.assign(v,JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){}
+const Look=(()=>{const K='masareef:look';let v={skin:'night',mode:'auto',text:'md',cards:'soft',ui:'v3'};try{Object.assign(v,JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){}
   /* مرة واحدة: من كان على اللون الافتراضي القديم ينتقل إلى «هادئ مريح» ويستطيع الرجوع من المظهر */
   try{if(!localStorage.getItem('masareef:lookmig2')){localStorage.setItem('masareef:lookmig2','1');if(v.skin==='royal'){v.skin='calm';localStorage.setItem(K,JSON.stringify(v))}}}catch(e){}
-  function apply(){const r=document.documentElement;r.dataset.skin=v.skin;r.dataset.text=v.text;r.dataset.cards=v.cards;
+  /* 2.126: التصميم الجديد «ليل مسقط» مرة واحدة لكل جهاز، مع حفظ اللون السابق للرجوع إليه */
+  try{if(!localStorage.getItem('masareef:lookmig3')){localStorage.setItem('masareef:lookmig3','1');if(v.skin!=='night'){v.prevSkin=v.skin;v.skin='night'}v.ui='v3';localStorage.setItem(K,JSON.stringify(v))}}catch(e){}
+  if(!SKINS[v.skin])v.skin='night';if(v.ui!=='v2')v.ui='v3';
+  function apply(){const r=document.documentElement;r.dataset.skin=v.skin;r.dataset.ui=v.ui;r.dataset.text=v.text;r.dataset.cards=v.cards;
     if(v.mode==='auto')r.removeAttribute('data-theme');else r.dataset.theme=v.mode;
     const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',(SKINS[v.skin]||SKINS.royal)[1])}
   function set(k,val){v[k]=val;try{localStorage.setItem(K,JSON.stringify(v))}catch(e){}apply()}
@@ -5466,7 +5471,8 @@ function openLook(){const L=document.getElementById('layer');
   const draw=()=>{const v=Look.get();
    L.innerHTML=`${sheetTop('المظهر')}
     <h2 style="margin-top:0">المظهر</h2>
-    <div class="field"><label>لون التطبيق</label><div class="skins">${Object.entries(SKINS).map(([k,s])=>`<button class="skin" data-skin="${k}" aria-pressed="${v.skin===k}"><span class="sw" style="background:linear-gradient(140deg,${s[1]},${s[2]} 60%,${s[3]})"></span>${s[0]}</button>`).join('')}</div></div>
+    <div class="field"><label>شكل التطبيق</label><div class="seg">${[['v3','التصميم الجديد'],['v2','التصميم السابق']].map(([k,n])=>`<button class="n" data-lui="${k}" aria-pressed="${v.ui===k}">${n}</button>`).join('')}</div></div>
+    <div class="field" style="margin-top:14px"><label>لون التطبيق</label><div class="skins">${Object.entries(SKINS).map(([k,s])=>`<button class="skin" data-skin="${k}" aria-pressed="${v.skin===k}"><span class="sw" style="background:linear-gradient(140deg,${s[1]},${s[2]} 60%,${s[3]})"></span>${s[0]}</button>`).join('')}</div></div>
     <div class="field" style="margin-top:14px"><label>الوضع</label><div class="seg seg3">${[['auto','تلقائي'],['light','فاتح'],['dark','داكن']].map(([k,n])=>`<button class="n" data-lmode="${k}" aria-pressed="${v.mode===k}">${n}</button>`).join('')}</div></div>
     <div class="field" style="margin-top:14px"><label>حجم الخط</label><div class="seg">${[['md','عادي'],['lg','كبير']].map(([k,n])=>`<button class="n" data-ltext="${k}" aria-pressed="${v.text===k}">${n}</button>`).join('')}</div></div>
     <div class="field" style="margin-top:14px"><label>شكل البطاقات</label><div class="seg">${[['soft','ناعم بظلال'],['flat','مسطّح بسيط']].map(([k,n])=>`<button class="n" data-lcards="${k}" aria-pressed="${v.cards===k}">${n}</button>`).join('')}</div></div>
@@ -5477,14 +5483,17 @@ function openLook(){const L=document.getElementById('layer');
     if(x.hasAttribute('data-close')){L.innerHTML='';return}
     if(x.dataset.skin){Look.set('skin',x.dataset.skin);draw();return}
     if(x.dataset.lmode){Look.set('mode',x.dataset.lmode);draw();return}
+    if(x.dataset.lui){const v=Look.get();Look.set('ui',x.dataset.lui);if(x.dataset.lui==='v2'&&v.skin==='night')Look.set('skin',v.prevSkin&&SKINS[v.prevSkin]&&v.prevSkin!=='night'?v.prevSkin:'calm');if(x.dataset.lui==='v3'&&v.skin!=='night'){Look.set('prevSkin',v.skin);Look.set('skin','night')}applyTabLabels();render();draw();return}
     if(x.dataset.ltext){Look.set('text',x.dataset.ltext);draw();return}
     if(x.dataset.lcards){Look.set('cards',x.dataset.lcards);draw();return}};
   draw()}
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.125.0';
+const APP_VERSION='2.126.1';
 const CHANGELOG=[
+ {v:'2.126.1',d:'2026-11-05',items:['👛 أيقونة جديدة للتطبيق: محفظة ثلاثية الأبعاد باللون العنابي مع بطاقة ذهبية وخط صاعد.']},
+ {v:'2.126.0',d:'2026-11-05',items:['🎨 تصميم جديد «ليل مسقط»: ألوان كحلية هادئة مع أزرق واضح، وخط عربي جديد أوضح للأرقام يعمل بدون إنترنت، وبطاقات أنعم، ويدعم الوضع الداكن.','🧭 شريط سفلي جديد: الرئيسية · الدفع · زر ＋ في المنتصف · خطتي · المزيد. «خطتي» تجمع الميزانية والادخار بمفتاح تبديل في أعلى الصفحة.','↩️ تستطيع الرجوع للتصميم السابق ولونك السابق في أي وقت من «المظهر» ← شكل التطبيق. المظهر يُحفظ لكل جهاز ولا يمس بياناتك أو المزامنة.']},
  {v:'2.125.0',d:'2026-11-05',items:['🗓️ الميزانية الأسبوعية: سقف من الأحد إلى السبت للبقالة والوقود أو أي فئة، مع ما تبقّى والمسموح يوميًا، وتنبيه عند 80% و100%، وسجل آخر 8 أسابيع. تجدها في الرئيسية وصفحة الميزانية الشهرية و«المزيد».','📋 سجّل رسالة البنك من الحافظة: انسخ الرسالة ثم افتح التطبيق، فيظهر زر «نسخت رسالة البنك؟» يسجّلها بضغطة. وزر «لصق من الحافظة» في صفحة رسائل البنك وقائمة ＋.','💰 قراءة رسائل الإيداع والتحويل إلى حسابك: يتعرّف على «account ending with» و«xxxx1234» ويربطها بحسابك بعد أول مرة.','🔔 تذكير الفواتير قبل موعدها صار فيه زر «ادفع أو احجز» يفتح الفاتورة مباشرة، ويظهر المبلغ المحجوز لها، والإشعار يفتح الفاتورة نفسها.']},
  {v:'2.124.0',d:'2026-11-05',items:['🔄 مزامنة أشمل بين أجهزتك: حجوزات الدفع في حسابات الأبناء، والجهات المستفيدة، والخطة الاستثنائية، ومصادر الدخل، والمجموعات، وسجل الرصيد اليومي، وقائمة المراجعة، وما يتعلمه التطبيق من أسماء المحلات وتصنيفاتها، صارت تُدمج عنصرًا عنصرًا بدل أن يطغى جهاز على آخر','✅ مراجعة شاملة: كل الأزرار لها عمل، ونحو 865 ضغطة آلية على كل الصفحات والنوافذ بلا خطأ، والبيانات تبقى بعد إعادة الفتح وتُسترجع من قاعدة البيانات الداخلية']},
  {v:'2.123.0',d:'2026-11-03',items:['🧹 تنظيف شامل للتطبيق: حُذفت 16 دالة قديمة لا تُستخدم و3 أزرار مخفية بلا عمل، و66 قاعدة تنسيق مكررة أو لعناصر لم تعد موجودة، فصار التطبيق أخف','🎯 هدف ادخار واحد في صفحة الدفع: «معادلة الادخار» و«الادخار المحمي» صارا يستخدمان نفس المبلغ إذا حدّدته، بدل رقمين مختلفين','✅ فحص كل الصفحات والأقسام (فاتح وداكن، مع بيانات وبدونها) بلا أخطاء']},
