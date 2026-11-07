@@ -2601,3 +2601,58 @@ body.hv2-on header.top .brand{visibility:hidden}
 :root[data-ui="v3"] .hv2-hero,:root[data-ui="v3"] .hv2-card,:root[data-ui="v3"] .hv2-t,:root[data-ui="v3"] .hv2-r{border-radius:20px}
 :root[data-ui="v3"] .hv2-big{font-weight:700;letter-spacing:-.02em}
 :root[data-ui="v3"] .clipchip{border-radius:16px;background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+
+/* سعر الذهب في الرئيسية */
+.gdh{padding:14px 16px;margin-block:10px}
+.gdh-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.gdh-r{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:8px}
+.gdh-p{font-size:26px;font-weight:700;letter-spacing:-.01em}
+.gdh-p small{font-size:13px;color:var(--muted);font-weight:500}
+.gdh-ch{font-size:13px;display:inline-flex;align-items:baseline;gap:6px;flex-wrap:wrap;color:var(--muted)}
+.gdh-ch b{font-weight:600}
+.gdh-ch.up b,.gdh-ch.up bdi{color:var(--inc)}
+.gdh-ch.dn b,.gdh-ch.dn bdi{color:var(--exp)}
+.gdh-ch small{color:var(--muted);font-size:12px}
+.gdh-k{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.gdh-k b{color:var(--fg);font-weight:600}
+.gdh-sp{color:#C99A2E;margin-top:8px}
+.gdh-svg{display:block;width:100%;height:34px}
+.gdh-s{margin-top:10px;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.6;background:var(--surface-2,var(--bg));color:var(--fg)}
+.gdh-s.buy{background:var(--inc-soft,#E3F3EC);color:var(--inc)}
+.gdh-s.sell{background:#FFF4DE;color:#8A5A00}
+:root[data-theme="dark"] .gdh-s.sell{background:#3A2C10;color:#F2C14E}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .gdh-s.sell{background:#3A2C10;color:#F2C14E}}
+.gdh-a{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.gdh-n{display:block;margin-top:8px;font-size:11.5px}
+
+/* 2.127: وضع السفر، عاداتي، المراجعة الأسبوعية، تحدي الأبناء */
+.trh{padding:12px 14px;margin-block:10px}
+.trh-r{display:flex;gap:16px;flex-wrap:wrap;margin:6px 0 8px}
+.trh-r>div{display:flex;flex-direction:column;gap:2px}
+.trh-r .note{font-size:12px}
+.trh-r b{font-size:18px}
+.trh-r b small{font-size:12px;color:var(--muted);font-weight:500}
+.fxrow{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.fxrow small{display:block}
+.fxrow .inp{text-align:left}
+.nsh,.wrh{display:flex;align-items:center;gap:12px;width:100%;text-align:right;font:inherit;color:var(--fg);padding:12px 14px;margin-block:10px;cursor:pointer;min-height:44px}
+.nsh-i{font-size:20px}
+.nsh-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.nsh-t small{color:var(--muted);font-size:12px}
+.nsh-d{display:flex;gap:3px}
+.nsh-d i{width:7px;height:18px;border-radius:3px;background:var(--line)}
+.nsh-d i.on{background:var(--inc)}
+.nscal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:12px 0}
+.nscal span{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;background:var(--surface-2,var(--line));color:var(--muted)}
+.nscal span.on{background:var(--inc);color:#fff;font-weight:600}
+.nscal span.td{outline:2px solid var(--accent);outline-offset:1px}
+.whybar{display:flex;height:12px;border-radius:7px;overflow:hidden;background:var(--line);margin:12px 0}
+.whybar i{display:block;height:100%}
+.whyc{align-items:center}
+.whyc small{margin-inline-end:2px}
+.wsrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.wsrow:last-child{border-bottom:0}
+.wsrow small{display:block}
+.wsrow.due b{color:var(--warn,#9A6400)}
+.kdch .kdst{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:2px;margin:8px 0;font-size:16px;text-align:center;color:var(--muted)}
+.kdch .kdst span.cur{border-bottom:2px solid var(--accent)}

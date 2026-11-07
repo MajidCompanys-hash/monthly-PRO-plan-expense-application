@@ -197,8 +197,8 @@ function itemFields(o){const r={};for(const f in o){if(ITEM_SKIP[f])continue;r[f
 const REST_SKIP={_su:1,_u:1,_sk:1,_delI:1};
 /* ===== 2.116 دمج الأقسام الجديدة عنصرًا عنصرًا عند المزامنة (الذهب، الأبناء، خطة الصيانة، فواتير المشتريات، الادخار المحمي، خطط الدفع) =====
  * كل عنصر له رقم (id): الإضافة من جهازين تُجمع، والحذف يُسجَّل (sub:المسار:الرقم) فلا يعود من جهاز آخر، والتعديل يأخذ الأحدث. */
-const SUB_ARR=['payHolds','payees','xplans','incomes','groups'];/* 2.124: قوائم بعناصر لها رقم */
-const SUB_MAP=['reviews','savPlanHist','pchk','merchantCats','stmtLearn','merchMap','catRules','estSnap','balLog','fuelPrices'];/* سجلات بمفتاح (شهر/يوم/اسم) */
+const SUB_ARR=['payHolds','payees','xplans','incomes','groups','wish','travels'];/* 2.124: قوائم بعناصر لها رقم */
+const SUB_MAP=['reviews','savPlanHist','pchk','merchantCats','stmtLearn','merchMap','catRules','estSnap','balLog','fuelPrices','wkRev'];/* سجلات بمفتاح (شهر/يوم/اسم) */
 const SUB_KEYS=['mtasks','kids','gold','grc','svl','mPlans','mbud'].concat(SUB_ARR,SUB_MAP);const SubI={};
 function subLists(st){const out=[];if(Array.isArray(st.mtasks))out.push(['mtasks',st.mtasks]);SUB_ARR.forEach(k=>{if(Array.isArray(st[k]))out.push([k,st[k]])});if(Array.isArray(st.kids)){out.push(['kids',st.kids]);st.kids.forEach(k=>{if(k&&k.id!=null){if(Array.isArray(k.tx))out.push(['kids.'+k.id+'.tx',k.tx]);if(Array.isArray(k.jars))out.push(['kids.'+k.id+'.jars',k.jars])}})}
   if(st.gold){if(Array.isArray(st.gold.lots))out.push(['gold.lots',st.gold.lots]);if(Array.isArray(st.gold.sales))out.push(['gold.sales',st.gold.sales])}if(st.grc){if(Array.isArray(st.grc.rc))out.push(['grc.rc',st.grc.rc]);if(Array.isArray(st.grc.list))out.push(['grc.list',st.grc.list])}return out}
@@ -1173,6 +1173,8 @@ function grcPrint(m){const D=grcMonth(m);const A=D.A,B=D.B;const now=new Date();
 function vMore(){const cm=curM();const nTx=inMonth(cm).length;const Ds=debts().filter(d=>+d.balance>0.0005);const dT=r3(Ds.reduce((s,d)=>s+(+d.balance||0),0));
   const T=[['log','🧾','السجل',countWord(nTx,'عملية','عمليتان','عمليات','عملية')+' هذا الشهر','data-tab="log"'],['budget','🗂️','إدارة البيانات','الالتزامات والديون والسيارات والإعدادات','data-tab="budget"'],
     ['debt','🏦','الديون',Ds.length?countWord(Ds.length,'دين','دينان','ديون','دينًا')+' · '+money(dT):'لا ديون','data-mdjump="debt"'],['reports','📊','التقارير','يومي · شهري · سنوي · طباعة','data-tab="reports"'],
+    ['travel','✈️','وضع السفر',(()=>{try{const T=travelOn();return T?esc(T.name)+' · '+money(travelCalc(T).tot)+' '+CUR:'مصاريف الرحلة بعملة البلد'}catch(e){return ''}})(),'data-tvl="1"'],
+    ['habits','🧠','عاداتي في الصرف',(()=>{try{const N=nsStats();const W=wishStats();return countWord(N.n,'يوم','يومان','أيام','يومًا')+' بلا صرف'+(W.wait.length?' · '+W.wait.length+' في الانتظار':'')}catch(e){return ''}})(),'data-habits="ns"'],
     ['wk','🗓️','الميزانية الأسبوعية',(()=>{try{if(!wkOn())return 'سقف أسبوعي للبقالة والوقود';const W=wkCalc();const o=W.rows.filter(r=>r.p>100).length;return o?'تجاوزت '+o+' من '+W.rows.length:'ضمن الحدود · باقٍ '+countWord(W.daysLeft,'يوم','يومان','أيام','يومًا')}catch(e){return ''}})(),wkOn()?'data-wkhist="1"':'data-wkset="1"'],
     ['grc','🛒','مشتريات السوبر ماركت',(()=>{try{const X=grcIn(mStart(cm),mEnd(cm));return X.length?countWord(X.length,'فاتورة','فاتورتان','فواتير','فاتورة')+' · '+money(r3(X.reduce((s,r)=>s+(+r.total||0),0))):'فواتير PDF أو صور ومقارنة الأشهر'}catch(e){return ''}})(),'data-grcopen="1"'],['sms','📩','رسائل البنك',(()=>{try{const n=list().filter(t=>t.card4||(t.src&&/^h/.test(t.src)&&t.src!=='stmt')).length;return (S.settings.smsAuto?'⚡ التسجيل التلقائي مفعّل':'الصق رسالة البنك أو فعّل التسجيل التلقائي')+(n?' · '+n+' عملية':'')}catch(e){return ''}})(),'data-smsopen="1"'],['kids','👨‍👧','حسابات الأبناء',(()=>{try{return kdHomeLine()}catch(e){return ''}})(),'data-kidsopen="1"'],['gold','🪙','استثمار الذهب',(()=>{try{return gdHomeLine()}catch(e){return ''}})(),'data-goldopen="1"'],['ballog','📒','الرصيد اليومي',blHas(today())?'سجّلت رصيد اليوم ✓':'سجّل رصيد حسابك هذا الصباح','data-ballog="1"'],['sim','🧪','ماذا لو؟','جرّب قراراتك قبل اعتمادها','data-tab="sim"'],['spend','🎯','ترشيد المصاريف','أهداف لكل قسم، والصرف العشوائي، والتقدير حتى يصل الكشف','data-tab="spend"'],['cars','🚗','السيارات والوقود',cars().length?countWord(cars().length,'سيارة','سيارتان','سيارات','سيارة'):'أضف سيارتك','data-tab="cars"'],
     ['house','👨‍👩‍👧','البيت والأهل','المصروف لكل شخص','data-tab="house"'],['docs','📄','مستنداتي','خزنة مشفّرة','data-tab="docs"'],['trusts','🤝','الأمانات','أمانات لك وعليك','data-tab="trusts"'],
@@ -1502,6 +1504,7 @@ function homeV2Html(m){const H=homeFin(),B=H.B,dp=H.dp;const td=today(),dt=new D
      <small class="hv2-bs">${B.acc?'مجموع أرصدة حساباتك (نفس صافي ثروتي)':B.man?'من رصيدك المكتوب '+esc(odoWhenFull(B.at))+' مع العمليات بعده':'الدخل '+money(B.inc)+' − المصروف '+money(B.exp)}</small>${B.est?`<small class="hv2-est">≈ يشمل تقدير ${money(B.est)} لأيام لم يصل كشفها</small>`:''}
      <span class="hv2-pill">${hv2i('cal',14)} ${H.cyc?'الراتب بعد '+countWord(H.payIn,'يوم واحد','يومين','أيام','يومًا'):'نهاية الشهر بعد '+countWord(H.days,'يوم واحد','يومين','أيام','يومًا')}</span></button>
    <div class="hv2-rbig">${hv2Ring(incP,'w')}<small>باقٍ من الدخل</small></div></div>
+  ${S.month===curM()?safe('وضع السفر',()=>travelHomeHtml())+safe('مراجعة الأسبوع',()=>wrHomeHtml()):''}${S.month===curM()?safe('سعر الذهب',()=>gdHomeHtml()):''}
   <div class="hv2-3"><button class="hv2-t t-inc" data-tab="log"><span class="hv2-ti">${hv2i('up')}</span><span class="hv2-tl">الدخل</span><b class="num">${money(B.inc)}</b><small>${H.cyc?'هذه الدورة':'هذا الشهر'}</small></button>
    <button class="hv2-t t-exp" data-tab="monthly"><span class="hv2-ti">${hv2i('due')}</span><span class="hv2-tl">الالتزامات القادمة</span><b class="num">${money(H.up)}</b><small>${H.nUp?countWord(H.nUp,'بند واحد','بندان','بنود','بندًا')+(H.cyc?' قبل الراتب':''):'لا شيء متبقٍ'}</small></button>
    <button class="hv2-t t-pr" data-hfexp="1"><span class="hv2-ti">${hv2i('trend')}</span><span class="hv2-tl">المتوقع قبل الراتب</span><b class="num ${H.proj<0?'amt-exp':''}">${money(H.proj)}</b><small>${H.proj<0?'⚠️ عجز متوقع':'بعد الالتزامات والادخار'}</small></button></div>
@@ -1515,7 +1518,7 @@ function homeV2Html(m){const H=homeFin(),B=H.B,dp=H.dp;const td=today(),dt=new D
 
 /* صفحة الرئيسية الجديدة: الجزء العلوي الجديد ثم بقية الأقسام كما هي */
 function hv2Page(m,pc,inc,exp,left,lastInc,empty){
-  return `<div class="hv2">${homeV2Html(m)}</div>${safe('الادخار المحمي',()=>svlHtml(m,'home'))}${safe('ميزانية الأسبوع',()=>wkHtml('home'))}${(()=>{try{return odoBannerHtml()}catch(e){return ''}})()}
+  return `<div class="hv2">${homeV2Html(m)}</div>${safe('الادخار المحمي',()=>svlHtml(m,'home'))}${safe('ميزانية الأسبوع',()=>wkHtml('home'))}${m===curM()?safe('أيام بلا صرف',()=>nsHomeHtml()):''}${(()=>{try{return odoBannerHtml()}catch(e){return ''}})()}
    ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}
    <div class="srchpin hv2-srch"><button class="srchbar" data-search="1" aria-label="بحث في التطبيق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>ابحث في عملياتك وديونك والتزاماتك…</span></button></div>
    ${safe('البطاقات',()=>homeCarHtml(m,pc,inc,exp,left))}${safe('الرسم',()=>homeChartHtml(m,pc))}${rescueHomeHtml()}${homeAttnHtml(true)}${homeTiles([bizKnown()?'<button class="xphome" data-biz=""><span>💼</span><span><b>مشروعي</b><small>مبيعات وأرباح ومخزون «الزمرة الملكية» في مكان واحد</small></span><span class="xph-go">‹</span></button>':'',(()=>{try{return fuelQuickHtml('home')}catch(e){return ''}})(),'<button class="xphome" data-merch=""><span>📍</span><span><b>الجهات والمحلات</b><small>كم صرفت في كل محطة ومحل: أسبوع، شهر، سنة</small></span><span class="xph-go">‹</span></button>','<button class="xphome" data-prio="1"><span>🧭</span><span><b>الأولويات وخطة الديون</b><small>ماذا أدفع أولًا، وأسرع طريق للتحرر من الديون</small></span><span class="xph-go">‹</span></button>',revHomeHtml(),safe('التصنيف',()=>ckHomeHtml()),xpHomeHtml(),ppHomeHtml(),safe('التوقعات',()=>fcHomeHtml()),seasHomeHtml(),subsHomeHtml(),list().some(t=>t.src==='stmt')?'<button class="stbtn sm" data-bana="1"><span>📊</span><span><b>تحليل الكشوفات</b><small>كل بنوكك · خطة الشهر القادم</small></span><span class="xph-go">‹</span></button>':(hqOn()?'':'<button class="stbtn sm" data-stmt="1"><span>🏦</span><span><b>استيراد كشف البنك</b><small>أضف عمليات الشهر بضغطة</small></span><span class="xph-go">‹</span></button>')])}
@@ -1528,7 +1531,7 @@ function vHome(){
   const empty=!list().length?`<div class="panel empty"><b>ابدأ بتسجيل أول عملية</b>اضغط زر + في الأسفل وسجّل راتبك أو أول مصروف. يمكنك أيضًا تجربة التطبيق ببيانات مثال ثم حذفها.<div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" data-open-add>إضافة عملية</button><button class="btn ghost" id="loadSample">تجربة ببيانات مثال</button></div></div>`:'';
   if(m===curM()&&hv2On()&&list().length){try{return hv2Page(m,pc,inc,exp,left,lastInc,empty)}catch(e){console.warn(e)}}
   return `<div class="srchpin"><button class="srchbar" data-search="1" aria-label="بحث في التطبيق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>ابحث في عملياتك وديونك والتزاماتك…</span></button></div>${safe('الرصيد اليومي',()=>blHomeHtml())}${safe('الادخار المحمي',()=>svlHtml(m,'home'))}${m===curM()?(()=>{try{return homeTopHtml()}catch(e){return ''}})():''}${(()=>{try{return odoBannerHtml()}catch(e){return ''}})()}${homeDuaHtml()}${spiritHtml('top')}${rzHtml('top')}${safe('البطاقات',()=>homeCarHtml(m,pc,inc,exp,left))}
-   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${m===curM()?safe('ميزانية الأسبوع',()=>wkHtml('home')):''}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${homeQuickHtml()}${safe('الرسم',()=>homeChartHtml(m,pc))}${rescueHomeHtml()}${homeAttnHtml()}${homeTiles([bizKnown()?'<button class="xphome" data-biz=""><span>💼</span><span><b>مشروعي</b><small>مبيعات وأرباح ومخزون «الزمرة الملكية» في مكان واحد</small></span><span class="xph-go">‹</span></button>':'',(()=>{try{return fuelQuickHtml('home')}catch(e){return ''}})(),'<button class="xphome" data-merch=""><span>📍</span><span><b>الجهات والمحلات</b><small>كم صرفت في كل محطة ومحل: أسبوع، شهر، سنة</small></span><span class="xph-go">‹</span></button>','<button class="xphome" data-prio="1"><span>🧭</span><span><b>الأولويات وخطة الديون</b><small>ماذا أدفع أولًا، وأسرع طريق للتحرر من الديون</small></span><span class="xph-go">‹</span></button>',revHomeHtml(),safe('التصنيف',()=>ckHomeHtml()),xpHomeHtml(),ppHomeHtml(),safe('التوقعات',()=>fcHomeHtml()),seasHomeHtml(),subsHomeHtml(),list().some(t=>t.src==='stmt')?'<button class="stbtn sm" data-bana="1"><span>📊</span><span><b>تحليل الكشوفات</b><small>كل بنوكك · خطة الشهر القادم</small></span><span class="xph-go">‹</span></button>':(hqOn()?'':'<button class="stbtn sm" data-stmt="1"><span>🏦</span><span><b>استيراد كشف البنك</b><small>أضف عمليات الشهر بضغطة</small></span><span class="xph-go">‹</span></button>')])}
+   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${m===curM()?safe('وضع السفر',()=>travelHomeHtml())+safe('مراجعة الأسبوع',()=>wrHomeHtml())+safe('سعر الذهب',()=>gdHomeHtml())+safe('أيام بلا صرف',()=>nsHomeHtml()):''}${m===curM()?safe('ميزانية الأسبوع',()=>wkHtml('home')):''}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${homeQuickHtml()}${safe('الرسم',()=>homeChartHtml(m,pc))}${rescueHomeHtml()}${homeAttnHtml()}${homeTiles([bizKnown()?'<button class="xphome" data-biz=""><span>💼</span><span><b>مشروعي</b><small>مبيعات وأرباح ومخزون «الزمرة الملكية» في مكان واحد</small></span><span class="xph-go">‹</span></button>':'',(()=>{try{return fuelQuickHtml('home')}catch(e){return ''}})(),'<button class="xphome" data-merch=""><span>📍</span><span><b>الجهات والمحلات</b><small>كم صرفت في كل محطة ومحل: أسبوع، شهر، سنة</small></span><span class="xph-go">‹</span></button>','<button class="xphome" data-prio="1"><span>🧭</span><span><b>الأولويات وخطة الديون</b><small>ماذا أدفع أولًا، وأسرع طريق للتحرر من الديون</small></span><span class="xph-go">‹</span></button>',revHomeHtml(),safe('التصنيف',()=>ckHomeHtml()),xpHomeHtml(),ppHomeHtml(),safe('التوقعات',()=>fcHomeHtml()),seasHomeHtml(),subsHomeHtml(),list().some(t=>t.src==='stmt')?'<button class="stbtn sm" data-bana="1"><span>📊</span><span><b>تحليل الكشوفات</b><small>كل بنوكك · خطة الشهر القادم</small></span><span class="xph-go">‹</span></button>':(hqOn()?'':'<button class="stbtn sm" data-stmt="1"><span>🏦</span><span><b>استيراد كشف البنك</b><small>أضف عمليات الشهر بضغطة</small></span><span class="xph-go">‹</span></button>')])}
    ${spiritHtml('mid')}${rzHtml('mid')}${empty}
    ${recent.length?`<h2>آخر العمليات</h2><div class="panel" style="padding:6px 10px">${recent.map(txRow).join('')}</div><div style="margin-top:8px"><button class="chip" data-tab="log">عرض كل العمليات</button></div>`:''}${debtsBrowseHtml()}${plansHomeHtml()}${finStatusHtml()}${advHomeHtml()}${repHomeHtml()}${spiritHtml('bottom')}${rzHtml('bottom')}`;
 }
@@ -1765,6 +1768,7 @@ function openKid(id){const L=document.getElementById('layer');const k=kdGet(id);
    <div class="mpr-k"><div><span>الرصيد</span><b class="num">${money(X.tot)}</b><small class="note">${X.bank!=null?(Math.abs(X.bank-X.tot)<0.0005?'✓ مطابق للبنك':'البنك: '+money(X.bank)):'لم تطابقه مع البنك'}</small></div><div><span>أودعت في ${curM().slice(0,4)}</span><b class="num amt-inc">${money(X.depY)}</b><small class="note">صرفت منه ${money(X.outY)}</small></div></div>
    ${X.sugM?`<div class="infobox"><span>💡 لتصل إلى أهداف الصناديق في مواعيدها: أودع <b class="num">${money(X.sugM)}</b> ${CUR} شهريًا لـ${esc(k.name)}${X.depM?' (أودعت هذا الشهر '+money(X.depM)+')':''}</span></div>`:''}
    ${(()=>{const H=phList().filter(h=>h.status==='held'&&h.kid===k.id);return H.length?`<div class="panel"><b>🔒 مبالغ محجوزة للدفع</b>${H.map(h=>`<div class="sumrow"><span>${esc(h.name)} <small class="note">· ${esc(mShort(h.m))}</small></span><b class="num">${money(h.amt)}</b></div>`).join('')}<small class="note">تُدفع أو تُلغى من صفحة الالتزام في «الدفع».</small></div>`:''})()}
+   ${kdChHtml(k)}
    <div class="row2"><button class="btn" data-kdm="dep"><span class="lk">🔒 </span>💰 إيداع</button><button class="btn ghost" data-kdm="wd"><span class="lk">🔒 </span>↩️ صرف من صندوق</button></div>
    <div class="stack" style="margin-top:10px">${X.J.map(x=>`<div class="kd-jar"><div class="kd-jh"><span>${x.j.ic} <b>${esc(x.j.n)}</b>${x.due?` <small class="note">· ${fmtD(x.due)} (${kdDueTxt(x)})</small>`:''}</span><b class="num">${money(x.bal)}</b></div>
      ${x.tgt?`<div class="mp-bar"><i style="width:${x.pct}%"></i></div><small class="note">${x.pct}% من ${money(x.tgt)}${x.need?' · باقٍ '+money(x.need)+(x.perM?' · '+money(x.perM)+' شهريًا':''):' · ✓ اكتمل الهدف'}</small>`:`<small class="note">بلا هدف · <button class="linkbtn" data-kdj="1">حدّد هدفًا</button></small>`}</div>`).join('')}</div>
@@ -1773,7 +1777,7 @@ function openKid(id){const L=document.getElementById('layer');const k=kdGet(id);
    <div class="actions"><button class="btn ghost block" data-kdback="1">رجوع</button></div></div></div>`;
   L.oninput=L.onchange=null;
   L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')||x.dataset.kdback){openKids();return}
-    if(x.dataset.kdm){openKidMove(id,x.dataset.kdm);return}if(x.dataset.kdmv){openKidXfer(id);return}if(x.dataset.kdj){openKidJars(id);return}if(x.dataset.kdrec){openKidRec(id);return}if(x.dataset.kdpr1){kdPrint(id);return}if(x.dataset.kded){openKidEdit(id);return}
+    if(x.dataset.kdm){openKidMove(id,x.dataset.kdm);return}if(x.dataset.kdmv){openKidXfer(id);return}if(x.dataset.kdj){openKidJars(id);return}if(x.dataset.kdrec){openKidRec(id);return}if(x.dataset.kdpr1){kdPrint(id);return}if(x.dataset.kdch){openKidCh(id);return}if(x.dataset.kded){openKidEdit(id);return}
     if(x.dataset.kdx){const t=k.tx.find(z=>z.id===x.dataset.kdx);if(!t)return;k.tx=k.tx.filter(z=>z!==t);let tr=null;if(t.trf){tr=transfers().find(z=>z.id===t.trf);S.settings.transfers=transfers().filter(z=>z.id!==t.trf)}await putSettings();openKid(id);
       toast('حُذفت الحركة',async()=>{k.tx.push(t);if(tr)S.settings.transfers=transfers().concat([tr]);await putSettings();openKid(id)},8000)}}}
 function openKidMove(id,type){const L=document.getElementById('layer');const k=kdGet(id);const dep=type==='dep';const X=kdStats(k);let auto=dep;
@@ -1883,11 +1887,39 @@ function gdAdvice(){const C=gdCalc(),G=gdS(),out=[];const add=(lv,ic,t,s)=>out.p
   return out.sort((a,b)=>a.lv-b.lv)}
 function gdSpark(H){if(H.length<2)return '';const v=H.map(h=>+h.p24);const mn=Math.min(...v),mx=Math.max(...v),sp=mx-mn||1;const pts=H.map((h,i)=>`${(i/(H.length-1)*100).toFixed(1)},${(38-((+h.p24-mn)/sp)*34).toFixed(1)}`).join(' ');
   return `<svg class="gd-sp" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg><div class="sumrow"><small class="note">${fmtD(H[0].d)}: ${money(H[0].p24)}</small><small class="note">${fmtD(H[H.length-1].d)}: ${money(H[H.length-1].p24)}</small></div>`}
+/* ===== سعر الذهب في الرئيسية: اليوم مقارنة بالأمس + مؤشر استرشادي من آخر 30 يومًا ===== */
+function gdHomeOn(){const g=S.settings.gold;return !(g&&g.home===false)}
+function gdDayCmp(){const P=(S.settings.gold&&S.settings.gold.prices)||[];if(!P.length)return null;const cur=P[P.length-1];let prev=null;for(let i=P.length-2;i>=0;i--){if(P[i].d<cur.d){prev=P[i];break}}
+  const from=addDays(cur.d,-30);const H=P.filter(x=>x.d>=from&&x.d<=cur.d);const vals=H.map(x=>+x.p24).filter(v=>v>0);
+  const avg=vals.length>=5?vals.reduce((a,v)=>a+v,0)/vals.length:0;
+  return {cur,prev,ch:prev?r3(cur.p24-prev.p24):0,pc:prev?Math.round((cur.p24/prev.p24-1)*1000)/10:0,avg,dv:avg?Math.round((cur.p24/avg-1)*1000)/10:null,lo:vals.length?Math.min(...vals):0,hi:vals.length?Math.max(...vals):0,n:vals.length,H}}
+function gdSignal(D){if(!D||D.dv===null)return ['wait','مؤشر الشراء والبيع يظهر بعد تسجيل أسعار 5 أيام على الأقل خلال شهر'];
+  if(D.dv<=-2)return ['buy','أقل من متوسط آخر 30 يومًا بـ '+Math.abs(D.dv)+'%: وقت مناسب للشراء التدريجي'];
+  if(D.dv>=2)return ['sell','أعلى من متوسط آخر 30 يومًا بـ '+D.dv+'%: ليس أفضل وقت للشراء، ومناسب للبيع إن احتجت'];
+  return ['mid','قريب من متوسط آخر 30 يومًا ('+(D.dv>0?'+':'')+D.dv+'%): لا إشارة واضحة، التزم بخطتك']}
+function gdSparkMini(H){const v=H.map(h=>+h.p24);if(v.length<3)return '';const mn=Math.min(...v),mx=Math.max(...v),sp=mx-mn||1;const pts=v.map((x,i)=>`${(100-i/(v.length-1)*100).toFixed(1)},${(26-((x-mn)/sp)*22).toFixed(1)}`).join(' ');return `<svg class="gdh-svg" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`}
+function gdHomeHtml(){if(!gdHomeOn())return '';const D=gdDayCmp();const G=S.settings.gold||{};
+  if(!D)return `<section class="panel gdh"><div class="gdh-h"><b>🪙 سعر الذهب اليوم</b></div><p class="note" style="margin:6px 0 10px">اعرف سعر غرام الذهب كل يوم ومقارنته بالأمس، ومتى يكون السعر مناسبًا للشراء أو البيع.</p><div class="gdh-a"><button class="chip pay" data-gdnow="1">اعرض سعر اليوم</button><button class="chip" data-gdhide="1">إخفاء</button></div></section>`;
+  const fresh=D.cur.d===today();const up=D.ch>0.0005,dn=D.ch<-0.0005;const sg=gdSignal(D);let C=null;try{C=gdCalc()}catch(e){}
+  const vsCost=C&&C.pure>0&&C.avg>0?Math.round((D.cur.p24/C.avg-1)*1000)/10:null;
+  const prevLbl=D.prev?(D.prev.d===addDays(D.cur.d,-1)?'عن أمس':'عن '+fmtD(D.prev.d)):'';
+  return `<section class="panel gdh"><div class="gdh-h"><b>🪙 سعر الذهب ${fresh?'اليوم':'· آخر سعر '+esc(fmtD(D.cur.d))}</b><small class="note">غرام عيار 24</small></div>
+   <div class="gdh-r"><b class="num gdh-p">${money(D.cur.p24)} <small>${CUR}</small></b>${D.prev?`<span class="gdh-ch ${up?'up':dn?'dn':''}"><b>${up?'▲ ارتفع':dn?'▼ انخفض':'● ثابت'} ${up||dn?money(Math.abs(D.ch)):''}</b> <bdi dir="ltr">${D.pc>0?'+':''}${D.pc}%</bdi> <small>${prevLbl}</small></span>`:'<small class="note">لا يوجد سعر سابق للمقارنة بعد</small>'}</div>
+   <div class="gdh-k"><span>عيار 22 <b class="num">${money(r3(D.cur.p24*22/24))}</b></span><span>عيار 21 <b class="num">${money(r3(D.cur.p24*21/24))}</b></span>${D.n>=2?`<span>أدنى وأعلى 30 يومًا <b class="num">${money(D.lo)} – ${money(D.hi)}</b></span>`:''}</div>
+   ${D.H.length>2?`<div class="gdh-sp">${gdSparkMini(D.H)}</div>`:''}
+   <div class="gdh-s ${sg[0]}">${esc(sg[1])}${vsCost!==null?`<br>متوسط تكلفة ذهبك ${money(C.avg)} للغرام: ${vsCost>=0?'ربح':'خسارة'} ${Math.abs(vsCost)}% على الورق`:''}</div>
+   <div class="gdh-a">${fresh?'':`<button class="chip pay" data-gdnow="1">حدّث سعر اليوم</button>`}${G.netAuto?'':`<button class="chip" data-gdauto="1">تحديث تلقائي يومي</button>`}<button class="chip" data-gdopen="price">التفاصيل والسجل</button></div>
+   <small class="note gdh-n">مؤشر استرشادي من الأسعار المسجلة في تطبيقك، وليس نصيحة استثمارية.</small></section>`}
+function gdAskAuto(go){const L2=document.createElement('div');L2.className='gd-ask';L2.innerHTML=`<div class="gd-askc" role="dialog" aria-modal="true"><b>🌐 تحديث سعر الذهب يوميًا</b><p>عند فتح التطبيق مرة في اليوم، يتصل بخدمة Gold-API لجلب <b>سعر الذهب فقط</b>. لا يُرسَل أي شيء من بياناتك. تستطيع إيقافه من الذهب ← السعر.</p><div class="stack"><button class="btn" data-ga="yes">موافق، حدّثه يوميًا</button><button class="btn ghost" data-ga="no">لا، سأحدّثه بنفسي</button></div></div>`;document.body.appendChild(L2);
+  L2.onclick=e=>{const b=e.target.closest('[data-ga]');if(!b&&e.target!==L2)return;L2.remove();if(b&&b.dataset.ga==='yes')go()}}
+async function gdAutoDaily(){try{const G=S.settings.gold;if(!G||!G.netAuto||!gdHomeOn()||gdAutoDaily.busy)return;const last=(G.prices||[]).slice(-1)[0];const td=today();if(last&&last.d===td)return;if(navigator.onLine===false)return;
+  let k='';try{k=localStorage.getItem('masareef:gdAutoTry')||''}catch(e){}if(k===td)return;try{localStorage.setItem('masareef:gdAutoTry',td)}catch(e){}
+  gdAutoDaily.busy=1;const R=await gdNetGet();await gdAddPrice(R.p24,'auto',R.usd,R.upd);render()}catch(e){}finally{gdAutoDaily.busy=0}}
 /* تحديث السعر من الإنترنت: بموافقتك فقط */
 function gdAskNet(go){const G=gdS();if(G.net==='always'){go();return}const L2=document.createElement('div');L2.className='gd-ask';L2.innerHTML=`<div class="gd-askc" role="dialog" aria-modal="true"><b>🌐 الاتصال بالإنترنت</b><p>سيتصل التطبيق بخدمة Gold-API لجلب <b>سعر الذهب فقط</b>. لا يُرسَل أي شيء من بياناتك أو أموالك. هذا هو الاتصال الوحيد في التطبيق.</p><div class="stack"><button class="btn" data-gn="once">موافق، هذه المرة</button><button class="btn ghost" data-gn="always">موافق دائمًا عند الضغط على الزر</button><button class="btn ghost" data-gn="no">لا، سأكتب السعر يدويًا</button></div></div>`;document.body.appendChild(L2);
   L2.onclick=async e=>{const b=e.target.closest('[data-gn]');if(!b&&e.target!==L2)return;L2.remove();const v=b?b.dataset.gn:'no';if(v==='no')return;if(v==='always'){G.net='always';await putSettings()}go()}}
-async function gdFetch(after){gdAskNet(async()=>{toast('جارٍ جلب سعر الذهب…');try{const ac=new AbortController();const tm=setTimeout(()=>ac.abort(),12000);const r=await fetch(GD_URL,{cache:'no-store',signal:ac.signal,credentials:'omit',referrerPolicy:'no-referrer'});clearTimeout(tm);if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();const usd=+j.price;if(!(usd>100))throw new Error('bad');
-    const p24=r3(usd/GD_OZ*GD_PEG);await gdAddPrice(p24,'net',usd,j.updatedAt||'');gdS().tip={at:new Date().toISOString(),t:gdInstant()};await putSettings();toast('🪙 سعر غرام الذهب عيار 24: '+rial(p24)+gdPriceToast(),null,5000);if(after)after()}catch(e){toast('تعذّر جلب السعر. تأكد من الإنترنت أو اكتب السعر يدويًا',null,6000)}})}
+async function gdNetGet(){const ac=new AbortController();const tm=setTimeout(()=>ac.abort(),12000);try{const r=await fetch(GD_URL,{cache:'no-store',signal:ac.signal,credentials:'omit',referrerPolicy:'no-referrer'});if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json();const usd=+j.price;if(!(usd>100))throw new Error('bad');return {usd,p24:r3(usd/GD_OZ*GD_PEG),upd:j.updatedAt||''}}finally{clearTimeout(tm)}}
+async function gdFetch(after){gdAskNet(async()=>{toast('جارٍ جلب سعر الذهب…');try{const R=await gdNetGet();const p24=R.p24,usd=R.usd;await gdAddPrice(p24,'net',usd,R.upd);gdS().tip={at:new Date().toISOString(),t:gdInstant()};await putSettings();toast('🪙 سعر غرام الذهب عيار 24: '+rial(p24)+gdPriceToast(),null,5000);if(after)after()}catch(e){toast('تعذّر جلب السعر. تأكد من الإنترنت أو اكتب السعر يدويًا',null,6000)}})}
 async function gdAddPrice(p24,src,usd,upd){const G=gdS();const td=today();const at=new Date().toISOString();const last=G.prices[G.prices.length-1];const it={d:td,at,p24:r3(p24),src,usd:usd||null,upd:upd||''};if(last&&last.d===td)G.prices[G.prices.length-1]=it;else G.prices.push(it);if(G.prices.length>800)G.prices=G.prices.slice(-800);await putSettings()}
 /* عبارات خانة الذهب: تحفيز ونصائح، وآيات وأحاديث الزكاة، وتنبيهات السعر، وشرح للمبتدئ */
 const GD_TIPS=['الذهب مخزن للقيمة على المدى الطويل، لا طريق للربح السريع.','اشترِ بمبلغ ثابت كل شهر، فيتوزع سعر شرائك بين الارتفاع والانخفاض.','لا تضع في الذهب مالًا قد تحتاجه قريبًا. اترك لنفسك نقدًا للطوارئ أولًا.','قبل الشراء اسأل عن المصنعية، فهي لا تُسترد غالبًا عند البيع.','احتفظ بفاتورة كل قطعة، فهي تثبت الوزن والعيار وتسهّل البيع لاحقًا.','السبائك والجنيهات للاستثمار، والمصوغات للزينة؛ اعرف هدفك قبل الشراء.','لا تطارد السعر بعد ارتفاع كبير، ولا تبع بخوف بعد هبوط مؤقت.','قارن السعر بين أكثر من محل قبل أن تشتري أو تبيع.','ادخار غرام واحد كل شهر يصنع بعد سنوات رصيدًا يُحسب له حساب.','وزّع أموالك: حساب للطوارئ، وادخار، واستثمار، ولا تجعلها كلها في أصل واحد.','سجّل كل عملية فورًا، فالأرقام الدقيقة أساس القرار الصحيح.','راجع ذهبك مرة كل شهر، لا كل ساعة؛ الاستثمار يحتاج صبرًا.','أخرج زكاة ذهبك في موعدها، فالزكاة تطهّر المال وتباركه.','الذهب يحمي قيمة المال من التضخم على المدى البعيد، لكنه يتقلب على المدى القريب.'];
@@ -1977,7 +2009,9 @@ function openGold(v){v=v||'sum';const L=document.getElementById('layer');
       <div class="panel stack"><b>✍️ إدخال السعر يدويًا</b><div class="fp-in"><select class="inp gd-sel" id="gdMk" aria-label="العيار">${GD_K.map(k=>`<option value="${k}">عيار ${k}</option>`).join('')}</select><input class="inp num" id="gdMp" inputmode="decimal" placeholder="سعر الغرام ${CUR}" aria-label="سعر الغرام"><button class="chip" id="gdMs">حفظ</button></div><small class="note">اكتب سعر الغرام لأي عيار، والتطبيق يحسب البقية.</small></div>
       <div class="panel stack"><b>🏪 فرق سعر المحل</b><div class="fp-in"><input class="inp num" id="gdPr" inputmode="decimal" value="${+G.prem||0}" aria-label="فرق سعر المحل بالنسبة المئوية"><span class="note">%</span><button class="chip" id="gdPrS">حفظ</button></div><small class="note">السعر العالمي يختلف عن سعر المحلات. اكتب +3 مثلًا ليُقيَّم ذهبك أقرب لسعر السوق المحلي، أو −2 لسعر إعادة البيع.</small></div>
       ${H.length>1?`<div class="panel"><b>📈 سجل الأسعار (عيار 24)</b>${gdSpark(H)}</div>`:''}
-      <div class="panel"><div class="sumrow"><span>🌐 الاتصال بالإنترنت لتحديث السعر</span><b>${G.net==='always'?'موافقة دائمة':'يسألك كل مرة'}</b></div>${G.net==='always'?'<button class="chip" id="gdNetOff">إلغاء الموافقة الدائمة</button>':''}<small class="note" style="display:block">المصدر: gold-api.com (سعر الأونصة بالدولار) ← الريال بسعر الربط الثابت 0.3845.</small></div>${gdGlossHtml(['الأونصة','العيار','فرق سعر المحل'])}`}
+      <div class="panel"><div class="sumrow"><span>🌐 الاتصال بالإنترنت لتحديث السعر</span><b>${G.net==='always'?'موافقة دائمة':'يسألك كل مرة'}</b></div>${G.net==='always'?'<button class="chip" id="gdNetOff">إلغاء الموافقة الدائمة</button>':''}<small class="note" style="display:block">المصدر: gold-api.com (سعر الأونصة بالدولار) ← الريال بسعر الربط الثابت 0.3845.</small></div>
+      <div class="panel setrow"><div><b>🔄 تحديث تلقائي مرة يوميًا</b><small>عند فتح التطبيق، لسعر الذهب فقط</small></div><button class="tgl${G.netAuto?' on':''}" id="gdAuto" role="switch" aria-checked="${!!G.netAuto}" aria-label="تحديث تلقائي يومي"></button></div>
+      <div class="panel setrow"><div><b>🏠 سعر الذهب في الرئيسية</b><small>اليوم مقارنة بالأمس مع مؤشر الشراء والبيع</small></div><button class="tgl${gdHomeOn()?' on':''}" id="gdHome" role="switch" aria-checked="${gdHomeOn()}" aria-label="سعر الذهب في الرئيسية"></button></div>${gdGlossHtml(['الأونصة','العيار','فرق سعر المحل'])}`}
     else if(v==='zakat'){const Z=gdZakat();body=`${gdQuoteHtml()}<div class="panel stack"><div class="sumrow"><b>🕌 زكاة الذهب</b><button class="tgl${G.zk.on?' on':''}" id="gdZon" role="switch" aria-checked="${!!G.zk.on}" aria-label="حساب الزكاة"></button></div>
       ${G.zk.on?`<div class="gd-k"><div><span>ذهبك الخالص</span><b class="num">${Z.pure} غ</b></div><div><span>النصاب</span><b class="num">85 غ</b><small class="note">${Z.reach?'✓ بلغ النصاب':'باقٍ '+Z.left+' غ'}</small></div><div><span>مقدار الزكاة 2.5%</span><b class="num ${Z.reach?'amt-exp':''}">${Z.reach?money(Z.amt):'—'}</b></div></div>
        <label class="note" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="gdZjw" ${G.zk.jw?'checked':''} style="width:18px;height:18px"> احسب المصوغات (الحلي) في الزكاة</label><small class="note">في زكاة الحلي المعدّ للاستعمال الشخصي خلاف بين العلماء، فاختر حسب ما تأخذ به.</small>
@@ -2002,6 +2036,8 @@ function openGold(v){v=v||'sum';const L=document.getElementById('layer');
     if(x.dataset.gdsetplan){G.plan=r3(Math.ceil(+x.dataset.gdsetplan));await putSettings();toast('خطة شراء الذهب: '+rial(G.plan)+' شهريًا');v='plan';redraw();return}
     if(x.id==='gdMs'){const k=+document.getElementById('gdMk').value,pv=parseAmt(document.getElementById('gdMp').value);if(!(pv>0)){toast('اكتب سعر الغرام');return}await gdAddPrice(pv*24/k,'man');G.tip={at:new Date().toISOString(),t:gdInstant()};await putSettings();redraw();toast('حُفظ السعر: عيار 24 = '+rial(r3(pv*24/k))+gdPriceToast(),null,5000);return}
     if(x.id==='gdPrS'){const s=String(document.getElementById('gdPr').value).trim().replace('−','-');G.prem=Math.max(-20,Math.min(30,parseFloat(normDigits(s))||0));await putSettings();redraw();toast('فرق سعر المحل: '+G.prem+'%');return}
+    if(x.id==='gdAuto'){if(G.netAuto){delete G.netAuto;await putSettings();redraw();toast('أُوقف التحديث التلقائي');return}gdAskAuto(async()=>{G.netAuto=true;await putSettings();try{localStorage.removeItem('masareef:gdAutoTry')}catch(e){}redraw();toast('🪙 سيتحدث السعر تلقائيًا مرة يوميًا');gdAutoDaily()});return}
+    if(x.id==='gdHome'){G.home=gdHomeOn()?false:true;if(G.home)delete G.home;await putSettings();redraw();return}
     if(x.id==='gdNetOff'){delete G.net;await putSettings();redraw();toast('سيسألك التطبيق قبل كل اتصال');return}
     if(x.id==='gdZon'){G.zk.on=!G.zk.on;await putSettings();redraw();return}
     if(x.id==='gdPlS'){G.plan=r3(parseAmt(document.getElementById('gdPl').value)||0);await putSettings();redraw();toast(G.plan?'خطة شراء الذهب: '+rial(G.plan)+' شهريًا':'أُلغيت الخطة');return}
@@ -2116,7 +2152,7 @@ function reportsMonthExtras(){const m=S.month,a=inMonth(m),st=recStatus(m);
 
 /* ---------- 10. العرض ---------- */
 let AL_BOOT=0;function render(){LIST_ON++;try{return renderMain()}finally{LIST_ON--;if(!LIST_ON)LIST_C=null}}
-function renderMain(){memoClear();try{blSync()}catch(e){}memoClear();setTimeout(svlWatch,60);try{document.body.classList.toggle('hv2-on',S.tab==='home'&&S.month===curM()&&hv2On()&&list().length>0)}catch(e){}try{catGoalSync()}catch(e){}if(!AL_BOOT){AL_BOOT=1;setTimeout(autoLinkSoon,1500)}applyCatNames();admChip();try{hdrMenuSync()}catch(e){}applyTabLabels();try{navTabChanged()}catch(e){}setTimeout(()=>fillStorage(document.getElementById('storBox')),50);
+function renderMain(){memoClear();try{blSync()}catch(e){}memoClear();setTimeout(svlWatch,60);setTimeout(gdAutoDaily,900);try{document.body.classList.toggle('hv2-on',S.tab==='home'&&S.month===curM()&&hv2On()&&list().length>0)}catch(e){}try{catGoalSync()}catch(e){}if(!AL_BOOT){AL_BOOT=1;setTimeout(autoLinkSoon,1500)}applyCatNames();admChip();try{hdrMenuSync()}catch(e){}applyTabLabels();try{navTabChanged()}catch(e){}setTimeout(()=>fillStorage(document.getElementById('storBox')),50);
   {const ml=document.getElementById('mLabel');ml.innerHTML='<span class="ml-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></span><span class="ml-t">'+esc(monthName(S.month))+'</span>'+(S.month===curM()?'<span class="ml-tag cur">الحالي</span>':S.month<curM()?'<span class="ml-tag past">شهر سابق</span>':'<span class="ml-tag fut">شهر قادم</span>')+'<span class="ml-car" aria-hidden="true">▾</span>';const mb=document.getElementById('monthbar');mb.classList.toggle('m-cur',S.month===curM());mb.classList.toggle('m-past',S.month<curM());mb.classList.toggle('m-fut',S.month>curM());mb.title=S.month===curM()?'أنت في الشهر الحالي':'انتبه: أنت في '+monthName(S.month)}
   document.getElementById('monthbar').hidden=S.tab==='settings';
   const v=document.getElementById('view');
@@ -2174,6 +2210,7 @@ function openSheet(t,pre){
      ${isNew?namePickHtml(t):''}
      <div class="catgrid" role="group" aria-label="الفئة">${cats.map(c=>`<button class="cg" data-cat="${c.id}" aria-pressed="${t.cat===c.id}" title="${esc(c.n)}"><i style="background:${c.c}1f;color:${c.c}">${catIcon(c.id)}</i>${esc(SHORT[c.id]||c.n)}</button>`).join('')}${showAll?'':'<button class="cg" id="catMore"><i style="background:var(--surface-2);color:var(--muted)">…</i>المزيد</button>'}</div>
      <input class="inp" id="fNote" placeholder="ملاحظة (اختياري): ${t.type==='inc'?'راتب أكتوبر':'لولو، وقود، قهوة'}" value="${esc(t.note)}" maxlength="80" autocomplete="off" aria-label="ملاحظة">
+ ${t.type==='exp'&&!t.rec&&!t.debt?`<div class="chips whyc" role="group" aria-label="سبب الشراء (اختياري)"><small class="note">السبب:</small>${WHY.map(([k,n])=>`<button class="chip" data-why="${k}" aria-pressed="${t.why===k}">${n}</button>`).join('')}</div>`:''}
      <div class="chips" role="group" aria-label="التاريخ" style="align-items:center"><button class="chip" data-dset="${td}" aria-pressed="${t.date===td}">اليوم</button><button class="chip" data-dset="${yd}" aria-pressed="${t.date===yd}">أمس</button><input class="inp" type="date" id="fDate" value="${esc(t.date)}" style="width:auto;flex:1;min-width:130px;padding:6px 10px" aria-label="تاريخ آخر"></div>
      <div class="seg seg3" role="group" aria-label="طريقة الدفع">${METHODS.map(m=>`<button class="n" data-meth="${m[0]}" aria-pressed="${t.method===m[0]}">${m[1]}</button>`).join('')}</div>
      ${t.type==='exp'&&P.length?`<div class="chips" role="group" aria-label="لمن هذا المصروف"><button class="chip" data-person="" aria-pressed="${!t.person}">لي / للبيت</button>${P.map(p=>`<button class="chip" data-person="${esc(p.id)}" aria-pressed="${t.person===p.id}"><span class="dot" style="background:${personColor(p.id)}"></span>${esc(p.name)}</button>`).join('')}</div>`:''}
@@ -2196,7 +2233,7 @@ function openSheet(t,pre){
     const rec={id:t.id,type:t.type,amount:amt,cat:t.cat,date:t.date||today(),method:t.method,note:(t.note||'').trim(),createdAt:t.createdAt||new Date().toISOString()};
     if(!S.tx[rec.id]){const dup=list().find(x=>x.type===rec.type&&Math.abs(+x.amount-rec.amount)<0.0005&&x.date===rec.date&&(x.cat===rec.cat||(rec.note&&x.note===rec.note)));
       if(dup&&!confirm('سجّلت اليوم عملية بنفس المبلغ '+money(rec.amount)+' ('+(dup.note||catOf(dup.cat).n)+'). هل تريد تسجيلها مرة أخرى؟'))return}
-    if(t.sample)rec.sample=true; if(t.type==='exp'&&t.person)rec.person=t.person; ['rec','src','car','debt','pend','apv','acc'].forEach(k=>{if(t[k])rec[k]=t[k]});if(rec.type!=='exp')delete rec.rec;
+    if(t.sample)rec.sample=true; if(t.type==='exp'&&t.person)rec.person=t.person; ['rec','src','car','debt','pend','apv','acc','why','fx','travel','card4','time'].forEach(k=>{if(t[k])rec[k]=t[k]});if(rec.rec||rec.debt||rec.type!=='exp')delete rec.why;if(rec.type!=='exp')delete rec.rec;
     let setChanged=false;
     if(S.settings.lastMethod!==t.method){S.settings.lastMethod=t.method;setChanged=true}
     if(rec.note&&manualCat){const k=mkey(rec.note);if(k&&(S.settings.merchantCats||{})[k]!==rec.cat){S.settings.merchantCats=Object.assign({},S.settings.merchantCats||{},{[k]:rec.cat});setChanged=true}}
@@ -2221,6 +2258,7 @@ function openSheet(t,pre){
     if(x.id==='fRcpt'){const pre={type:'receipt',tx:t.id,title:'إيصال - '+(t.note||catOf(t.cat).n)+' '+fmtD(t.date)};L.innerHTML='';L.oninput=L.onchange=null;withVault(()=>openDoc(null,pre),Vault.cfg?'افتح الخزنة لإرفاق الإيصال':'أنشئ خزنة المستندات أولًا لحفظ الإيصالات مشفّرة');return}
     if(x.dataset.frcv){const id=x.dataset.frcv;L.innerHTML='';L.oninput=L.onchange=null;withVault(()=>viewDoc(id));return}
     if(x.dataset.person!==undefined){t.person=x.dataset.person;press('[data-person]',b=>b===x);return}
+    if(x.dataset.why){t.why=t.why===x.dataset.why?'':x.dataset.why;press('[data-why]',b=>b.dataset.why===t.why);return}
     if(x.id==='fDelAsk'){grab();askDel=true;draw();return}
     if(x.id==='fDelNo'){grab();askDel=false;draw();return}
     if(x.id==='fDel'){const old=S.tx[t.id]&&Object.assign({},S.tx[t.id]);L.innerHTML='';L.oninput=L.onchange=null;await delTx(t.id);toast('حُذفت العملية',old?()=>putTx(old):null);return}
@@ -4794,7 +4832,7 @@ function printTrust(id){const t=trusts().find(x=>x.id===id);if(!t)return;const c
 
 /* ---------- 19. مستنداتي: الخزنة المشفّرة ---------- */
 const DOC_T={id:['البطاقة الشخصية','idcard','#24508C',60],passport:['جواز السفر','passport','#2E8B72',180],license:['رخصة القيادة','car','#3E7CB1',60],cv:['السيرة الذاتية (CV)','doc','#6B5CA5',0],
- cert:['شهادة','edu','#3B8F5A',0],mulk:['ملكية مركبة','car','#5B6F8A',30],carins:['تأمين مركبة','shield','#3E7CB1',30],carother:['مستند سيارة','car','#7A6CC0',0],debtdoc:['عقد أو مستند دين','loan','#8A4F7D',0],receipt:['إيصال شراء','doc','#3B8F5A',0],debtrcpt:['إيصال سداد','doc','#B0662F',0],health:['بطاقة صحية','health','#C0445A',30],other:['مستند آخر','iother','#7A8494',30]};
+ cert:['شهادة','edu','#3B8F5A',0],mulk:['ملكية مركبة','car','#5B6F8A',30],carins:['تأمين مركبة','shield','#3E7CB1',30],carother:['مستند سيارة','car','#7A6CC0',0],debtdoc:['عقد أو مستند دين','loan','#8A4F7D',0],receipt:['إيصال شراء','doc','#3B8F5A',0],warranty:['ضمان جهاز','shield','#7A6CC0',30],debtrcpt:['إيصال سداد','doc','#B0662F',0],health:['بطاقة صحية','health','#C0445A',30],other:['مستند آخر','iother','#7A8494',30]};
 const VDB=(()=>{let dbp=null;
   const open=()=>dbp||(dbp=new Promise((res,rej)=>{const r=indexedDB.open('masareef-vault',1);r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('kv');d.createObjectStore('docs',{keyPath:'id'});d.createObjectStore('blobs')};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
   const rq=r=>new Promise((res,rej)=>{r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
@@ -5065,7 +5103,7 @@ function admAsk(then,why){let el=document.getElementById('admLayer');if(!el){el=
   el.onkeydown=e=>{if(e.key==='Enter'&&e.target.id==='admPin'){e.preventDefault();document.getElementById('admGo').click()}};
   if(!c.bio)setTimeout(()=>{const i=document.getElementById('admPin');if(i)i.focus()},60)}
 /* كل زر تعديل أو حذف أو تراجع أو اعتماد يمر من هنا أولًا */
-const ADM_SEL=['[data-edit]','[data-lseldel]','[data-cmmove]','[data-grpedit]','[data-txdel]','[data-txedit]','[data-dpe]','[data-redit]','[data-dedit]','[data-tedit]','[data-cedit]','[data-gedit]','[data-pedit]','[data-sedit]','[data-rpedit]',
+const ADM_SEL=['[data-tvdel]','[data-wsdel]','[data-edit]','[data-lseldel]','[data-cmmove]','[data-grpedit]','[data-txdel]','[data-txedit]','[data-dpe]','[data-redit]','[data-dedit]','[data-tedit]','[data-cedit]','[data-gedit]','[data-pedit]','[data-sedit]','[data-rpedit]',
   '[data-apv]','[data-apedit]','#syncEncOff','[data-purge]','#pgGo','#priApply','#mxRen','#mxMerge','#mxUnmerge','[data-mxsplit]','#smSave','#smDel','#smBulkDel','#smImpGo','#dpGo','#fcBud','#dlGo','[data-unpay]','[data-recpick]','[data-secadd]','[data-fqadm]','[data-xadd]','[data-xedit]','[data-xundo]','[data-early]','[data-icoedit]','#rzOn','[data-rzpos]','[data-payedit]','#payAdd','[data-mdi]','#plOn','[data-plscope]','[data-plbefore]','[data-rename]','#lblEdit','[data-acedit]','#acAdd','[data-trdel]','[data-subadd]','#dnEdit','#wdEdit','#apvAll','[id$="DelAsk"]','#pdYes','.toast button','#clearSample','#restoreBtn','label[for="restoreFile"]','label[for="restoreFile2"]','[data-snaprest]','#syncUnlink','#vaultReset','#admOff','#admPinChange','#admApprove','#admBioSet','#admFinSet','[data-odordel]','[data-odoredit]','#pkAddGo','[data-mted]','[data-mtadd]','[data-mtseed]','[data-mtseedc]','[data-mtdel]','[data-mtoff]','[data-mtcopy]','[data-mtclr]','[data-mtun]','[data-kdedit]','[data-kded]','[data-kdj]','[data-kdx]','#svlS','#svlX','[data-gded]','#gdDel'].join(',');
 document.addEventListener('click',e=>{if(!admOn())return;if(e.target.closest('#admLayer'))return;
   if(admOpen()){if(e.target.closest('button,label'))Adm.last=Date.now();return}
@@ -5076,7 +5114,7 @@ document.addEventListener('click',e=>{if(!admOn())return;if(e.target.closest('#a
  * التحقق يتم داخل الهاتف نفسه (Face ID / Touch ID) بدون إنترنت، ولا تخرج أي بيانات من الجهاز.
  * إن لم تتوفر البصمة في جهاز ما (مثل ماك بلا Touch ID) يُطلب رمز المدير بدلًا منها. */
 const Fin={at:0,pass:false};
-const FIN_SEL=['#grcSave','#phSave','[data-phuse]','[data-phback]','#gdSave','#mtDone','#kdSave','#krS','#dSave','#ffSave','#fSave','#fSaveMore','#rpSave','#dpSave','#paConfirm','#spSave','#nSave','#sSave','#iAdd','#stGo','#smImpGo','#xgSave','#sdSave','[data-quick]','[data-xppaynow]'].join(',');
+const FIN_SEL=['#grcSave','#phSave','[data-phuse]','[data-phback]','#gdSave','#mtDone','#kdSave','#krS','#dSave','#ffSave','#fSave','#fSaveMore','#rpSave','#dpSave','#paConfirm','#spSave','#nSave','#sSave','#iAdd','#stGo','#smImpGo','#xgSave','#sdSave','[data-quick]','[data-xppaynow]','#tvSave'].join(',');
 function finOn(){const c=admCfg();return !!(c&&c.fin)}
 function finFresh(){return Date.now()-Fin.at<60000}
 function finWhy(b){return b.matches('#sdSave')?'إيداع في الادخار':b.matches('#xgSave')?'تسجيل دخل':b.matches('#rpSave,#paConfirm')?'دفع فاتورة':b.matches('#dpSave')?'دفع قسط':b.matches('#stGo,#smImpGo,#iAdd')?'إضافة عمليات من الكشف أو الرسائل':'تسجيل مصروف أو دخل'}
@@ -5218,10 +5256,11 @@ function parseSms(raw){
   const key=hashStr(t);
   const base={raw:raw.trim(),key,ok:false};
   if(/\bOTP\b|رمز التحقق|رمز التفعيل|كلمة المرور|one[- ]time|verification code|الرمز السري/i.test(t))return Object.assign(base,{reason:'رسالة رمز تحقق وليست عملية'});
-  let amount=0;AMT_RE.lastIndex=0;let m;
-  while((m=AMT_RE.exec(t))){const pre=t.slice(Math.max(0,m.index-32),m.index);
+  let amount=0;AMT_RE.lastIndex=0;let m;let fx=null;const tA=t.replace(/ريال\s*(?:سعودي|قطري|يمني|إيراني)/g,'FXR');
+  while((m=AMT_RE.exec(tA))){const pre=tA.slice(Math.max(0,m.index-32),m.index);
     if(/bal|رصيد|available|avl|المتاح|المتوفر|limit|الحد/i.test(pre))continue;
     amount=parseFloat((m[1]||m[2]).replace(/,/g,''));if(amount)break}
+  if(!amount){const F=fxFind(t);if(F){fx={cur:F.cur,amt:F.amt,rate:fxRate(F.cur)};amount=fxToOmr(F.cur,F.amt)}}/* 2.127: مبلغ بعملة أجنبية يُحوَّل للريال، ولا يُؤخذ الرصيد مكانه */
   if(!amount){const f=t.match(/(?:amount|amt|مبلغ|بمبلغ)\s*:?\s*([0-9][0-9,]*\.[0-9]{1,3})/i)||t.match(/\b([0-9][0-9,]*\.[0-9]{3})\b/);if(f)amount=parseFloat(f[1].replace(/,/g,''))}
   if(!amount)return Object.assign(base,{reason:'لم أجد مبلغًا في الرسالة'});
   const type=smsDirection(t);
@@ -5235,7 +5274,7 @@ function parseSms(raw){
   else if(type==='inc')cat=/salary|payroll|راتب/i.test(t)?'salary':'iother';
   else if(atm)cat='other';
   else{cat='other';for(const [c,words] of Object.entries(KW)){if(words.some(w=>low.includes(w))){cat=c;break}}}
-  const note=merchant||(atm?'سحب نقدي من الصراف':type==='inc'?(cat==='salary'?'راتب':'إيداع في الحساب'):'');
+  let note=merchant||(atm?'سحب نقدي من الصراف':type==='inc'?(cat==='salary'?'راتب':'إيداع في الحساب'):'');if(fx)note=(note?note+' · ':'')+fx.amt+' '+fxName(fx.cur);
   const dup=list().some(x=>x.src===key);
   /* 2.118: الرصيد بعد العملية، وآخر 4 أرقام من البطاقة، ووقت العملية (صيغة البنك الوطني العماني وغيرها) */
   const bm=t.match(/(?:available|avl\.?|avail\.?)\s*(?:bal(?:ance)?\.?)?\s*(?:is|:)?\s*(?:OMR|RO|R\.O\.?)?\s*(-?[0-9][0-9,]*\.[0-9]{1,3})/i)||t.match(/(?:الرصيد\s*(?:المتاح|المتوفر)?|رصيدك(?:\s*المتاح)?)\s*(?:هو|:)?\s*(?:ر\.?\s*ع\.?|OMR)?\s*(-?[0-9][0-9,]*\.[0-9]{1,3})/);
@@ -5246,8 +5285,8 @@ function parseSms(raw){
   const near=dup?null:list().find(x=>x.type===type&&Math.abs((+x.amount||0)-amt)<0.0005&&x.date&&Math.abs(dDiff(x.date,date))<=1);
   const accDef=(card4&&(S.settings.card4Acc||{})[card4])||(method==='cash'?'cash':(method==='card'?((S.settings.accounts||[]).find(a=>a.forCard)||{}).id:'')||'main');
   const dirSure=SMS_CR.concat(SMS_DR).some(([r])=>r.test(t))||/salary|payroll|راتب/i.test(t);const dateSure=/\d{4}-\d{1,2}-\d{1,2}|\b\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}\b|\d{1,2}[\s\-]?(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(t);
-  const sure=dirSure&&dateSure&&(!!merchant||atm||type==='inc')&&(!card4||!!(S.settings.card4Acc||{})[card4]);
-  return Object.assign(base,{ok:true,sure,on:!dup&&!near,dup,near:near?{id:near.id,note:near.note||catOf(near.cat).n,date:near.date}:null,amount:amount.toFixed(3),type,cat,date,time,method,note,merchant,bal,card4,acc:accDef,setBal:bal!=null});
+  const sure=dirSure&&dateSure&&(!!merchant||atm||type==='inc')&&(!card4||!!(S.settings.card4Acc||{})[card4])&&(!fx||!!FX_DEF[fx.cur][2]);
+  return Object.assign(base,{ok:true,sure,on:!dup&&!near,dup,near:near?{id:near.id,note:near.note||catOf(near.cat).n,date:near.date}:null,amount:amount.toFixed(3),type,cat,date,time,method,note,merchant,bal,card4,acc:accDef,setBal:bal!=null,fx});
 }
 function splitMsgs(text){
   const parts=normDigits(text).split(/\n\s*\n+/).map(s=>s.trim()).filter(Boolean);
@@ -5490,8 +5529,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.126.1';
+const APP_VERSION='2.127.0';
 const CHANGELOG=[
+ {v:'2.127.0',d:'2026-11-07',items:['💱 إصلاح مهم: رسائل البنك بعملة أجنبية (درهم، دولار، ريال سعودي…) كانت تُسجَّل بالرصيد بدل المبلغ. الآن تُحوَّل للريال تلقائيًا بسعر ثابت للعملات المربوطة، وتستطيع تعديل الأسعار ورسوم البطاقة.','✈️ وضع السفر: ميزانية للرحلة، ومصروف بعملة البلد يُحوَّل للريال، وبطاقة في الرئيسية، وتقرير «كم كلّفتني الرحلة» عند الإنهاء.','🧠 عاداتي في الصرف: أيام بلا صرف مع تقويم وسلسلة، وسبب الشراء (حاجة/رغبة/اندفاع) عند إضافة مصروف، وقائمة «انتظر قبل الشراء» تحسب ما وفّرته بالتراجع.','🗓️ المراجعة الأسبوعية: تظهر من الخميس، فيها صرف الأسبوع ومقارنته بالسابق وما يستحق قريبًا.','🏆 تحدي الادخار لميرة وملهم: هدف شهري ونجمة كل شهر يتحقق، ومستويات برونزي وفضي وذهبي.','🛡️ نوع مستند جديد «ضمان جهاز» في مستنداتي مع تنبيه قبل انتهاء الضمان بشهر.','🪙 سعر الذهب في أعلى الرئيسية: غرام عيار 24 مع عيار 22 و21، ومقارنته بالأمس (ارتفع أو انخفض وبكم ونسبته)، وأدنى وأعلى سعر في 30 يومًا مع خط بياني صغير.','🧭 مؤشر استرشادي: «وقت مناسب للشراء التدريجي» إذا كان السعر أقل من متوسط آخر 30 يومًا بـ 2% أو أكثر، و«مناسب للبيع إن احتجت» إذا كان أعلى، مع مقارنة بمتوسط تكلفة ذهبك.','🔄 تحديث تلقائي اختياري مرة يوميًا عند فتح التطبيق، لا يعمل إلا بعد موافقتك ويُوقف من الذهب ← السعر، ومنه أيضًا تخفي البطاقة من الرئيسية.']},
  {v:'2.126.1',d:'2026-11-05',items:['👛 أيقونة جديدة للتطبيق: محفظة ثلاثية الأبعاد باللون العنابي مع بطاقة ذهبية وخط صاعد.']},
  {v:'2.126.0',d:'2026-11-05',items:['🎨 تصميم جديد «ليل مسقط»: ألوان كحلية هادئة مع أزرق واضح، وخط عربي جديد أوضح للأرقام يعمل بدون إنترنت، وبطاقات أنعم، ويدعم الوضع الداكن.','🧭 شريط سفلي جديد: الرئيسية · الدفع · زر ＋ في المنتصف · خطتي · المزيد. «خطتي» تجمع الميزانية والادخار بمفتاح تبديل في أعلى الصفحة.','↩️ تستطيع الرجوع للتصميم السابق ولونك السابق في أي وقت من «المظهر» ← شكل التطبيق. المظهر يُحفظ لكل جهاز ولا يمس بياناتك أو المزامنة.']},
  {v:'2.125.0',d:'2026-11-05',items:['🗓️ الميزانية الأسبوعية: سقف من الأحد إلى السبت للبقالة والوقود أو أي فئة، مع ما تبقّى والمسموح يوميًا، وتنبيه عند 80% و100%، وسجل آخر 8 أسابيع. تجدها في الرئيسية وصفحة الميزانية الشهرية و«المزيد».','📋 سجّل رسالة البنك من الحافظة: انسخ الرسالة ثم افتح التطبيق، فيظهر زر «نسخت رسالة البنك؟» يسجّلها بضغطة. وزر «لصق من الحافظة» في صفحة رسائل البنك وقائمة ＋.','💰 قراءة رسائل الإيداع والتحويل إلى حسابك: يتعرّف على «account ending with» و«xxxx1234» ويربطها بحسابك بعد أول مرة.','🔔 تذكير الفواتير قبل موعدها صار فيه زر «ادفع أو احجز» يفتح الفاتورة مباشرة، ويظهر المبلغ المحجوز لها، والإشعار يفتح الفاتورة نفسها.']},
@@ -6489,7 +6529,7 @@ async function fillStorage(el){if(!el)return;const s=await storageInfo();const t
 async function impSave(items){let n=0,IMP_bal=0;const IMP_added=[],IMP_new=[];const mc=Object.assign({},S.settings.merchantCats||{});
       for(const it of items){if(!it.ok||!it.on)continue;const amt=parseAmt(it.amount);if(!amt)continue;
         const rec={id:uidGen(),type:it.type,amount:amt,cat:it.cat,date:it.date||today(),method:it.method,note:(it.note||'').trim(),createdAt:new Date().toISOString(),src:it.key};
-        if(it.acc&&it.acc!=='main')rec.acc=it.acc;if(it.card4)rec.card4=it.card4;if(it.time)rec.time=it.time;
+        if(it.acc&&it.acc!=='main')rec.acc=it.acc;if(it.card4)rec.card4=it.card4;if(it.time)rec.time=it.time;if(it.fx)rec.fx=it.fx;{const T0=travelOn();if(T0&&it.fx&&rec.date>=T0.from)rec.travel=T0.id}
         if(it.card4&&it.acc){S.settings.card4Acc=Object.assign({},S.settings.card4Acc||{},{[it.card4]:it.acc})}
         if(it.setBal&&it.bal!=null){const A=accList();const a=A.find(z=>z.id===(it.acc||'main'));if(a){const key2=rec.date+'T'+(it.time||'23:59');const old=a.anchor;const oldKey=old?(old.date+'T'+(old.msgT||(old.at||'').slice(11,16)||'00:00')):'';
           if(!old||key2>=oldKey){a.log=(a.log||[]).concat([{date:rec.date,app:accBalance(a),actual:it.bal,src:'sms'}]).slice(-24);a.anchor={bal:it.bal,date:rec.date,at:rec.createdAt,msgT:it.time||'',src:'sms'};if(a.id==='main'){const mm=mainAcc();mm.balance=it.bal;mm.at=rec.date;S.settings.mainAcc=mm}S.settings.accounts=A;IMP_bal=(IMP_bal||0)+1}}}
@@ -6888,6 +6928,161 @@ function openWkHist(){const L=document.getElementById('layer');const td=today();
    ${cats.length?`<p class="note">التزمت بحدودك في <b>${okN}</b> من آخر 7 أسابيع مكتملة.</p><div class="mpr-wrap"><table class="mpr-t wktbl"><thead><tr><th>الأسبوع</th>${cats.map(c=>`<th>${esc(wkName(c))}<small> (${money(C.caps[c])})</small></th>`).join('')}</tr></thead><tbody>${Ws.map(W=>`<tr${W.cur?' class="cur"':''}><td class="nw">${wkRange(W.ws,W.we)}${W.cur?' <small>الحالي</small>':''}</td>${W.rows.map(r=>`<td class="num ${r.p>100?'amt-exp':r.p>=80?'wkw':''}">${money(r.s)}<small> <bdi dir="ltr">${r.p}%</bdi></small></td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<p class="note">لم تحدد حدودًا أسبوعية بعد.</p>'}
    <div class="actions"><button class="btn block" data-wkset2="1">تعديل الحدود</button><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
   L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}if(x.dataset.wkset2){openWkSet();return}}}
+/* ==================== 2.127: العملات الأجنبية ووضع السفر ==================== */
+/* [سعر الوحدة بالريال العماني، الاسم، 1 = عملة مربوطة بسعر ثابت (دقيقة)، 0 = سعر تقريبي عدّله] */
+const FX_DEF={USD:[0.3845,'دولار أمريكي',1],AED:[0.1047,'درهم إماراتي',1],SAR:[0.10253,'ريال سعودي',1],QAR:[0.10563,'ريال قطري',1],BHD:[1.02261,'دينار بحريني',1],JOD:[0.54231,'دينار أردني',1],KWD:[1.26,'دينار كويتي',0],EUR:[0.446,'يورو',0],GBP:[0.51,'جنيه إسترليني',0],EGP:[0.008,'جنيه مصري',0],INR:[0.0044,'روبية هندية',0],TRY:[0.0092,'ليرة تركية',0],THB:[0.0118,'بات تايلندي',0],MYR:[0.0915,'رينغيت ماليزي',0]};
+const FX_AR={'درهم':'AED','دراهم':'AED','دولار':'USD','ريال سعودي':'SAR','ريال قطري':'QAR','دينار بحريني':'BHD','دينار كويتي':'KWD','دينار أردني':'JOD','يورو':'EUR','جنيه إسترليني':'GBP','جنيه مصري':'EGP','روبية':'INR','ليرة':'TRY'};
+function fxRate(c){const u=(S.settings.fx||{})[c];return +u>0?+u:(FX_DEF[c]?FX_DEF[c][0]:0)}
+function fxName(c){return FX_DEF[c]?FX_DEF[c][1]:c}
+function fxFee(){return Math.max(0,Math.min(10,+S.settings.fxFee||0))}
+function fxToOmr(c,a){return r3((+a||0)*fxRate(c)*(1+fxFee()/100))}
+function fxFind(t){const codes=Object.keys(FX_DEF).join('|');const ar=Object.keys(FX_AR).sort((a,b)=>b.length-a.length).map(s=>s.replace(/\s+/g,'\\s*')).join('|');
+  const re=new RegExp('(?:\\b('+codes+')\\s*([0-9][0-9,]*(?:\\.[0-9]{1,3})?))|(?:([0-9][0-9,]*(?:\\.[0-9]{1,3})?)\\s*('+codes+')\\b)|(?:([0-9][0-9,]*(?:\\.[0-9]{1,3})?)\\s*('+ar+'))|(?:('+ar+')\\s*([0-9][0-9,]*(?:\\.[0-9]{1,3})?))','gi');let m;
+  while((m=re.exec(t))){const pre=t.slice(Math.max(0,m.index-32),m.index);if(/bal|رصيد|available|avl|المتاح|المتوفر|limit|الحد/i.test(pre))continue;
+    let c=(m[1]||m[4]||'').toUpperCase(),a=m[2]||m[3]||'';if(!c&&(m[6]||m[7])){const w=(m[6]||m[7]).replace(/\s+/g,' ');c=FX_AR[w]||FX_AR[Object.keys(FX_AR).find(k=>k.replace(/\s+/g,'')===w.replace(/\s+/g,''))]||'';a=m[5]||m[8]}
+    const v=parseFloat(String(a).replace(/,/g,''));if(c&&v>0)return {cur:c,amt:v}}
+  return null}
+function travels(){return S.settings.travels||(S.settings.travels=[])}
+function travelOn(){return travels().find(t=>t.on)||null}
+function travelTx(T){const to=T.on?today():(T.to||today());return inRange(T.from,to).filter(t=>isVarExp(t)||(t.fx&&t.type==='exp'))}
+function travelCalc(T){const X=travelTx(T);const tot=r3(X.reduce((a,t)=>a+(+t.amount||0),0));const to=T.on?today():(T.to||today());const days=Math.max(1,dDiff(T.from,to)+1);
+  const by={};X.forEach(t=>{by[t.cat]=r3((by[t.cat]||0)+(+t.amount||0))});const cats=Object.entries(by).sort((a,b)=>b[1]-a[1]);
+  const todayS=T.on?r3(X.filter(t=>t.date===today()).reduce((a,t)=>a+(+t.amount||0),0)):0;const fx=X.filter(t=>t.fx);
+  return {X,tot,days,cats,todayS,avg:r3(tot/days),left:+T.budget>0?r3(T.budget-tot):null,pct:+T.budget>0?Math.round(tot/T.budget*100):0,fxN:fx.length}}
+function travelHomeHtml(){const T=travelOn();if(!T)return '';const C=travelCalc(T);const cn=fxName(T.cur);
+  return `<section class="panel trh"><div class="wkhead"><b>✈️ ${esc(T.name)}</b><small>منذ ${esc(fmtD(T.from))} · اليوم ${C.days}</small></div>
+   <div class="trh-r"><div><span class="note">صرفت في الرحلة</span><b class="num">${money(C.tot)} <small>${CUR}</small></b></div><div><span class="note">اليوم</span><b class="num">${money(C.todayS)}</b></div>${C.left!=null?`<div><span class="note">${C.left>=0?'باقٍ من الميزانية':'تجاوزت'}</span><b class="num ${C.left<0?'amt-exp':''}">${money(Math.abs(C.left))}</b></div>`:''}</div>
+   ${+T.budget>0?`<div class="wkbar"><i style="width:${Math.min(100,C.pct)}%;${C.pct>=100?'background:var(--exp)':C.pct>=80?'background:#D08A2E':''}"></i></div>`:''}
+   <div class="wkacts"><button class="chip pay" data-tvexp="1">＋ مصروف بالـ${esc(cn)}</button><button class="chip" data-travels="1">التفاصيل</button><button class="chip" data-tvend="1">إنهاء الرحلة</button></div></section>`}
+function openTravelExp(){const T=travelOn();if(!T){openTravel();return}const L=document.getElementById('layer');const cats=['rest','food','shop','fun','transport','other'].map(id=>EXP_CATS.find(c=>c.id===id)).filter(Boolean);let cat=cats[0]?cats[0].id:'other';
+  L.innerHTML=`${sheetTop('مصروف في الرحلة')}<h2 style="margin-top:0">✈️ مصروف في ${esc(T.name)}</h2>
+   <div class="field"><label for="trA">المبلغ بالـ${esc(fxName(T.cur))}</label><input class="inp num" id="trA" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+   <p class="note" id="trO">يساوي 0.000 ${CUR}</p>
+   <div class="chips" role="group" aria-label="الفئة">${cats.map((c,i)=>`<button class="chip" data-trc="${c.id}" aria-pressed="${i===0}">${esc(c.n)}</button>`).join('')}</div>
+   <input class="inp" id="trN" placeholder="ملاحظة: مطعم، تاكسي، هدية" maxlength="60" style="margin-top:10px" aria-label="ملاحظة">
+   <div class="seg seg3" style="margin-top:10px" role="group" aria-label="طريقة الدفع">${METHODS.map((m,i)=>`<button class="n" data-trm="${m[0]}" aria-pressed="${m[0]===(S.settings.lastMethod||'card')}">${m[1]}</button>`).join('')}</div>
+   <div class="actions"><button class="btn block" id="tvSave"><span class="lk">🔒 </span>حفظ</button><button class="btn ghost block" data-close>إلغاء</button></div></div></div>`;
+  let meth=S.settings.lastMethod||'card';const upd=()=>{const a=parseAmt(document.getElementById('trA').value)||0;document.getElementById('trO').textContent='يساوي '+money(fxToOmr(T.cur,a))+' '+CUR+(fxFee()?' (مع رسوم '+fxFee()+'%)':'')+' بسعر '+fxRate(T.cur)+' للوحدة'};
+  L.oninput=e=>{if(e.target.id==='trA')upd()};L.onchange=null;setTimeout(()=>{const i=document.getElementById('trA');if(i)i.focus()},80);
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+    if(x.dataset.trc){cat=x.dataset.trc;L.querySelectorAll('[data-trc]').forEach(b=>b.setAttribute('aria-pressed',b===x));return}
+    if(x.dataset.trm){meth=x.dataset.trm;L.querySelectorAll('[data-trm]').forEach(b=>b.setAttribute('aria-pressed',b===x));return}
+    if(x.id==='tvSave'){const a=parseAmt(document.getElementById('trA').value);if(!(a>0)){toast('اكتب المبلغ');return}const n=(document.getElementById('trN').value||'').trim();
+      const rec={id:uidGen(),type:'exp',amount:fxToOmr(T.cur,a),cat,date:today(),method:meth,note:(n?n+' · ':'')+a+' '+fxName(T.cur),createdAt:new Date().toISOString(),fx:{cur:T.cur,amt:a,rate:fxRate(T.cur)},travel:T.id};
+      S.tx[rec.id]=rec;L.innerHTML='';await putTx(rec);toast('✈️ سُجّل '+money(rec.amount)+' '+CUR+' ('+a+' '+fxName(T.cur)+')');return}}}
+function openTravel(){const L=document.getElementById('layer');const T=travelOn();const past=travels().filter(t=>!t.on).slice().sort((a,b)=>(b.from||'').localeCompare(a.from||''));
+  const draw=()=>{const C=T?travelCalc(T):null;
+  L.innerHTML=`${sheetTop('وضع السفر')}<h2 style="margin-top:0">✈️ وضع السفر</h2>
+   ${T?`<div class="panel stack"><div class="sumrow"><b>${esc(T.name)}</b><small class="note">${esc(fxName(T.cur))} · منذ ${esc(fmtD(T.from))}</small></div>${travelRepHtml(T,C)}<div class="row2"><button class="btn" data-tvexp="1">＋ مصروف</button><button class="btn ghost" data-tvend="1">إنهاء الرحلة</button></div></div>`
+   :`<p class="note">فعّله قبل السفر: تسجّل المصروف بعملة البلد ويُحوَّل للريال تلقائيًا، وتتابع ميزانية الرحلة يومًا بيوم، وفي النهاية تقرير «كم كلّفتني الرحلة».</p>
+   <div class="panel stack"><div class="field"><label for="tpN">اسم الرحلة</label><input class="inp" id="tpN" placeholder="مثال: دبي مع العائلة" maxlength="40"></div>
+    <div class="row2"><div class="field"><label for="tpC">العملة</label><select class="inp" id="tpC">${Object.keys(FX_DEF).map(c=>`<option value="${c}">${esc(fxName(c))}</option>`).join('')}</select></div><div class="field"><label for="tpB">الميزانية (${CUR})</label><input class="inp num" id="tpB" inputmode="decimal" placeholder="اختياري"></div></div>
+    <div class="field"><label for="tpF">تاريخ البداية</label><input class="inp" type="date" id="tpF" value="${today()}"></div>
+    <button class="btn block" id="tpGo">ابدأ الرحلة</button></div>`}
+   <details class="panel"><summary><b>💱 أسعار العملات ورسوم البطاقة</b></summary><p class="note">العملات المربوطة بسعر ثابت دقيقة. الباقية تقريبية: عدّلها بسعر بنكك.</p>
+    ${Object.keys(FX_DEF).map(c=>`<div class="fxrow"><span>${esc(fxName(c))} <small class="note">${c}${FX_DEF[c][2]?' · ثابت':' · تقريبي'}</small></span><input class="inp num" data-fxc="${c}" inputmode="decimal" value="${fxRate(c)}" aria-label="سعر ${esc(fxName(c))} بالريال"></div>`).join('')}
+    <div class="fxrow"><span>رسوم العملة الأجنبية في بطاقتك %</span><input class="inp num" id="fxFee" inputmode="decimal" value="${fxFee()}" aria-label="رسوم العملة الأجنبية"></div>
+    <button class="chip" id="fxSave">حفظ الأسعار</button></details>
+   ${past.length?`<h3>رحلات سابقة</h3><div class="panel">${past.map(p=>{const c=travelCalc(p);return `<div class="sumrow"><button class="linkbtn" data-tvrep="${esc(p.id)}">${esc(p.name)} <small class="note">· ${esc(fmtD(p.from))} – ${esc(fmtD(p.to||p.from))}</small></button><span><b class="num">${money(c.tot)}</b> <button class="linkbtn" data-tvdel="${esc(p.id)}" aria-label="حذف الرحلة">🗑️</button></span></div>`}).join('')}</div>`:''}
+   <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`};
+  draw();L.oninput=L.onchange=null;
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+    if(x.dataset.tvexp){openTravelExp();return}
+    if(x.dataset.tvend){await travelEnd();return}
+    if(x.dataset.tvrep){const p=travels().find(t=>t.id===x.dataset.tvrep);if(p)openTravelRep(p);return}
+    if(x.dataset.tvdel){const id=x.dataset.tvdel;S.settings.travels=travels().filter(t=>t.id!==id);await putSettings();openTravel();toast('حُذفت الرحلة من السجل (المصاريف نفسها باقية)');return}
+    if(x.id==='fxSave'){const fx={};L.querySelectorAll('[data-fxc]').forEach(i=>{const v=parseAmt(i.value);const c=i.dataset.fxc;if(v>0&&Math.abs(v-FX_DEF[c][0])>0.0000001)fx[c]=v});S.settings.fx=fx;S.settings.fxFee=Math.max(0,Math.min(10,parseAmt(document.getElementById('fxFee').value)||0));await putSettings();toast('💱 حُفظت أسعار العملات');return}
+    if(x.id==='tpGo'){const n=(document.getElementById('tpN').value||'').trim()||'رحلة';const c=document.getElementById('tpC').value;const bd=parseAmt(document.getElementById('tpB').value)||0;const f=document.getElementById('tpF').value||today();
+      travels().forEach(t=>{if(t.on){t.on=false;t.to=t.to||today()}});S.settings.travels=travels().concat([{id:uidGen(),name:n,cur:c,budget:bd>0?r3(bd):0,from:f>today()?today():f,on:true}]);await putSettings();L.innerHTML='';render();toast('✈️ بدأت رحلة «'+n+'». رحلة سعيدة!');return}}}
+function travelRepHtml(T,C){C=C||travelCalc(T);return `<div class="mpr-k"><div><span>المجموع</span><b class="num">${money(C.tot)}</b></div><div><span>متوسط اليوم</span><b class="num">${money(C.avg)}</b><small class="note">${countWord(C.days,'يوم واحد','يومان','أيام','يومًا')}</small></div>${+T.budget>0?`<div><span>الميزانية</span><b class="num">${money(T.budget)}</b><small class="note">${C.pct}%</small></div>`:''}</div>
+  ${C.cats.length?`<div class="stack" style="margin-top:8px">${C.cats.map(([c,v])=>`<div class="sumrow"><span>${esc(catOf(c).n)}</span><b class="num">${money(v)}</b></div>`).join('')}</div>`:'<p class="note">لا مصاريف مسجلة بعد في الرحلة.</p>'}`}
+function openTravelRep(T){const L=document.getElementById('layer');L.innerHTML=`${sheetTop('تقرير الرحلة')}<h2 style="margin-top:0">✈️ كم كلّفتني «${esc(T.name)}»</h2><p class="note">${esc(fmtD(T.from))} – ${esc(fmtD(T.to||today()))} · ${esc(fxName(T.cur))}</p><div class="panel">${travelRepHtml(T)}</div><div class="actions"><button class="btn ghost block" data-tvback="1">رجوع</button></div></div></div>`;L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}if(x.dataset.tvback){openTravel();return}}}
+async function travelEnd(){const T=travelOn();if(!T)return;T.on=false;T.to=today();await putSettings();render();openTravelRep(T);toast('انتهت الرحلة. حمدًا لله على السلامة')}
+
+/* ==================== 2.127: عاداتي في الصرف ==================== */
+/* أيام بلا صرف: يوم لم تصرف فيه شيئًا خارج الالتزامات */
+function nsDays(from,to){const spent=new Set(inRange(from,to).filter(isVarExp).map(t=>t.date));const out=[];let d=from;while(d<=to){out.push({d,ns:!spent.has(d)});d=addDays(d,1)}return out}
+function nsStats(){const td=today();const m=curM();const from=mStart(m);const yd=addDays(td,-1);const D=from<=yd?nsDays(from,yd):[];const n=D.filter(x=>x.ns).length;
+  let streak=0;for(let i=D.length-1;i>=0;i--){if(D[i].ns)streak++;else break}
+  const todayNs=!inRange(td,td).some(isVarExp);let best=0,cur=0;D.forEach(x=>{cur=x.ns?cur+1:0;best=Math.max(best,cur)});
+  return {D,n,streak,todayNs,best,from}}
+function nsHomeHtml(){if(S.settings.nsHome===false||!list().length)return '';const N=nsStats();if(!N.D.length)return '';
+  return `<button class="panel nsh" data-habits="ns"><span class="nsh-i">🟢</span><span class="nsh-t"><b>${countWord(N.n,'يوم واحد','يومان','أيام','يومًا')} بلا صرف هذا الشهر</b><small>${N.streak?'سلسلة '+countWord(N.streak,'يوم','يومين','أيام','يومًا')+' متتالية':'أطول سلسلة '+countWord(N.best,'يوم','يومين','أيام','يومًا')}${N.todayNs?' · اليوم ما زال بلا صرف':''}</small></span><span class="nsh-d" aria-hidden="true">${N.D.slice(-10).map(x=>`<i class="${x.ns?'on':''}"></i>`).join('')}</span></button>`}
+/* سبب الشراء */
+const WHY=[['need','حاجة','#0E8A5F'],['want','رغبة','#2559E8'],['imp','اندفاع','#D2452F']];
+function whyStats(from,to){const X=inRange(from,to).filter(t=>isVarExp(t));const tag=X.filter(t=>t.why);const by={need:0,want:0,imp:0};tag.forEach(t=>{by[t.why]=r3((by[t.why]||0)+(+t.amount||0))});const tot=r3(by.need+by.want+by.imp);
+  const impCats={};tag.filter(t=>t.why==='imp').forEach(t=>{impCats[t.cat]=r3((impCats[t.cat]||0)+(+t.amount||0))});return {by,tot,n:tag.length,all:X.length,impCats:Object.entries(impCats).sort((a,b)=>b[1]-a[1])}}
+/* انتظر قبل الشراء */
+function wishes(){return S.settings.wish||(S.settings.wish=[])}
+function wishDue(w){return addDays(w.at,+w.days||30)}
+function wishStats(){const W=wishes();const y=today().slice(0,4);const skipped=W.filter(w=>w.st==='skip'&&(w.done||'').slice(0,4)===y);return {wait:W.filter(w=>!w.st),due:W.filter(w=>!w.st&&wishDue(w)<=today()),saved:r3(skipped.reduce((a,w)=>a+(+w.price||0),0)),nSkip:skipped.length,bought:W.filter(w=>w.st==='buy')}}
+function openHabits(tab){tab=tab||'ns';const L=document.getElementById('layer');
+  const draw=()=>{let body='';
+   if(tab==='ns'){const N=nsStats();const m=curM();const from=mStart(m),to=mEnd?mEnd(m):addDays(from,30);const all=nsDays(from,to>today()?today():to);
+     body=`<div class="mpr-k"><div><span>أيام بلا صرف</span><b class="num">${N.n}</b><small class="note">من ${N.D.length} يومًا مضى</small></div><div><span>السلسلة الحالية</span><b class="num">${N.streak}</b></div><div><span>الأطول</span><b class="num">${N.best}</b></div></div>
+      <div class="nscal" role="img" aria-label="تقويم أيام الشهر بلا صرف">${all.map(x=>`<span class="${x.d===today()?'td ':''}${x.ns?'on':''}" title="${esc(fmtD(x.d))}">${+x.d.slice(8)}</span>`).join('')}</div>
+      <p class="note">اليوم الأخضر: لم تصرف فيه شيئًا خارج الالتزامات (الفواتير والأقساط لا تُحسب). جرّب يومين بلا صرف أسبوعيًا.</p>
+      <div class="panel setrow"><div><b>إظهارها في الرئيسية</b></div><button class="tgl${S.settings.nsHome===false?'':' on'}" id="nsHome" role="switch" aria-checked="${S.settings.nsHome!==false}" aria-label="إظهار أيام بلا صرف في الرئيسية"></button></div>`}
+   else if(tab==='why'){const m=curM();const W=whyStats(mStart(m),today());const pct=k=>W.tot>0?Math.round(W.by[k]/W.tot*100):0;
+     body=`<p class="note">عند إضافة مصروف اختر سببه: حاجة أو رغبة أو اندفاع. هذا يكشف أين يذهب المال دون أن تشعر.</p>
+      ${W.n?`<div class="whybar">${WHY.map(([k,n,c])=>`<i style="width:${pct(k)}%;background:${c}"></i>`).join('')}</div>
+      <div class="stack">${WHY.map(([k,n,c])=>`<div class="sumrow"><span><span class="dot" style="background:${c}"></span> ${n}</span><span><b class="num">${money(W.by[k])}</b> <small class="note">${pct(k)}%</small></span></div>`).join('')}</div>
+      ${W.impCats.length?`<div class="infobox"><span>⚡ أكثر صرفك الاندفاعي هذا الشهر في «${esc(catOf(W.impCats[0][0]).n)}»: ${money(W.impCats[0][1])} ${CUR}</span></div>`:''}
+      <small class="note">حدّدت السبب لـ ${W.n} من ${W.all} عملية هذا الشهر.</small>`:'<div class="infobox"><span>لم تحدد سبب أي مصروف هذا الشهر بعد. ستجد الاختيار تحت الملاحظة عند إضافة مصروف.</span></div>'}`}
+   else{const WS=wishStats();const W=wishes().filter(w=>!w.st).sort((a,b)=>wishDue(a).localeCompare(wishDue(b)));
+     body=`<p class="note">قبل أن تشتري شيئًا غير ضروري أضفه هنا وانتظر. إذا بقيت تريده بعد المدة اشترِه بلا ندم، وإذا تراجعت يُحسب لك توفيرًا.</p>
+      ${WS.saved>0?`<div class="infobox"><span>🎉 وفّرت هذا العام <b class="num">${money(WS.saved)}</b> ${CUR} بالتراجع عن ${countWord(WS.nSkip,'شيء واحد','شيئين','أشياء','شيئًا')}</span></div>`:''}
+      <div class="panel stack"><div class="row2"><input class="inp" id="wsN" placeholder="ماذا تريد أن تشتري؟" maxlength="40" aria-label="اسم الشيء"><input class="inp num" id="wsP" inputmode="decimal" placeholder="السعر ${CUR}" aria-label="السعر"></div>
+       <div class="chips" role="group" aria-label="مدة الانتظار">${[7,30,60].map(d=>`<button class="chip" data-wwd="${d}" aria-pressed="${d===30}">${d===7?'أسبوع':d===30?'30 يومًا':'شهرين'}</button>`).join('')}</div><button class="btn block" id="wsAdd">أضف إلى قائمة الانتظار</button></div>
+      ${W.length?`<div class="panel">${W.map(w=>{const left=dDiff(today(),wishDue(w));return `<div class="wsrow${left<=0?' due':''}"><div><b>${esc(w.name)}</b><small class="note">${money(w.price)} ${CUR} · ${left>0?'باقٍ '+countWord(left,'يوم','يومان','أيام','يومًا'):'انتهى الانتظار: هل ما زلت تريده؟'}</small></div><div class="chips"><button class="chip pay" data-wsbuy="${esc(w.id)}">اشتريته</button><button class="chip" data-wsskip="${esc(w.id)}">تراجعت</button><button class="chip" data-wwdel="${esc(w.id)}" aria-label="حذف">🗑️</button></div></div>`}).join('')}</div>`:''}`}
+   L.innerHTML=`${sheetTop('عاداتي في الصرف')}<h2 style="margin-top:0">🧠 عاداتي في الصرف</h2><div class="seg grc-tabs">${[['ns','🟢 بلا صرف'],['why','🎯 السبب'],['wish','⏳ الانتظار']].map(([k,n])=>`<button class="n" data-hbt="${k}" aria-pressed="${tab===k}">${n}</button>`).join('')}</div>${body}<div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`};
+  let wd=30;draw();L.oninput=L.onchange=null;
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+    if(x.dataset.hbt){tab=x.dataset.hbt;draw();return}
+    if(x.id==='nsHome'){S.settings.nsHome=S.settings.nsHome===false?true:false;if(S.settings.nsHome)delete S.settings.nsHome;await putSettings();draw();render();return}
+    if(x.dataset.wwd){wd=+x.dataset.wwd;L.querySelectorAll('[data-wwd]').forEach(b=>b.setAttribute('aria-pressed',b===x));return}
+    if(x.id==='wsAdd'){const n=(document.getElementById('wsN').value||'').trim();const p=parseAmt(document.getElementById('wsP').value)||0;if(!n){toast('اكتب ما تريد شراءه');return}S.settings.wish=wishes().concat([{id:uidGen(),name:n,price:r3(p),at:today(),days:wd}]);await putSettings();draw();toast('⏳ أُضيف. سأذكّرك بعد '+countWord(wd,'يوم','يومين','أيام','يومًا'));return}
+    if(x.dataset.wsbuy){const w=wishes().find(z=>z.id===x.dataset.wsbuy);if(!w)return;w.st='buy';w.done=today();await putSettings();L.innerHTML='';openSheet(null,{type:'exp',amount:w.price>0?String(w.price):'',note:w.name,cat:'shop'});return}
+    if(x.dataset.wsskip){const w=wishes().find(z=>z.id===x.dataset.wsskip);if(!w)return;w.st='skip';w.done=today();await putSettings();draw();toast('👏 قرار موفق! وفّرت '+money(w.price)+' '+CUR);return}
+    if(x.dataset.wwdel){S.settings.wish=wishes().filter(z=>z.id!==x.dataset.wwdel);await putSettings();draw();return}}}
+
+/* ==================== 2.127: المراجعة الأسبوعية ==================== */
+function wrDone(ws){return !!(S.settings.wkRev||{})[ws]}
+function wrHomeHtml(){if(!list().length)return '';const td=today();const dow=new Date(td+'T12:00').getDay();if(dow<4)return '';const ws=wkStartOf(td);if(wrDone(ws))return '';
+  return `<button class="panel wrh" data-wkrev="1"><span class="nsh-i">🗓️</span><span class="nsh-t"><b>مراجعة الأسبوع جاهزة</b><small>3 دقائق: صرفك، وما تجاوز حده، وما يستحق الأسبوع القادم</small></span><span class="chip pay">ابدأ</span></button>`}
+function openWkReview(){const L=document.getElementById('layer');const td=today();const ws=wkStartOf(td),we=addDays(ws,6),pws=addDays(ws,-7),pwe=addDays(ws,-1);const to=td<we?td:we;
+  const X=inRange(ws,to).filter(isVarExp),P=inRange(pws,pwe).filter(isVarExp);const s=r3(X.reduce((a,t)=>a+(+t.amount||0),0)),ps=r3(P.reduce((a,t)=>a+(+t.amount||0),0));
+  const by={};X.forEach(t=>{by[t.cat]=r3((by[t.cat]||0)+(+t.amount||0))});const top=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const ns=nsDays(ws,to).filter(x=>x.ns).length;const W=whyStats(ws,to);let B=[];try{B=billAlertList()}catch(e){}let WK=null;try{WK=wkOn()?wkCalc(ws):null}catch(e){}const WS=wishStats();
+  const diff=ps>0?Math.round((s/ps-1)*100):null;
+  L.innerHTML=`${sheetTop('مراجعة الأسبوع')}<h2 style="margin-top:0">🗓️ مراجعة الأسبوع</h2><p class="note">${wkRange(ws,we)}</p>
+   <div class="mpr-k"><div><span>صرفت هذا الأسبوع</span><b class="num">${money(s)}</b><small class="note">${diff===null?'':diff>0?'أكثر من الأسبوع الماضي بـ '+diff+'%':diff<0?'أقل من الأسبوع الماضي بـ '+Math.abs(diff)+'%':'مثل الأسبوع الماضي'}</small></div><div><span>أيام بلا صرف</span><b class="num">${ns}</b></div>${W.by.imp>0?`<div><span>صرف اندفاعي</span><b class="num amt-exp">${money(W.by.imp)}</b></div>`:''}</div>
+   ${top.length?`<h3>أين ذهب المال</h3><div class="panel">${top.map(([c,v])=>`<div class="sumrow"><span>${esc(catOf(c).n)}</span><b class="num">${money(v)}</b></div>`).join('')}</div>`:''}
+   ${WK&&WK.rows.length?`<h3>ميزانية الأسبوع</h3><div class="panel">${WK.rows.map(wkBarHtml).join('')}</div>`:''}
+   ${B.length?`<h3>يستحق قريبًا</h3><div class="panel">${B.slice(0,5).map(a=>`<div class="sumrow"><span>${esc(a.title)}</span><small class="note">${esc(a.when||'')}</small></div>`).join('')}</div>`:''}
+   ${WS.due.length?`<div class="infobox"><span>⏳ ${countWord(WS.due.length,'شيء واحد انتهى','شيئان انتهى','أشياء انتهى','شيئًا انتهى')} انتظاره في «انتظر قبل الشراء»: قرّر الآن</span><button class="chip" data-habits="wish">افتح</button></div>`:''}
+   <div class="actions"><button class="btn block" id="wrOk">✓ تمت المراجعة</button><button class="btn ghost block" data-close>لاحقًا</button></div></div></div>`;
+  L.oninput=L.onchange=null;L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+    if(x.dataset.habits){openHabits(x.dataset.habits);return}
+    if(x.id==='wrOk'){S.settings.wkRev=Object.assign({},S.settings.wkRev||{},{[ws]:today()});await putSettings();L.innerHTML='';render();toast('👏 أحسنت! المراجعة الأسبوعية عادة الناجحين ماليًا');return}}}
+
+/* ==================== 2.127: تحدي الادخار للأبناء ==================== */
+function kdCh(k){const g=k.ch&&+k.ch.goal>0?+k.ch.goal:0;if(!g)return null;const y=today().slice(0,4);const cm=curM();const net={};(k.tx||[]).forEach(t=>{const m=(t.d||'').slice(0,7);if(m)net[m]=r3((net[m]||0)+(+t.amt||0))});
+  const months=[];for(let i=1;i<=12;i++){const m=y+'-'+String(i).padStart(2,'0');months.push({m,v:net[m]||0,ok:(net[m]||0)>=g-0.0005,fut:m>cm,cur:m===cm})}
+  const stars=months.filter(x=>x.ok&&!x.fut).length;let streak=0;{let m=months.find(x=>x.cur)&&months.find(x=>x.cur).ok?cm:shiftMonth(cm,-1);while((net[m]||0)>=g-0.0005){streak++;m=shiftMonth(m,-1)}}
+  const lv=stars>=12?['🏆','الكأس الذهبية']:stars>=9?['🥇','ذهبي']:stars>=6?['🥈','فضي']:stars>=3?['🥉','برونزي']:['🌱','مبتدئ'];
+  const curV=net[cm]||0;return {g,months,stars,streak,lv,curV,curPct:Math.min(100,Math.round(curV/g*100)),need:r3(Math.max(0,g-curV))}}
+function kdChHtml(k){const C=kdCh(k);if(!C)return `<div class="infobox"><span>🏆 ابدأ «تحدي الادخار» لـ${esc(k.name)}: هدف شهري، ونجمة كل شهر يتحقق فيه.</span><button class="chip" data-kdch="1">ابدأ</button></div>`;
+  return `<div class="panel kdch"><div class="sumrow"><b>🏆 تحدي الادخار ${C.lv[0]} ${esc(C.lv[1])}</b><button class="linkbtn" data-kdch="1">تعديل</button></div>
+   <div class="kdst" aria-label="${C.stars} نجوم هذا العام">${C.months.map(x=>`<span class="${x.ok&&!x.fut?'on':''}${x.cur?' cur':''}" title="${esc(mShort(x.m))}">${x.ok&&!x.fut?'⭐':x.fut?'·':'☆'}</span>`).join('')}</div>
+   <div class="mp-bar"><i style="width:${C.curPct}%"></i></div><small class="note">هذا الشهر ${money(C.curV)} من ${money(C.g)}${C.need>0?' · باقٍ '+money(C.need)+' للنجمة':' · ⭐ حصل على نجمة الشهر'} · ${C.stars} نجوم هذا العام${C.streak>1?' · سلسلة '+C.streak+' أشهر':''}</small></div>`}
+function openKidCh(id){const L=document.getElementById('layer');const k=kdGet(id);if(!k)return;const g=k.ch&&k.ch.goal||'';
+  L.innerHTML=`${sheetTop('تحدي الادخار')}<h2 style="margin-top:0">🏆 تحدي الادخار لـ${esc(k.name)}</h2><p class="note">حدّد مبلغًا يُودَع كل شهر. كل شهر يكتمل فيه يحصل ${esc(k.name)} على نجمة ⭐، ومع النجوم يرتقي: 3 برونزي، 6 فضي، 9 ذهبي، 12 الكأس الذهبية.</p>
+   <div class="field"><label for="kcG">الهدف الشهري (${CUR})</label><input class="inp num" id="kcG" inputmode="decimal" value="${g}" placeholder="مثال: 20"></div>
+   <div class="actions"><button class="btn block" id="kcS">حفظ</button>${g?'<button class="btn ghost block" id="kcX">إيقاف التحدي</button>':''}<button class="btn ghost block" data-kcb="1">رجوع</button></div></div></div>`;
+  L.oninput=L.onchange=null;L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')||x.dataset.kcb){openKid(id);return}
+    if(x.id==='kcS'){const v=parseAmt(document.getElementById('kcG').value);if(!(v>0)){toast('اكتب مبلغًا أكبر من صفر');return}k.ch={goal:r3(v),at:(k.ch&&k.ch.at)||today()};await putSettings();openKid(id);toast('🏆 بدأ التحدي! بالتوفيق لـ'+k.name);return}
+    if(x.id==='kcX'){delete k.ch;await putSettings();openKid(id);return}}}
 function smartAlertList_(){const C=alertCfg(),m=curM(),td=today(),out=[];const dis=adisGet();
   const push=o=>{if(!dis[o.ref])out.push(o)};
   if(C.inst.on||C.late.on)recStatus(m).R.filter(i=>i.kind==='debt'&&!i.isPaid).forEach(i=>{const dd=dueOf(i,m),n=dDiff(td,dd),need=r3(i.amount-(i.paidAmt||0));
@@ -6903,6 +7098,7 @@ function smartAlertList_(){const C=alertCfg(),m=curM(),td=today(),out=[];const d
   if(C.payday.on){const s=inMonth(m).filter(t=>t.type==='inc'&&t.cat==='salary').sort((a,b)=>b.date.localeCompare(a.date))[0];if(s&&dDiff(s.date,td)<=4)push({ref:'pay:'+s.id,kind:'payday',level:'good',days:-1,title:'نزل راتبك '+money(s.amount)+' '+CUR,when:'وزّعه الآن على الالتزامات والادخار والمصروف قبل أن يُصرف','dis':1,act:['خطة التوزيع','data-askopen="split"']})}
   if(C.svl&&C.svl.on){const a=svlAlert();if(a)push(a)}
   if(C.budget.on)try{wkAlerts(push)}catch(e){}
+  try{wishStats().due.forEach(w=>push({ref:'wish:'+w.id,kind:'budget',level:'warn',days:0,title:'انتهى انتظار «'+w.name+'»',when:'هل ما زلت تريده؟ ('+money(w.price)+' '+CUR+')',dis:1,act:['قرّر','data-habits="wish"']}))}catch(e){}
   {const a=gdAlert();if(a)push(a)}
   return out.sort((a,b)=>a.days-b.days)}
 function smartAlertsHtml(){if(S.month!==curM())return '';const A=smartAlertList();if(!A.length)return '';
@@ -10452,6 +10648,12 @@ document.addEventListener('click',async e=>{
   if(b.dataset.csave){carToGoal(b.dataset.csave);return}
   if(b.dataset.grcopen){openGrc(S.month);return}
   if(e.target.closest('[data-clipx]')){clipChipHide();return}if(b.dataset.clipsms){clipRecord();return}
+  if(b.dataset.tvexp){openTravelExp();return}if(b.dataset.tvl){openTravel();return}if(b.dataset.tvend){await travelEnd();return}
+  if(b.dataset.habits){openHabits(b.dataset.habits);return}if(b.dataset.wkrev){openWkReview();return}
+  if(b.dataset.gdnow){gdFetch(()=>render());return}
+  if(b.dataset.gdopen){openGold(b.dataset.gdopen);return}
+  if(b.dataset.gdhide){gdS().home=false;await putSettings();render();toast('أُخفي سعر الذهب من الرئيسية. تعيده من الذهب ← السعر');return}
+  if(b.dataset.gdauto){gdAskAuto(async()=>{gdS().netAuto=true;await putSettings();try{localStorage.removeItem('masareef:gdAutoTry')}catch(e){}render();toast('🪙 سيتحدث سعر الذهب تلقائيًا مرة يوميًا عند فتح التطبيق');gdAutoDaily()});return}
   if(b.dataset.wkset){openWkSet();return}if(b.dataset.wkhist){openWkHist();return}
   if(b.dataset.smsopen){openImport();return}
   if(b.dataset.kidsopen){openKids();return}
