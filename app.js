@@ -1173,6 +1173,7 @@ function grcPrint(m){const D=grcMonth(m);const A=D.A,B=D.B;const now=new Date();
 function vMore(){const cm=curM();const nTx=inMonth(cm).length;const Ds=debts().filter(d=>+d.balance>0.0005);const dT=r3(Ds.reduce((s,d)=>s+(+d.balance||0),0));
   const T=[['log','🧾','السجل',countWord(nTx,'عملية','عمليتان','عمليات','عملية')+' هذا الشهر','data-tab="log"'],['budget','🗂️','إدارة البيانات','الالتزامات والديون والسيارات والإعدادات','data-tab="budget"'],
     ['debt','🏦','الديون',Ds.length?countWord(Ds.length,'دين','دينان','ديون','دينًا')+' · '+money(dT):'لا ديون','data-mdjump="debt"'],['reports','📊','التقارير','يومي · شهري · سنوي · طباعة','data-tab="reports"'],
+    ['scal','📅','تقويم المصروف',(()=>{try{const M=scMonth(curM());return 'هذا الشهر '+money(M.tot)+' '+CUR+(M.over>0?' · إسراف '+money(M.over):'')}catch(e){return 'الأيام والأسابيع ومقارنة الأشهر'}})(),'data-scal="1"'],
     ['travel','✈️','وضع السفر',(()=>{try{const T=travelOn();return T?esc(T.name)+' · '+money(travelCalc(T).tot)+' '+CUR:'مصاريف الرحلة بعملة البلد'}catch(e){return ''}})(),'data-tvl="1"'],
     ['habits','🧠','عاداتي في الصرف',(()=>{try{const N=nsStats();const W=wishStats();return countWord(N.n,'يوم','يومان','أيام','يومًا')+' بلا صرف'+(W.wait.length?' · '+W.wait.length+' في الانتظار':'')}catch(e){return ''}})(),'data-habits="ns"'],
     ['wk','🗓️','الميزانية الأسبوعية',(()=>{try{if(!wkOn())return 'سقف أسبوعي للبقالة والوقود';const W=wkCalc();const o=W.rows.filter(r=>r.p>100).length;return o?'تجاوزت '+o+' من '+W.rows.length:'ضمن الحدود · باقٍ '+countWord(W.daysLeft,'يوم','يومان','أيام','يومًا')}catch(e){return ''}})(),wkOn()?'data-wkhist="1"':'data-wkset="1"'],
@@ -1691,7 +1692,7 @@ function vBudgetIn(){const sec=mdpSec();const hasSt=list().some(t=>t.src==='stmt
   return `<div class="md-head"><h2 style="margin:0">${esc(lbl('sec.master'))}</h2></div>${mdKpis()}
    ${att.length?`<div class="panel md-att"><b class="md-att-h">تحتاج انتباهك</b>${att.map(x=>`<button class="md-a lv${x.lv}" ${x.attr}><span class="md-ic">${x.ic}</span><span class="md-am"><b>${esc(x.t)}</b><small>${esc(x.s)}</small></span><span class="xph-go">‹</span></button>`).join('')}</div>`:'<div class="okbox md-ok">✓ بياناتك منظمة: لا شيء يحتاج انتباهك الآن.</div>'}
    ${tabs}<div class="md-body">${body}</div>`}
-function vReports(){const seg=`<div class="row2" style="margin-bottom:12px"><button class="btn" id="printRep">طباعة التقرير وخياراته</button><button class="btn ghost" id="quickPrint">طباعة سريعة</button></div><div class="seg" style="margin-bottom:4px"><button class="n" data-rmode="month" aria-pressed="${S.rmode!=='year'}">تقرير شهري</button><button class="n" data-rmode="year" aria-pressed="${S.rmode==='year'}">تقرير سنوي</button></div>`;
+function vReports(){const seg=`<button class="btn block scal-btn" data-scal="1">📅 تقويم المصروف: الأيام والأسابيع والمقارنة والتوقع</button><div class="row2" style="margin-bottom:12px"><button class="btn" id="printRep">طباعة التقرير وخياراته</button><button class="btn ghost" id="quickPrint">طباعة سريعة</button></div><div class="seg" style="margin-bottom:4px"><button class="n" data-rmode="month" aria-pressed="${S.rmode!=='year'}">تقرير شهري</button><button class="n" data-rmode="year" aria-pressed="${S.rmode==='year'}">تقرير سنوي</button></div>`;
   const mm=vReportsMonth();const i=mm.indexOf('<h2>بياناتك</h2>');
   return seg+safe('الادخار المحمي',()=>svlRepHtml())+safe('تكلفة الصيانة',()=>mtRepHtml(S.month))+safe('الذهب',()=>gdRepHtml())+(S.rmode==='year'?vYear():mm.slice(0,i)+reportsMonthExtras())+mm.slice(i)+versionHtml()}
 /* ===== 2.114 🛡️ الادخار الشهري المحمي =====
@@ -5573,8 +5574,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.128.0';
+const APP_VERSION='2.129.0';
 const CHANGELOG=[
+ {v:'2.129.0',d:'2026-11-21',items:['📅 تقويم المصروف: مربع لكل يوم بما صرفته فيه ولونه حسب المبلغ، ومجموع كل أسبوع من الشهر مع تمييز أعلى أسبوع، ويفصل ما أنفقته وما سحبته نقدًا وما أسرفت فيه. اضغط اليوم أو الأسبوع لترى عملياته.','🗓️ تنقّل بين الأشهر بالأسهم وبين السنوات بأزرار السنة، وعرض السنة كاملة (12 شهرًا مع أعمدة أسابيعها).','📊 المقارنة: جدول كل الأشهر السابقة حسب أسابيعها مع المتوسط، وفي أي أسبوع من الشهر تصرف أكثر عادةً، وأي أيام الأسبوع.','🔮 التوقع: للأشهر الثلاثة القادمة، أي أسبوع يُتوقع أن تصرف فيه أكثر، من نمط صرفك والالتزامات المستحقة فيه. تجده في «المزيد» وفي «التقارير».']},
  {v:'2.128.0',d:'2026-11-07',items:['🖼️ صورة الرئيسية بيدك: اختر من 6 مشاهد (القلعة، البحر والسفينة، الجبال، الصحراء والنخيل، المسجد والهلال، المدينة ليلًا) أو ضع صورتك من الاستوديو أو بالتقاطها بالكاميرا مع اختيار موضعها، أو بدون صورة. زر الصورة بجانب زر الضبط في أعلى الرئيسية، وأيضًا في «المظهر». الصورة تُحفظ في جهازك فقط.','🪙 تحت سعر الذهب في الرئيسية يظهر مصدره بخط صغير: gold-api.com، وسعر الأونصة بالدولار وطريقة التحويل للريال ووقت آخر تحديث.']},
  {v:'2.127.0',d:'2026-11-07',items:['💱 إصلاح مهم: رسائل البنك بعملة أجنبية (درهم، دولار، ريال سعودي…) كانت تُسجَّل بالرصيد بدل المبلغ. الآن تُحوَّل للريال تلقائيًا بسعر ثابت للعملات المربوطة، وتستطيع تعديل الأسعار ورسوم البطاقة.','✈️ وضع السفر: ميزانية للرحلة، ومصروف بعملة البلد يُحوَّل للريال، وبطاقة في الرئيسية، وتقرير «كم كلّفتني الرحلة» عند الإنهاء.','🧠 عاداتي في الصرف: أيام بلا صرف مع تقويم وسلسلة، وسبب الشراء (حاجة/رغبة/اندفاع) عند إضافة مصروف، وقائمة «انتظر قبل الشراء» تحسب ما وفّرته بالتراجع.','🗓️ المراجعة الأسبوعية: تظهر من الخميس، فيها صرف الأسبوع ومقارنته بالسابق وما يستحق قريبًا.','🏆 تحدي الادخار لميرة وملهم: هدف شهري ونجمة كل شهر يتحقق، ومستويات برونزي وفضي وذهبي.','🛡️ نوع مستند جديد «ضمان جهاز» في مستنداتي مع تنبيه قبل انتهاء الضمان بشهر.','🪙 سعر الذهب في أعلى الرئيسية: غرام عيار 24 مع عيار 22 و21، ومقارنته بالأمس (ارتفع أو انخفض وبكم ونسبته)، وأدنى وأعلى سعر في 30 يومًا مع خط بياني صغير.','🧭 مؤشر استرشادي: «وقت مناسب للشراء التدريجي» إذا كان السعر أقل من متوسط آخر 30 يومًا بـ 2% أو أكثر، و«مناسب للبيع إن احتجت» إذا كان أعلى، مع مقارنة بمتوسط تكلفة ذهبك.','🔄 تحديث تلقائي اختياري مرة يوميًا عند فتح التطبيق، لا يعمل إلا بعد موافقتك ويُوقف من الذهب ← السعر، ومنه أيضًا تخفي البطاقة من الرئيسية.']},
  {v:'2.126.1',d:'2026-11-05',items:['👛 أيقونة جديدة للتطبيق: محفظة ثلاثية الأبعاد باللون العنابي مع بطاقة ذهبية وخط صاعد.']},
@@ -7128,6 +7130,137 @@ function openKidCh(id){const L=document.getElementById('layer');const k=kdGet(id
   L.oninput=L.onchange=null;L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')||x.dataset.kcb){openKid(id);return}
     if(x.id==='kcS'){const v=parseAmt(document.getElementById('kcG').value);if(!(v>0)){toast('اكتب مبلغًا أكبر من صفر');return}k.ch={goal:r3(v),at:(k.ch&&k.ch.at)||today()};await putSettings();openKid(id);toast('🏆 بدأ التحدي! بالتوفيق لـ'+k.name);return}
     if(x.id==='kcX'){delete k.ch;await putSettings();openKid(id);return}}}
+/* ===================== 2.129: تقويم المصروف =====================
+ * مربع لكل يوم بما صرفته فيه، ومجموع كل أسبوع من الشهر (الأسبوع 1 = أول 7 أيام من الشهر، وفي وضع شهر الراتب يبدأ من يوم الراتب).
+ * يفصل: الإنفاق كله، والسحب النقدي، والإسراف (ما زاد في يوم عن ضعف معدلك اليومي المعتاد في آخر 3 أشهر).
+ * عرض الشهر والسنة، ومقارنة كل الأشهر حسب أسابيعها، وتوقع أي أسبوع ستصرف فيه أكثر في الأشهر القادمة. كله داخل الجهاز. */
+const SC_DOW=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const SC_DOW1=['ح','ن','ث','ر','خ','ج','س'];
+const SC_WN=['الأول','الثاني','الثالث','الرابع','الخامس'];
+const scS={view:'month',m:'',y:'',flt:'all',n:12};
+function scDM(d){return '<bdi>'+(+d.slice(8))+'/'+(+d.slice(5,7))+'</bdi>'}
+function scFmt(v){v=+v||0;if(v<=0.0005)return '';if(v>=1000)return (v/1000).toFixed(1).replace(/\.0$/,'')+'k';if(v>=100)return String(Math.round(v));return (Math.round(v*10)/10).toString()}
+function scExp(from,to){return inRange(from,to).filter(t=>t.type==='exp'&&!t.own)}
+function scKind(t){return ATM_RE.test(t.note||'')?'atm':isVarExp(t)?'var':'fix'}
+function scPick(o){return scS.flt==='var'?o.v:scS.flt==='atm'?o.atm:o.tot}
+function scDays(from,to){const M={};scExp(from,to).forEach(t=>{const o=M[t.date]||(M[t.date]={tot:0,v:0,fix:0,atm:0,imp:0,n:0});const a=+t.amount||0;const k=scKind(t);o.tot+=a;o.n++;if(k==='atm')o.atm+=a;else if(k==='var')o.v+=a;else o.fix+=a;if(t.why==='imp')o.imp+=a});
+  Object.values(M).forEach(o=>['tot','v','fix','atm','imp'].forEach(k=>o[k]=r3(o[k])));return M}
+/* معدلك اليومي المعتاد للمصروف المتغير: متوسط آخر 3 أشهر قبل هذا الشهر (أو هذا الشهر إن لم يوجد سابق) */
+function scBase(m){let tot=0,days=0;for(let i=1;i<=3;i++){const pm=shiftMonth(m,-i);const s=mStart(pm),e=mEnd(pm);const X=scExp(s,e).filter(t=>scKind(t)==='var');if(!X.length)continue;tot+=X.reduce((a,t)=>a+(+t.amount||0),0);days+=dDiff(s,e)+1}
+  if(!days){const s=mStart(m),e=mEnd(m)<today()?mEnd(m):today();const X=scExp(s,e).filter(t=>scKind(t)==='var');if(X.length){tot=X.reduce((a,t)=>a+(+t.amount||0),0);days=dDiff(s,e)+1}}
+  return days?r3(tot/days):0}
+function scOver(o,base){if(!o)return 0;const lim=base>0?base*2:0;return r3(Math.max(lim>0?Math.max(0,o.v-lim):0,o.imp||0))}
+/* أسابيع الشهر: كتل من 7 أيام تبدأ من بداية الشهر */
+function scWeeks(m){const s=mStart(m),e=mEnd(m);const W=[];let d=s,i=0;while(d<=e){const wi=Math.floor(i/7);(W[wi]=W[wi]||[]).push(d);d=addDays(d,1);i++}return W}
+function scMonth(m){const W=scWeeks(m);const s=mStart(m),e=mEnd(m);const D=scDays(s,e);const base=scBase(m);const td=today();
+  const weeks=W.map((days,wi)=>{let tot=0,v=0,fix=0,atm=0,over=0;days.forEach(d=>{const o=D[d];if(!o)return;tot+=o.tot;v+=o.v;fix+=o.fix;atm+=o.atm;over+=scOver(o,base)});const past=days.filter(d=>d<=td).length;return {wi,days,tot:r3(tot),v:r3(v),fix:r3(fix),atm:r3(atm),over:r3(over),n:days.length,past}});
+  const T=k=>r3(weeks.reduce((a,w)=>a+w[k],0));const vals=Object.values(D).map(scPick).filter(x=>x>0).sort((a,b)=>a-b);const cap=vals.length?vals[Math.min(vals.length-1,Math.floor(vals.length*0.9))]:0;
+  let zero=0;{let d=s;while(d<=e&&d<=td){if(!(D[d]&&D[d].v+D[d].atm>0.0005))zero++;d=addDays(d,1)}}
+  return {m,s,e,D,weeks,base,cap,tot:T('tot'),v:T('v'),fix:T('fix'),atm:T('atm'),over:T('over'),zero}}
+function scLvl(v,cap){if(!(v>0.0005))return 0;if(!(cap>0))return 2;const r=v/cap;return r<0.25?1:r<0.5?2:r<0.8?3:r<1.05?4:5}
+function scWPick(w){return scS.flt==='var'?w.v:scS.flt==='atm'?w.atm:w.tot}
+function scMonthsWithData(){const L=list().filter(t=>t.type==='exp'&&!t.own&&t.date);if(!L.length)return [];let first=L.reduce((a,t)=>t.date<a?t.date:a,L[0].date);let m=mOf(first);const cm=curM();const out=[];let g=0;while(m<=cm&&g<240){out.push(m);m=shiftMonth(m,1);g++}return out}
+function scYears(){const ys=new Set(scMonthsWithData().map(m=>m.slice(0,4)));ys.add(curM().slice(0,4));return [...ys].sort()}
+
+function scMonthHtml(){const M=scMonth(scS.m);const td=today();const maxW=Math.max(0,...M.weeks.filter(w=>w.n>=4).map(scWPick));
+  const head=`<div class="scg sch"><span></span>${[0,1,2,3,4,5,6].map(i=>'<span>'+(i+1)+'</span>').join('')}<span>المجموع</span></div>`;
+  const rows=M.weeks.map(w=>{const wv=scWPick(w);const top=w.n>=4&&wv>0.0005&&Math.abs(wv-maxW)<0.0005;
+    const cells=w.days.map(d=>{const o=M.D[d];const v=o?scPick(o):0;const ov=scOver(o,M.base);const fut=d>td;const dow=new Date(d+'T12:00').getDay();
+      return `<button class="scd l${scLvl(v,M.cap)}${fut?' fut':''}${d===td?' td':''}${ov>0?' ov':''}" data-scday="${d}" aria-label="${esc(fmtD(d))}: ${v>0?money(v)+' '+CUR:'بلا صرف'}${o&&o.atm>0?'، سحب '+money(o.atm):''}${ov>0?'، إسراف '+money(ov):''}"><i>${+d.slice(8)}<small>${SC_DOW1[dow]}</small></i><b class="num">${fut?'':scFmt(v)}</b>${o&&o.atm>0&&scS.flt!=='atm'?'<em class="sc-atm" aria-hidden="true">🏧</em>':''}${o&&o.fix>0&&scS.flt==='all'?'<em class="sc-fix" aria-hidden="true"></em>':''}</button>`}).join('');
+    const pad=Array(7-w.days.length).fill('<span class="scd pad"></span>').join('');
+    return `<div class="scg"><span class="scw">${w.wi+1}</span>${cells}${pad}<button class="scwt${top?' top':''}" data-scweek="${w.wi}" aria-label="الأسبوع ${SC_WN[w.wi]}: ${money(wv)}"><b class="num">${scFmt(wv)||'0'}</b>${top?'<small>الأعلى</small>':''}</button></div>`}).join('');
+  const share=w=>M.tot>0?Math.round(w.tot/M.tot*100):0;const full=M.weeks.filter(w=>w.n>=4&&w.past>0);const hiW=full.length?full.reduce((a,w)=>scWPick(w)>scWPick(a)?w:a,full[0]):null;
+  const dowT=[0,0,0,0,0,0,0];Object.entries(M.D).forEach(([d,o])=>{dowT[new Date(d+'T12:00').getDay()]+=o.v+o.atm});const hiD=dowT.indexOf(Math.max(...dowT));
+  return `<div class="sck">
+    <div><span>أنفقت</span><b class="num">${money(M.tot)}</b></div>
+    <div><span>متغير</span><b class="num">${money(M.v)}</b></div>
+    <div><span>التزامات</span><b class="num">${money(M.fix)}</b></div>
+    <div><span>🏧 سحبت</span><b class="num">${money(M.atm)}</b></div>
+    <div class="${M.over>0?'bad':''}"><span>أسرفت</span><b class="num">${money(M.over)}</b></div>
+    <div><span>أيام بلا صرف</span><b class="num">${M.zero}</b></div></div>
+   <div class="scgrid" role="grid" aria-label="تقويم ${esc(monthName(scS.m))}">${head}${rows}</div>
+   <div class="sclg"><span><i class="l1"></i><i class="l3"></i><i class="l5"></i> أقل ← أكثر</span><span><i class="lov"></i> إسراف</span><span>🏧 سحب نقدي</span>${scS.flt==='all'?'<span><i class="lfx"></i> التزام</span>':''}</div>
+   ${hiW&&scWPick(hiW)>0?`<div class="infobox"><span>📌 أكثر أسبوع صرفت فيه: <b>الأسبوع ${SC_WN[hiW.wi]}</b> (${scDM(hiW.days[0])} – ${scDM(hiW.days[hiW.days.length-1])}) بـ <b class="num">${money(scWPick(hiW))}</b>${scS.flt==='all'?' = '+share(hiW)+'% من صرف الشهر'+(hiW.fix>0?'، منها التزامات '+money(hiW.fix):''):''}.${dowT[hiD]>0?' وأكثر يوم في الأسبوع تصرف فيه: '+SC_DOW[hiD]+'.':''}</span></div>`:''}
+   <p class="note">الإسراف: ما زاد في يوم عن ضعف معدلك اليومي المعتاد (${money(M.base)} ${CUR} في اليوم، من آخر 3 أشهر)، وما وضعت له سبب «اندفاع». اضغط أي يوم لترى عملياته، أو مجموع الأسبوع لتفاصيله.</p>`}
+
+function scYearHtml(){const y=scS.y;const ms=[];for(let i=1;i<=12;i++)ms.push(y+'-'+String(i).padStart(2,'0'));const cm=curM();
+  const D=ms.map(m=>m>cm?null:scMonth(m));const gmax=Math.max(0.001,...D.filter(Boolean).flatMap(M=>M.weeks.map(scWPick)));const tot=r3(D.filter(Boolean).reduce((a,M)=>a+scPick({tot:M.tot,v:M.v,atm:M.atm}),0));
+  const act=D.filter(M=>M&&M.tot>0);const hiM=act.length?act.reduce((a,M)=>scPick(M)>scPick(a)?M:a,act[0]):null,loM=act.length?act.reduce((a,M)=>scPick(M)<scPick(a)?M:a,act[0]):null;
+  const wkT=[0,0,0,0,0];act.forEach(M=>M.weeks.forEach(w=>{if(w.n>=4)wkT[w.wi]+=scWPick(w)}));const hw=wkT.slice(0,4).indexOf(Math.max(...wkT.slice(0,4)));
+  return `<div class="sck"><div><span>مجموع ${y}</span><b class="num">${money(tot)}</b></div>${hiM?`<div><span>أغلى شهر</span><b>${esc(mShort(hiM.m))}</b></div><div><span>أوفر شهر</span><b>${esc(mShort(loM.m))}</b></div>`:''}</div>
+   <div class="scyr">${ms.map((m,i)=>{const M=D[i];if(!M)return `<div class="scym fut"><b>${esc(mShort(m))}</b><small>لم يأتِ بعد</small></div>`;const v=scPick({tot:M.tot,v:M.v,atm:M.atm});const mw=Math.max(...M.weeks.filter(w=>w.n>=4).map(scWPick),0);
+     return `<button class="scym${m===cm?' cur':''}" data-scm="${m}"><b>${esc(mShort(m))}</b><span class="num">${money(v)}</span><span class="scyb" aria-hidden="true">${M.weeks.map(w=>{const wv=scWPick(w);return `<i class="${wv>0&&Math.abs(wv-mw)<0.0005&&w.n>=4?'hi':''}" style="height:${Math.max(4,Math.round(wv/gmax*100))}%"></i>`}).join('')}</span><small>${M.over>0?'إسراف '+money(M.over):'&nbsp;'}</small></button>`}).join('')}</div>
+   ${act.length?`<div class="infobox"><span>📌 في ${y} كان <b>الأسبوع ${SC_WN[hw]}</b> من الشهر هو الأعلى صرفًا في المجموع. الأعمدة الصغيرة في كل شهر هي أسابيعه بالترتيب، والداكن أعلاها.</span></div>`:'<p class="note">لا مصاريف مسجلة في هذه السنة.</p>'}`}
+
+function scCmpData(n){const all=scMonthsWithData();const cm=curM();const ms=all.filter(m=>m<cm).slice(-n);return ms.map(scMonth)}
+function scCmpHtml(){const R=scCmpData(scS.n);if(R.length<2)return '<div class="infobox"><span>المقارنة تحتاج شهرين مكتملين على الأقل من المصاريف المسجلة.</span></div>';
+  const nW=5;const allV=R.flatMap(M=>M.weeks.map(scWPick));const cap=Math.max(...allV,0.001);
+  const avg=[];for(let w=0;w<nW;w++){const xs=R.map(M=>M.weeks[w]).filter(x=>x&&x.n>=4).map(scWPick);avg[w]=xs.length?r3(xs.reduce((a,v)=>a+v,0)/xs.length):null}
+  const per=[];for(let w=0;w<nW;w++){const xs=R.map(M=>M.weeks[w]).filter(x=>x&&x.n>0).map(x=>scWPick(x)/x.n);per[w]=xs.length?xs.reduce((a,v)=>a+v,0)/xs.length:0}
+  const hw=avg.slice(0,4).indexOf(Math.max(...avg.slice(0,4).map(x=>x||0)));const lw=avg.slice(0,4).indexOf(Math.min(...avg.slice(0,4).map(x=>x==null?Infinity:x)));
+  const winCount=[0,0,0,0];R.forEach(M=>{const f=M.weeks.filter(w=>w.n>=4);if(!f.length)return;const t=f.reduce((a,w)=>scWPick(w)>scWPick(a)?w:a,f[0]);if(scWPick(t)>0)winCount[t.wi]++});
+  const mt=R.map(M=>({m:M.m,v:scPick(M)}));const mAvg=r3(mt.reduce((a,x)=>a+x.v,0)/mt.length);const last3=mt.slice(-3),prev3=mt.slice(-6,-3);const tr=prev3.length===3?Math.round((last3.reduce((a,x)=>a+x.v,0)/(prev3.reduce((a,x)=>a+x.v,0)||1)-1)*100):null;
+  const dow=[0,0,0,0,0,0,0],dowN=[0,0,0,0,0,0,0];R.forEach(M=>{let d=M.s;while(d<=M.e){const g=new Date(d+'T12:00').getDay();const o=M.D[d];dow[g]+=o?(scS.flt==='atm'?o.atm:o.v+o.atm):0;dowN[g]++;d=addDays(d,1)}});const dowA=dow.map((v,i)=>dowN[i]?v/dowN[i]:0);const dmax=Math.max(...dowA,0.001);const hd=dowA.indexOf(Math.max(...dowA));
+  return `<div class="chips" role="group" aria-label="عدد الأشهر">${[[3,'3 أشهر'],[6,'6 أشهر'],[12,'سنة'],[120,'كل الأشهر']].map(([k,n])=>`<button class="chip" data-scn="${k}" aria-pressed="${scS.n===k}">${n}</button>`).join('')}</div>
+   <div class="infobox"><span>📌 عادةً تصرف أكثر في <b>الأسبوع ${SC_WN[hw]}</b> من الشهر (متوسط <b class="num">${money(avg[hw]||0)}</b>)، وكان الأعلى في ${winCount[hw]} من ${R.length} أشهر. وأقل أسابيعك صرفًا: الأسبوع ${SC_WN[lw]} (${money(avg[lw]||0)}).${tr!=null?` آخر 3 أشهر ${tr>0?'أعلى':'أقل'} من الثلاثة التي قبلها بـ ${Math.abs(tr)}%.`:''}</span></div>
+   <div class="scct-w"><table class="scct"><thead><tr><th>الشهر</th>${[0,1,2,3,4].map(w=>`<th>أ${w+1}</th>`).join('')}<th>المجموع</th></tr></thead><tbody>
+    ${R.slice().reverse().map(M=>`<tr><th><button class="linkbtn" data-scm="${M.m}">${esc(mShort(M.m))} ${M.m.slice(2,4)}</button></th>${[0,1,2,3,4].map(w=>{const x=M.weeks[w];if(!x)return '<td class="na">—</td>';const v=scWPick(x);return `<td class="l${scLvl(v,cap)}${x.n<4?' part':''}"><span class="num">${scFmt(v)||'0'}</span></td>`}).join('')}<td class="num"><b>${money(scPick(M))}</b></td></tr>`).join('')}
+    </tbody><tfoot><tr><th>المتوسط</th>${avg.map((v,w)=>`<td class="num${w===hw?' hi':''}">${v==null?'—':scFmt(v)}</td>`).join('')}<td class="num"><b>${money(mAvg)}</b></td></tr></tfoot></table></div>
+   <small class="note">أ1 = الأسبوع الأول من الشهر (الأيام 1–7)، أ5 = الأيام الأخيرة بعد اليوم 28، وهي أيام قليلة فلا تُقارن بغيرها. الألوان من الأقل للأكثر.</small>
+   <h3>أي أيام الأسبوع تصرف فيها أكثر</h3><div class="scdw">${dowA.map((v,i)=>`<div class="${i===hd?'hi':''}"><span class="scdwb"><i style="height:${Math.max(3,Math.round(v/dmax*100))}%"></i></span><b class="num">${scFmt(v)||'0'}</b><small>${SC_DOW[i]}</small></div>`).join('')}</div>
+   <small class="note">متوسط ما تصرفه في كل يوم من أيام الأسبوع (بدون الالتزامات) في الأشهر المختارة.</small>`}
+
+/* التوقع: لكل أسبوع من الأشهر القادمة = متوسط صرفك المتغير في نفس الأسبوع (آخر 6 أشهر، والأحدث أثقل وزنًا) + الالتزامات المستحقة في أيامه */
+function scFcMonth(m,R){const W=scWeeks(m);const wts=R.map((M,i)=>i+1);const sw=wts.reduce((a,v)=>a+v,0)||1;let items=[];try{items=monthItems(m).filter(i=>!i.isPaid&&+i.amount>0)}catch(e){}
+  return W.map((days,wi)=>{let vs=0,ws=0;R.forEach((M,i)=>{const x=M.weeks[wi];if(!x||!x.n)return;vs+=((x.v+x.atm)/x.n)*days.length*wts[i];ws+=wts[i]});const v=ws?r3(vs/ws):0;
+    const due=items.filter(i=>{const d=dayIn(m,i.day);return d>=days[0]&&d<=days[days.length-1]});const fix=r3(due.reduce((a,i)=>a+(+i.amount||0),0));return {wi,days,v,fix,tot:r3(v+fix),due}})}
+function scFcHtml(){const all=scMonthsWithData();const cm=curM();const R=all.filter(m=>m<cm).slice(-6).map(scMonth);if(!R.length)return '<div class="infobox"><span>التوقع يحتاج شهرًا مكتملًا واحدًا على الأقل من المصاريف المسجلة.</span></div>';
+  const ms=[cm,shiftMonth(cm,1),shiftMonth(cm,2),shiftMonth(cm,3)];
+  return `<p class="note">لكل أسبوع: متوسط صرفك المتغير في نفس الأسبوع من آخر ${R.length} أشهر (الأحدث أثقل وزنًا)، مضافًا إليه الالتزامات التي تستحق في أيامه ولم تُدفع.</p>
+   ${ms.map(m=>{const F=scFcMonth(m,R);const mx=Math.max(...F.map(w=>w.tot),0.001);const full=F.filter(w=>w.days.length>=4);const hi=full.reduce((a,w)=>w.tot>a.tot?w:a,full[0]);const td=today();
+     return `<div class="panel scfc"><div class="sumrow"><b>${esc(monthName(m))}${m===cm?' <small class="note">(الحالي)</small>':''}</b><b class="num">≈ ${money(r3(F.reduce((a,w)=>a+w.tot,0)))}</b></div>
+      ${F.map(w=>{const past=m===cm&&w.days[w.days.length-1]<td;return `<div class="scfr${w===hi?' hi':''}${past?' past':''}"><span class="scfl">الأسبوع ${SC_WN[w.wi]}<small>${scDM(w.days[0])} – ${scDM(w.days[w.days.length-1])}</small></span><span class="scfb"><i class="v" style="width:${Math.round(w.v/mx*100)}%"></i><i class="f" style="width:${Math.round(w.fix/mx*100)}%"></i></span><b class="num">${money(w.tot)}</b></div>${w.due.length&&!past?`<small class="note scfd">منها: ${w.due.slice(0,3).map(i=>esc(i.name)+' '+money(i.amount)).join('، ')}${w.due.length>3?' …':''}</small>`:''}`}).join('')}
+      ${hi&&hi.tot>0?`<small class="note">📌 المتوقع أن يكون <b>الأسبوع ${SC_WN[hi.wi]}</b> الأعلى صرفًا${hi.fix>0?' بسبب الالتزامات المستحقة فيه':''}. جهّز له مبلغه مسبقًا.</small>`:''}</div>`}).join('')}
+   <div class="sclg"><span><i class="lv"></i> صرف متغير متوقع</span><span><i class="lfx2"></i> التزامات مستحقة</span></div>`}
+
+function openSpendCal(view,m){const L=document.getElementById('layer');scS.view=view||scS.view||'month';scS.m=m||scS.m||S.month||curM();scS.y=scS.y||scS.m.slice(0,4);if(m)scS.y=m.slice(0,4);
+  const draw=()=>{const cm=curM();const ys=scYears();let body='';try{body=scS.view==='year'?scYearHtml():scS.view==='cmp'?scCmpHtml():scS.view==='fc'?scFcHtml():scMonthHtml()}catch(e){body='<div class="errbox">تعذّر عرض هذا الجزء</div>';console.error(e)}
+    const nav=scS.view==='month'?`<div class="scnav"><button class="iconbtn" data-scmv="-1" aria-label="الشهر السابق">‹</button><b>${esc(monthName(scS.m))}</b><button class="iconbtn" data-scmv="1" aria-label="الشهر التالي"${scS.m>=cm?' disabled':''}>›</button></div>`
+      :scS.view==='year'?`<div class="scnav"><button class="iconbtn" data-scyv="-1" aria-label="السنة السابقة"${scS.y<=ys[0]?' disabled':''}>‹</button><b>${scS.y}</b><button class="iconbtn" data-scyv="1" aria-label="السنة التالية"${scS.y>=cm.slice(0,4)?' disabled':''}>›</button></div>`:'';
+    L.innerHTML=`${sheetTop('تقويم المصروف')}<h2 style="margin-top:0">📅 تقويم المصروف</h2>
+     <div class="seg grc-tabs" role="tablist">${[['month','الشهر'],['year','السنة'],['cmp','المقارنة'],['fc','التوقع']].map(([k,n])=>`<button class="n" role="tab" data-scv="${k}" aria-pressed="${scS.view===k}">${n}</button>`).join('')}</div>
+     ${nav}
+     ${scS.view==='month'||scS.view==='year'?`<div class="chips scys" role="group" aria-label="السنة">${ys.map(y=>`<button class="chip" data-scy="${y}" aria-pressed="${(scS.view==='year'?scS.y:scS.m.slice(0,4))===y}">${y}</button>`).join('')}${scS.view==='month'&&scS.m!==cm?'<button class="chip pay" data-scnow="1">الشهر الحالي</button>':''}</div>`:''}
+     ${scS.view!=='fc'?`<div class="seg seg3 scflt" role="group" aria-label="ماذا أعرض">${[['all','كل الإنفاق'],['var','المتغير فقط'],['atm','السحب النقدي']].map(([k,n])=>`<button class="n" data-scf="${k}" aria-pressed="${scS.flt===k}">${n}</button>`).join('')}</div>`:''}
+     ${body}
+     <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`};
+  draw();L.oninput=L.onchange=null;
+  L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+    if(x.dataset.scv){scS.view=x.dataset.scv;if(scS.view==='year')scS.y=scS.m.slice(0,4);draw();return}
+    if(x.dataset.scmv){const n=shiftMonth(scS.m,+x.dataset.scmv);if(n>curM())return;scS.m=n;scS.y=n.slice(0,4);draw();return}
+    if(x.dataset.scyv){scS.y=String(+scS.y+(+x.dataset.scyv));draw();return}
+    if(x.dataset.scy){const y=x.dataset.scy;if(scS.view==='year'){scS.y=y}else{const mm=scS.m.slice(5);let n=y+'-'+mm;if(n>curM())n=curM();scS.m=n;scS.y=y}draw();return}
+    if(x.dataset.scnow){scS.m=curM();scS.y=scS.m.slice(0,4);draw();return}
+    if(x.dataset.scf){scS.flt=x.dataset.scf;draw();return}
+    if(x.dataset.scn){scS.n=+x.dataset.scn;draw();return}
+    if(x.dataset.scm){scS.m=x.dataset.scm;scS.y=scS.m.slice(0,4);scS.view='month';draw();return}
+    if(x.dataset.scday){scDayOpen(x.dataset.scday,()=>openSpendCal());return}
+    if(x.dataset.scweek){const M=scMonth(scS.m);const w=M.weeks[+x.dataset.scweek];if(w)scWeekOpen(M,w,()=>openSpendCal());return}}}
+function scTxRows(X){return X.length?X.sort((a,b)=>(+b.amount||0)-(+a.amount||0)).map(t=>{const k=scKind(t);return `<div class="sumrow"><span>${k==='atm'?'🏧 ':''}${esc(t.note||catOf(t.cat).n)} <small class="note">· ${esc(catOf(t.cat).n)}${k==='fix'?' · التزام':''}${t.why==='imp'?' · اندفاع':''}</small></span><b class="num amt-exp">${money(t.amount)}</b></div>`}).join(''):'<p class="note">لا مصاريف.</p>'}
+function scDayOpen(d,back){const L=document.getElementById('layer');const X=scExp(d,d);const M=scMonth(mOf(d));const o=M.D[d];const ov=scOver(o,M.base);
+  L.innerHTML=`${sheetTop(fmtD(d))}<h2 style="margin-top:0">📅 ${esc(SC_DOW[new Date(d+'T12:00').getDay()])} ${esc(fmtD(d))}</h2>
+   <div class="sck"><div><span>أنفقت</span><b class="num">${money(o?o.tot:0)}</b></div><div><span>🏧 سحبت</span><b class="num">${money(o?o.atm:0)}</b></div><div class="${ov>0?'bad':''}"><span>أسرفت</span><b class="num">${money(ov)}</b></div></div>
+   ${ov>0?`<div class="infobox"><span>صرفت في هذا اليوم ${money(o.v)} من المصروف المتغير، ومعدلك اليومي المعتاد ${money(M.base)}.</span></div>`:''}
+   <div class="panel">${scTxRows(X)}</div>
+   <div class="actions"><button class="btn ghost block" data-scback="1">رجوع للتقويم</button></div></div></div>`;
+  L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}if(x.dataset.scback)back()}}
+function scWeekOpen(M,w,back){const L=document.getElementById('layer');const a=w.days[0],b=w.days[w.days.length-1];const X=scExp(a,b);const by={};X.forEach(t=>{const k=catOf(t.cat).n;by[k]=r3((by[k]||0)+(+t.amount||0))});
+  L.innerHTML=`${sheetTop('الأسبوع')}<h2 style="margin-top:0">📅 الأسبوع ${SC_WN[w.wi]} من ${esc(monthName(M.m))}</h2><p class="note">${esc(fmtD(a))} – ${esc(fmtD(b))}</p>
+   <div class="sck"><div><span>أنفقت</span><b class="num">${money(w.tot)}</b></div><div><span>متغير</span><b class="num">${money(w.v)}</b></div><div><span>التزامات</span><b class="num">${money(w.fix)}</b></div><div><span>🏧 سحبت</span><b class="num">${money(w.atm)}</b></div><div class="${w.over>0?'bad':''}"><span>أسرفت</span><b class="num">${money(w.over)}</b></div></div>
+   <h3>حسب الفئة</h3><div class="panel">${Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="sumrow"><span>${esc(k)}</span><b class="num">${money(v)}</b></div>`).join('')||'<p class="note">لا مصاريف.</p>'}</div>
+   <h3>العمليات</h3><div class="panel">${scTxRows(X)}</div>
+   <div class="actions"><button class="btn ghost block" data-scback="1">رجوع للتقويم</button></div></div></div>`;
+  L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}if(x.dataset.scback)back()}}
 function smartAlertList_(){const C=alertCfg(),m=curM(),td=today(),out=[];const dis=adisGet();
   const push=o=>{if(!dis[o.ref])out.push(o)};
   if(C.inst.on||C.late.on)recStatus(m).R.filter(i=>i.kind==='debt'&&!i.isPaid).forEach(i=>{const dd=dueOf(i,m),n=dDiff(td,dd),need=r3(i.amount-(i.paidAmt||0));
@@ -10693,6 +10826,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.csave){carToGoal(b.dataset.csave);return}
   if(b.dataset.grcopen){openGrc(S.month);return}
   if(e.target.closest('[data-clipx]')){clipChipHide();return}if(b.dataset.clipsms){clipRecord();return}
+  if(b.dataset.scal){openSpendCal('month',S.month||curM());return}
   if(b.dataset.heropick){openHeroPick();return}
   if(b.dataset.tvexp){openTravelExp();return}if(b.dataset.tvl){openTravel();return}if(b.dataset.tvend){await travelEnd();return}
   if(b.dataset.habits){openHabits(b.dataset.habits);return}if(b.dataset.wkrev){openWkReview();return}
