@@ -2830,3 +2830,17 @@ body.hv2-on header.top .brand{visibility:hidden}
 .be-unkl{border:1px solid rgba(176,138,46,.4);margin-bottom:12px;display:flex;flex-direction:column;gap:6px}
 .be-unk .chips{margin-top:6px}
 .be-how summary{cursor:pointer;font-weight:600}
+/* 2.132 تجهيز شهر قادم */
+.fp-months{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;-webkit-overflow-scrolling:touch}.fp-months .chip{white-space:nowrap}.fp-months .chip.on{background:var(--accent,#2F7F7A);color:#fff}
+.fp-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0 10px}
+.fp-study{border-width:1px;border-style:solid;display:flex;flex-direction:column;gap:6px}
+.fp-study.fp-ok{border-color:rgba(46,139,87,.45)}.fp-study.fp-warn{border-color:rgba(176,138,46,.5)}.fp-study.fp-bad{border-color:rgba(192,79,79,.5)}
+.fp-vh{display:flex;justify-content:space-between;align-items:center;font-weight:600}.fp-vh b{font-size:13px;padding:3px 10px;border-radius:10px}
+.fp-ok .fp-vh b{background:rgba(46,139,87,.13);color:#2E8B57}.fp-warn .fp-vh b{background:rgba(176,138,46,.15);color:#9A7520}.fp-bad .fp-vh b{background:rgba(192,79,79,.13);color:#C04F4F}
+.fp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:6px}.fp-grid label{display:flex;flex-direction:column;gap:3px}.fp-grid em{font-style:normal;font-size:10.5px}
+.fp-tip{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}.fp-tip small{opacity:.85;line-height:1.6}.fp-tip .chip{align-self:flex-start}
+.fp-row{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px;display:flex;flex-direction:column;gap:6px}
+.fp-rt{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.fp-rt small{margin-inline-start:auto}
+.fp-xadd{display:flex;gap:6px;align-items:center;margin-top:8px}.fp-xadd input#fpXn{flex:1;min-width:0}.fp-xadd .amtbox{width:110px}
+#layer textarea#fpNote{width:100%;box-sizing:border-box;border-radius:12px;border:1px solid var(--line);padding:10px;font:inherit;background:var(--surface);color:inherit}
+.fp-follow{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}.ms-bar.over i{background:#C04F4F}

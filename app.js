@@ -199,7 +199,7 @@ const REST_SKIP={_su:1,_u:1,_sk:1,_delI:1};
  * كل عنصر له رقم (id): الإضافة من جهازين تُجمع، والحذف يُسجَّل (sub:المسار:الرقم) فلا يعود من جهاز آخر، والتعديل يأخذ الأحدث. */
 const SUB_ARR=['payHolds','payees','xplans','incomes','groups','wish','travels'];/* 2.124: قوائم بعناصر لها رقم */
 const SUB_MAP=['reviews','savPlanHist','pchk','merchantCats','stmtLearn','merchMap','catRules','estSnap','balLog','fuelPrices','wkRev'];/* سجلات بمفتاح (شهر/يوم/اسم) */
-const SUB_KEYS=['mtasks','kids','gold','grc','svl','mPlans','mbud'].concat(SUB_ARR,SUB_MAP);const SubI={};
+const SUB_KEYS=['mtasks','kids','gold','grc','svl','mPlans','mbud','fplans'].concat(SUB_ARR,SUB_MAP);const SubI={};
 function subLists(st){const out=[];if(Array.isArray(st.mtasks))out.push(['mtasks',st.mtasks]);SUB_ARR.forEach(k=>{if(Array.isArray(st[k]))out.push([k,st[k]])});if(Array.isArray(st.kids)){out.push(['kids',st.kids]);st.kids.forEach(k=>{if(k&&k.id!=null){if(Array.isArray(k.tx))out.push(['kids.'+k.id+'.tx',k.tx]);if(Array.isArray(k.jars))out.push(['kids.'+k.id+'.jars',k.jars])}})}
   if(st.gold){if(Array.isArray(st.gold.lots))out.push(['gold.lots',st.gold.lots]);if(Array.isArray(st.gold.sales))out.push(['gold.sales',st.gold.sales])}if(st.grc){if(Array.isArray(st.grc.rc))out.push(['grc.rc',st.grc.rc]);if(Array.isArray(st.grc.list))out.push(['grc.list',st.grc.list])}return out}
 const subJ=it=>JSON.stringify(it,(k,v)=>k==='_t'?undefined:v);
@@ -218,6 +218,7 @@ function subMergeKey(x,Lv,Rv,rn,del){if(Lv==null)return Rv;if(Rv==null)return Lv
   if(x==='grc'){const o=pick(Lv,Rv);o.rc=U('grc.rc',Lv.rc,Rv.rc);o.list=U('grc.list',Lv.list,Rv.list);o.alias=pick(Lv.alias,Rv.alias);o.cat=pick(Lv.cat,Rv.cat);return o}
   if(x==='svl'){const o=pick(Lv,Rv);o.m=pick(Lv.m,Rv.m);return o}
   if(x==='mPlans')return pick(Lv,Rv);
+  if(x==='fplans'){const o=Object.assign({},Lv||{});Object.keys(Rv||{}).forEach(k=>{const a=o[k],b=Rv[k];if(!a||(b&&((b.upd||'')>(a.upd||'')||((b.upd||'')===(a.upd||'')&&rn))))o[k]=b});return o}
   if(SUB_ARR.includes(x))return U(x,Lv,Rv);
   if(x==='mbud'){const o=pick(Lv,Rv);o.m=pick(Lv.m,Rv.m);return o}
   if(SUB_MAP.includes(x)&&typeof Lv==='object'&&typeof Rv==='object'&&!Array.isArray(Lv)&&!Array.isArray(Rv))return pick(Lv,Rv);
@@ -732,6 +733,7 @@ function bankPlan(d){d=d||dailyPlan();const acc=mainAcc();const key=d.cyc?d.from
   const G=S.settings.goals||[];const Sv=goalsSummary().plan;const dep=G.reduce((s,g)=>s+(+((g.log||{})[d.cm])||0),0);
   let d0=(d.inc-C-Sv-d.buffer)/d.dim;if(d.B)d0=Math.min(d0,(d.B-C)/d.dim);d0=Math.max(0,d0);
   const expected=carry+d.inc-dueBy-Sv-d0*d.day;const recorded=carry+d.incRec-d.spent-dep;
+  const mA=(S.settings.accounts||[]).find(a=>a.id==='main'&&a.anchor);if(mA){const BB=accBalances();if('main' in BB){acc.balance=BB.main;acc.at=new Date().toISOString()}}
   const hasBal=acc.balance!==null&&acc.balance!==''&&acc.at&&acc.at>=d.from;
   const tr=trustsHeld('main');
   return{acc,key,carry,C,dueBy,Sv,dep,d0,expected,recorded,tr,actual:hasBal?+acc.balance:null,own:hasBal?r3(+acc.balance-tr):null,diff:hasBal?+acc.balance-tr-expected:null}}
@@ -1186,7 +1188,9 @@ function vMore(){const cm=curM();const nTx=inMonth(cm).length;const Ds=debts().f
 /* الرصيد الفعلي: من الدخل والمصروف تلقائيًا، أو رصيد البنك الذي تكتبه أنت ثم تُضاف إليه العمليات بعده */
 function realBal(){const cm=curM(),MF=monthFlow(cm);
   /* 2.107: من أرصدة حساباتك تلقائيًا (نفس «أرصدة حساباتك» في صافي ثروتي) */
-  if(S.settings.balSrc!=='flow'){try{const T=accTotals();if(T.known>0&&S.settings.blAuto!==false)return{v:r3(T.total),man:true,acc:true,at:new Date().toISOString(),inc:MF.inc,exp:MF.exp}}catch(e){}}
+  /* 2.131.2: إذا وصل رصيد حقيقي من البنك (رسالة أو كشف) فالرئيسية تعرض دائمًا مجموع الحسابات بنفس الآلية في كل مكان */
+  const bankReal=accList().some(a=>a.anchor&&(a.anchor.src==='sms'||a.anchor.src==='stmt'));
+  if(bankReal||S.settings.balSrc!=='flow'){try{const T=accTotals();if(T.known>0&&(bankReal||S.settings.blAuto!==false))return{v:r3(T.total),man:true,acc:true,at:new Date().toISOString(),inc:MF.inc,exp:MF.exp}}catch(e){}}
   const rb=S.settings.realBal;if(rb&&rb.at&&rb.at>=mStart(cm)&&isFinite(+rb.v)){const A=list().filter(t=>!t.own&&!t.sample&&t.date&&(t.createdAt||t.date)>rb.at&&t.date>=rb.at.slice(0,10));return{v:r3(+rb.v+sum(A,'inc')-sum(A,'exp')),man:true,at:rb.at,inc:MF.inc,exp:MF.exp}}
   return{v:r3(MF.left),man:false,inc:MF.inc,exp:MF.exp}}
 function homeFin(){const cm=curM();const B=Object.assign({},realBal());let est=0;try{if(!B.man){est=estOf(cm);if(est>0.0005){B.raw=B.v;B.v=r3(B.v-est);B.est=est}}}catch(e){}const pc=payCycle();const end=pc?pc.end:mEnd(cm);const td=today();const days=Math.max(0,dDiff(td,end));
@@ -1546,7 +1550,7 @@ function homeV2Html(m){const H=homeFin(),B=H.B,dp=H.dp;const td=today(),dt=new D
      <small class="hv2-bs">${B.acc?'مجموع أرصدة حساباتك (نفس صافي ثروتي)':B.man?'من رصيدك المكتوب '+esc(odoWhenFull(B.at))+' مع العمليات بعده':'الدخل '+money(B.inc)+' − المصروف '+money(B.exp)}</small>${B.est?`<small class="hv2-est">≈ يشمل تقدير ${money(B.est)} لأيام لم يصل كشفها</small>`:''}
      <span class="hv2-pill">${hv2i('cal',14)} ${H.cyc?'الراتب بعد '+countWord(H.payIn,'يوم واحد','يومين','أيام','يومًا'):'نهاية الشهر بعد '+countWord(H.days,'يوم واحد','يومين','أيام','يومًا')}</span></button>
    <div class="hv2-rbig">${hv2Ring(incP,'w')}<small>باقٍ من الدخل</small></div></div>
-  ${S.month===curM()?safe('رسائل البنك',()=>boxHomeHtml())+safe('حساب غير مسجل',()=>beUnkHtml(true))+safe('وضع السفر',()=>travelHomeHtml())+safe('مراجعة الأسبوع',()=>wrHomeHtml()):''}${S.month===curM()?safe('سعر الذهب',()=>gdHomeHtml()):''}
+  ${S.month===curM()?safe('رسائل البنك',()=>boxHomeHtml())+safe('حساب غير مسجل',()=>beUnkHtml(true))+safe('خطة الشهر القادم',()=>fpHomeHtml())+safe('وضع السفر',()=>travelHomeHtml())+safe('مراجعة الأسبوع',()=>wrHomeHtml()):''}${S.month===curM()?safe('سعر الذهب',()=>gdHomeHtml()):''}
   <div class="hv2-3"><button class="hv2-t t-inc" data-tab="log"><span class="hv2-ti">${hv2i('up')}</span><span class="hv2-tl">الدخل</span><b class="num">${money(B.inc)}</b><small>${H.cyc?'هذه الدورة':'هذا الشهر'}</small></button>
    <button class="hv2-t t-exp" data-tab="monthly"><span class="hv2-ti">${hv2i('due')}</span><span class="hv2-tl">الالتزامات القادمة</span><b class="num">${money(H.up)}</b><small>${H.nUp?countWord(H.nUp,'بند واحد','بندان','بنود','بندًا')+(H.cyc?' قبل الراتب':''):'لا شيء متبقٍ'}</small></button>
    <button class="hv2-t t-pr" data-hfexp="1"><span class="hv2-ti">${hv2i('trend')}</span><span class="hv2-tl">المتوقع قبل الراتب</span><b class="num ${H.proj<0?'amt-exp':''}">${money(H.proj)}</b><small>${H.proj<0?'⚠️ عجز متوقع':'بعد الالتزامات والادخار'}</small></button></div>
@@ -1573,7 +1577,7 @@ function vHome(){
   const empty=!list().length?`<div class="panel empty"><b>ابدأ بتسجيل أول عملية</b>اضغط زر + في الأسفل وسجّل راتبك أو أول مصروف. يمكنك أيضًا تجربة التطبيق ببيانات مثال ثم حذفها.<div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn" data-open-add>إضافة عملية</button><button class="btn ghost" id="loadSample">تجربة ببيانات مثال</button></div></div>`:'';
   if(m===curM()&&hv2On()&&list().length){try{return hv2Page(m,pc,inc,exp,left,lastInc,empty)}catch(e){console.warn(e)}}
   return `<div class="srchpin"><button class="srchbar" data-search="1" aria-label="بحث في التطبيق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>ابحث في عملياتك وديونك والتزاماتك…</span></button></div>${safe('الرصيد اليومي',()=>blHomeHtml())}${safe('الادخار المحمي',()=>svlHtml(m,'home'))}${m===curM()?(()=>{try{return homeTopHtml()}catch(e){return ''}})():''}${(()=>{try{return odoBannerHtml()}catch(e){return ''}})()}${homeDuaHtml()}${spiritHtml('top')}${rzHtml('top')}${safe('البطاقات',()=>homeCarHtml(m,pc,inc,exp,left))}
-   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${m===curM()?safe('رسائل البنك',()=>boxHomeHtml())+safe('حساب غير مسجل',()=>beUnkHtml(true))+safe('وضع السفر',()=>travelHomeHtml())+safe('مراجعة الأسبوع',()=>wrHomeHtml())+safe('سعر الذهب',()=>gdHomeHtml())+safe('أيام بلا صرف',()=>nsHomeHtml()):''}${m===curM()?safe('ميزانية الأسبوع',()=>wkHtml('home')):''}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${homeQuickHtml()}${safe('الرسم',()=>homeChartHtml(m,pc))}${rescueHomeHtml()}${homeAttnHtml()}${homeTiles([bizKnown()?'<button class="xphome" data-biz=""><span>💼</span><span><b>مشروعي</b><small>مبيعات وأرباح ومخزون «الزمرة الملكية» في مكان واحد</small></span><span class="xph-go">‹</span></button>':'',(()=>{try{return fuelQuickHtml('home')}catch(e){return ''}})(),(leanOn()?'':'<button class="xphome" data-merch=""><span>📍</span><span><b>الجهات والمحلات</b><small>كم صرفت في كل محطة ومحل: أسبوع، شهر، سنة</small></span><span class="xph-go">‹</span></button>'),(leanOn()?'':'<button class="xphome" data-prio="1"><span>🧭</span><span><b>الأولويات وخطة الديون</b><small>ماذا أدفع أولًا، وأسرع طريق للتحرر من الديون</small></span><span class="xph-go">‹</span></button>'),revHomeHtml(),safe('التصنيف',()=>ckHomeHtml()),xpHomeHtml(),ppHomeHtml(),safe('التوقعات',()=>fcHomeHtml()),seasHomeHtml(),subsHomeHtml(),list().some(t=>t.src==='stmt')&&!leanOn()?'<button class="stbtn sm" data-bana="1"><span>📊</span><span><b>تحليل الكشوفات</b><small>كل بنوكك · خطة الشهر القادم</small></span><span class="xph-go">‹</span></button>':(hqOn()||leanOn()?'':'<button class="stbtn sm" data-stmt="1"><span>🏦</span><span><b>استيراد كشف البنك</b><small>أضف عمليات الشهر بضغطة</small></span><span class="xph-go">‹</span></button>')])}
+   ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب، مثل «سبتمبر – أكتوبر».</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}${m===curM()?safe('رسائل البنك',()=>boxHomeHtml())+safe('حساب غير مسجل',()=>beUnkHtml(true))+safe('خطة الشهر القادم',()=>fpHomeHtml())+safe('وضع السفر',()=>travelHomeHtml())+safe('مراجعة الأسبوع',()=>wrHomeHtml())+safe('سعر الذهب',()=>gdHomeHtml())+safe('أيام بلا صرف',()=>nsHomeHtml()):''}${m===curM()?safe('ميزانية الأسبوع',()=>wkHtml('home')):''}${lastInc?`<div class="infobox"><span>💡 آخر دخل «${esc(lastInc.note||catOf(lastInc.cat).n)}» <b class="num">${amtH(lastInc.amount)}</b> مسجّل بتاريخ ${fmtD(lastInc.date)}، فيُحسب في شهر ${esc(MONTHS[+lastInc.date.slice(5,7)-1])}. حدّد يوم نزول الراتب ليُحسب دخلك ومصاريفك من يوم نزوله.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${homeQuickHtml()}${safe('الرسم',()=>homeChartHtml(m,pc))}${rescueHomeHtml()}${homeAttnHtml()}${homeTiles([bizKnown()?'<button class="xphome" data-biz=""><span>💼</span><span><b>مشروعي</b><small>مبيعات وأرباح ومخزون «الزمرة الملكية» في مكان واحد</small></span><span class="xph-go">‹</span></button>':'',(()=>{try{return fuelQuickHtml('home')}catch(e){return ''}})(),(leanOn()?'':'<button class="xphome" data-merch=""><span>📍</span><span><b>الجهات والمحلات</b><small>كم صرفت في كل محطة ومحل: أسبوع، شهر، سنة</small></span><span class="xph-go">‹</span></button>'),(leanOn()?'':'<button class="xphome" data-prio="1"><span>🧭</span><span><b>الأولويات وخطة الديون</b><small>ماذا أدفع أولًا، وأسرع طريق للتحرر من الديون</small></span><span class="xph-go">‹</span></button>'),revHomeHtml(),safe('التصنيف',()=>ckHomeHtml()),xpHomeHtml(),ppHomeHtml(),safe('التوقعات',()=>fcHomeHtml()),seasHomeHtml(),subsHomeHtml(),list().some(t=>t.src==='stmt')&&!leanOn()?'<button class="stbtn sm" data-bana="1"><span>📊</span><span><b>تحليل الكشوفات</b><small>كل بنوكك · خطة الشهر القادم</small></span><span class="xph-go">‹</span></button>':(hqOn()||leanOn()?'':'<button class="stbtn sm" data-stmt="1"><span>🏦</span><span><b>استيراد كشف البنك</b><small>أضف عمليات الشهر بضغطة</small></span><span class="xph-go">‹</span></button>')])}
    ${spiritHtml('mid')}${rzHtml('mid')}${empty}
    ${recent.length?`<h2>آخر العمليات</h2><div class="panel" style="padding:6px 10px">${recent.map(txRow).join('')}</div><div style="margin-top:8px"><button class="chip" data-tab="log">عرض كل العمليات</button></div>`:''}${debtsBrowseHtml()}${plansHomeHtml()}${finStatusHtml()}${advHomeHtml()}${repHomeHtml()}${spiritHtml('bottom')}${rzHtml('bottom')}`;
 }
@@ -5576,9 +5580,11 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.131.1';
+const APP_VERSION='2.132.0';
 const CHANGELOG=[
- {v:'2.131.1',date:'2026-11-22',items:['🏦 «حساباتي وأرصدتي»: صفحة واحدة لكل الأرصدة (من الرسائل والكشوفات والإدخال اليدوي)، يفتحها رصيد الرئيسية والبحث وسجل الرسائل، وأُزيلت بطاقات الأرصدة المكررة','كشف البنك لا يستبدل رصيدًا أحدث وصل من الرسائل، ويُطابق عمليات الرسائل فلا تتكرر','التحويل بين حساباتك من الرسائل يُعلَّم «بين حساباتي» فلا يُحسب مصروفًا ولا دخلًا في التقارير الشهرية والسنوية','شراءان بنفس المبلغ في وقتين مختلفين يُسجلان كعمليتين، والرسالة المكررة تُتجاهل','🧮 محرك الأرصدة الذكي: إجمالي المتوفر في كل حساباتك، ولكل حساب: آخر رصيد من رسالة البنك + الإيداعات − المصروفات بعده = الرصيد الآن، مع حالة المطابقة ودقة الأرصدة','تنبيه في الرئيسية عند وصول رسائل من حساب أو بطاقة غير مسجلة، وإضافتها بضغطة (الاسم والبنك وآخر رصيد من الرسالة) ونقل عملياتها السابقة لها','إصلاح: الرسالة المتأخرة الأقدم من آخر رصيد لم تعد تُخصم مرتين، فالترتيب صار بوقت رسالة البنك','زر «سجّل الفرق» عندما يختلف رصيد البنك عن توقع التطبيق']},
+ {v:'2.132.0',date:'2026-11-22',items:['🗓️ تجهيز شهر قادم: تختار أي شهر قادم (التالي أو بعد عدة أشهر) وتجهّز له دراسة جدوى (الدخل − الالتزامات − المصروف − المناسبات − الادخار = فائض أو عجز)، واستراتيجية مقترحة (تأجيل الأقل أولوية، إنهاء دين صغير، اشتراكات يمكن التخلص منها، سقف لأكبر بنود الصرف)، وترتيب الأولويات وخطة الدفع، وميزانية الشهر، ومصاريف خاصة بالشهر وملاحظاتك','الخطة تُحفظ مسودة، وعند الاعتماد تتفعل تلقائيًا أول يوم من ذلك الشهر (خطة الدفع والميزانية) مع تنبيه في الرئيسية ومتابعة الفعلي مقابل المخطط','تذكير في آخر أيام الشهر لتجهيز خطة الشهر التالي، وتتزامن الخطط بين أجهزتك']},
+{v:'2.131.2',date:'2026-11-22',items:['الرصيد في الرئيسية = مجموع أرصدة كل حساباتك البنكية من رسائل البنك، بنفس الحساب في كل مكان (الرئيسية بتصميميها، «حساباتي وأرصدتي»، وضعي المالي، المتاح للإنفاق)','عند وصول رصيد حقيقي من البنك لم يعد إعداد «الرصيد من الدخل والمصروف» يتجاوزه','صندوق «رصيدك في البنك» يأخذ رصيد الحساب الجاري من نفس المحرك']},
+{v:'2.131.1',date:'2026-11-22',items:['🏦 «حساباتي وأرصدتي»: صفحة واحدة لكل الأرصدة (من الرسائل والكشوفات والإدخال اليدوي)، يفتحها رصيد الرئيسية والبحث وسجل الرسائل، وأُزيلت بطاقات الأرصدة المكررة','كشف البنك لا يستبدل رصيدًا أحدث وصل من الرسائل، ويُطابق عمليات الرسائل فلا تتكرر','التحويل بين حساباتك من الرسائل يُعلَّم «بين حساباتي» فلا يُحسب مصروفًا ولا دخلًا في التقارير الشهرية والسنوية','شراءان بنفس المبلغ في وقتين مختلفين يُسجلان كعمليتين، والرسالة المكررة تُتجاهل','🧮 محرك الأرصدة الذكي: إجمالي المتوفر في كل حساباتك، ولكل حساب: آخر رصيد من رسالة البنك + الإيداعات − المصروفات بعده = الرصيد الآن، مع حالة المطابقة ودقة الأرصدة','تنبيه في الرئيسية عند وصول رسائل من حساب أو بطاقة غير مسجلة، وإضافتها بضغطة (الاسم والبنك وآخر رصيد من الرسالة) ونقل عملياتها السابقة لها','إصلاح: الرسالة المتأخرة الأقدم من آخر رصيد لم تعد تُخصم مرتين، فالترتيب صار بوقت رسالة البنك','زر «سجّل الفرق» عندما يختلف رصيد البنك عن توقع التطبيق']},
 {v:'2.131.0',d:'2026-11-22',items:['واجهة مختصرة: أُزيلت الأزرار المكررة من الرئيسية، وصارت كل أدوات التطبيق في قائمة واحدة مرتبة بأيقونات ملوّنة (اسحب الشاشة للأسفل أو افتح «المزيد»)، ويمكن إعادة الشكل القديم بزر في أسفل القائمة','📩 متابعة رسائل البنك: سجل مرتب لكل رسالة وصلت، مجمّع بالأيام، ولكل رسالة حالتها (سُجّلت، تنتظر، مكررة) والمبلغ والمحل والرصيد بعدها، مع تصفية حسب البنك.','🏦 لكل حساب بطاقة فيها رصيده المحدّث تلقائيًا من رسالة البنك وآخر أرقام البطاقة ووقت آخر رسالة. يعمل مع بنك مسقط والبنك الوطني وأي بنك آخر.','🧠 فحص ذكي: إذا اختلف رصيد البنك عما توقعه التطبيق يُنبّهك بالفرق (غالبًا رسوم أو تحويل بلا رسالة) مع زر لإضافته. والبطاقة الجديدة تُربط تلقائيًا بحساب البنك المناسب من اسم المرسل.','🏠 في الرئيسية: آخر عملية من رسائل البنك والرصيد الآن، وتنبيه الفرق إن وُجد.','🧾 كشف الحساب من رسائل البنك: يومي وشهري وسنوي لكل حساب، فيه التاريخ والوقت والبيان والخصم والإيداع ورصيد البنك بعد كل عملية، مع طباعة وPDF. وسجل الرسائل المقروءة بالتاريخ والوقت.','🔍 دليل كل أقسام التطبيق داخل البحث: اسحب الصفحة للأسفل أو اضغط 🔍، فتجد كل الميزات مرتبة في مجموعات، تضغط الخانة فتنتقل إليها مباشرة.']},
  {v:'2.130.1',d:'2026-11-22',items:['✏️ تصحيح اسم إجراء الاختصار في خطوات «صندوق رسائل البنك»: «إحضار محتويات عنوان URL»، مع مكان كل خيار فيه.']},
  {v:'2.130.0',d:'2026-11-22',items:['📩 صندوق رسائل البنك: الاختصار يرسل رسالة البنك بصمت (بدون فتح Safari) إلى صندوق مجاني في حسابك على Google، وتطبيقك المثبت يسحبها تلقائيًا عند فتحه وكل دقيقة وهو مفتوح، بدون تسجيل دخول ولا مزامنة يدوية. الواضحة تُسجَّل مباشرة، وغير الواضحة تظهر في الرئيسية لمراجعتها. الإعداد من ⚙️ تسجيل رسائل البنك ← صندوق رسائل البنك.','🧭 إن بقي اختصارك القديم يفتح Safari والصندوق مُعدّ، تُحوَّل الرسالة لتطبيقك بدل حفظها في Safari، فلا تتكرر ولا تضيع.','🔁 الرسالة نفسها لا تُسجَّل مرتين ولو سحبها جوالك والماك معًا.']},
@@ -6739,9 +6745,9 @@ function beAcc(a){const A=a.anchor;if(!A)return{a,b:null};const tx=list().filter
   const inn=r3(tx.filter(t=>t.type==='inc').reduce((s,t)=>s+(+t.amount||0),0)+trs.filter(x=>x.to===a.id).reduce((s,x)=>s+(+x.amount||0),0));
   const out=r3(tx.filter(t=>t.type!=='inc').reduce((s,t)=>s+(+t.amount||0),0)+trs.filter(x=>x.from===a.id).reduce((s,x)=>s+(+x.amount||0),0));
   const L=(a.log||[]).filter(x=>x&&x.actual!=null);const last=L[L.length-1]||null;const diff=last&&last.app!=null&&isFinite(+last.app)?r3(+last.actual-(+last.app)):null;
-  const age=dDiff(A.date,today());return{a,A,b:r3(+A.bal+inn-out),inn,out,n:tx.length+trs.length,tx,last,diff,age,sms:A.src==='sms'}}
+  const age=dDiff(A.date,today());const BB=accBalances();return{a,A,b:a.id in BB?r3(BB[a.id]):r3(+A.bal+inn-out),inn,out,n:tx.length+trs.length,tx,last,diff,age,sms:A.src==='sms'}}
 function beAll(){const A=accList().filter(a=>a.kind!=='cash'||a.anchor).map(beAcc);const sv=savAcc();const svb=sv.balance!==null&&sv.balance!==''&&sv.balance!=null?+sv.balance:null;
-  const K=A.filter(x=>x.b!==null);const total=r3(K.reduce((s,x)=>s+x.b,0)+(svb||0));
+  const K=A.filter(x=>x.b!==null);const total=accTotals().total;
   const ok=K.filter(x=>x.diff===null||Math.abs(x.diff)<0.01).length;const fresh=K.filter(x=>x.age<=3).length;
   const score=A.length?Math.round(((K.length/A.length)*0.4+(K.length?ok/K.length:0)*0.4+(K.length?fresh/K.length:0)*0.2)*100):0;
   return{A,K,svb,sv,total,score,ok,fresh}}
@@ -6822,6 +6828,136 @@ function openBeAdd(k){const u=beUnknown().find(x=>x.k===k);if(!u){toast('لم أ
      try{const LG=boxLog().map(z=>z.card4&&z.card4===u.c4?Object.assign({},z,{acc:id}):z);localStorage.setItem(BOX_LOG,JSON.stringify(LG))}catch(er){}
      await putSettings();L.innerHTML='';render();toast('✓ أُضيف «'+name+'»'+(b!==null?' برصيد '+money(b):'')+'، ودخل في إجمالي أرصدتك');try{openBalEngine()}catch(er){}}}}
 function beIgnore(k){S.settings.accIgnore=(S.settings.accIgnore||[]).concat([k]).slice(-40);putSettings();render();toast('لن أذكّرك بهذا الحساب. تجده في «حساباتي وأرصدتي» إن غيّرت رأيك')}
+
+/* ===================== 🗓️ تجهيز شهر قادم (2.132) =====================
+ * تختار شهرًا قادمًا (التالي أو بعد عدة أشهر) وتجهّز له: دراسة جدوى (الدخل المتوقع − الالتزامات − المصروف المعتاد − المصاريف الإضافية
+ * والموسمية − الادخار)، واستراتيجية مقترحة (ما تؤجله، ما تتخلص منه، أي دين تنهيه)، وترتيب الأولويات وخطة الدفع، وميزانية الشهر.
+ * تُحفظ مسودة، وعند «الاعتماد» تتفعل تلقائيًا في أول يوم من ذلك الشهر: تصير خطة الدفع المعتمدة وميزانية الشهر، مع تنبيه ومتابعة.
+ * لا تُنقل أي أموال ولا يُعدل أي ادخار أو دين تلقائيًا؛ الاقتراحات أزرار تختارها أنت. */
+function fpRaw(){return S.settings.fplans||{}}
+function fpAll(){const A=fpRaw();const o={};Object.keys(A).forEach(k=>{if(A[k]&&A[k].st!=='del')o[k]=A[k]});return o}
+function fpGet(m){const P=fpAll()[m];return P?JSON.parse(JSON.stringify(P)):null}
+async function fpPut(P){P.upd=new Date().toISOString();const A=Object.assign({},fpRaw());A[P.m]=P;Object.keys(A).forEach(k=>{if(k<shiftMonth(curM(),-6))delete A[k]});S.settings.fplans=A;await putSettings()}
+const FP_ST={draft:['مسودة','warn'],ready:['معتمدة · تبدأ أول الشهر','ok'],active:['مفعّلة الآن','ok'],done:['انتهت','muted'],missed:['فات موعدها','muted']};
+function fpAvgInc(){const v=pastAvg(a=>sum(a.filter(t=>!t.own&&!t.sample),'inc'),3);return r3(v||0)}
+function fpNew(m){let sav=0;try{sav=r3(goalsSummary().plan||0)}catch(e){}const inc=r3(salAmt()||fpAvgInc()||0);const vari=r3(pastAvg(varSpend)||0);
+  const P={m,st:'draft',inc,vari,sav,extras:[],notes:'',created:new Date().toISOString(),items:null,bud:{ess:r3(mbAvg(MB_ESS)),per:r3(mbAvg(MB_PER)),res:r3(Math.round(inc*0.05))}};
+  P.items=mpAutoItems(m,fpAvailFor(P));return P}
+function fpExtras(P){return r3((P.extras||[]).reduce((s,x)=>s+(+x.amt||0),0))}
+function fpSeas(m){let out=[];try{out=seas().filter(g=>g.date&&mOf(g.date)===m).map(g=>({name:g.name||'مناسبة',icon:g.icon,need:r3(Math.max(0,(+g.amount||0)-(+g.saved||0))),amount:+g.amount||0}))}catch(e){}return out}
+function fpAvailFor(P){return r3(Math.max(0,(+P.inc||0)-(+P.vari||0)-fpExtras(P)-(+P.sav||0)-fpSeas(P.m).reduce((s,x)=>s+x.need,0)))}
+function fpRows(P){return mpItems(P.m).map(x=>{const s=(P.items||{})[x.key]||{mode:'full'};const amt=s.mode==='full'?x.rem:s.mode==='defer'?0:r3(Math.min(x.rem,Math.max(0,+s.amt||0)));
+  const tier=PRI_TIER.find(t=>x.sc>=t[0])||PRI_TIER[PRI_TIER.length-1];return Object.assign({},x,{mode:s.mode,amt,carry:r3(x.rem-amt),tier})})}
+function fpStudy(P){const R=fpRows(P);const commit=r3(R.reduce((s,r)=>s+r.rem,0));const plan=r3(R.reduce((s,r)=>s+r.amt,0));const carry=r3(commit-plan);
+  const S2=fpSeas(P.m);const seasNeed=r3(S2.reduce((s,x)=>s+x.need,0));const ext=fpExtras(P);const inc=+P.inc||0,vari=+P.vari||0,sav=+P.sav||0;
+  const need=r3(commit+vari+ext+seasNeed+sav);const surplus=r3(inc-need);const afterPlan=r3(inc-plan-vari-ext-seasNeed-sav);
+  const inst=r3(R.filter(r=>r.i.kind==='debt').reduce((s,r)=>s+r.rem,0));const dti=inc>0?Math.round(inst/inc*100):null;
+  const verdict=surplus>=inc*0.1?['مريح','ok','الدخل يغطي كل شيء ويبقى فائض جيد.']:surplus>=0?['مشدود','warn','الدخل يكفي بالكاد؛ أي مصروف طارئ يسبب عجزًا.']:['عجز','bad','المطلوب أكبر من الدخل المتوقع؛ تحتاج تأجيل أو تخفيض.'];
+  return{R,commit,plan,carry,S2,seasNeed,ext,inc,vari,sav,need,surplus,afterPlan,inst,dti,verdict}}
+/* الاستراتيجية: اقتراحات محسوبة من بياناتك، كل واحدة معها زر يطبقها على الخطة (لا شيء يُطبق تلقائيًا) */
+function fpStrategy(P,T){const out=[];const m=P.m;
+  if(T.surplus<0){const gap=-T.surplus;
+    const low=T.R.filter(r=>r.mode!=='defer'&&r.sc<30).sort((a,b)=>a.sc-b.sc);const lowSum=r3(low.reduce((s,r)=>s+r.amt,0));
+    if(low.length)out.push({ic:'⏸️',t:'أجّل البنود الأقل أولوية',d:`${low.slice(0,4).map(r=>esc(r.i.kind==='debt'?r.i.ref.name:r.i.name)).join('، ')} — مجموعها ${money(lowSum)} ${lowSum>=gap?'وهذا يغطي العجز كله.':'ويغطي جزءًا من العجز.'}`,act:'defer-low'});
+    const cut=r3(Math.min(T.vari*0.25,gap));if(T.vari>0)out.push({ic:'✂️',t:`خفّض المصروف اليومي ${Math.round(cut/T.vari*100)}%`,d:`من ${money(T.vari)} إلى ${money(r3(T.vari-cut))}، أي توفير ${money(cut)} (حوالي ${money(r3(cut/30))} يوميًا).`,act:'cut-var',v:r3(T.vari-cut)});
+    if(T.sav>0)out.push({ic:'🐷',t:'خفّض حصة الادخار لهذا الشهر فقط',d:`حصتك ${money(T.sav)}. لا أغيّرها إلا إذا ضغطت.`,act:'cut-sav',v:r3(Math.max(0,T.sav-Math.max(0,gap-cut)))})}
+  /* التخلص من الالتزامات: دين صغير يمكن إنهاؤه بالفائض */
+  try{const Ds=debts().filter(d=>+d.balance>0.0005&&!d.closed).sort((a,b)=>(+a.balance)-(+b.balance));const room=Math.max(0,T.surplus);
+    const d=Ds.find(x=>+x.balance<=room+debtInst(x)+0.0005);
+    if(d)out.push({ic:'🏁',t:`أنهِ «${esc(d.name)}» كاملًا هذا الشهر`,d:`المتبقي ${money(+d.balance)} ويكفيه فائضك. بعدها يتحرر قسط ${money(debtInst(d))} كل شهر ابتداءً من ${esc(monthName(shiftMonth(m,1)))}.`});
+    else if(Ds.length&&room>1){const t=Ds[0];out.push({ic:'⚡',t:`سدّد ${money(r3(room*0.5))} إضافيًا لـ«${esc(t.name)}»`,d:`أصغر دين متبقٍ (${money(+t.balance)})؛ نصف الفائض يقربك من التخلص منه ويبقى النصف احتياطيًا.`})}}catch(e){}
+  /* مستلزمات واشتراكات يمكن الاستغناء عنها: التزامات متكررة منخفضة الضرورة */
+  const subs=T.R.filter(r=>r.i.kind==='rec'&&r.sc<30);if(subs.length)out.push({ic:'🧹',t:'راجع اشتراكات ومستلزمات يمكن التخلص منها',d:subs.slice(0,4).map(r=>`${esc(r.i.name)} ${money(r.rem)} شهريًا = ${money(r3(r.rem*12))} سنويًا`).join(' · ')});
+  /* أعلى فئات المصروف المتغير */
+  try{const M=pastMonths(3);if(M.length){const C={};M.forEach(a=>a.filter(t=>t.type==='exp'&&!t.own&&!isFixedTx(t)&&!t.sample).forEach(t=>{C[t.cat]=(C[t.cat]||0)+(+t.amount||0)}));
+    const top=Object.entries(C).map(([c,v])=>[c,r3(v/M.length)]).sort((a,b)=>b[1]-a[1]).slice(0,3);if(top.length)out.push({ic:'🎯',t:'ضع سقفًا لأكبر بنود الصرف',d:top.map(([c,v])=>`${esc(catOf(c).n)} ≈ ${money(v)}`).join(' · ')+' شهريًا في المتوسط.'})}}catch(e){}
+  /* مناسبات الشهر والشهرين بعده */
+  const nx=[shiftMonth(m,1),shiftMonth(m,2)].map(k=>({k,s:fpSeas(k)})).filter(x=>x.s.length);if(nx.length)out.push({ic:'📅',t:'استعد لما بعده',d:nx.map(x=>`${esc(monthName(x.k))}: ${x.s.map(s=>esc(s.name)+' '+money(s.need)).join('، ')}`).join(' · ')});
+  if(T.surplus>=0&&!out.length)out.push({ic:'✅',t:'الخطة متوازنة',d:'لا توجد مخاطر واضحة. اجعل الفائض احتياطيًا أو أضفه لهدف ادخار.'});
+  return out}
+function fpMonthsChips(sel){const c=curM();const K=[];for(let k=0;k<=12;k++)K.push(shiftMonth(c,k));const A=fpAll();
+  return `<div class="chips fp-months">${K.map(k=>`<button class="chip${k===sel?' on':''}" data-fpm="${k}" aria-pressed="${k===sel}">${esc(mShort?mShort(k):monthName(k))}${A[k]?' '+(A[k].st==='draft'?'📝':'✅'):''}</button>`).join('')}</div>`}
+function fpFollow(P){const MF=monthFlow(P.m);const a=MF.a.filter(t=>!t.own&&!t.sample);const vs=r3(varSpend(a));let pp=null;try{pp=planProgress(P.m)}catch(e){}
+  const pct=(v,t)=>t>0.0005?Math.min(100,Math.round(v/t*100)):0;
+  return `<div class="panel fp-follow"><b>📈 متابعة الخطة حتى اليوم</b>
+   <div class="sumrow"><span>الدخل: الفعلي / المتوقع</span><b class="num">${money(MF.inc)} / ${money(P.inc)}</b></div><div class="ms-bar"><i style="width:${pct(MF.inc,P.inc)}%"></i></div>
+   <div class="sumrow"><span>المصروف المتغير: الفعلي / المخطط</span><b class="num ${vs>P.vari?'amt-exp':''}">${money(vs)} / ${money(P.vari)}</b></div><div class="ms-bar ${vs>P.vari?'over':''}"><i style="width:${pct(vs,P.vari)}%"></i></div>
+   ${pp?`<div class="sumrow"><span>خطة الدفع: ${pp.nd} من ${pp.n} بنود</span><b class="num">${money(pp.done)} / ${money(pp.tgt)}</b></div><div class="ms-bar"><i style="width:${pp.pct}%"></i></div>`:''}</div>`}
+function openFuturePlan(m0){const L=document.getElementById('layer');let m=m0||shiftMonth(curM(),1);let P=fpGet(m)||fpNew(m);let dirty=false;
+  const sc=()=>{const sh=L.querySelector('.sheet');return sh?sh.scrollTop:0};
+  const draw=()=>{const y=sc();const T=fpStudy(P);const ST=fpStrategy(P,T);const isNew=!fpAll()[m];const st=FP_ST[P.st]||FP_ST.draft;const lock=P.st==='done'||P.st==='missed';
+   const row=(r,k)=>`<div class="fp-row"><div class="fp-rt"><span class="fp-tier">${r.tier[2]}</span><b>${esc(r.i.kind==='debt'?r.i.ref.name:r.i.name)}</b><small class="note">${esc(r.tier[3])} · ${money(r.rem)}</small></div>
+     <div class="seg sm"><button data-fpmode="full" data-fpk="${esc(r.key)}" aria-pressed="${r.mode==='full'}">كامل</button><button data-fpmode="part" data-fpk="${esc(r.key)}" aria-pressed="${r.mode==='part'}">جزء</button><button data-fpmode="defer" data-fpk="${esc(r.key)}" aria-pressed="${r.mode==='defer'}">تأجيل</button></div>
+     ${r.mode==='part'?`<div class="amtbox sm"><input data-fpamt="${esc(r.key)}" inputmode="decimal" value="${amtIn(r.amt)}"><span>${CUR}</span></div>`:''}</div>`;
+   L.innerHTML=`${sheetTop('تجهيز شهر قادم')}<h2 style="margin-top:0">🗓️ تجهيز شهر قادم</h2>
+    <p class="note" style="margin-top:-4px">جهّز خطة أي شهر قادم: دراسة الجدوى، الاستراتيجية، الأولويات وخطة الدفع، والميزانية. اعتمدها فتتفعل تلقائيًا في أول الشهر.</p>
+    ${fpMonthsChips(m)}
+    <div class="fp-head"><h3 style="margin:0">${esc(monthName(m))}</h3><span class="pill ${st[1]}">${isNew?'لم تُحفظ بعد':st[0]}</span></div>
+    ${P.st==='active'?fpFollow(P):''}
+    <div class="panel fp-study fp-${T.verdict[1]}"><div class="fp-vh"><span>📊 دراسة الجدوى</span><b>${T.verdict[0]}</b></div>
+     <div class="fp-grid">
+      <label><small>الدخل المتوقع</small><div class="amtbox sm"><input id="fpInc" inputmode="decimal" value="${amtIn(P.inc)}"${lock?' disabled':''}><span>${CUR}</span></div></label>
+      <label><small>مصروف الشهر المتغير (أكل، وقود، تسوق…)</small><div class="amtbox sm"><input id="fpVar" inputmode="decimal" value="${amtIn(P.vari)}"${lock?' disabled':''}><span>${CUR}</span></div><em class="note">متوسط آخر 3 أشهر ${money(r3(pastAvg(varSpend)||0))}</em></label>
+      <label><small>الادخار المخطط</small><div class="amtbox sm"><input id="fpSav" inputmode="decimal" value="${amtIn(P.sav)}"${lock?' disabled':''}><span>${CUR}</span></div></label>
+     </div>
+     <div class="sumrow"><span>الالتزامات والأقساط المستحقة (${T.R.length})</span><b class="num">${money(T.commit)}</b></div>
+     ${T.seasNeed>0.0005?`<div class="sumrow"><span>مناسبات الشهر: ${T.S2.map(s=>esc(s.name)).join('، ')}</span><b class="num">${money(T.seasNeed)}</b></div>`:''}
+     ${T.ext>0.0005?`<div class="sumrow"><span>مصاريف إضافية خاصة بالشهر</span><b class="num">${money(T.ext)}</b></div>`:''}
+     <div class="sumrow"><span>المصروف المتغير + الادخار</span><b class="num">${money(r3(T.vari+T.sav))}</b></div>
+     <div class="sumrow total"><span>${T.surplus>=0?'الفائض المتوقع':'العجز المتوقع'}</span><b class="num ${T.surplus<0?'amt-exp':'amt-inc'}">${T.surplus<0?'−':''}${money(Math.abs(T.surplus))}</b></div>
+     ${T.carry>0.0005?`<div class="sumrow"><span>بعد تطبيق خطة الدفع (تأجيل ${money(T.carry)})</span><b class="num ${T.afterPlan<0?'amt-exp':'amt-inc'}">${T.afterPlan<0?'−':''}${money(Math.abs(T.afterPlan))}</b></div>`:''}
+     <small class="note">${T.verdict[2]}${T.dti?' · الأقساط '+T.dti+'% من الدخل'+(T.dti>=40?' (مرتفعة)':''):''}</small></div>
+    <h3>🧭 الاستراتيجية المقترحة</h3><div class="stack">${ST.map(s=>`<div class="panel fp-tip"><b>${s.ic} ${s.t}</b><small>${s.d}</small>${s.act&&!lock?`<button class="chip" data-fpact="${s.act}" data-v="${s.v!=null?s.v:''}">طبّقها على الخطة</button>`:''}</div>`).join('')}</div>
+    <h3>➕ مصاريف خاصة بهذا الشهر</h3><div class="panel">${(P.extras||[]).map((x,k)=>`<div class="sumrow"><span>${esc(x.name)}</span><b class="num">${money(x.amt)} ${lock?'':`<button class="iconbtn sm" data-fpxdel="${k}" aria-label="حذف">✕</button>`}</b></div>`).join('')||'<small class="note">مثل رسوم مدرسة، صيانة، سفر، هدية… تدخل في دراسة الجدوى.</small>'}
+     ${lock?'':`<div class="fp-xadd"><input id="fpXn" placeholder="البند"><div class="amtbox sm"><input id="fpXa" inputmode="decimal" placeholder="0"><span>${CUR}</span></div><button class="chip pay" data-fpxadd="1">أضف</button></div>`}</div>
+    <h3>🔢 الأولويات وخطة الدفع (${T.R.length})</h3><p class="note" style="margin-top:-6px">مرتبة بالأهم: الضرورة، عاقبة التأخير، قرب الموعد، والفائدة. المتاح لها ${money(fpAvailFor(P))}.</p>
+    ${T.R.length?`<div class="stack">${T.R.map(row).join('')}</div>${lock?'':'<button class="chip" data-fpauto="1">↻ وزّع المتاح تلقائيًا بالأولوية</button>'}`:'<div class="panel empty">لا التزامات مستحقة في هذا الشهر.</div>'}
+    <h3>💼 ميزانية الشهر</h3><div class="fp-grid">
+     <label><small>أساسيات (أكل، وقود، بيت…)</small><div class="amtbox sm"><input id="fpBe" inputmode="decimal" value="${amtIn(P.bud.ess)}"${lock?' disabled':''}><span>${CUR}</span></div></label>
+     <label><small>شخصي (مطاعم، تسوق، ترفيه)</small><div class="amtbox sm"><input id="fpBp" inputmode="decimal" value="${amtIn(P.bud.per)}"${lock?' disabled':''}><span>${CUR}</span></div></label>
+     <label><small>احتياطي الطوارئ</small><div class="amtbox sm"><input id="fpBr" inputmode="decimal" value="${amtIn(P.bud.res)}"${lock?' disabled':''}><span>${CUR}</span></div></label></div>
+    <h3>📝 أهدافي وملاحظاتي لهذا الشهر</h3><textarea id="fpNote" rows="3" placeholder="مثال: إنهاء قرض الهاتف، عدم الشراء من الإنترنت، تجهيز رسوم المدرسة"${lock?' disabled':''}>${esc(P.notes||'')}</textarea>
+    <div class="actions">${lock?'':`${P.st==='draft'?`<button class="btn" data-fpok="1">✅ اعتماد الخطة${m===curM()?' وتفعيلها الآن':' (تتفعل '+esc(fmtD(mStart(m)))+')'}</button>`:`<button class="btn" data-fpsave="1">💾 حفظ التعديلات</button>`}
+     <button class="btn ghost" data-fpdraft="1">${P.st==='draft'?'💾 حفظ كمسودة':'↩️ إرجاعها مسودة'}</button>`}${!isNew?'<button class="btn ghost" data-fpdel="1">🗑️ حذف الخطة</button>':''}<button class="btn ghost" data-close>إغلاق</button></div></div></div>`;
+   const sh=L.querySelector('.sheet');if(sh)sh.scrollTop=y};
+  const grab=()=>{const g=id=>document.getElementById(id);const n=(id,d)=>{const e=g(id);if(!e)return d;const v=parseAmt(e.value);return isFinite(v)&&v>=0?r3(v):d};
+   P.inc=n('fpInc',P.inc);P.vari=n('fpVar',P.vari);P.sav=n('fpSav',P.sav);P.bud={ess:n('fpBe',P.bud.ess),per:n('fpBp',P.bud.per),res:n('fpBr',P.bud.res)};const nt=g('fpNote');if(nt)P.notes=nt.value;
+   L.querySelectorAll('[data-fpamt]').forEach(e=>{const v=parseAmt(e.value);if(isFinite(v)&&v>=0){P.items[e.dataset.fpamt]={mode:'part',amt:r3(v)}}})};
+  const save=async st=>{grab();if(st)P.st=st;await fpPut(P);dirty=false;if(P.st==='ready'||P.st==='active')await fpTick(true)};
+  draw();L.oninput=()=>{dirty=true};
+  L.onchange=e=>{if(e.target.matches('#fpInc,#fpVar,#fpSav,[data-fpamt],#fpBe,#fpBp,#fpBr')){grab();draw()}};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;
+   if(x.hasAttribute('data-close')){if(dirty&&!confirm('لم تحفظ التعديلات. إغلاق بدون حفظ؟'))return;L.innerHTML='';return}
+   if(x.dataset.fpm){if(dirty&&!confirm('لم تحفظ تعديلات هذا الشهر. الانتقال بدون حفظ؟'))return;m=x.dataset.fpm;P=fpGet(m)||fpNew(m);dirty=false;draw();return}
+   if(x.dataset.fpmode){grab();const k=x.dataset.fpk;const r=fpRows(P).find(z=>z.key===k);P.items=P.items||{};P.items[k]=x.dataset.fpmode==='part'?{mode:'part',amt:r?r3(r.rem/2):0}:{mode:x.dataset.fpmode};dirty=true;draw();return}
+   if(x.dataset.fpauto){grab();P.items=mpAutoItems(m,fpAvailFor(P));dirty=true;draw();toast('وُزّع المتاح على البنود حسب الأولوية');return}
+   if(x.dataset.fpact){grab();const a=x.dataset.fpact,v=+x.dataset.v;
+     if(a==='defer-low'){fpRows(P).filter(r=>r.sc<30).forEach(r=>{P.items[r.key]={mode:'defer'}});toast('أُجّلت البنود الأقل أولوية')}
+     if(a==='cut-var'&&isFinite(v)){P.vari=v;toast('عُدّل المصروف اليومي المتوقع')}
+     if(a==='cut-sav'&&isFinite(v)){P.sav=v;toast('عُدّلت حصة الادخار لهذه الخطة فقط')}
+     dirty=true;draw();return}
+   if(x.dataset.fpxadd){grab();const nm=(document.getElementById('fpXn').value||'').trim();const v=parseAmt(document.getElementById('fpXa').value);if(!nm||!(v>0)){toast('اكتب البند والمبلغ');return}P.extras=(P.extras||[]).concat([{name:nm,amt:r3(v)}]);dirty=true;draw();return}
+   if(x.dataset.fpxdel!=null){grab();P.extras.splice(+x.dataset.fpxdel,1);dirty=true;draw();return}
+   if(x.dataset.fpdraft){await save('draft');draw();toast(P.st==='draft'?'💾 حُفظت المسودة':'رجعت مسودة');return}
+   if(x.dataset.fpsave){await save();draw();toast('💾 حُفظت التعديلات');return}
+   if(x.dataset.fpok){await save('ready');P=fpGet(m)||P;draw();toast(P.st==='active'?'✅ اعتُمدت وتفعّلت الآن':'✅ اعتُمدت. ستتفعل تلقائيًا في '+fmtD(mStart(m)));return}
+   if(x.dataset.fpdel){if(!confirm('حذف خطة '+monthName(m)+'؟ (خطة الدفع والميزانية المفعّلة تبقى كما هي)'))return;const A=Object.assign({},fpRaw());A[m]={m,st:'del',upd:new Date().toISOString()};S.settings.fplans=A;await putSettings();P=fpNew(m);dirty=false;draw();toast('حُذفت الخطة');return}}}
+/* التفعيل: عند بداية الشهر (أو فورًا إن كان الشهر الحالي) تصبح خطة الدفع والميزانية المعتمدتين لذلك الشهر */
+async function fpTick(quiet){const A=fpAll();const c=curM();let ch=false,act=null;const A2=Object.assign({},fpRaw());
+  for(const k of Object.keys(A)){const P=Object.assign({},A[k]);
+    if(P.st==='ready'&&k<c){P.st='missed';P.upd=new Date().toISOString();A2[k]=P;ch=true;continue}
+    if(P.st==='active'&&k<c){P.st='done';P.upd=new Date().toISOString();A2[k]=P;ch=true;continue}
+    if(P.st==='ready'&&k===c){const items={};const I=mpItems(k);I.forEach(x=>{const s=(P.items||{})[x.key]||{mode:'full'};const amt=s.mode==='full'?x.rem:s.mode==='defer'?0:r3(Math.min(x.rem,+s.amt||0));items[x.key]={mode:s.mode,amt,p0:r3(x.i.paidAmt||0)}});
+      const plan=r3(Object.values(items).reduce((s,i)=>s+i.amt,0));const carry=r3(I.reduce((s,x)=>s+x.rem,0)-plan);
+      const MP=Object.assign({},S.settings.mPlans||{});if(MP[k])P.prevMP=MP[k];MP[k]={ok:true,at:new Date().toISOString(),avail:fpAvailFor(P),items,plan,carry,from:'fplan'};S.settings.mPlans=MP;
+      const B=Object.assign({},S.settings.mbud||{});P.prevBud=(B.m||{})[k]||null;B.m=Object.assign({},B.m||{},{[k]:{ess:P.bud.ess,per:P.bud.per,sav:P.sav,res:P.bud.res}});S.settings.mbud=B;
+      P.st='active';P.actAt=new Date().toISOString();P.upd=P.actAt;A2[k]=P;ch=true;act=P}}
+  if(ch){S.settings.fplans=A2;await putSettings();try{memoClear()}catch(e){}if(act){render();if(!quiet)toast('🗓️ بدأت خطتك لشهر '+monthName(act.m)+': خطة الدفع والميزانية مفعّلتان')}}return act}
+function fpHomeHtml(){const A=fpAll();const c=curM();const P=A[c];const nx=A[shiftMonth(c,1)];const td=today();
+  if(P&&P.st==='active'&&dDiff(mStart(c),td)<=4){const T=fpStudy(P);return `<button class="xphome on" data-fplan="${c}"><span class="xph-i">🗓️</span><span class="xph-t"><b>بدأت خطتك لشهر ${esc(monthName(c))}</b><small>${T.verdict[0]} · ${T.surplus>=0?'فائض متوقع '+money(T.surplus):'عجز متوقع '+money(-T.surplus)} · تابعها من هنا</small></span><span class="xph-go">‹</span></button>`}
+  const left=dDiff(td,mEnd(c));if(left<=5&&!nx)return `<button class="xphome" data-fplan="${shiftMonth(c,1)}"><span class="xph-i">🗓️</span><span class="xph-t"><b>جهّز خطة ${esc(monthName(shiftMonth(c,1)))}</b><small>بقي ${daysWord(left)} على نهاية الشهر · دراسة جدوى وأولويات في دقيقتين</small></span><span class="xph-go">‹</span></button>`;
+  if(left<=5&&nx&&nx.st==='draft')return `<button class="xphome" data-fplan="${shiftMonth(c,1)}"><span class="xph-i">📝</span><span class="xph-t"><b>خطة ${esc(monthName(shiftMonth(c,1)))} ما زالت مسودة</b><small>اعتمدها لتتفعل تلقائيًا أول الشهر</small></span><span class="xph-go">‹</span></button>`;
+  return ''}
 
 function openBoxFeed(f){const L=document.getElementById('layer');let flt=f||'all';
   const draw=()=>{const all=boxLog().slice().reverse();const X=all.filter(x=>flt==='all'?true:flt.startsWith('bk:')?x.bank===flt.slice(3):flt==='warn'?x.diff!=null:flt==='pend'?x.st==='pend':x.st===flt);
@@ -6913,7 +7049,7 @@ function bsPrint(){const [a,b]=bsRange();const nm=accName(bsS.acc)||'الحسا�
 function sDir(){const T=t=>()=>sGoTab(t);return [
  ['💵 أموالي اليومية',[['🏠','الرئيسية','home الرئيسيه',T('home')],['☰','سجل العمليات','سجل العمليات المصاريف',T('log')],['➕','إضافة مصروف أو دخل','اضافه مصروف دخل جديد',()=>openSheet(null,{type:'exp'})],['💰','كم أستطيع أن أنفق اليوم؟','صرف امن انفق اليوم',()=>openSpendToday()],['🏦','حساباتي وأرصدتي','حساب بنك محفظه رصيد ارصده اجمالي المتوفر مطابقه محرك',()=>openBalEngine()],['📆','اختيار الشهر','تقويم شهر',()=>openMonthPicker()]]],
  ['📅 الدفع والالتزامات',[['📅','الالتزامات الشهرية','الشهريه فواتير اقساط دفع',T('monthly')],['🗓️','تقويم الدفع','تقويم الدفع مواعيد',()=>openPayCalendar()],['📋','خطة الشهر','خطه الشهر اعتماد تاجيل',()=>openMonthPlan(S.month||curM())],['📊','مخطط السداد','خطه سداد قسط اختياري',()=>openPayPlanner()],['🧭','الأولويات والتخلص من الديون','اولويات ديون كرة الثلج',()=>openPriority()],['🗓️','الخطة المالية الاستثنائية','خطه استثنائيه تاجيل',()=>openXPlans()],['🔁','المصاريف المتكررة والاشتراكات','اشتراكات متكرر منسي',()=>openSubs()],['🛟','خطة الإنقاذ','انقاذ عجز',()=>openRescue()]]],
- ['🎯 الميزانية والادخار',[['🍩','الميزانية الشهرية','ميزانيه شهريه خطتي',T('mbud')],['🗓️','الميزانية الأسبوعية','ميزانيه اسبوعيه سقف',()=>openWkSet()],['💰','الادخار الذكي','ادخار ذكي اهداف',T('smartsav')],['🔒','الادخار المحمي','ادخار محمي',()=>openSvlSet()],['📆','المصاريف الموسمية','رمضان العيد مدارس موسمي',()=>openSeasonal()],['👧','حسابات الأبناء','ابناء ميرة ملهم حصالة تحدي',()=>openKids()],['🪙','الذهب','ذهب سعر زكاة',()=>openGold()],['✈️','وضع السفر','سفر رحلة عملة',()=>openTravel()]]],
+ ['🎯 الميزانية والادخار',[['🗓️','تجهيز شهر قادم','خطه الشهر القادم استراتيجيه دراسه جدوى اولويات تجهيز ميزانيه مستقبل',()=>openFuturePlan()],['🍩','الميزانية الشهرية','ميزانيه شهريه خطتي',T('mbud')],['🗓️','الميزانية الأسبوعية','ميزانيه اسبوعيه سقف',()=>openWkSet()],['💰','الادخار الذكي','ادخار ذكي اهداف',T('smartsav')],['🔒','الادخار المحمي','ادخار محمي',()=>openSvlSet()],['📆','المصاريف الموسمية','رمضان العيد مدارس موسمي',()=>openSeasonal()],['👧','حسابات الأبناء','ابناء ميرة ملهم حصالة تحدي',()=>openKids()],['🪙','الذهب','ذهب سعر زكاة',()=>openGold()],['✈️','وضع السفر','سفر رحلة عملة',()=>openTravel()]]],
  ['📊 التقارير والتحليل',[['📊','التقارير الشهرية والسنوية','تقرير احصائيات',T('reports')],['📅','تقويم المصروف','تقويم ايام اسابيع مقارنه توقع',()=>openSpendCal('month',curM())],['📈','التوقعات ومقارنة الأشهر','توقع مقارنه الاشهر',()=>openMonthFc()],['📬','التقارير الدورية','تقرير يومي اسبوعي شهري سنوي',()=>openPeriodRep('week')],['🗓️','مراجعة الأسبوع','مراجعه اسبوعيه',()=>openWkReview()],['📋','مراجعة الشهر','مراجعه نهايه الشهر اقفال',()=>openReview()],['🧠','عاداتي في الصرف','بلا صرف سبب الشراء انتظر',()=>openHabits('ns')],['📍','الجهات والمحلات','محلات محطه مطعم',()=>openMerch()],['🖨️','طباعة تقرير','طباعه pdf',()=>openPrintSheet()],['📧','إرسال التقارير بالإيميل','ايميل gmail',()=>openEmailRep()]]],
  ['🏦 البنك والرسائل',[['🧾','كشف الحساب من رسائل البنك','كشف حساب يومي شهري سنوي رسائل',()=>openBoxStmt()],['📩','سجل الرسائل المقروءة','سجل رسائل البنك مقروءه متابعه ارصده',()=>openBoxFeed()],['📮','صندوق رسائل البنك','صندوق اختصار تلقائي',()=>openSmsBox()],['💬','قراءة رسالة بنك (لصق)','رسالة sms لصق',()=>openImport()],['⚡','تسجيل الرسائل تلقائيًا','اتمتة اختصارات',()=>openShortcutGuide()],['🏦','استيراد كشف البنك PDF','كشف pdf excel استيراد مسقط الوطني',()=>openStmt()],['📊','تحليل كشوفات البنوك','تحليل كشف بنك',()=>openBankAnalysis()],['🧾','عمليات الكشوفات المستوردة','عمليات الكشف مستورده',()=>openStmtTx()]]],
  ['🏡 البيت والعائلة',[['🏡','البيت','البيت المنزل',T('house')],['🛒','السوبر ماركت','بقاله مشتريات قائمه',()=>openGrc(S.month)],['🤝','الأمانات','امانات',T('trusts')],['📁','مستنداتي','مستندات خزنه ضمان',T('docs')],['📖','التلاوات القرآنية','قران الملك الواقعه يس',()=>openQuranHub()]]],
@@ -11163,7 +11299,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.grcopen){openGrc(S.month);return}
   if(e.target.closest('[data-clipx]')){clipChipHide();return}if(b.dataset.clipsms){clipRecord();return}
   if(b.dataset.scal){openSpendCal('month',S.month||curM());return}
-  if(b.dataset.bstmt){openBoxStmt();return}if(b.dataset.beadd&&!b.closest('#layer')){openBeAdd(b.dataset.beadd);return}if(b.dataset.beign&&!b.closest('#layer')){beIgnore(b.dataset.beign);return}if(b.dataset.beng){openBalEngine();return}if(b.dataset.leantog){S.settings.homeLean=!leanOn();putSettings();render();toast(leanOn()?'أُخفيت الاختصارات المكررة':'أُعيدت الاختصارات في الرئيسية');return}if(b.dataset.spg!==undefined&&!b.closest('#layer')){const pg=sPages()[+b.dataset.spg];if(pg)pg[3]();return}
+  if(b.dataset.bstmt){openBoxStmt();return}if(b.dataset.fplan){openFuturePlan(b.dataset.fplan);return}if(b.dataset.beadd&&!b.closest('#layer')){openBeAdd(b.dataset.beadd);return}if(b.dataset.beign&&!b.closest('#layer')){beIgnore(b.dataset.beign);return}if(b.dataset.beng){openBalEngine();return}if(b.dataset.leantog){S.settings.homeLean=!leanOn();putSettings();render();toast(leanOn()?'أُخفيت الاختصارات المكررة':'أُعيدت الاختصارات في الرئيسية');return}if(b.dataset.spg!==undefined&&!b.closest('#layer')){const pg=sPages()[+b.dataset.spg];if(pg)pg[3]();return}
   if(b.dataset.boxrev){boxReview();return}if(b.dataset.smsbox){openSmsBox();return}if(b.dataset.boxfeed){openBoxFeed();return}
   if(b.dataset.heropick){openHeroPick();return}
   if(b.dataset.tvexp){openTravelExp();return}if(b.dataset.tvl){openTravel();return}if(b.dataset.tvend){await travelEnd();return}
@@ -11255,7 +11391,7 @@ document.addEventListener('change',e=>{
 document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
 document.addEventListener('dblclick',e=>{if(!e.target.closest('input,textarea'))e.preventDefault()},{passive:false});
 /* ---------- 30. التشغيل ---------- */
-checkVersion();cacheLoad();S.month=curM();audSnap();migrateRecs();secSeed();if(lockCfg())showLock();privBtnInit();render();dbBoot();heroLoad();handleLaunchUrl();Sync.start();setTimeout(()=>boxPull(),1200);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>boxPull(),500)});addEventListener('online',()=>boxPull());setInterval(()=>{if(document.visibilityState==='visible')boxPull()},60000);setTimeout(notifyCarAlerts,1500);setTimeout(prpNotify,2500);vaultLoad();
+checkVersion();cacheLoad();S.month=curM();audSnap();migrateRecs();secSeed();if(lockCfg())showLock();privBtnInit();render();dbBoot();heroLoad();handleLaunchUrl();Sync.start();setTimeout(()=>boxPull(),1200);setTimeout(()=>{try{fpTick()}catch(e){}},2500);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(()=>boxPull(),500)});addEventListener('online',()=>boxPull());setInterval(()=>{if(document.visibilityState==='visible'){boxPull();try{fpTick()}catch(e){}}},60000);setTimeout(notifyCarAlerts,1500);setTimeout(prpNotify,2500);vaultLoad();
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('pin')){const b=document.getElementById(e.target.id==='vPin'?'vaultUnlock':'vaultSetup');b&&b.click()}});
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='mb'){e.preventDefault();capSave(e.target.value)}if(e.key==='Enter'&&e.target.id==='salAmt'){e.preventDefault();salAmtSave(e.target.value)}});
 function salAmtSave(v){const n=String(v||'').trim()===''?0:parseAmt(String(v));if(n===null||isNaN(n)||n<0){toast('اكتب مبلغًا صحيحًا');return}S.settings.salaryAmt=r3(n);if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();putSettings();render();toast(n?'حُفظ الراتب المحدد '+rial(n)+'، ويُعتمد في كل الحسابات':'أُلغي الراتب المحدد')}
