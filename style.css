@@ -2764,3 +2764,54 @@ body.hv2-on header.top .brand{visibility:hidden}
 
 /* 2.130 صندوق رسائل البنك */
 .boxh{display:flex;align-items:center;gap:12px;width:100%;text-align:right;font:inherit;color:var(--fg);padding:12px 14px;margin-block:10px;cursor:pointer;min-height:44px;border-color:color-mix(in srgb,var(--accent) 35%,var(--line));background:var(--accent-soft)}
+
+/* 2.131 متابعة رسائل البنك */
+.boxh2{background:var(--surface);border-color:var(--line)}
+.boxh2 small b{font-weight:700}
+.bxaccs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0 10px}
+.bxacc{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:3px}
+.bxbal{font-size:20px;font-weight:700}
+.bxbal small{font-size:12px;color:var(--muted);font-weight:500}
+.bxbk{display:inline-block;font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:7px;background:var(--accent-soft);color:var(--accent);vertical-align:middle}
+.bxf{margin:8px 0}
+.bxday{margin:12px 0 6px;font-size:13px;color:var(--muted)}
+.bxlist{padding:2px 10px}
+.bxrow{display:flex;align-items:center;gap:10px;width:100%;padding:10px 2px;border:0;border-bottom:1px solid var(--line);background:none;font:inherit;color:var(--fg);text-align:right;cursor:pointer;min-height:44px}
+.bxrow:last-child{border-bottom:0}
+.bxi{width:28px;text-align:center;font-size:16px;flex:none}
+.bxm{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.bxm b{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bxm small{font-size:12px;color:var(--muted)}
+.bxrow.muted .bxm b{color:var(--muted);font-weight:500}
+.bxrow.wait .bxi{filter:saturate(1.4)}
+.bxw{flex:none;font-size:11.5px;font-weight:700;color:var(--exp);background:var(--exp-soft,#FCE9E6);padding:3px 8px;border-radius:8px}
+.infobox.warn{border-color:color-mix(in srgb,var(--exp) 40%,var(--line))}
+.bxtxt{white-space:pre-wrap;word-break:break-word;font-size:13.5px;line-height:1.7;margin:6px 0;background:var(--surface-2,var(--bg));padding:10px;border-radius:10px}
+
+/* 2.131 كشف الحساب + دليل البحث */
+.bst-w{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:8px 0}
+.bst{width:100%;border-collapse:collapse;font-size:12.5px;min-width:330px}
+.bst th,.bst td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+.bst thead th{font-size:11.5px;color:var(--muted);font-weight:600;background:var(--surface-2,var(--bg))}
+.bst td small{display:block;font-size:10.5px;color:var(--muted)}
+.bst td.num{text-align:left;white-space:nowrap}
+.bst td.nw{white-space:nowrap}
+.bst tbody tr{cursor:pointer}
+.bst tfoot th,.bst tfoot td{font-weight:700;background:var(--surface-2,var(--bg));border-bottom:0}
+.sdir-h{margin-top:4px}
+.sdir{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.sdir-g{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 10px 6px}
+.sdir-t{display:block;font-size:13px;margin:0 4px 8px}
+.sdir-items{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.sdir-i{display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px;border:0;border-radius:12px;background:transparent;font:inherit;color:var(--fg);cursor:pointer;min-height:64px;text-align:center}
+.sdir-i:active{background:var(--surface-2,var(--bg))}
+.sdir-i span{width:40px;height:40px;border-radius:13px;background:var(--surface-2,var(--bg));display:flex;align-items:center;justify-content:center;font-size:19px}
+.sdir-i small{font-size:11px;line-height:1.3}
+/* 2.131 واجهة مختصرة */
+.sdir-foot{display:flex;flex-direction:column;gap:8px;align-items:center;margin:16px 0 8px;text-align:center}
+.sdir-g:nth-child(8n+1){--gc:#2F7F7A}.sdir-g:nth-child(8n+2){--gc:#C0663A}.sdir-g:nth-child(8n+3){--gc:#3E7BC4}.sdir-g:nth-child(8n+4){--gc:#7B5BC4}
+.sdir-g:nth-child(8n+5){--gc:#2E8B57}.sdir-g:nth-child(8n+6){--gc:#C04F7A}.sdir-g:nth-child(8n+7){--gc:#B08A2E}.sdir-g:nth-child(8n+8){--gc:#5F6B7A}
+.sdir-t{color:var(--gc,var(--fg));display:flex;align-items:center;gap:6px}
+.sdir-i span{background:color-mix(in srgb,var(--gc,#2F7F7A) 13%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gc,#2F7F7A) 18%,transparent)}
+.sdir-i:active span{transform:scale(.94)}
+.sdir-i small{color:var(--fg);font-weight:500}
