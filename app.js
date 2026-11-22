@@ -1497,33 +1497,55 @@ const HERO_SC={
 const HeroDB=(()=>{let dp=null;const op=()=>dp||(dp=new Promise((res,rej)=>{const r=indexedDB.open('masareef-hero',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
   const tx=(m,f)=>op().then(d=>new Promise((res,rej)=>{const t=d.transaction('kv',m);const q=f(t.objectStore('kv'));t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)}));
   return{get:k=>tx('readonly',s=>s.get(k)),put:(k,v)=>tx('readwrite',s=>s.put(v,k)),del:k=>tx('readwrite',s=>s.delete(k))}})();
-const HERO={url:'',ready:false};
-async function heroLoad(){try{const b=await HeroDB.get('photo');if(HERO.url)URL.revokeObjectURL(HERO.url);HERO.url=b?URL.createObjectURL(b):''}catch(e){HERO.url=''}HERO.ready=true;if(S.tab==='home')render()}
-function heroKey(){let k='castle';try{k=Look.get().hero||'castle'}catch(e){}if(k==='photo')return HERO.url?'photo':'castle';return HERO_SC[k]?k:'castle'}
+const HERO={url:'',ready:false,urls:[],keys:[]};const HERO_MAX=8;
+async function heroLoad(){try{(HERO.urls||[]).forEach(u=>{try{URL.revokeObjectURL(u)}catch(e){}});const K=['photo'];for(let n=2;n<=HERO_MAX;n++)K.push('photo'+n);const urls=[],keys=[];
+  for(const k of K){let b=null;try{b=await HeroDB.get(k)}catch(e){}if(b){urls.push(URL.createObjectURL(b));keys.push(k)}}HERO.urls=urls;HERO.keys=keys;HERO.url=urls[0]||''}catch(e){HERO.url='';HERO.urls=[];HERO.keys=[]}HERO.ready=true;if(S.tab==='home')render()}
+/* 2.133: عرض متحرك في أعلى الرئيسية — صورك (حتى 8) أو مشاهد التطبيق، تتبدل تلقائيًا بانتقال ناعم وحركة تكبير بطيئة */
+function heroSlides(){const P=HERO.urls||[];if(P.length)return P.map(u=>({img:u}));return Object.keys(HERO_SC).filter(k=>k!=='none').map(k=>({sc:k}))}
+function heroSpeed(){let v=8;try{v=+Look.get().heroSpd;if(!(v>=3&&v<=30))v=8}catch(e){}return v}
+function heroAnimOn(){try{return Look.get().heroAnim!==false&&!matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return true}}
+function heroSlidesHtml(){const L=heroSlides();const pos=heroPos();return `<div class="hv2-slides${heroAnimOn()?' kb':''}" style="--hsp:${heroSpeed()}s">${L.map((x,i)=>x.img?`<div class="hv2-sl${i===0?' on':''}"><img class="hv2-photo" src="${x.img}" alt="" style="object-position:50% ${pos}%"><div class="hv2-shade"></div></div>`:`<div class="hv2-sl hero-${x.sc}${i===0?' on':''}"${HERO_SC[x.sc][2]?` style="background:${HERO_SC[x.sc][2]}"`:''}>${x.sc==='castle'?HV2_SCENE:HERO_SC[x.sc][1]}</div>`).join('')}${L.length>1?`<div class="hv2-dots">${L.map((_,i)=>`<i${i===0?' class="on"':''}></i>`).join('')}</div>`:''}</div>`}
+let HERO_T=null,HERO_I=0;function heroTick(){clearTimeout(HERO_T);HERO_T=setTimeout(()=>{try{const W=document.querySelector('#view .hv2-slides');if(W&&document.visibilityState==='visible'){const sl=W.querySelectorAll('.hv2-sl'),dt=W.querySelectorAll('.hv2-dots i');if(sl.length>1){HERO_I=(HERO_I+1)%sl.length;sl.forEach((e,i)=>e.classList.toggle('on',i===HERO_I));dt.forEach((e,i)=>e.classList.toggle('on',i===HERO_I))}}}catch(e){}heroTick()},heroSpeed()*1000)}
+function heroKey(){let k='castle';try{k=Look.get().hero||'castle'}catch(e){}if(k==='slides')return 'slides';if(k==='photo')return HERO.url?'photo':'castle';return HERO_SC[k]?k:'castle'}
 function heroPos(){let p=50;try{p=+Look.get().heroPos;if(!(p>=0&&p<=100))p=50}catch(e){}return p}
-function heroSecAttrs(){const k=heroKey();const sky=k!=='photo'&&HERO_SC[k]&&HERO_SC[k][2];return ` class="hv2-hero hero-${k}"${sky?` style="background:${sky}"`:''}`}
-function heroBgHtml(){const k=heroKey();if(k==='photo')return `<img class="hv2-photo" src="${HERO.url}" alt="" style="object-position:50% ${heroPos()}%"><div class="hv2-shade"></div>`;if(k==='none')return '';return k==='castle'?HV2_SCENE:HERO_SC[k][1]}
-async function heroFromFile(f){if(!f||!/^image\//.test(f.type||'image/'))throw new Error('type');let src;try{src=await createImageBitmap(f)}catch(e){src=await new Promise((res,rej)=>{const i=new Image();const u=URL.createObjectURL(f);i.onload=()=>{URL.revokeObjectURL(u);res(i)};i.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('img'))};i.src=u})}
+function heroSize(){let v='md';try{v=Look.get().heroSize||'md'}catch(e){}return ['md','lg','xl','full'].includes(v)?v:'md'}
+function heroSecAttrs(){const k=heroKey();const sky=k!=='photo'&&k!=='slides'&&HERO_SC[k]&&HERO_SC[k][2];return ` class="hv2-hero hero-${k} hs-${heroSize()}"${sky?` style="background:${sky}"`:''}`}
+function heroBgHtml(){const k=heroKey();if(k==='slides'){HERO_I=0;heroTick();return heroSlidesHtml()}if(k==='photo')return `<div class="hv2-one${heroAnimOn()?' kb':''}" style="--hsp:${heroSpeed()}s"><img class="hv2-photo" src="${HERO.url}" alt="" style="object-position:50% ${heroPos()}%"></div><div class="hv2-shade"></div>`;if(k==='none')return '';return k==='castle'?HV2_SCENE:HERO_SC[k][1]}
+async function heroFromFile(f,key){if(!f||!/^image\//.test(f.type||'image/'))throw new Error('type');let src;try{src=await createImageBitmap(f)}catch(e){src=await new Promise((res,rej)=>{const i=new Image();const u=URL.createObjectURL(f);i.onload=()=>{URL.revokeObjectURL(u);res(i)};i.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('img'))};i.src=u})}
   const W=1170,H=540;const sw=src.width,sh=src.height;if(!(sw>0&&sh>0))throw new Error('size');const sc=Math.max(W/sw,H/sh);const dw=Math.round(Math.min(sw*sc,3000)),dh=Math.round(Math.min(sh*sc,4000));
   const c=document.createElement('canvas');const w=Math.min(W,dw);c.width=w;c.height=Math.round(dh*(w/dw));const ctx=c.getContext('2d');ctx.drawImage(src,0,0,c.width,c.height);
-  const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',.84));if(!blob)throw new Error('blob');await HeroDB.put('photo',blob);await heroLoad();return blob.size}
+  const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',.84));if(!blob)throw new Error('blob');await HeroDB.put(key||'photo',blob);await heroLoad();return blob.size}
 function openHeroPick(){const L=document.getElementById('layer');
   const draw=()=>{const cur=heroKey();const hasP=!!HERO.url;
    L.innerHTML=`${sheetTop('صورة الرئيسية')}<h2 style="margin-top:0">🖼️ صورة الرئيسية</h2><p class="note">اختر المشهد الذي يظهر أعلى الصفحة الرئيسية، أو ضع صورتك. الاختيار محفوظ في هذا الجهاز فقط.</p>
     <div class="herog">${Object.keys(HERO_SC).map(k=>`<button class="heroo" data-hero="${k}" aria-pressed="${cur===k}"><span class="heroo-t hero-${k}"${HERO_SC[k][2]?` style="background:${HERO_SC[k][2]}"`:''}>${k==='castle'?HV2_SCENE:k==='none'?'':HERO_SC[k][1]}</span><small>${esc(HERO_SC[k][0])}</small></button>`).join('')}
+     <button class="heroo" data-hero="slides" aria-pressed="${cur==='slides'}"><span class="heroo-t hero-slides"><b class="heroo-add">🎞️</b></span><small>عرض متحرك</small></button>
      <button class="heroo" data-hero="photo" aria-pressed="${cur==='photo'}"><span class="heroo-t hero-photo">${hasP?`<img src="${HERO.url}" alt="">`:'<b class="heroo-add">＋</b>'}</span><small>${hasP?'صورتي':'صورة من الاستوديو'}</small></button></div>
     <div class="row2"><button class="btn ghost" id="hrLib">🖼️ من الاستوديو</button><button class="btn ghost" id="hrCam">📸 التقاط صورة</button></div>
+    <div class="panel stack"><b>📐 مساحة الصورة</b><small class="note">الصورة تملأ المساحة دائمًا (تُقص الأطراف الزائدة بدل ترك فراغ). اختر حجم المساحة نفسها:</small>
+     <div class="chips" role="group" aria-label="حجم الصورة">${[['md','عادي'],['lg','كبير'],['xl','كبير جدًا'],['full','ملء العرض من الحافة للحافة']].map(([v,n])=>`<button class="chip" data-hsize="${v}" aria-pressed="${heroSize()===v}">${n}</button>`).join('')}</div></div>
+    <div class="panel stack hr-anim"><b>🎞️ الحركة والتبديل التلقائي</b><small class="note">«عرض متحرك» يبدّل ${HERO.urls.length>1?'صورك ('+HERO.urls.length+')':HERO.urls.length?'صورك (أضف صورًا أخرى ليتبدل بينها)':'مشاهد التطبيق (أو صورك إذا أضفتها)'} تلقائيًا بانتقال ناعم، مع حركة تكبير بطيئة.</small>
+     <div class="chips" role="group" aria-label="سرعة التبديل">${[[5,'سريع'],[8,'متوسط'],[14,'هادئ']].map(([v,n])=>`<button class="chip" data-hspd="${v}" aria-pressed="${heroSpeed()===v}">${n} · ${v} ث</button>`).join('')}</div>
+     <label class="toggle"><input type="checkbox" id="hrAnim"${heroAnimOn()?' checked':''}><span>حركة التكبير البطيئة للصور</span></label>
+     ${HERO.urls.length?`<div class="hr-thumbs">${HERO.urls.map((u,i)=>`<span class="hr-th"><img src="${u}" alt=""><button class="iconbtn sm" data-hrdel="${HERO.keys[i]}" aria-label="حذف الصورة">✕</button></span>`).join('')}${HERO.urls.length<HERO_MAX?'<button class="hr-th add" id="hrMore" aria-label="أضف صورة">＋</button>':''}</div><small class="note">${HERO.urls.length} من ${HERO_MAX} صور · محفوظة في هذا الجهاز فقط</small>`:'<button class="btn ghost block" id="hrMore">＋ أضف صورًا للعرض المتحرك</button>'}</div>
     ${hasP?`<div class="panel stack"><b>موضع صورتك</b><div class="chips" role="group" aria-label="موضع الصورة">${[[15,'الأعلى'],[50,'الوسط'],[85,'الأسفل']].map(([v,n])=>`<button class="chip" data-hpos="${v}" aria-pressed="${Math.abs(heroPos()-v)<10}">${n}</button>`).join('')}</div><button class="btn ghost block" id="hrDel">حذف صورتي</button></div>`:''}
-    <input type="file" id="hrFile" accept="image/*" hidden><input type="file" id="hrCamF" accept="image/*" capture="environment" hidden>
+    <input type="file" id="hrFile" accept="image/*" hidden><input type="file" id="hrMoreF" accept="image/*" multiple hidden><input type="file" id="hrCamF" accept="image/*" capture="environment" hidden>
     <div class="actions"><button class="btn ghost block" data-close>تم</button></div></div></div>`};
   draw();L.oninput=null;
-  L.onchange=async e=>{if(e.target.id!=='hrFile'&&e.target.id!=='hrCamF')return;const f=e.target.files&&e.target.files[0];if(!f)return;toast('جارٍ تجهيز الصورة…');try{await heroFromFile(f);Look.set('hero','photo');Look.set('heroPos',50);render();draw();toast('🖼️ وُضعت صورتك في الرئيسية')}catch(er){toast('تعذّر فتح هذه الصورة. جرّب صورة أخرى (JPG أو PNG)')}};
+  L.onchange=async e=>{if(e.target.id==='hrAnim'){Look.set('heroAnim',e.target.checked);render();return}
+    if(e.target.id==='hrMoreF'){const F=[...(e.target.files||[])];if(!F.length)return;toast('جارٍ تجهيز الصور…');let n=0;for(const f of F){const used=new Set(HERO.keys);const K=['photo'].concat([2,3,4,5,6,7,8].map(i=>'photo'+i)).find(k=>!used.has(k));if(!K)break;try{await heroFromFile(f,K);n++}catch(er){}}
+      Look.set('hero','slides');render();draw();toast(n?'🎞️ أُضيفت '+countWord(n,'صورة','صورتان','صور','صورة')+' للعرض المتحرك':'تعذّر فتح الصور');return}
+    if(e.target.id!=='hrFile'&&e.target.id!=='hrCamF')return;const f=e.target.files&&e.target.files[0];if(!f)return;toast('جارٍ تجهيز الصورة…');try{await heroFromFile(f);Look.set('hero','photo');Look.set('heroPos',50);render();draw();toast('🖼️ وُضعت صورتك في الرئيسية')}catch(er){toast('تعذّر فتح هذه الصورة. جرّب صورة أخرى (JPG أو PNG)')}};
   L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
     if(x.dataset.hero){const k=x.dataset.hero;if(k==='photo'&&!HERO.url){document.getElementById('hrFile').click();return}Look.set('hero',k);render();draw();return}
     if(x.dataset.hpos){Look.set('heroPos',+x.dataset.hpos);render();draw();return}
+    if(x.dataset.hsize){Look.set('heroSize',x.dataset.hsize);render();draw();toast('تغيّر حجم الصورة في الرئيسية');return}
+    if(x.dataset.hspd){Look.set('heroSpd',+x.dataset.hspd);if(heroKey()!=='slides'&&heroKey()!=='photo')Look.set('hero','slides');render();draw();return}
+    if(x.id==='hrMore'){document.getElementById('hrMoreF').click();return}
+    if(x.dataset.hrdel){try{await HeroDB.del(x.dataset.hrdel)}catch(er){}await heroLoad();if(!HERO.url&&Look.get().hero==='photo')Look.set('hero','castle');render();draw();toast('حُذفت الصورة');return}
     if(x.id==='hrLib'){document.getElementById('hrFile').click();return}
     if(x.id==='hrCam'){document.getElementById('hrCamF').click();return}
-    if(x.id==='hrDel'){try{await HeroDB.del('photo')}catch(er){}await heroLoad();if(Look.get().hero==='photo')Look.set('hero','castle');render();draw();toast('حُذفت صورتك، ورجعت القلعة');return}}}
+    if(x.id==='hrDel'){try{for(const k of HERO.keys)await HeroDB.del(k)}catch(er){}await heroLoad();if(Look.get().hero==='photo')Look.set('hero','castle');render();draw();toast('حُذفت صورتك، ورجعت القلعة');return}}}
 const HV2_IC={wallet:'<path d="M3 7a2 2 0 0 1 2-2h12v4"/><rect x="3" y="7" width="18" height="13" rx="2.5"/><circle cx="16.5" cy="13.5" r="1.3"/>',cal:'<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M4 10h16"/>',up:'<path d="M12 19V5M6 11l6-6 6 6"/>',due:'<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M4 10h16M9 15l2 2 4-4"/>',trend:'<path d="M4 19l5-6 4 3 7-9"/><path d="M15 7h5v5"/>',minus:'<path d="M5 12h14"/>',plus:'<path d="M12 5v14M5 12h14"/>',card:'<rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10h18M7 15h3"/>',bank:'<path d="M3 10l9-6 9 6M5 10v8M19 10v8M9 10v8M15 10v8M3 20h18"/>',print:'<path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z"/>',bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',car:'<path d="M5 16l1.5-5a2 2 0 0 1 1.9-1.4h7.2a2 2 0 0 1 1.9 1.4L19 16"/><rect x="3.5" y="16" width="17" height="3.5" rx="1.5"/>',doc:'<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>'};
 function hv2i(k,s){return `<svg class="hv2-i" aria-hidden="true" viewBox="0 0 24 24" width="${s||18}" height="${s||18}">${HV2_IC[k]}</svg>`}
 function hv2Ring(p,cls,label){p=Math.max(0,Math.min(100,Math.round(p)));return `<span class="hv2-ring ${cls||''}" style="--p:${p}"><span class="num">${label!=null?label:p+'%'}</span></span>`}
@@ -2452,7 +2474,7 @@ function payInfo(i,m){const td=today(),due=dueOf(i,m);const rem=r3(Math.max(0,i.
   const lt=payLater(i,m);const post=!i.isPaid&&lt&&lt>=td;const days=dDiff(td,due);const g=i.isPaid?'paid':post?'post':late?'late':m>curM()||days>7?'later':'soon';return{due,rem,late,lt,post,days,g}}
 let PAY_FIN=null;function payFinish(id){if(!PAY_FIN){try{const P=debtPlan();PAY_FIN=simDebts(debts().filter(d=>+d.balance>0.0005),P.extra,P.strategy,true).finish||{}}catch(e){PAY_FIN={}}setTimeout(()=>{PAY_FIN=null},0)}return PAY_FIN[id]}
 function payCard(i,m){const f=payInfo(i,m);const lock=!i.isPaid&&!i.pre&&payLocked(i,m);const d=i.ref;const key=i.kind+'|'+i.id;
-  const status=i.pre&&i.isPaid?'<span class="pill paid">✓ مدفوع قبل التسجيل</span>':i.isPaid?`<span class="pill paid pd-big">✓ تم الدفع${(()=>{const z=i.pre?null:planOf(i,m);return z&&z.status==='done'?' حسب الخطة':''})()}</span>`:i.pre?'<span class="pill late">متأخر من قبل التسجيل</span>':f.late?`<span class="pill late">متأخر · كان ${dmy(f.due)}</span>`:f.days===0?'<span class="pill warn">موعده اليوم</span>':`<span class="pill soon">موعده ${dmy(f.due)}${f.days>0&&f.days<=7?' · بعد '+countWord(f.days,'يوم','يومين','أيام','يومًا'):''}</span>`;
+  const status=i.pre&&i.isPaid?'<span class="pill paid">✓ مدفوع قبل التسجيل</span>':i.isPaid?`<span class="pill paid pd-big">✓ تم الدفع${(()=>{const z=i.pre?null:planOf(i,m);return z&&z.status==='done'?' حسب الخطة':''})()}${slPaidTx(i,m)?' · 📩 من رسالة البنك':''}</span>`:i.pre?'<span class="pill late">متأخر من قبل التسجيل</span>':f.late?`<span class="pill late">متأخر · كان ${dmy(f.due)}</span>`:f.days===0?'<span class="pill warn">موعده اليوم</span>':`<span class="pill soon">موعده ${dmy(f.due)}${f.days>0&&f.days<=7?' · بعد '+countWord(f.days,'يوم','يومين','أيام','يومًا'):''}</span>`;
   const sub=[];if(i.kind==='debt'){if(+d.balance>0.0005)sub.push('متبقي الدين <b class="num amt-exp">'+money(d.balance)+'</b>');const I=debtInstInfo(d);if(I.tot)sub.push('قسط '+Math.min(I.tot,I.paid+(i.isPaid?0:1))+' من '+I.tot);const fn=payFinish(d.id);if(fn&&d.mode!=='once')sub.push('ينتهي '+esc(monthLabel(fn)))}
   else{if(i.tracked&&i.prev>0.0005)sub.push('فاتورة '+money(i.bill)+' + متأخرات <b class="num amt-exp">'+money(i.prev)+'</b>');if(i.variable&&!(i.ref.bills||{})[m])sub.push('المبلغ تقريبي')}
   try{if(!i.isPaid){const H=phOf(i.kind,i.id,m);if(H.length)sub.push('<span class="ph-b">🔒 محجوز <b class="num">'+money(H.reduce((s,h)=>s+(+h.amt||0),0))+'</b> في حساب '+esc(H.map(h=>(kdGet(h.kid)||{}).name||'').join('، '))+'</span>')}}catch(e){}
@@ -5580,9 +5602,12 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.132.0';
+const APP_VERSION='2.133.1';
 const CHANGELOG=[
- {v:'2.132.0',date:'2026-11-22',items:['🗓️ تجهيز شهر قادم: تختار أي شهر قادم (التالي أو بعد عدة أشهر) وتجهّز له دراسة جدوى (الدخل − الالتزامات − المصروف − المناسبات − الادخار = فائض أو عجز)، واستراتيجية مقترحة (تأجيل الأقل أولوية، إنهاء دين صغير، اشتراكات يمكن التخلص منها، سقف لأكبر بنود الصرف)، وترتيب الأولويات وخطة الدفع، وميزانية الشهر، ومصاريف خاصة بالشهر وملاحظاتك','الخطة تُحفظ مسودة، وعند الاعتماد تتفعل تلقائيًا أول يوم من ذلك الشهر (خطة الدفع والميزانية) مع تنبيه في الرئيسية ومتابعة الفعلي مقابل المخطط','تذكير في آخر أيام الشهر لتجهيز خطة الشهر التالي، وتتزامن الخطط بين أجهزتك']},
+ {v:'2.133.1',date:'2026-11-22',items:['📐 مساحة صورة الرئيسية: عادي، كبير، كبير جدًا، أو ملء العرض من الحافة للحافة، والصورة تملأ المساحة دائمًا']},
+{v:'2.133.0',date:'2026-11-22',items:['🎞️ صور متحركة في أعلى الرئيسية: «عرض متحرك» يبدّل صورك (حتى 8 صور) أو مشاهد التطبيق تلقائيًا بانتقال ناعم ونقاط تبيّن الصورة الحالية، مع حركة تكبير بطيئة','اختيار سرعة التبديل (5 أو 8 أو 14 ثانية)، وإيقاف حركة التكبير إن أردت، وإضافة عدة صور مرة واحدة وحذف أي صورة','الصورة الواحدة أيضًا صار لها حركة تكبير بطيئة، وتتوقف الحركة تلقائيًا إذا كان الهاتف مضبوطًا على «تقليل الحركة»']},
+{v:'2.132.1',date:'2026-11-22',items:['🔗 رسائل البنك تُسجّل دفعات الالتزامات والأقساط تلقائيًا: رسالة خصم تطابق التزامًا أو قسطًا غير مدفوع (نفس المبلغ + اسم الجهة، أو العملية الوحيدة بهذا المبلغ قرب الموعد) تصير دفعته وينقص الدين، ولا تُحسب مرتين','المطابقة غير المؤكدة (مثل التزامين بنفس المبلغ) تبقى اقتراحًا في صفحة الدفع ولا تُربط إلا بموافقتك، ومع كل ربط زر تراجع','بطاقة الدفع تُظهر «📩 من رسالة البنك»، ونافذة «ادفع» تنبهك أن الدفعة وصلت من البنك حتى لا تسجلها مرة ثانية','🔔 كل رسالة بنك يقرؤها التطبيق تظهر في الإشعارات (قسم «رسائل البنك المقروءة»): خصم أو إيداع أو دفعة التزام، بالتاريخ والوقت والرصيد بعدها، مع العداد على الجرس، وكإشعار على الهاتف إذا فعّلت الإشعارات']},
+{v:'2.132.0',date:'2026-11-22',items:['🗓️ تجهيز شهر قادم: تختار أي شهر قادم (التالي أو بعد عدة أشهر) وتجهّز له دراسة جدوى (الدخل − الالتزامات − المصروف − المناسبات − الادخار = فائض أو عجز)، واستراتيجية مقترحة (تأجيل الأقل أولوية، إنهاء دين صغير، اشتراكات يمكن التخلص منها، سقف لأكبر بنود الصرف)، وترتيب الأولويات وخطة الدفع، وميزانية الشهر، ومصاريف خاصة بالشهر وملاحظاتك','الخطة تُحفظ مسودة، وعند الاعتماد تتفعل تلقائيًا أول يوم من ذلك الشهر (خطة الدفع والميزانية) مع تنبيه في الرئيسية ومتابعة الفعلي مقابل المخطط','تذكير في آخر أيام الشهر لتجهيز خطة الشهر التالي، وتتزامن الخطط بين أجهزتك']},
 {v:'2.131.2',date:'2026-11-22',items:['الرصيد في الرئيسية = مجموع أرصدة كل حساباتك البنكية من رسائل البنك، بنفس الحساب في كل مكان (الرئيسية بتصميميها، «حساباتي وأرصدتي»، وضعي المالي، المتاح للإنفاق)','عند وصول رصيد حقيقي من البنك لم يعد إعداد «الرصيد من الدخل والمصروف» يتجاوزه','صندوق «رصيدك في البنك» يأخذ رصيد الحساب الجاري من نفس المحرك']},
 {v:'2.131.1',date:'2026-11-22',items:['🏦 «حساباتي وأرصدتي»: صفحة واحدة لكل الأرصدة (من الرسائل والكشوفات والإدخال اليدوي)، يفتحها رصيد الرئيسية والبحث وسجل الرسائل، وأُزيلت بطاقات الأرصدة المكررة','كشف البنك لا يستبدل رصيدًا أحدث وصل من الرسائل، ويُطابق عمليات الرسائل فلا تتكرر','التحويل بين حساباتك من الرسائل يُعلَّم «بين حساباتي» فلا يُحسب مصروفًا ولا دخلًا في التقارير الشهرية والسنوية','شراءان بنفس المبلغ في وقتين مختلفين يُسجلان كعمليتين، والرسالة المكررة تُتجاهل','🧮 محرك الأرصدة الذكي: إجمالي المتوفر في كل حساباتك، ولكل حساب: آخر رصيد من رسالة البنك + الإيداعات − المصروفات بعده = الرصيد الآن، مع حالة المطابقة ودقة الأرصدة','تنبيه في الرئيسية عند وصول رسائل من حساب أو بطاقة غير مسجلة، وإضافتها بضغطة (الاسم والبنك وآخر رصيد من الرسالة) ونقل عملياتها السابقة لها','إصلاح: الرسالة المتأخرة الأقدم من آخر رصيد لم تعد تُخصم مرتين، فالترتيب صار بوقت رسالة البنك','زر «سجّل الفرق» عندما يختلف رصيد البنك عن توقع التطبيق']},
 {v:'2.131.0',d:'2026-11-22',items:['واجهة مختصرة: أُزيلت الأزرار المكررة من الرئيسية، وصارت كل أدوات التطبيق في قائمة واحدة مرتبة بأيقونات ملوّنة (اسحب الشاشة للأسفل أو افتح «المزيد»)، ويمكن إعادة الشكل القديم بزر في أسفل القائمة','📩 متابعة رسائل البنك: سجل مرتب لكل رسالة وصلت، مجمّع بالأيام، ولكل رسالة حالتها (سُجّلت، تنتظر، مكررة) والمبلغ والمحل والرصيد بعدها، مع تصفية حسب البنك.','🏦 لكل حساب بطاقة فيها رصيده المحدّث تلقائيًا من رسالة البنك وآخر أرقام البطاقة ووقت آخر رسالة. يعمل مع بنك مسقط والبنك الوطني وأي بنك آخر.','🧠 فحص ذكي: إذا اختلف رصيد البنك عما توقعه التطبيق يُنبّهك بالفرق (غالبًا رسوم أو تحويل بلا رسالة) مع زر لإضافته. والبطاقة الجديدة تُربط تلقائيًا بحساب البنك المناسب من اسم المرسل.','🏠 في الرئيسية: آخر عملية من رسائل البنك والرصيد الآن، وتنبيه الفرق إن وُجد.','🧾 كشف الحساب من رسائل البنك: يومي وشهري وسنوي لكل حساب، فيه التاريخ والوقت والبيان والخصم والإيداع ورصيد البنك بعد كل عملية، مع طباعة وPDF. وسجل الرسائل المقروءة بالتاريخ والوقت.','🔍 دليل كل أقسام التطبيق داخل البحث: اسحب الصفحة للأسفل أو اضغط 🔍، فتجد كل الميزات مرتبة في مجموعات، تضغط الخانة فتنتقل إليها مباشرة.']},
@@ -6596,7 +6621,7 @@ async function impSave(items){let n=0,IMP_bal=0;const IMP_added=[],IMP_new=[];co
           if(!old||key2>=oldKey){a.log=(a.log||[]).concat([{date:rec.date,app:accBalance(a),actual:it.bal,src:'sms'}]).slice(-24);a.anchor={bal:it.bal,date:rec.date,at:rec.createdAt,msgT:it.time||'',src:'sms'};if(a.id==='main'){const mm=mainAcc();mm.balance=it.bal;mm.at=rec.date;S.settings.mainAcc=mm}S.settings.accounts=A;IMP_bal=(IMP_bal||0)+1}}}
         if(it.merchant)mc[mkey(it.merchant)]=it.cat;
         IMP_new.push(rec);IMP_added.push(rec.date);n++}
-  if(IMP_new.length)await putTxMany(IMP_new);try{if(IMP_new.length)await smsOwnPair()}catch(e){}S.settings.merchantCats=mc;putSettings();return{n,bal:IMP_bal,added:IMP_added,ids:IMP_new.map(t=>t.id),recs:IMP_new}}
+  if(IMP_new.length)await putTxMany(IMP_new);try{if(IMP_new.length)await smsOwnPair()}catch(e){}try{if(IMP_new.length)await smsLinkPays()}catch(e){}S.settings.merchantCats=mc;putSettings();return{n,bal:IMP_bal,added:IMP_added,ids:IMP_new.map(t=>t.id),recs:IMP_new}}
 /* الحفظ التلقائي: إذا قُرئت الرسالة بثقة كاملة (الاتجاه والتاريخ والمحل والحساب معروفة، وليست مكررة) تُسجَّل مباشرة مع زر «تراجع» */
 async function smsAutoSave(text){window.__smsAuto=1;if(!S.settings.smsAuto||finOn())return false;const items=splitMsgs(text).map(parseSms);if(!items.length||!items.every(it=>it.ok&&it.on&&it.sure))return false;
   const snapA=JSON.stringify(S.settings.accounts||[]),snapM=JSON.stringify(S.settings.mainAcc||null);const R=await impSave(items);if(!R.n)return false;render();
@@ -6654,18 +6679,18 @@ async function smsOwnPair(){const W=/تحويل|حوال|transfer|trf\b|\bft\b|o
   if(out.length){const now=new Date().toISOString();await putTxMany(out.map(t=>Object.assign({},t,{own:1,skind:'own',updatedAt:now})))}return out.length/2}
 let BOX_BUSY=false;
 async function boxPull(manual){if(!boxOn()||BOX_BUSY)return null;if(navigator.onLine===false){if(manual)toast('بدون إنترنت');return null}if(document.getElementById('lockScreen'))return null;
-  BOX_BUSY=true;let saved=0,pend=0,skip=0;
+  BOX_BUSY=true;let saved=0,pend=0,skip=0;const NEW=[];
   try{const seq=boxSeq();const j=await boxGet(seq);const items=(j.items||[]).filter(m=>m&&m.id>seq&&m.text);let max=seq;const P=boxPend();
     for(const m of items){max=Math.max(max,m.id);const t=String(m.text);
       const bk=boxBank((m.from||'')+' '+t);
       if(!looksBank(t)){skip++;boxLogAdd([{k:m.id+'_0',mid:m.id,at:m.at||new Date().toISOString(),st:'skip',amt:0,note:'',bank:bk,text:t.slice(0,600)}]);continue}
       const its=splitMsgs(t).map(parseSms);its.forEach((it,i)=>{it.fid='bx'+m.id+'_'+i;if(it.card4&&!(S.settings.card4Acc||{})[it.card4]){const ba=bankAcc(bk);if(ba)it.acc=ba}});
       if(!its.length||its.every(it=>!it.ok||it.dup)){skip++;boxLogAdd(boxLogEntries(m,its,its.some(it=>it.dup)?'dup':'skip').map(e=>Object.assign(e,{bank:bk})));continue}
-      let ok=false;try{if(S.settings.smsAuto&&!finOn()&&its.every(it=>it.ok&&it.on&&it.sure)){its.forEach(it=>{it._exp=boxExpect(it)});const R=await impSave(its);ok=R&&R.n>0;if(ok){saved+=R.n;boxLogAdd(boxLogEntries(m,its,'saved').map(e=>Object.assign(e,{bank:bk})))}}}catch(e){}
-      if(!ok){boxLogAdd(boxLogEntries(m,its,'pend').map(e=>Object.assign(e,{bank:bk})));if(!P.some(x=>x.id===m.id)){P.push({id:m.id,at:m.at,text:t,bank:bk});pend++}}}
+      let ok=false;try{if(S.settings.smsAuto&&!finOn()&&its.every(it=>it.ok&&it.on&&it.sure)){its.forEach(it=>{it._exp=boxExpect(it)});const R=await impSave(its);ok=R&&R.n>0;if(ok){saved+=R.n;const E=boxLogEntries(m,its,'saved').map(e=>Object.assign(e,{bank:bk}));NEW.push(...E);boxLogAdd(E)}}}catch(e){}
+      if(!ok){const E=boxLogEntries(m,its,'pend').map(e=>Object.assign(e,{bank:bk}));NEW.push(...E);boxLogAdd(E);if(!P.some(x=>x.id===m.id)){P.push({id:m.id,at:m.at,text:t,bank:bk});pend++}}}
     boxSetPend(P);try{localStorage.setItem(BOX_SEQ,String(max))}catch(e){}
     const c=boxCfg();c.last=Date.now();c.err='';
-    if(saved||pend)render();
+    if(saved||pend)render();try{bxNotify(NEW)}catch(e){}
     if(saved)toast('📩 سُجّل من رسائل البنك: '+countWord(saved,'عملية واحدة','عمليتان','عمليات','عملية')+(pend?' · و'+pend+' تنتظر مراجعتك':''));
     else if(pend)toast('📩 وصلت '+countWord(pend,'رسالة بنك واحدة','رسالتا بنك','رسائل بنك','رسالة بنك')+' تحتاج مراجعتك');
     else if(manual)toast(items.length?'✓ لا رسائل جديدة تحتاج تسجيلًا':'✓ الصندوق متصل، لا رسائل جديدة');
@@ -6958,6 +6983,54 @@ function fpHomeHtml(){const A=fpAll();const c=curM();const P=A[c];const nx=A[shi
   const left=dDiff(td,mEnd(c));if(left<=5&&!nx)return `<button class="xphome" data-fplan="${shiftMonth(c,1)}"><span class="xph-i">🗓️</span><span class="xph-t"><b>جهّز خطة ${esc(monthName(shiftMonth(c,1)))}</b><small>بقي ${daysWord(left)} على نهاية الشهر · دراسة جدوى وأولويات في دقيقتين</small></span><span class="xph-go">‹</span></button>`;
   if(left<=5&&nx&&nx.st==='draft')return `<button class="xphome" data-fplan="${shiftMonth(c,1)}"><span class="xph-i">📝</span><span class="xph-t"><b>خطة ${esc(monthName(shiftMonth(c,1)))} ما زالت مسودة</b><small>اعتمدها لتتفعل تلقائيًا أول الشهر</small></span><span class="xph-go">‹</span></button>`;
   return ''}
+
+/* ===================== 2.132.1: ربط رسائل البنك بالالتزامات والأقساط =====================
+ * رسالة خصم من البنك تطابق التزامًا أو قسطًا غير مدفوع تُربط به تلقائيًا (تصير دفعته، ولا تُحسب مصروفًا مستقلًا مرتين، وينقص الدين)،
+ * بشرط أن تكون المطابقة مؤكدة: نفس المبلغ بالضبط + (اسم الجهة/البيان المعتاد) أو (هي العملية الوحيدة بهذا المبلغ قرب الموعد ولا يوجد بند آخر بنفس المبلغ).
+ * غير المؤكد يبقى اقتراحًا في صفحة الدفع «هل هذه دفعة …؟» ولا يُربط إلا بموافقتك. */
+function slItemTargets(i,m){const due=r3(Math.max(0,i.amount-(i.paidAmt||0)));const T=[due,i.kind==='debt'?+i.ref.payment||0:+i.bill||billAmt(i.ref,m)||0,+i.amount||0].filter(x=>x>0.0005);return [...new Set(T.map(r3))]}
+function slCands(m){const from=addDays(mStart(m),-7),to=mEnd(m);const no=aiNo();
+  return list().filter(t=>t.via==='sms'&&t.type==='exp'&&!t.rec&&!t.debt&&!t.own&&!t.sample&&!t.pend&&t.date>=from&&t.date<=to).map(t=>({t,no}))}
+function slPlan(){const cm=curM();const out=[],ask=[],used=new Set();
+  [cm,shiftMonth(cm,-1)].forEach(m=>{let I=[];try{I=monthItems(m).filter(i=>!i.pre&&!i.isPaid)}catch(e){return}const C=slCands(m).filter(c=>!used.has(c.t.id));
+    I.forEach(i=>{const tg=slItemTargets(i,m);if(!tg.length)return;const dd=dueOf(i,m);
+      const W=aiWords(aiItemName(i)).concat(i.kind==='debt'&&i.ref.lender?aiWords(i.ref.lender):[]);let LK=new Set();try{LK=aiLearned(i)}catch(e){}
+      const cs=C.filter(c=>!used.has(c.t.id)&&!c.no[i.kind+'|'+i.id+'|'+c.t.id]&&tg.some(x=>Math.abs(x-(+c.t.amount||0))<0.0015));if(!cs.length)return;
+      const named=cs.filter(c=>{const h=sNorm(String(c.t.note||'')).toLowerCase();let k='';try{k=ckey(c.t.note)}catch(e){}return (k&&LK.has(k))||W.some(w=>w&&h.includes(w))});
+      const sameAmtItems=I.filter(j=>j!==i&&slItemTargets(j,m).some(x=>tg.some(y=>Math.abs(x-y)<0.0015))).length;
+      const near=cs.filter(c=>Math.abs(dDiff(c.t.date,dd))<=7);
+      let pick=null;if(named.length===1)pick=named[0];else if(!named.length&&cs.length===1&&near.length===1&&!sameAmtItems)pick=near[0];
+      if(pick){used.add(pick.t.id);out.push({i,m,t:pick.t})}else ask.push({i,m,n:cs.length})})});
+  return{out,ask}}
+let SL_BUSY=false;
+async function smsLinkPays(){if(SL_BUSY||S.settings.smsLink===false)return 0;SL_BUSY=true;try{const P=slPlan();if(!P.out.length)return 0;
+  const snapD=JSON.stringify(debts());const olds=[],names=[];
+  for(const x of P.out){const t=S.tx[x.t.id];if(!t||t.rec||t.debt)continue;olds.push(Object.assign({},t));
+    if(x.i.kind==='rec'){await putTx(Object.assign({},t,{rec:x.i.id,forM:x.m!==mOf(t.date)?x.m:t.forM,linkVia:'sms'}))}
+    else{const d=debts().find(z=>z.id===x.i.id);if(!d)continue;const p=await applyDebtPayment(d,+t.amount,t.date,false);p.tx=t.id;if(x.m!==mOf(t.date))p.forM=x.m;await putTx(Object.assign({},t,{debt:d.id,cat:'loan',linkVia:'sms'}))}
+    names.push((x.i.kind==='debt'?x.i.ref.name:x.i.name)+' '+money(t.amount))}
+  await putSettings();try{memoClear()}catch(e){}render();
+  if(names.length)toast('🔗 من رسائل البنك سُجّلت دفعة: '+names.slice(0,3).join('، ')+(names.length>3?' …':''),async()=>{S.settings.debts=JSON.parse(snapD);const N=Object.assign({},aiNo());olds.forEach(o=>{const x=P.out.find(z=>z.t.id===o.id);if(x)N[x.i.kind+'|'+x.i.id+'|'+o.id]=1});S.settings.aiNo=N;await putTxMany(olds);await putSettings();render();toast('أُلغي الربط')},10000);
+  return names.length}finally{SL_BUSY=false}}
+/* الدفعة التي جاءت من رسالة البنك: علامة في بطاقة الدفع وتنبيه داخل نافذة «ادفع» */
+function slPaidTx(i,m){try{if(i.kind==='rec'){const t=recPaid(i.ref,m);return t&&t.via==='sms'?t:null}
+  const p=(i.ref.pays||[]).filter(p=>p.date&&dpM(p)===m&&p.tx).map(p=>S.tx[p.tx]).find(t=>t&&t.via==='sms');return p||null}catch(e){return null}}
+function slAskTx(i,m){try{const tg=slItemTargets(i,m);const no=aiNo();return slCands(m).map(c=>c.t).filter(t=>!no[i.kind+'|'+i.id+'|'+t.id]&&tg.some(x=>Math.abs(x-(+t.amount||0))<0.0015)).sort((a,b)=>Math.abs(dDiff(a.date,dueOf(i,m)))-Math.abs(dDiff(b.date,dueOf(i,m))))[0]||null}catch(e){return null}}
+function slPaidHint(kind,id,m){try{const i=monthItems(m).find(x=>x.kind===kind&&x.id===id);if(!i)return '';const t=slPaidTx(i,m);if(!t)return '';
+  return `<div class="ai-pay match sl-paid"><span>📩</span><div><b>${i.isPaid?'دُفع من رسالة البنك':'وصلت دفعة من رسالة البنك'}</b><small><b class="num">${money(t.amount)}</b> بتاريخ ${dmy(t.date)}${t.time?' '+esc(t.time):''}${t.note?' · «'+esc(String(t.note).slice(0,40))+'»':''}. ${i.isPaid?'لا تسجّل دفعة جديدة إلا إذا دفعت مبلغًا آخر فعلًا.':'المتبقي '+money(r3(i.amount-(i.paidAmt||0)))+'.'}</small></div></div>`}catch(e){return ''}}
+
+/* 2.132.1: كل رسالة بنك يقرؤها التطبيق تظهر في 🔔 الإشعارات (قسم «رسائل البنك المقروءة») مع العداد، وكإشعار على الهاتف إن فعّلت الإشعارات */
+function bxNtItems(){const since=Date.now()-3*864e5;return boxLog().filter(e=>e&&e.at&&new Date(e.at).getTime()>=since&&!(e.st==='skip'&&!e.amt)).slice(-20).reverse().map(e=>{
+  const bk=e.bank?bankName(e.bank):'';const an=e.acc?accName(e.acc):'';const t=S.tx['bx'+e.k];const lk=t&&(t.rec||t.debt)?(t.rec?(recs().find(r=>r.id===t.rec)||{}).name:'قسط '+((debts().find(d=>d.id===t.debt)||{}).name||'')):'';
+  const ic=e.st==='pend'?'📩':e.diff!=null?'⚠️':e.st==='dup'?'♻️':e.type==='inc'?'💰':'💸';
+  const what=e.st==='dup'?'رسالة مكررة لم تُسجل':e.type==='inc'?'إيداع '+money(e.amt):(lk?'دفعة «'+lk+'» ':'خصم ')+money(e.amt);
+  const title=what+' '+CUR+(e.note&&e.type!=='inc'&&!lk?' · '+String(e.note).slice(0,28):'')+(bk||an?' — '+(an&&an!=='—'?an:bk):'');
+  const st=e.st==='pend'?'تنتظر مراجعتك':e.st==='saved'?'سُجّلت تلقائيًا':e.st==='dup'?'مكررة':'';
+  const when=[(e.date?fmtD(e.date):'')+(e.time?' '+e.time:''),st,e.bal!=null?'الرصيد بعدها '+money(e.bal):'',e.diff!=null?'فرق '+money(e.diff):''].filter(Boolean).join(' · ');
+  return{ref:'bx:'+e.k,ic,lv:'bank',title,when,act:[e.st==='pend'?'📩 راجعها':'عرض','data-boxfeed="1"'],days:0}})}
+async function bxNotify(E){try{ntBadge()}catch(e){}try{if(!('Notification' in window)||Notification.permission!=='granted'||!E.length)return;const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
+  const I=bxNtItems().filter(n=>E.some(e=>'bx:'+e.k===n.ref));const L=I.length>3?[{title:'📩 '+countWord(I.length,'رسالة بنك','رسالتا بنك','رسائل بنك','رسالة بنك')+' قُرئت',when:I.slice(0,3).map(n=>n.title).join(' · '),ref:'bx:sum'}]:I;
+  for(const n of L){const opt={body:n.when,icon:'icon-192.png',tag:n.ref,lang:'ar',dir:'rtl',data:{url:'./'}};if(reg&&reg.showNotification)await reg.showNotification(n.title,opt);else new Notification(n.title,opt)}}catch(e){}}
 
 function openBoxFeed(f){const L=document.getElementById('layer');let flt=f||'all';
   const draw=()=>{const all=boxLog().slice().reverse();const X=all.filter(x=>flt==='all'?true:flt.startsWith('bk:')?x.bank===flt.slice(3):flt==='warn'?x.diff!=null:flt==='pend'?x.st==='pend':x.st===flt);
@@ -10517,16 +10590,17 @@ function ntList(){const out=[];const add=(o)=>{if(o&&o.ref&&!out.some(x=>x.ref==
   try{odoDueList().forEach(x=>add({ref:x.ref,ic:'⛽',lv:'warn',title:x.title,when:x.when+' · صوّر العداد بـ📷 فيُحسب الوقود تلقائيًا',act:['📷 صوّر العداد','data-odoscan="'+esc(x.c.id)+'|'+x.which+'|'+x.m+'"'],days:x.days}))}catch(e){}
   try{prpPending().forEach(k=>add({ref:'prp:'+k+':'+prpKey(k),ic:'📬',lv:'info',title:'تقريرك ال'+PRP[k][0]+' جاهز',when:'التقدم، الديون والمستحقات، ومستوى أدائك المالي',act:['اقرأ التقرير','data-prep="'+k+'"'],days:9}))}catch(e){}
   try{const P=pendList();if(P.length)add({ref:'pend:'+P.length+':'+P[0].id,ic:'⏳',lv:'warn',title:countWord(P.length,'عملية بانتظار الاعتماد','عمليتان بانتظار الاعتماد','عمليات بانتظار الاعتماد','عملية بانتظار الاعتماد'),when:'راجعها واعتمدها من الرئيسية',act:['افتح','data-tab="home"'],days:0})}catch(e){}
-  const W={late:0,warn:1,info:2};return out.sort((a,b)=>(W[a.lv]??2)-(W[b.lv]??2)||(a.days||0)-(b.days||0))}
+  try{bxNtItems().forEach(add)}catch(e){}
+  const W={bank:-1,late:0,warn:1,info:2};return out.sort((a,b)=>(W[a.lv]??2)-(W[b.lv]??2)||(a.days||0)-(b.days||0))}
 function ntUnread(){const R=ntRead();return ntList().filter(n=>!R[n.ref]).length}
 function ntBadge(){const b=document.getElementById('ntBtn');if(!b)return;let n=0;try{n=ntUnread()}catch(e){}const s=b.querySelector('.nt-badge');s.textContent=n>9?'9+':n;s.hidden=!n;b.setAttribute('aria-label','الإشعارات'+(n?' ('+n+' غير مقروءة)':''))}
 function ntFire(attr){const d=document.createElement('div');d.innerHTML='<button type="button" '+attr+'></button>';const b=d.firstChild;b.style.display='none';document.body.appendChild(b);b.click();b.remove()}
 function openNotif(){const L=document.getElementById('layer');const R0=ntRead();
-  const draw=()=>{const A=ntList();const R=ntRead();const G=[['late','🔴 عاجل'],['warn','🟠 قريبًا'],['info','💡 معلومات']];
+  const draw=()=>{const A=ntList();const R=ntRead();const G=[['bank','📩 رسائل البنك المقروءة'],['late','🔴 عاجل'],['warn','🟠 قريبًا'],['info','💡 معلومات']];
     L.innerHTML=`${sheetTop('الإشعارات')}<div class="nt-head" data-nofold><h2 style="margin:0">🔔 الإشعارات</h2>${A.some(n=>!R[n.ref])?'<button class="chip" id="ntAll">✓ تحديد الكل كمقروء</button>':''}</div>
-     ${A.length?G.map(([lv,t])=>{const I=A.filter(n=>(n.lv in {late:1,warn:1}?n.lv:'info')===lv);if(!I.length)return '';return `<div class="nt-g"><div class="nt-gh">${t} <small class="num">${I.length}</small></div>${I.map(n=>`<div class="nt-i${R[n.ref]?'':' unread'} lv-${lv}"><span class="nt-ic">${n.ic}</span><div class="nt-m"><b>${esc(n.title)}</b>${n.when?`<small>${esc(n.when)}</small>`:''}${n.act?`<button class="btn sm nt-act" data-ntgo="${esc(n.ref)}">${esc(n.act[0])}</button>`:''}</div>${R[n.ref]?'':'<span class="nt-dot" aria-label="غير مقروء"></span>'}</div>`).join('')}</div>`}).join('')
+     ${A.length?G.map(([lv,t])=>{const I=A.filter(n=>(n.lv in {late:1,warn:1,bank:1}?n.lv:'info')===lv);if(!I.length)return '';return `<div class="nt-g"><div class="nt-gh">${t} <small class="num">${I.length}</small></div>${I.map(n=>`<div class="nt-i${R[n.ref]?'':' unread'} lv-${lv}"><span class="nt-ic">${n.ic}</span><div class="nt-m"><b>${esc(n.title)}</b>${n.when?`<small>${esc(n.when)}</small>`:''}${n.act?`<button class="btn sm nt-act" data-ntgo="${esc(n.ref)}">${esc(n.act[0])}</button>`:''}</div>${R[n.ref]?'':'<span class="nt-dot" aria-label="غير مقروء"></span>'}</div>`).join('')}</div>`}).join('')
       :'<div class="okbox" style="margin-top:12px">✓ لا إشعارات الآن. كل شيء على ما يرام.</div>'}
-     <p class="note" style="margin-top:12px">تظهر هنا تنبيهات الفواتير والأقساط والتقارير وغيرها. ولتصلك والتطبيق مغلق فعّل الإشعارات من ⚙️ الضبط.</p>
+     <p class="note" style="margin-top:12px">تظهر هنا تنبيهات الفواتير والأقساط والتقارير، وكل رسالة بنك قرأها التطبيق (خصم، إيداع، دفعة التزام) خلال آخر 3 أيام. ولتصلك والتطبيق مغلق فعّل الإشعارات من ⚙️ الضبط.</p>
      <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`};
   draw();
   L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;
@@ -10990,7 +11064,7 @@ function aiAnswer(q,m){const n=' '+sNorm(q).replace(/[؟?!،,.]/g,' ').toLowerCa
   return{icon:'🤔',title:'لم أفهم السؤال',big:'جرّب',lines:['ماذا أدفع أولًا؟ · هل يكفي راتبي؟ · كم باقي علي؟ · ما المتأخر؟ · ما القادم؟ · متى ينتهي (اسم الدين)؟ · كم دفعت للكهرباء هذه السنة؟']}}
 function aiAnsHtml(q,m){const A=aiAnswer(q,m);return `<div class="ask-card ai-ans${A.red?' red':''}${A.green?' green':''}"><div class="ask-h"><span>${A.icon}</span><small>${esc(A.title)}</small><button class="chip" data-aiclr="1" aria-label="إغلاق الإجابة">✕</button></div><div class="ask-big"><b class="num">${esc(A.big)}</b>${A.unit?` <span>${esc(A.unit)}</span>`:''}</div>${(A.lines||[]).map(l=>`<p>${l}</p>`).join('')}${A.bars?sBarsHtml(A.bars):''}</div>`}
 /* تلميحات ذكية داخل نوافذ الدفع */
-function aiPayHint(kind,id,m){try{const i=monthItems(m).find(x=>x.kind===kind&&x.id===id);if(!i)return '';const b=aiMatchTx(i,m);const U=aiUsual(i,m);let h='';
+function aiPayHint(kind,id,m){try{const i=monthItems(m).find(x=>x.kind===kind&&x.id===id);if(!i)return '';let b=aiMatchTx(i,m);if(!b&&!i.isPaid){const t=slAskTx(i,m);if(t)b={t,sc:3}}const U=aiUsual(i,m);let h=slPaidHint(kind,id,m);
   if(b)h+=`<div class="ai-pay match"><span>🤖</span><div><b>وجدت في السجل عملية تبدو هذه الدفعة</b><small><b class="num">${money(b.t.amount)}</b> بتاريخ ${dmy(b.t.date)}${b.t.note?' · «'+esc(String(b.t.note).slice(0,40))+'»':''}. اربطها بدل تسجيل دفعة جديدة حتى لا يُحسب المبلغ مرتين.</small><div class="ai-acts"><button class="chip pay" data-ailink="${kind}|${esc(id)}|${esc(b.t.id)}|${m}">🔗 اربطها</button><button class="chip" data-aino="${kind}|${esc(id)}|${esc(b.t.id)}">ليست هي</button></div></div></div>`;
   if(U)h+=`<div class="ai-pay"><span>🤖</span><div><small>المعتاد لهذا البند: <b class="num">${money(U.avg)}</b> (متوسط آخر ${countWord(U.n,'شهر','شهرين','أشهر','شهرًا')})</small></div></div>`;return h}catch(e){return ''}}
 function aiAmtWarn(kind,id,m,amt){try{if(!(amt>0))return '';const i=monthItems(m).find(x=>x.kind===kind&&x.id===id);const U=i?aiUsual(i,m):null;const W=[];

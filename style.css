@@ -2844,3 +2844,26 @@ body.hv2-on header.top .brand{visibility:hidden}
 .fp-xadd{display:flex;gap:6px;align-items:center;margin-top:8px}.fp-xadd input#fpXn{flex:1;min-width:0}.fp-xadd .amtbox{width:110px}
 #layer textarea#fpNote{width:100%;box-sizing:border-box;border-radius:12px;border:1px solid var(--line);padding:10px;font:inherit;background:var(--surface);color:inherit}
 .fp-follow{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}.ms-bar.over i{background:#C04F4F}
+/* 2.133 عرض متحرك في الرئيسية */
+.hv2-slides,.hv2-one{position:absolute;inset:0;overflow:hidden;z-index:0}
+.hv2-sl{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease;background:linear-gradient(180deg,#1E4F7A 0%,#3C7FA8 46%,#A9CFD6 80%,#D8E6DC 100%)}
+.hv2-sl.on{opacity:1;z-index:1}
+.hv2-slides.kb .hv2-sl.on .hv2-photo,.hv2-slides.kb .hv2-sl.on .hv2-scene,.hv2-one.kb .hv2-photo{animation:hvKb calc(var(--hsp,8s) + 1.5s) ease-in-out both}
+.hv2-one.kb .hv2-photo{animation:hvKb2 18s ease-in-out infinite alternate}
+@keyframes hvKb{from{transform:scale(1) translate3d(0,0,0)}to{transform:scale(1.09) translate3d(-1.5%,-1%,0)}}
+@keyframes hvKb2{from{transform:scale(1)}to{transform:scale(1.08) translate3d(1.5%,-1%,0)}}
+.hv2-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:3}
+.hv2-dots i{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.5);transition:width .4s,background .4s}.hv2-dots i.on{width:16px;background:#fff}
+.hero-slides{background:linear-gradient(135deg,#1E4F7A,#C0663A)!important;display:flex;align-items:center;justify-content:center}
+.hr-thumbs{display:flex;flex-wrap:wrap;gap:8px}.hr-th{position:relative;width:72px;height:48px;border-radius:10px;overflow:hidden;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;background:var(--surface);font-size:20px}
+.hr-th img{width:100%;height:100%;object-fit:cover}.hr-th .iconbtn{position:absolute;top:2px;left:2px;width:20px;height:20px;min-height:0;padding:0;font-size:10px;background:rgba(0,0,0,.55);color:#fff;border-radius:10px}
+@media (prefers-reduced-motion: reduce){.hv2-sl{transition:none}.hv2-photo,.hv2-scene{animation:none!important}}
+/* 2.133.1 مساحة صورة الرئيسية */
+.hv2-hero.hs-lg{height:210px}
+.hv2-hero.hs-xl{height:270px}
+.hv2-hero.hs-full{height:280px;border-radius:0 0 26px 26px;margin-top:-6px}
+.hv2-hero.hs-full{margin-inline:-16px}
+.hv2-hero .hv2-photo{object-fit:cover;width:100%;height:100%}
+.hv2-hero .hv2-scene{width:100%;height:100%}
+.hv2-hero.hs-full .hv2-ht{inset:18px 20px auto 20px!important}
+#view:has(.hv2-hero.hs-full){overflow-x:visible}
