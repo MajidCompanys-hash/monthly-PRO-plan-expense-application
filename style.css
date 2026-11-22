@@ -2761,3 +2761,6 @@ body.hv2-on header.top .brand{visibility:hidden}
 :root[data-theme="dark"] .scd.l2,:root[data-theme="dark"] .scct td.l2{background:#1E3A78;border-color:#28479A}
 :root[data-theme="dark"] .scd.l3,:root[data-theme="dark"] .scct td.l3{background:#2F56B8;border-color:#3A63C8;color:#fff}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .scd.l1,:root:not([data-theme="light"]) .scct td.l1{background:#16264A;border-color:#1E3260}:root:not([data-theme="light"]) .scd.l2,:root:not([data-theme="light"]) .scct td.l2{background:#1E3A78;border-color:#28479A}:root:not([data-theme="light"]) .scd.l3,:root:not([data-theme="light"]) .scct td.l3{background:#2F56B8;border-color:#3A63C8;color:#fff}}
+
+/* 2.130 صندوق رسائل البنك */
+.boxh{display:flex;align-items:center;gap:12px;width:100%;text-align:right;font:inherit;color:var(--fg);padding:12px 14px;margin-block:10px;cursor:pointer;min-height:44px;border-color:color-mix(in srgb,var(--accent) 35%,var(--line));background:var(--accent-soft)}
