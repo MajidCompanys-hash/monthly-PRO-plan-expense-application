@@ -5296,7 +5296,7 @@ function mkey(s){return String(s||'').toLowerCase().replace(/[^a-z؀-ۿ]+/g,' ')
 const AMT_RE=/(?:\bOMR(?![A-Za-z])|\bR\.?O\.?(?![A-Za-z])|ر\.?\s?ع\.?|ريال(?:\s*عماني)?)\s*([0-9][0-9,]*(?:\.[0-9]{1,3})?)|([0-9][0-9,]*(?:\.[0-9]{1,3})?)\s*(?:OMR(?![A-Za-z])|R\.?O\.?(?![A-Za-z])|ر\.?\s?ع\.?|ريال)/gi;
 const MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
 function pickDate(t){
-  let m=t.match(/(\d{4})-(\d{1,2})-(\d{1,2})/),y,mo,d;
+  let m=t.match(/(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/),y,mo,d;
   if(m){y=+m[1];mo=+m[2];d=+m[3]}
   else if((m=t.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/))){d=+m[1];mo=+m[2];y=+m[3]}
   else if((m=t.match(/(\d{1,2})[\s\-]?(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[\s\-,]*(\d{2,4})/i))){d=+m[1];mo=MON[m[2].toLowerCase()];y=+m[3]}
@@ -5325,7 +5325,7 @@ function smsDirection(t){if(/salary|payroll|راتب|رواتب|refund|استر�
 /* 2.133.3: التطبيق يقرأ فقط العمليات التي تمت فعلًا (خصم، إيداع، سحب، شراء، تحويل).
  * لا يسجل: التذكير بالأقساط والفواتير المستحقة، كشف البطاقة والحد الأدنى، العمليات المرفوضة أو الفاشلة، العروض والاسترداد النقدي،
  * الأوامر المجدولة «سيتم خصم…»، تغيير الحد، رسائل الرصيد فقط، ورموز التحقق. */
-const SMS_DONE=/\b(?:txn|transaction)\b[^\n]{0,80}?\b(?:done|successful(?:ly)?|approved|completed|processed|made)\b|successful(?:ly)?\s*(?:paid|transferred|completed)|\b(?:debit|credit)\s*(?:txn|transaction)|\bPOS\b|\bATM\b|\be-?com(?:merce)?\b|تم\s*استخدام|تمت\s*(?:عملية|الحوالة|حوالة|عملية الشراء)|حركة\s*(?:مدينة|دائنة)|debited|credited|deducted|was (?:used|charged|spent|paid)|has been (?:debited|credited|deducted|transferred|paid|withdrawn|used|charged)|\bpurchase\b|\bpurchased\b|\bpaid\b|withdrawal|withdrawn|\bspent\b|received|transferred|\bdeposit(?:ed)?\b|refund(?:ed)?|reversal|reversed|تم\s*(?:خصم|إيداع|ايداع|سحب|شراء|تحويل|دفع|استلام|إضافة|اضافة|استرداد|قيد|الخصم|الإيداع|السحب|الشراء|التحويل|الدفع)|خُصم|خصم مبلغ|أُودع|اودع|سُحب|سحب نقدي|عملية شراء|شراء بمبلغ|حوالة واردة|حوالة صادرة|إيداع راتب|ايداع راتب|استرداد مبلغ/i;
+const SMS_DONE=/\b(?:fund\s*|mobile\s*|online\s*|bank\s*)?(?:transfer|payment|remittance)\b[^\n]{0,90}?\b(?:successful(?:ly)?|done|completed|processed|executed)\b|\b(?:txn|transaction)\b[^\n]{0,80}?\b(?:done|successful(?:ly)?|approved|completed|processed|made)\b|successful(?:ly)?\s*(?:paid|transferred|completed)|\b(?:debit|credit)\s*(?:txn|transaction)|\bPOS\b|\bATM\b|\be-?com(?:merce)?\b|تم\s*استخدام|تمت\s*(?:عملية|الحوالة|حوالة|عملية الشراء)|حركة\s*(?:مدينة|دائنة)|debited|credited|deducted|was (?:used|charged|spent|paid)|has been (?:debited|credited|deducted|transferred|paid|withdrawn|used|charged)|\bpurchase\b|\bpurchased\b|\bpaid\b|withdrawal|withdrawn|\bspent\b|received|transferred|\bdeposit(?:ed)?\b|refund(?:ed)?|reversal|reversed|تم\s*(?:خصم|إيداع|ايداع|سحب|شراء|تحويل|دفع|استلام|إضافة|اضافة|استرداد|قيد|الخصم|الإيداع|السحب|الشراء|التحويل|الدفع)|خُصم|خصم مبلغ|أُودع|اودع|سُحب|سحب نقدي|عملية شراء|شراء بمبلغ|حوالة واردة|حوالة صادرة|إيداع راتب|ايداع راتب|استرداد مبلغ/i;
 function smsNonTx(t){const s=String(t||'');
   if(/declined|rejected|\bfailed\b|unsuccessful|not (?:been )?(?:processed|completed|approved)|insufficient|could not be|تم رفض|مرفوض|رُفضت|رفضت|فشل|فشلت|لم تتم|لم يتم|غير كاف|عدم كفاية/i.test(s))return 'عملية مرفوضة أو فاشلة، لم يُخصم شيء';
   if(/will be (?:debited|deducted|executed|charged|credited|paid|transferred)|is scheduled|scheduled (?:for|on)|standing instruction will|سيتم\s*(?:خصم|تنفيذ|تحويل|سحب|دفع|إيداع)|سوف يتم|سيُخصم|سيخصم/i.test(s))return 'تنبيه بعملية مستقبلية، لم تتم بعد';
@@ -5362,14 +5362,14 @@ function parseSms(raw){
   let note=merchant||(atm?'سحب نقدي من الصراف':type==='inc'?(cat==='salary'?'راتب':'إيداع في الحساب'):'');if(fx)note=(note?note+' · ':'')+fx.amt+' '+fxName(fx.cur);
   const dup=list().some(x=>x.src===key);
   /* 2.118: الرصيد بعد العملية، وآخر 4 أرقام من البطاقة، ووقت العملية (صيغة البنك الوطني العماني وغيرها) */
-  const bm=t.match(/(?:available|avl\.?|avail\.?)\s*(?:bal(?:ance)?\.?)?\s*(?:is|:)?\s*(?:OMR|RO|R\.O\.?)?\s*(-?[0-9][0-9,]*\.[0-9]{1,3})/i)||t.match(/(?:الرصيد\s*(?:المتاح|المتوفر)?|رصيدك(?:\s*المتاح)?)\s*(?:هو|:)?\s*(?:ر\.?\s*ع\.?|OMR)?\s*(-?[0-9][0-9,]*\.[0-9]{1,3})/);
-  const bal=bm?parseFloat(bm[1].replace(/,/g,'')):null;
-  const cm=t.match(/card\s*(?:no\.?|number)?\s*(?:ending|ends)?\s*(?:with|in)?\s*[xX*#]*\s*(\d{4})\b/i)||t.match(/(?:account|acct|a\/c)\s*(?:no\.?|number)?\s*(?:ending|ends)?\s*(?:with|in)?\s*[xX*#]*\s*(\d{4})\b/i)||t.match(/[xX*#]{2,}\s*(\d{4})\b/)||t.match(/(?:بطاقة|حساب)[^\d]{0,25}(\d{4})\b/);const card4=cm?cm[1]:'';
+  const bm=t.match(/(?:available|avl\.?|avail\.?)\s*(?:bal(?:ance)?\.?)?\s*(?:is|:)?\s*(?:OMR|RO|R\.O\.?)?\s*(-?[0-9][0-9,]*\.[0-9]{1,3})/i)||t.match(/(?:available|avl\.?|avail\.?|current|ledger)\s*bal(?:ance)?\.?[^\d\n]{0,45}?(?:OMR|RO|R\.O\.?)\s*(-?[0-9][0-9,]*\.[0-9]{1,3})/i)||t.match(/(?:الرصيد\s*(?:المتاح|المتوفر|الحالي|الفعلي)?|رصيدك(?:\s*(?:المتاح|المتوفر|الحالي|الفعلي))?)\s*(?:هو|:|=)?\s*(?:ر\.?\s*ع\.?|OMR)?\s*(-?[0-9][0-9,]*\.[0-9]{1,3})/);
+  const bm2=bm||t.match(/(?:available|avl\.?|avail\.?|current|ledger)\s*bal(?:ance)?[^\d\n]{0,45}?(-?[0-9][0-9,]*\.[0-9]{1,3})\s*(?:OMR|RO|R\.O)?/i)||t.match(/(?:الرصيد|رصيدك)[^\d\n]{0,45}?(-?[0-9][0-9,]*\.[0-9]{1,3})/);const bal=bm2?parseFloat(bm2[1].replace(/,/g,'')):null;
+  const cm=t.match(/(?:a\/c|account|acct|card|حساب|بطاقة)[^\d\n]{0,25}\d{0,8}[*xX•#]{2,}(\d{3,4})\b/i)||t.match(/card\s*(?:no\.?|number)?\s*(?:ending|ends)?\s*(?:with|in)?\s*[xX*#]*\s*(\d{4})\b/i)||t.match(/(?:account|acct|a\/c)\s*(?:no\.?|number)?\s*(?:ending|ends)?\s*(?:with|in)?\s*[xX*#]*\s*(\d{4})\b/i)||t.match(/[xX*#]{2,}\s*(\d{4})\b/)||t.match(/(?:بطاقة|حساب)[^\d]{0,25}(\d{4})\b/);const card4=cm?cm[1]:'';
   const tm=t.match(/\b(\d{1,2}):(\d{2})\b/);const time=tm?String(+tm[1]).padStart(2,'0')+':'+tm[2]:'';
   const date=pickDate(t);const amt=+amount.toFixed(3);
   const near=dup?null:list().find(x=>x.type===type&&Math.abs((+x.amount||0)-amt)<0.0005&&x.date&&Math.abs(dDiff(x.date,date))<=1&&!(x.via==='sms'&&x.time&&time&&(x.time!==time||x.date!==date)));
   const accDef=(card4&&(S.settings.card4Acc||{})[card4])||(method==='cash'?'cash':(method==='card'?((S.settings.accounts||[]).find(a=>a.forCard)||{}).id:'')||'main');
-  const dirSure=SMS_CR.concat(SMS_DR).some(([r])=>r.test(t))||/salary|payroll|راتب/i.test(t);const dateSure=/\d{4}-\d{1,2}-\d{1,2}|\b\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}\b|\d{1,2}[\s\-]?(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(t);
+  const dirSure=SMS_CR.concat(SMS_DR).some(([r])=>r.test(t))||/salary|payroll|راتب/i.test(t);const dateSure=/\d{4}[\/\-.]\d{1,2}[\/\-.]\d{1,2}|\b\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}\b|\d{1,2}[\s\-]?(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(t);
   const sure=dirSure&&dateSure&&(!!merchant||atm||type==='inc')&&(!card4||!!(S.settings.card4Acc||{})[card4])&&(!fx||!!FX_DEF[fx.cur][2]);
   const why2=[!dirSure&&'dir',!dateSure&&'date',!(merchant||atm||type==='inc')&&'merchant',(card4&&!(S.settings.card4Acc||{})[card4])&&'card',(fx&&!FX_DEF[fx.cur][2])&&'fx'].filter(Boolean);
   return Object.assign(base,{ok:true,sure,why2,on:!dup&&!near,dup,near:near?{id:near.id,note:near.note||catOf(near.cat).n,date:near.date}:null,amount:amount.toFixed(3),type,cat,date,time,method,note,merchant,bal,card4,acc:accDef,setBal:bal!=null,fx});
@@ -5617,9 +5617,10 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.133.4';
+const APP_VERSION='2.133.5';
 const CHANGELOG=[
- {v:'2.133.4',date:'2026-11-23',items:['🩺 فحص صندوق رسائل البنك خطوة بخطوة: الإصدار، الاتصال، هل يصل شيء من الاختصار ومتى آخر رسالة، اختبار إرسال واستقبال، وماذا فعل التطبيق بكل رسالة ولماذا، مع إصلاح بضغطة وتقرير للنسخ','ربط رقم البطاقة/الحساب بحسابه من داخل الفحص، وإعادة قراءة الرسائل التي لم تُسجل بلا تكرار','الرسالة الواضحة التي تذكر أن العملية تمت تُسجل تلقائيًا حتى لو نقصها التاريخ (يؤخذ وقت وصولها) أو اسم التاجر، ما دامت البطاقة مربوطة بحساب','إصلاح: إذا أنشأت سكربت صندوق جديدًا يبدأ التطبيق القراءة من جديد بدل انتظار رسائل لن تأتي']},
+ {v:'2.133.5',date:'2026-11-24',items:['🔁 التحويلات من رسائل البنك: التحويل الصادر يُسجل مصروفًا باسم «تحويل إلى …»، والوارد دخلًا «تحويل وارد من …»، والتحويل بين حساباتك لا يُحسب مصروفًا ولا دخلًا','قراءة رسائل «Fund transfer … was successful» و«Mobile payment … successful» التي كانت تُعامل كرسالة رصيد','🏦 ضبط على رسائلك الحقيقية: البنك الوطني «OMR 10.000 is debited from your A/C 1051**017… Available balance in your account is OMR…» وبنك مسقط «تم سحب 200.000 OMR من حسابك رقم 0311XXXXXXXX0016… بتاريخ 2026/11/23… رصيدك الحالي هو 927.429 OMR»','إصلاح: التاريخ بصيغة 2026/11/23 كان يُقرأ خطأ، والرصيد بصيغة «رصيدك الحالي هو … OMR» و«Available balance in your account is OMR» لم يكن يُقرأ، ورقم الحساب المخفي بالنجوم أو XXXX كان يُؤخذ من أوله بدل آخره','أول رسالة من رقم حساب جديد: يسألك في الرئيسية «أي حساب هو ••0016؟» فتختاره بضغطة، فتُسجل رسائله المنتظرة فورًا وكل رسائله القادمة تلقائيًا']},
+{v:'2.133.4',date:'2026-11-23',items:['🩺 فحص صندوق رسائل البنك خطوة بخطوة: الإصدار، الاتصال، هل يصل شيء من الاختصار ومتى آخر رسالة، اختبار إرسال واستقبال، وماذا فعل التطبيق بكل رسالة ولماذا، مع إصلاح بضغطة وتقرير للنسخ','ربط رقم البطاقة/الحساب بحسابه من داخل الفحص، وإعادة قراءة الرسائل التي لم تُسجل بلا تكرار','الرسالة الواضحة التي تذكر أن العملية تمت تُسجل تلقائيًا حتى لو نقصها التاريخ (يؤخذ وقت وصولها) أو اسم التاجر، ما دامت البطاقة مربوطة بحساب','إصلاح: إذا أنشأت سكربت صندوق جديدًا يبدأ التطبيق القراءة من جديد بدل انتظار رسائل لن تأتي']},
 {v:'2.133.3',date:'2026-11-23',items:['🛡️ قراءة الرسائل تسجّل فقط العمليات التي تمت فعلًا (خصم، إيداع، سحب، شراء، تحويل، قسط خُصم)، وتتجاهل: التذكير بالأقساط والفواتير المستحقة، كشف البطاقة والحد الأدنى، العمليات المرفوضة أو الفاشلة، العروض والاسترداد النقدي، «سيتم خصم…» المجدولة، تغيير الحد، ورموز التحقق','كل رسالة متجاهلة تظهر في سجل الرسائل مع سبب تجاهلها','رسالة «رصيدك المتاح…» بلا عملية تحدّث رصيد الحساب فقط دون تسجيل أي مصروف','الحفظ التلقائي يشترط أن تذكر الرسالة أن العملية تمت، وإلا تذهب للمراجعة']},
 {v:'2.133.2',date:'2026-11-23',items:['⚡ رسائل البنك أسرع: السحب فور فتح التطبيق، وعند الرجوع له، وكل 20 ثانية وهو مفتوح (كان كل دقيقة)','💰 الرصيد يتحدث من الرسالة فورًا حتى لو كانت العملية تنتظر مراجعتك (مثلًا بسبب تأكيد البصمة)، والعملية حين تُعتمد لا تُخصم مرتين','🔐 خيار «سجّل رسائل الصندوق تلقائيًا رغم تأكيد البصمة» (يحتاج بصمتك لتفعيله)، ويبقى الإدخال اليدوي والتعديل والحذف بالبصمة','⏱️ لوحة «سرعة التحديث» في صندوق رسائل البنك: آخر سحب وسبب انتظار الرسائل إن وُجد','🔄 السحب للأسفل للتحديث يسحب رسائل البنك أولًا ثم يزامن مع Google Drive، ويخبرك بالنتيجة (سُجّلت كذا، أو الصندوق سليم، أو سبب المشكلة)']},
 {v:'2.133.1',date:'2026-11-22',items:['📐 مساحة صورة الرئيسية: عادي، كبير، كبير جدًا، أو ملء العرض من الحافة للحافة، والصورة تملأ المساحة دائمًا']},
@@ -6705,15 +6706,21 @@ function boxPendAnchor(m,its,bk){let n=0;const A=accList();const map=S.settings.
   if(n){S.settings.accounts=A}return n}
 /* رسالة رصيد فقط (أو عملية مرفوضة تذكر الرصيد): لا تُسجل عملية، لكن يُحدَّث رصيد الحساب منها إن عُرف الحساب */
 function boxBalOnly(m,t,bk){const s=normDigits(String(t));const b=/(?:available|avl\.?|current)\s*bal(?:ance)?[\s\S]{0,45}?(?:OMR|RO|ر\.?\s?ع\.?)\s*([\d,]+(?:\.\d{1,3})?)|(?:available|avl\.?|current)\s*bal(?:ance)?[\s\S]{0,45}?\b(\d[\d,]*\.\d{1,3})\b|(?:الرصيد|رصيدك)\s*(?:المتاح|المتوفر|الحالي)?[\s\S]{0,30}?(\d[\d,]*\.\d{1,3})/i.exec(s);if(!b)return 0;
-  const bal=parseFloat((b[1]||b[2]||b[3]).replace(/,/g,''));if(!isFinite(bal))return 0;const c=/(?:x{2,}|\*{2,}|ending(?:\s*with)?|ends\s*with|المنته[يى]ة?\s*(?:بـ|ب)?|رقم)\s*(\d{4})\b/i.exec(s);
+  const bal=parseFloat((b[1]||b[2]||b[3]).replace(/,/g,''));if(!isFinite(bal))return 0;const c=/\d{0,8}[*xX•#]{2,}(\d{3,4})\b/.exec(s)||/(?:ending(?:\s*with)?|ends\s*with|المنته[يى]ة?\s*(?:بـ|ب)?|رقم)\s*(\d{4})\b/i.exec(s);
   const id=c?((S.settings.card4Acc||{})[c[1]]||null):(bankAcc(bk)||null);if(!id)return 0;const A=accList();const a=A.find(z=>z.id===id);if(!a)return 0;
   const at=m.at?new Date(m.at):new Date();const d=isoD(at),tm=String(at.getHours()).padStart(2,'0')+':'+String(at.getMinutes()).padStart(2,'0');
   const old=a.anchor;const key2=d+'T'+tm;const oldKey=old?(old.date+'T'+(old.msgT||(old.at||'').slice(11,16)||'00:00')):'';if(old&&(key2<oldKey||(old.mid&&+m.id<=+old.mid)))return 0;
   a.log=(a.log||[]).concat([{date:d,app:accBalance(a),actual:r3(bal),src:'sms'}]).slice(-24);a.anchor={bal:r3(bal),date:d,at:new Date().toISOString(),msgT:tm,src:'sms',mid:+m.id};S.settings.accounts=A;return 1}
 const BOX_WHY={dir:'لم أتعرف على نوع العملية (خصم أو إيداع)',date:'لا يوجد تاريخ في الرسالة',merchant:'لم أجد اسم الجهة أو التاجر',card:'رقم البطاقة/الحساب غير مربوط بحساب في التطبيق',fx:'عملة أجنبية بلا سعر صرف'};
 /* 2.133.4: رسالة واضحة من الصندوق تُسجل حتى لو نقصها التاريخ (يؤخذ وقت وصولها) أو اسم التاجر، ما دامت البطاقة مربوطة بحساب وتذكر أن العملية تمت */
+/* 2.133.5: التحويلات: «تحويل إلى أحمد» / «تحويل من سالم» بدل بيان فارغ */
+function smsXferNote(t,type){const s=String(t||'');if(!/transfer|remittance|mobile\s*payment|تحويل|حوال/i.test(s))return '';
+  const nm=(/(?:\bto|إلى|الى|لـ)\s+(?!(?:your|account|a\/c|acc|card)\b|حساب|بطاق|رقم)([A-Za-z\u0600-\u06FF][A-Za-z\u0600-\u06FF .'-]{1,32}?)(?=\s+(?:on|at|via)\b|\s+(?:بتاريخ|في|عبر)|[.,،]|$)/i.exec(s)||[])[1];
+  const fr=(/(?:\bfrom|من)\s+(?!(?:your|account|a\/c|acc|card)\b|حساب|بطاق|رقم)([A-Za-z\u0600-\u06FF][A-Za-z\u0600-\u06FF .'-]{1,32}?)(?=\s+(?:on|at|via|into)\b|\s+(?:بتاريخ|في|عبر)|[.,،]|$)/i.exec(s)||[])[1];
+  const acc=(/(?:to|إلى|الى)\s+(?:account|a\/c|acc|حساب)\s*(?:no\.?|رقم)?\s*[x*•]*(\d{3,4})/i.exec(s)||[])[1];
+  if(type==='inc')return 'تحويل وارد'+(fr&&!/\d/.test(fr)?' من '+fr.trim():'');return 'تحويل'+(nm&&!/\d/.test(nm)?' إلى '+nm.trim():acc?' إلى حساب ••'+acc:' صادر')}
 function boxAutoItem(it,m){if(!it.ok||!it.on||!SMS_DONE.test(it.raw||''))return false;if(it.sure)return true;const W=it.why2||[];const mapped=!it.card4||!!(S.settings.card4Acc||{})[it.card4];
-  if(mapped&&W.length&&W.every(w=>w==='date'||w==='merchant')){if(W.includes('date')&&m&&m.at){it.date=isoD(new Date(m.at));if(!it.time){const d=new Date(m.at);it.time=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}}if(W.includes('merchant')&&!it.note)it.note=it.type==='inc'?'إيداع':'خصم من البطاقة';return true}return false}
+  if(mapped&&W.length&&W.every(w=>w==='date'||w==='merchant')){if(W.includes('date')&&m&&m.at){it.date=isoD(new Date(m.at));if(!it.time){const d=new Date(m.at);it.time=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}}if(W.includes('merchant')&&!it.note)it.note=smsXferNote(it.raw||'',it.type)||(it.type==='inc'?'إيداع':/a\/c|account|acct|حساب/i.test(it.raw||'')&&!/card|بطاق/i.test(it.raw||'')?'خصم من الحساب':'خصم من البطاقة');return true}return false}
 function boxWhyNot(it){if(!it)return '';if(!it.ok)return it.reason||'لم تُقرأ كعملية';if(it.dup)return 'مسجلة من قبل (مكررة)';if(it.near)return 'تشبه عملية مسجلة بنفس المبلغ ('+(it.near.note||'')+')';
   const r=[];if(!S.settings.smsAuto)r.push('الحفظ التلقائي متوقف');if(finOn()&&S.settings.boxTrust!==true)r.push('تأكيد المصروف بالبصمة مفعّل');if(!SMS_DONE.test(it.raw||''))r.push('الرسالة لا تذكر أن العملية تمت');
   (it.why2||[]).forEach(w=>{if(!(w==='date'||w==='merchant')||(it.card4&&!(S.settings.card4Acc||{})[it.card4]))r.push(BOX_WHY[w]+(w==='card'&&it.card4?' (••'+it.card4+')':''))});return r.join('، ')}
@@ -6855,6 +6862,7 @@ function openBalEngine(){const L=document.getElementById('layer');
   L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
    if(x.dataset.befeed){openBoxFeed();return}
    if(x.dataset.beunign){S.settings.accIgnore=[];putSettings();draw();return}
+   if(x.dataset.bemap){const [c,i]=x.dataset.bemap.split('|');beMapCard(c,i).then(()=>draw());return}
    if(x.dataset.beadd){openBeAdd(x.dataset.beadd);return}
    if(x.dataset.beign){beIgnore(x.dataset.beign);draw();return}
    if(x.dataset.accmgr){openAccounts();return}
@@ -6873,9 +6881,9 @@ function beUnknown(){const ign=S.settings.accIgnore||[];const G={};const add=(bk
   return Object.values(G).sort((a,b)=>b.n-a.n)}
 function beUnkHtml(home){let U=[];try{U=beUnknown()}catch(e){return ''}if(!U.length)return '';const u=U[0];
   const nm=(u.bk?bankName(u.bk):'حساب')+(u.c4?' ••'+u.c4:'');
-  if(home)return `<div class="infobox be-unk"><span>🏦 لاحظت عمليات من <b>${esc(nm)}</b> (${countWord(u.n,'رسالة','رسالتان','رسائل','رسالة')}) وهو غير مسجل في حساباتك${U.length>1?'، و'+countWord(U.length-1,'حساب آخر','حسابان آخران','حسابات أخرى','حسابًا آخر'):''}، فرصيده لا يدخل في الإجمالي.</span><div class="chips"><button class="chip pay" data-beadd="${esc(u.k)}">أضفه بضغطة</button><button class="chip" data-beign="${esc(u.k)}">ليس لي</button></div></div>`;
+  if(home)return `<div class="infobox be-unk"><span>🏦 لاحظت عمليات من <b>${esc(nm)}</b> (${countWord(u.n,'رسالة','رسالتان','رسائل','رسالة')}) وهو غير مسجل في حساباتك${U.length>1?'، و'+countWord(U.length-1,'حساب آخر','حسابان آخران','حسابات أخرى','حسابًا آخر'):''}، فرصيده لا يدخل في الإجمالي.</span>${u.c4&&accList().some(a=>a.kind!=='cash')?`<small class="note" style="display:block;margin-top:6px">هل هو أحد حساباتك المسجلة؟ اختره مرة واحدة وتُسجَّل رسائله تلقائيًا:</small><div class="chips">${accList().filter(a=>a.kind!=='cash').map(a=>`<button class="chip pay" data-bemap="${esc(u.c4)}|${esc(a.id)}">${esc(a.name||accName(a.id))}</button>`).join('')}</div>`:''}<div class="chips"><button class="chip" data-beadd="${esc(u.k)}">➕ حساب جديد</button><button class="chip" data-beign="${esc(u.k)}">ليس لي</button></div></div>`;
   return `<div class="panel be-unkl"><b>🏦 حسابات تستخدمها وغير مسجلة</b><small class="note">وصلت منها رسائل لكن لا يوجد لها حساب في التطبيق، فلا يدخل رصيدها في الإجمالي. أضفها بضغطة: يأخذ التطبيق اسم البنك ورقم البطاقة وآخر رصيد من الرسالة.</small>
-   ${U.map(u=>`<div class="sumrow"><span><b>${esc((u.bk?bankName(u.bk):'بنك غير معروف')+(u.c4?' ••'+u.c4:''))}</b><small class="note"> ${countWord(u.n,'رسالة','رسالتان','رسائل','رسالة')}${u.last&&u.last.bal!=null?' · آخر رصيد '+money(u.last.bal):''}</small></span><span class="chips"><button class="chip pay" data-beadd="${esc(u.k)}">➕ أضف</button><button class="chip" data-beign="${esc(u.k)}">ليس لي</button></span></div>`).join('')}</div>`}
+   ${U.map(u=>`<div class="sumrow"><span><b>${esc((u.bk?bankName(u.bk):'بنك غير معروف')+(u.c4?' ••'+u.c4:''))}</b><small class="note"> ${countWord(u.n,'رسالة','رسالتان','رسائل','رسالة')}${u.last&&u.last.bal!=null?' · آخر رصيد '+money(u.last.bal):''}</small></span><span class="chips">${u.c4?accList().filter(a=>a.kind!=='cash').map(a=>`<button class="chip pay" data-bemap="${esc(u.c4)}|${esc(a.id)}">= ${esc(a.name||accName(a.id))}</button>`).join(''):''}<button class="chip" data-beadd="${esc(u.k)}">➕ جديد</button><button class="chip" data-beign="${esc(u.k)}">ليس لي</button></span></div>`).join('')}</div>`}
 function openBeAdd(k){const u=beUnknown().find(x=>x.k===k);if(!u){toast('لم أجد هذا الحساب');return}const L=document.getElementById('layer');
   const nm0=(u.bk?bankName(u.bk):'حساب بنكي')+(u.c4?' ••'+u.c4:'');const bal0=u.last&&u.last.bal!=null?u.last.bal:'';
   const nTx=list().filter(t=>u.c4&&t.card4===u.c4&&(!t.acc||t.acc==='main')).length;
@@ -6899,6 +6907,12 @@ function openBeAdd(k){const u=beUnknown().find(x=>x.k===k);if(!u){toast('لم أ
      /* سجل الرسائل: انسب رسائل هذه البطاقة للحساب الجديد */
      try{const LG=boxLog().map(z=>z.card4&&z.card4===u.c4?Object.assign({},z,{acc:id}):z);localStorage.setItem(BOX_LOG,JSON.stringify(LG))}catch(er){}
      await putSettings();L.innerHTML='';render();toast('✓ أُضيف «'+name+'»'+(b!==null?' برصيد '+money(b):'')+'، ودخل في إجمالي أرصدتك');try{openBalEngine()}catch(er){}}}}
+/* 2.133.5: ربط رقم حساب/بطاقة من الرسائل بحساب مسجل، ثم تسجيل رسائله المنتظرة فورًا ونقل عملياته السابقة */
+async function beMapCard(c4,id){if(!c4||!id)return;S.settings.card4Acc=Object.assign({},S.settings.card4Acc||{},{[c4]:id});
+  const T=list().filter(t=>t.card4===c4&&(!t.acc||t.acc==='main')&&id!=='main').map(t=>Object.assign({},t,{acc:id,updatedAt:new Date().toISOString()}));if(T.length)await putTxMany(T);
+  try{const LG=boxLog().map(z=>z.card4===c4?Object.assign({},z,{acc:id}):z);localStorage.setItem(BOX_LOG,JSON.stringify(LG))}catch(e){}
+  await putSettings();let R=null;try{const ids=boxPend().filter(p=>splitMsgs(String(p.text||'')).map(parseSms).some(it=>it.card4===c4)).map(p=>p.id);if(ids.length)R=await boxRescan(ids)}catch(e){}
+  render();toast('✓ رُبط ••'+c4+' بـ«'+accName(id)+'»'+(R&&R.saved?'، وسُجّلت '+countWord(R.saved,'رسالة','رسالتان','رسائل','رسالة')+' كانت تنتظر':'')+'. كل رسائله القادمة تُسجل تلقائيًا')}
 function beIgnore(k){S.settings.accIgnore=(S.settings.accIgnore||[]).concat([k]).slice(-40);putSettings();render();toast('لن أذكّرك بهذا الحساب. تجده في «حساباتي وأرصدتي» إن غيّرت رأيك')}
 
 /* ===================== 🗓️ تجهيز شهر قادم (2.132) =====================
@@ -7128,7 +7142,7 @@ async function openBoxDiag(){const L=document.getElementById('layer');let D={ste
    if(x.dataset.bdrun){run();return}
    if(x.dataset.bdfix==='auto'){S.settings.smsAuto=true;await putSettings();toast('✓ فُعّل الحفظ التلقائي');run();return}
    if(x.dataset.bdfix==='trust'){let r=true;try{r=await verifyUser()}catch(er){r=false}if(r!==true&&r!=='unavailable'){toast('لم يتم التحقق');return}S.settings.boxTrust=true;await putSettings();toast('✓ رسائل الصندوق ستُسجل تلقائيًا');run();return}
-   if(x.dataset.bdmap){const [c,a]=x.dataset.bdmap.split('|');S.settings.card4Acc=Object.assign({},S.settings.card4Acc||{},{[c]:a});await putSettings();toast('✓ رُبط ••'+c+' بحساب '+accName(a));run();return}
+   if(x.dataset.bdmap){const [c,a]=x.dataset.bdmap.split('|');await beMapCard(c,a);run();return}
    if(x.dataset.bdre){x.disabled=true;const R=await boxRescan(D.rescan);toast(R?('🔁 أُعيدت القراءة: سُجّلت '+(R.saved||0)+(R.pend?'، و'+R.pend+' للمراجعة':'')):'تعذّرت إعادة القراءة');render();run();return}
    if(x.dataset.bdcopy){const T=['فحص صندوق رسائل البنك — '+new Date().toLocaleString('ar-OM'),...D.steps.map(s=>(s.ok===true?'✅ ':s.ok===false?'❌ ':'⚠️ ')+s.t+(s.d&&!/<ol/.test(s.d)?' — '+s.d.replace(/<[^>]+>/g,''):'')),'',...D.msgs.map(m=>m.when+' '+m.st+' :: '+bdMask(m.text).slice(0,200)+(m.why?' [السبب: '+m.why+']':''))].join('\n');
      let okc=false;try{await navigator.clipboard.writeText(T);okc=true}catch(er){}if(!okc){try{const ta=document.createElement('textarea');ta.value=T;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();okc=document.execCommand('copy');ta.remove()}catch(er){}}
@@ -7234,7 +7248,7 @@ function sDir(){const T=t=>()=>sGoTab(t);return [
 function leanOn(){return !S.settings||S.settings.homeLean!==false}
 function sDirHtml(noH){let i=0;const P=sPages();return `${noH?'':'<h3 class="sdir-h">كل أقسام التطبيق</h3>'}<div class="sdir">${sDir().map(([g,items])=>`<div class="sdir-g"><b class="sdir-t">${esc(g)}</b><div class="sdir-items">${items.map(it=>{const k=P.findIndex(p=>p[1]===it[1]);return `<button class="sdir-i" data-spg="${k}"><span aria-hidden="true">${it[0]}</span><small>${esc(it[1])}</small></button>`}).join('')}</div></div>`).join('')}</div>`}
 /* تسجيل رسالة البنك من الحافظة */
-function looksBank(t){return !!t&&t.length<1200&&/(OMR|ر\.?\s?ع|ريال)/i.test(t)&&/\d/.test(t)&&/(debit|credit|transaction|transfer|purchase|withdraw|balance|خصم|إيداع|ايداع|سحب|شراء|تحويل|رصيد|حوالة)/i.test(t)}
+function looksBank(t){return !!t&&t.length<1200&&/(OMR|ر\.?\s?ع|ريال)/i.test(t)&&/\d/.test(t)&&/(debit|credit|transaction|txn|transfer|remittance|purchase|withdraw|balance|\bbal\b|payment|paid|spent|received|خصم|إيداع|ايداع|سحب|شراء|تحويل|رصيد|حوالة|دفع|استلام|مدين|دائن)/i.test(t)}
 async function clipRecord(){let t='';try{t=(await navigator.clipboard.readText()||'').trim()}catch(e){IMP={text:'',items:[]};openImport();toast('لم أستطع قراءة الحافظة، الصق الرسالة هنا يدويًا');return}
   clipChipHide();if(!t){toast('الحافظة فارغة. انسخ رسالة البنك أولًا');return}
   if(!looksBank(t)){toast('ما في الحافظة لا يبدو رسالة بنك');return}
@@ -11479,7 +11493,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.grcopen){openGrc(S.month);return}
   if(e.target.closest('[data-clipx]')){clipChipHide();return}if(b.dataset.clipsms){clipRecord();return}
   if(b.dataset.scal){openSpendCal('month',S.month||curM());return}
-  if(b.dataset.bstmt){openBoxStmt();return}if(b.dataset.bxdiag){openBoxDiag();return}if(b.dataset.fplan){openFuturePlan(b.dataset.fplan);return}if(b.dataset.beadd&&!b.closest('#layer')){openBeAdd(b.dataset.beadd);return}if(b.dataset.beign&&!b.closest('#layer')){beIgnore(b.dataset.beign);return}if(b.dataset.beng){openBalEngine();return}if(b.dataset.leantog){S.settings.homeLean=!leanOn();putSettings();render();toast(leanOn()?'أُخفيت الاختصارات المكررة':'أُعيدت الاختصارات في الرئيسية');return}if(b.dataset.spg!==undefined&&!b.closest('#layer')){const pg=sPages()[+b.dataset.spg];if(pg)pg[3]();return}
+  if(b.dataset.bstmt){openBoxStmt();return}if(b.dataset.bemap&&!b.closest('#layer')){const [c,i]=b.dataset.bemap.split('|');beMapCard(c,i);return}if(b.dataset.bxdiag){openBoxDiag();return}if(b.dataset.fplan){openFuturePlan(b.dataset.fplan);return}if(b.dataset.beadd&&!b.closest('#layer')){openBeAdd(b.dataset.beadd);return}if(b.dataset.beign&&!b.closest('#layer')){beIgnore(b.dataset.beign);return}if(b.dataset.beng){openBalEngine();return}if(b.dataset.leantog){S.settings.homeLean=!leanOn();putSettings();render();toast(leanOn()?'أُخفيت الاختصارات المكررة':'أُعيدت الاختصارات في الرئيسية');return}if(b.dataset.spg!==undefined&&!b.closest('#layer')){const pg=sPages()[+b.dataset.spg];if(pg)pg[3]();return}
   if(b.dataset.boxrev){boxReview();return}if(b.dataset.smsbox){openSmsBox();return}if(b.dataset.boxfeed){openBoxFeed();return}
   if(b.dataset.heropick){openHeroPick();return}
   if(b.dataset.tvexp){openTravelExp();return}if(b.dataset.tvl){openTravel();return}if(b.dataset.tvend){await travelEnd();return}
