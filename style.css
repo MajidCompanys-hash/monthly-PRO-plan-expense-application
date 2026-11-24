@@ -2872,3 +2872,14 @@ body.hv2-on header.top .brand{visibility:hidden}
 .bd-ok{border-inline-start-color:#2E8B57}.bd-bad{border-inline-start-color:#C04F4F}.bd-warn{border-inline-start-color:#B08A2E}
 .bd-msg{display:flex;flex-direction:column;gap:4px}.bd-msg .bxtxt{direction:ltr;text-align:left;opacity:.8;font-size:11.5px}
 .bd-st .chips{margin-top:4px}
+/* 2.133.6 دليل رسائل البنك */
+.bxg-map{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;display:flex;flex-direction:column;gap:6px}
+.bxg-flow{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:12px}.bxg-flow span{background:color-mix(in srgb,#2F7F7A 12%,transparent);border-radius:10px;padding:4px 8px;white-space:nowrap}.bxg-flow i{font-style:normal;opacity:.5}
+details.bxg{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:4px 12px;margin-bottom:10px}
+details.bxg>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;cursor:pointer}
+details.bxg>summary::-webkit-details-marker{display:none}details.bxg>summary span{font-size:11.5px;opacity:.7;white-space:nowrap}
+details.bxg>summary::after{content:"▾";opacity:.5;transition:transform .2s}details.bxg[open]>summary::after{transform:rotate(180deg)}
+details.bxg[open]{padding-bottom:12px}
+.bxg .steps li{margin-bottom:6px;line-height:1.75}.bxg code{direction:ltr;unicode-bidi:embed;background:var(--bg);padding:1px 5px;border-radius:5px}
+.bxg-key{background:rgba(176,138,46,.13);border-radius:10px;padding:6px 8px}
+.bxg-t{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}.bxg-t th,.bxg-t td{border:1px solid var(--line);padding:6px;text-align:start;vertical-align:top}.bxg-t td[dir=ltr]{font-family:ui-monospace,monospace;font-size:11px}
