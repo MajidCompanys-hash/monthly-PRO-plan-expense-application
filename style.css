@@ -2867,3 +2867,8 @@ body.hv2-on header.top .brand{visibility:hidden}
 .hv2-hero .hv2-scene{width:100%;height:100%}
 .hv2-hero.hs-full .hv2-ht{inset:18px 20px auto 20px!important}
 #view:has(.hv2-hero.hs-full){overflow-x:visible}
+/* 2.133.4 فحص الصندوق */
+.bd-st{display:flex;flex-direction:column;gap:4px;border-inline-start:4px solid var(--line)}.bd-st small{line-height:1.7}
+.bd-ok{border-inline-start-color:#2E8B57}.bd-bad{border-inline-start-color:#C04F4F}.bd-warn{border-inline-start-color:#B08A2E}
+.bd-msg{display:flex;flex-direction:column;gap:4px}.bd-msg .bxtxt{direction:ltr;text-align:left;opacity:.8;font-size:11.5px}
+.bd-st .chips{margin-top:4px}

@@ -5371,7 +5371,8 @@ function parseSms(raw){
   const accDef=(card4&&(S.settings.card4Acc||{})[card4])||(method==='cash'?'cash':(method==='card'?((S.settings.accounts||[]).find(a=>a.forCard)||{}).id:'')||'main');
   const dirSure=SMS_CR.concat(SMS_DR).some(([r])=>r.test(t))||/salary|payroll|راتب/i.test(t);const dateSure=/\d{4}-\d{1,2}-\d{1,2}|\b\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}\b|\d{1,2}[\s\-]?(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(t);
   const sure=dirSure&&dateSure&&(!!merchant||atm||type==='inc')&&(!card4||!!(S.settings.card4Acc||{})[card4])&&(!fx||!!FX_DEF[fx.cur][2]);
-  return Object.assign(base,{ok:true,sure,on:!dup&&!near,dup,near:near?{id:near.id,note:near.note||catOf(near.cat).n,date:near.date}:null,amount:amount.toFixed(3),type,cat,date,time,method,note,merchant,bal,card4,acc:accDef,setBal:bal!=null,fx});
+  const why2=[!dirSure&&'dir',!dateSure&&'date',!(merchant||atm||type==='inc')&&'merchant',(card4&&!(S.settings.card4Acc||{})[card4])&&'card',(fx&&!FX_DEF[fx.cur][2])&&'fx'].filter(Boolean);
+  return Object.assign(base,{ok:true,sure,why2,on:!dup&&!near,dup,near:near?{id:near.id,note:near.note||catOf(near.cat).n,date:near.date}:null,amount:amount.toFixed(3),type,cat,date,time,method,note,merchant,bal,card4,acc:accDef,setBal:bal!=null,fx});
 }
 function splitMsgs(text){
   const parts=normDigits(text).split(/\n\s*\n+/).map(s=>s.trim()).filter(Boolean);
@@ -5616,9 +5617,10 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.133.3';
+const APP_VERSION='2.133.4';
 const CHANGELOG=[
- {v:'2.133.3',date:'2026-11-23',items:['🛡️ قراءة الرسائل تسجّل فقط العمليات التي تمت فعلًا (خصم، إيداع، سحب، شراء، تحويل، قسط خُصم)، وتتجاهل: التذكير بالأقساط والفواتير المستحقة، كشف البطاقة والحد الأدنى، العمليات المرفوضة أو الفاشلة، العروض والاسترداد النقدي، «سيتم خصم…» المجدولة، تغيير الحد، ورموز التحقق','كل رسالة متجاهلة تظهر في سجل الرسائل مع سبب تجاهلها','رسالة «رصيدك المتاح…» بلا عملية تحدّث رصيد الحساب فقط دون تسجيل أي مصروف','الحفظ التلقائي يشترط أن تذكر الرسالة أن العملية تمت، وإلا تذهب للمراجعة']},
+ {v:'2.133.4',date:'2026-11-23',items:['🩺 فحص صندوق رسائل البنك خطوة بخطوة: الإصدار، الاتصال، هل يصل شيء من الاختصار ومتى آخر رسالة، اختبار إرسال واستقبال، وماذا فعل التطبيق بكل رسالة ولماذا، مع إصلاح بضغطة وتقرير للنسخ','ربط رقم البطاقة/الحساب بحسابه من داخل الفحص، وإعادة قراءة الرسائل التي لم تُسجل بلا تكرار','الرسالة الواضحة التي تذكر أن العملية تمت تُسجل تلقائيًا حتى لو نقصها التاريخ (يؤخذ وقت وصولها) أو اسم التاجر، ما دامت البطاقة مربوطة بحساب','إصلاح: إذا أنشأت سكربت صندوق جديدًا يبدأ التطبيق القراءة من جديد بدل انتظار رسائل لن تأتي']},
+{v:'2.133.3',date:'2026-11-23',items:['🛡️ قراءة الرسائل تسجّل فقط العمليات التي تمت فعلًا (خصم، إيداع، سحب، شراء، تحويل، قسط خُصم)، وتتجاهل: التذكير بالأقساط والفواتير المستحقة، كشف البطاقة والحد الأدنى، العمليات المرفوضة أو الفاشلة، العروض والاسترداد النقدي، «سيتم خصم…» المجدولة، تغيير الحد، ورموز التحقق','كل رسالة متجاهلة تظهر في سجل الرسائل مع سبب تجاهلها','رسالة «رصيدك المتاح…» بلا عملية تحدّث رصيد الحساب فقط دون تسجيل أي مصروف','الحفظ التلقائي يشترط أن تذكر الرسالة أن العملية تمت، وإلا تذهب للمراجعة']},
 {v:'2.133.2',date:'2026-11-23',items:['⚡ رسائل البنك أسرع: السحب فور فتح التطبيق، وعند الرجوع له، وكل 20 ثانية وهو مفتوح (كان كل دقيقة)','💰 الرصيد يتحدث من الرسالة فورًا حتى لو كانت العملية تنتظر مراجعتك (مثلًا بسبب تأكيد البصمة)، والعملية حين تُعتمد لا تُخصم مرتين','🔐 خيار «سجّل رسائل الصندوق تلقائيًا رغم تأكيد البصمة» (يحتاج بصمتك لتفعيله)، ويبقى الإدخال اليدوي والتعديل والحذف بالبصمة','⏱️ لوحة «سرعة التحديث» في صندوق رسائل البنك: آخر سحب وسبب انتظار الرسائل إن وُجد','🔄 السحب للأسفل للتحديث يسحب رسائل البنك أولًا ثم يزامن مع Google Drive، ويخبرك بالنتيجة (سُجّلت كذا، أو الصندوق سليم، أو سبب المشكلة)']},
 {v:'2.133.1',date:'2026-11-22',items:['📐 مساحة صورة الرئيسية: عادي، كبير، كبير جدًا، أو ملء العرض من الحافة للحافة، والصورة تملأ المساحة دائمًا']},
 {v:'2.133.0',date:'2026-11-22',items:['🎞️ صور متحركة في أعلى الرئيسية: «عرض متحرك» يبدّل صورك (حتى 8 صور) أو مشاهد التطبيق تلقائيًا بانتقال ناعم ونقاط تبيّن الصورة الحالية، مع حركة تكبير بطيئة','اختيار سرعة التبديل (5 أو 8 أو 14 ثانية)، وإيقاف حركة التكبير إن أردت، وإضافة عدة صور مرة واحدة وحذف أي صورة','الصورة الواحدة أيضًا صار لها حركة تكبير بطيئة، وتتوقف الحركة تلقائيًا إذا كان الهاتف مضبوطًا على «تقليل الحركة»']},
@@ -6708,17 +6710,24 @@ function boxBalOnly(m,t,bk){const s=normDigits(String(t));const b=/(?:available|
   const at=m.at?new Date(m.at):new Date();const d=isoD(at),tm=String(at.getHours()).padStart(2,'0')+':'+String(at.getMinutes()).padStart(2,'0');
   const old=a.anchor;const key2=d+'T'+tm;const oldKey=old?(old.date+'T'+(old.msgT||(old.at||'').slice(11,16)||'00:00')):'';if(old&&(key2<oldKey||(old.mid&&+m.id<=+old.mid)))return 0;
   a.log=(a.log||[]).concat([{date:d,app:accBalance(a),actual:r3(bal),src:'sms'}]).slice(-24);a.anchor={bal:r3(bal),date:d,at:new Date().toISOString(),msgT:tm,src:'sms',mid:+m.id};S.settings.accounts=A;return 1}
+const BOX_WHY={dir:'لم أتعرف على نوع العملية (خصم أو إيداع)',date:'لا يوجد تاريخ في الرسالة',merchant:'لم أجد اسم الجهة أو التاجر',card:'رقم البطاقة/الحساب غير مربوط بحساب في التطبيق',fx:'عملة أجنبية بلا سعر صرف'};
+/* 2.133.4: رسالة واضحة من الصندوق تُسجل حتى لو نقصها التاريخ (يؤخذ وقت وصولها) أو اسم التاجر، ما دامت البطاقة مربوطة بحساب وتذكر أن العملية تمت */
+function boxAutoItem(it,m){if(!it.ok||!it.on||!SMS_DONE.test(it.raw||''))return false;if(it.sure)return true;const W=it.why2||[];const mapped=!it.card4||!!(S.settings.card4Acc||{})[it.card4];
+  if(mapped&&W.length&&W.every(w=>w==='date'||w==='merchant')){if(W.includes('date')&&m&&m.at){it.date=isoD(new Date(m.at));if(!it.time){const d=new Date(m.at);it.time=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}}if(W.includes('merchant')&&!it.note)it.note=it.type==='inc'?'إيداع':'خصم من البطاقة';return true}return false}
+function boxWhyNot(it){if(!it)return '';if(!it.ok)return it.reason||'لم تُقرأ كعملية';if(it.dup)return 'مسجلة من قبل (مكررة)';if(it.near)return 'تشبه عملية مسجلة بنفس المبلغ ('+(it.near.note||'')+')';
+  const r=[];if(!S.settings.smsAuto)r.push('الحفظ التلقائي متوقف');if(finOn()&&S.settings.boxTrust!==true)r.push('تأكيد المصروف بالبصمة مفعّل');if(!SMS_DONE.test(it.raw||''))r.push('الرسالة لا تذكر أن العملية تمت');
+  (it.why2||[]).forEach(w=>{if(!(w==='date'||w==='merchant')||(it.card4&&!(S.settings.card4Acc||{})[it.card4]))r.push(BOX_WHY[w]+(w==='card'&&it.card4?' (••'+it.card4+')':''))});return r.join('، ')}
 function boxAutoOk(){return !!S.settings.smsAuto&&(!finOn()||S.settings.boxTrust===true)}
-let BOX_BUSY=false;
+let BOX_BUSY=false,BOX_ONLY=null;
 async function boxPull(manual){if(!boxOn()||BOX_BUSY)return null;if(navigator.onLine===false){if(manual)toast('بدون إنترنت');return null}if(document.getElementById('lockScreen'))return null;
   BOX_BUSY=true;let saved=0,pend=0,skip=0,balUp=0;const NEW=[];
-  try{const seq=boxSeq();const j=await boxGet(seq);const items=(j.items||[]).filter(m=>m&&m.id>seq&&m.text);let max=seq;const P=boxPend();
-    for(const m of items){max=Math.max(max,m.id);const t=String(m.text);
+  try{let seq=boxSeq();let j=await boxGet(seq);if(j&&j.seq!=null&&+j.seq<seq){seq=0;try{localStorage.setItem(BOX_SEQ,'0')}catch(e){}j=await boxGet(0)}const items=(j.items||[]).filter(m=>m&&m.id>seq&&m.text);let max=seq;const P=boxPend();
+    for(const m of items){max=Math.max(max,m.id);const t=String(m.text);if(/^MASAREEF-TEST/.test(t)){boxLogAdd([{k:m.id+'_0',mid:m.id,at:m.at||new Date().toISOString(),st:'skip',amt:0,note:'🧪 رسالة اختبار: الصندوق يستقبل ويرسل بشكل صحيح',text:t}]);continue}if(BOX_ONLY&&!BOX_ONLY.has(m.id))continue;
       const bk=boxBank((m.from||'')+' '+t);
       if(!looksBank(t)){skip++;boxLogAdd([{k:m.id+'_0',mid:m.id,at:m.at||new Date().toISOString(),st:'skip',amt:0,note:smsNonTx(t)||'ليست رسالة عملية بنكية',bank:bk,text:t.slice(0,600)}]);continue}
       const its=splitMsgs(t).map(parseSms);its.forEach((it,i)=>{it.fid='bx'+m.id+'_'+i;if(it.card4&&!(S.settings.card4Acc||{})[it.card4]){const ba=bankAcc(bk);if(ba)it.acc=ba}});
       if(!its.length||its.every(it=>!it.ok||it.dup)){skip++;let bu=0;try{if(its.some(it=>it.nonTx))bu=boxBalOnly(m,t,bk)}catch(e){}if(bu)balUp++;const why=(its.find(it=>it.reason)||{}).reason||'';boxLogAdd(boxLogEntries(m,its,its.some(it=>it.dup)?'dup':'skip').map(e=>Object.assign(e,{bank:bk,note:e.note||why+(bu?' · حُدّث الرصيد منها':'')})));continue}
-      let ok=false;try{if(boxAutoOk()&&its.every(it=>it.ok&&it.on&&it.sure&&SMS_DONE.test(it.raw||''))){its.forEach(it=>{it._exp=boxExpect(it)});const R=await impSave(its);ok=R&&R.n>0;if(ok){saved+=R.n;const E=boxLogEntries(m,its,'saved').map(e=>Object.assign(e,{bank:bk}));NEW.push(...E);boxLogAdd(E)}}}catch(e){}
+      let ok=false;try{if(boxAutoOk()&&its.every(it=>boxAutoItem(it,m))){its.forEach(it=>{it._exp=boxExpect(it)});const R=await impSave(its);ok=R&&R.n>0;if(ok){saved+=R.n;const E=boxLogEntries(m,its,'saved').map(e=>Object.assign(e,{bank:bk}));NEW.push(...E);boxLogAdd(E)}}}catch(e){}
       if(!ok){try{if(boxPendAnchor(m,its,bk))balUp++}catch(e){}const E=boxLogEntries(m,its,'pend').map(e=>Object.assign(e,{bank:bk}));NEW.push(...E);boxLogAdd(E);if(!P.some(x=>x.id===m.id)){P.push({id:m.id,at:m.at,text:t,bank:bk});pend++}}}
     if(balUp)await putSettings();boxSetPend(P);try{localStorage.setItem(BOX_SEQ,String(max))}catch(e){}
     const c=boxCfg();c.last=Date.now();c.err='';
@@ -6756,6 +6765,7 @@ function openSmsBox(){const L=document.getElementById('layer');let c=boxCfg();
     ${on?`<div class="codebox" dir="ltr">${esc(boxShortcutUrl())}</div><button class="btn ghost block" id="bxCopyU">📋 نسخ رابط الاختصار</button>`:'<p class="note">يظهر رابط الاختصار بعد حفظ رابط Web app.</p>'}
     <div class="panel setrow" style="margin-top:10px"><div><b>⚡ حفظ تلقائي بدون تأكيد</b><small>الواضحة تُسجَّل مباشرة، وغير الواضحة تنتظر مراجعتك.${finOn()?' <b>متوقف لأن تأكيد المصروف بالبصمة مفعّل، فكل رسالة تنتظر مراجعتك وبصمتك.</b>':''}</small></div><button class="tgl${S.settings.smsAuto?' on':''}" id="bxAuto" role="switch" aria-checked="${!!S.settings.smsAuto}" aria-label="حفظ تلقائي"></button></div>
      ${finOn()?`<div class="panel setrow"><div><b>🔐 سجّل رسائل الصندوق تلقائيًا رغم تأكيد البصمة</b><small>تأكيد المصروف بالبصمة مفعّل، لذلك تنتظر كل رسالة مراجعتك. رسائل الصندوق تأتي من بنكك عبر مفتاحك السري فقط، فيمكنك السماح بتسجيلها تلقائيًا، ويبقى الإدخال اليدوي والتعديل والحذف بالبصمة. <b>الرصيد يتحدث من الرسالة فورًا في الحالتين.</b></small></div><button class="tgl${S.settings.boxTrust?' on':''}" id="bxTrust" role="switch" aria-checked="${!!S.settings.boxTrust}" aria-label="تسجيل رسائل الصندوق رغم البصمة"></button></div>`:''}
+     <button class="btn block" data-bxdiag="1">🩺 افحص الصندوق خطوة بخطوة</button>
      <div class="panel bx-diag"><b>⏱️ سرعة التحديث</b><small>${boxCfg()&&boxCfg().last?'آخر سحب '+esc(boxAgo(new Date(boxCfg().last).toISOString()))+' · ':''}يسحب التطبيق الرسائل فور فتحه، وكل 20 ثانية وهو مفتوح. التطبيق لا يعمل وهو مغلق (قيد من iPhone)، فالرسائل التي تصل وهو مغلق تُسجل لحظة فتحه.</small>
       <small>${!S.settings.smsAuto?'⚠️ الحفظ التلقائي متوقف: الرسائل تنتظر مراجعتك.':finOn()&&!S.settings.boxTrust?'⚠️ تأكيد البصمة مفعّل: العمليات تنتظر مراجعتك (الرصيد يتحدث فورًا).':'✓ الرسائل الواضحة تُسجل تلقائيًا.'}</small></div>
     ${on?'<button class="btn ghost block" id="bxOff">إيقاف الصندوق في كل أجهزتي</button>':''}
@@ -6769,6 +6779,7 @@ function openSmsBox(){const L=document.getElementById('layer');let c=boxCfg();
     if(x.id==='bxCopyS'){try{await navigator.clipboard.writeText(boxScript(boxCfg().key));toast('📋 نُسخ السكربت. الصقه في script.google.com')}catch(er){toast('لم يُسمح بالنسخ')}return}
     if(x.id==='bxCopyU'){try{await navigator.clipboard.writeText(boxShortcutUrl());toast('📋 نُسخ رابط الاختصار')}catch(er){toast('لم يُسمح بالنسخ')}return}
     if(x.id==='bxAuto'){S.settings.smsAuto=!S.settings.smsAuto;await putSettings();draw();return}
+    if(x.dataset.bxdiag){openBoxDiag();return}
     if(x.id==='bxTrust'){if(!S.settings.boxTrust){let r=true;try{r=await verifyUser()}catch(er){r=false}if(r!==true&&r!=='unavailable'){toast('لم يتم التحقق');return}}S.settings.boxTrust=!S.settings.boxTrust;await putSettings();draw();toast(S.settings.boxTrust?'✓ رسائل الصندوق ستُسجل تلقائيًا':'رسائل الصندوق ستنتظر مراجعتك');return}
     if(x.id==='bxOff'){S.settings.smsBox=Object.assign({},boxCfg(),{on:false});await putSettings();draw();toast('أُوقف الصندوق');return}
     if(x.id==='bxPull'){await boxPull(true);draw();return}
@@ -7068,6 +7079,61 @@ async function bxNotify(E){try{ntBadge()}catch(e){}try{if(!('Notification' in wi
   const I=bxNtItems().filter(n=>E.some(e=>'bx:'+e.k===n.ref));const L=I.length>3?[{title:'📩 '+countWord(I.length,'رسالة بنك','رسالتا بنك','رسائل بنك','رسالة بنك')+' قُرئت',when:I.slice(0,3).map(n=>n.title).join(' · '),ref:'bx:sum'}]:I;
   for(const n of L){const opt={body:n.when,icon:'icon-192.png',tag:n.ref,lang:'ar',dir:'rtl',data:{url:'./'}};if(reg&&reg.showNotification)await reg.showNotification(n.title,opt);else new Notification(n.title,opt)}}catch(e){}}
 
+/* ===================== 2.133.4: 🩺 فحص صندوق رسائل البنك =====================
+ * يفحص السلسلة كاملة خطوة بخطوة ويقول أين تنقطع: الإصدار ← إعداد الصندوق ← الاتصال ← هل يصل شيء من الاختصار ← اختبار إرسال واستقبال
+ * ← ماذا فعل التطبيق بآخر الرسائل ولماذا ← الإعدادات التي تمنع الحفظ التلقائي. مع إصلاحات بضغطة وتقرير يمكن نسخه. */
+function bdMask(t){return String(t||'').replace(/\d{5,}/g,x=>'•'.repeat(Math.max(0,x.length-4))+x.slice(-4))}
+async function boxRescan(mids){if(!boxOn())return null;const prev=boxSeq();const lo=Math.max(0,Math.min(...mids)-1);try{localStorage.setItem(BOX_SEQ,String(lo))}catch(e){}
+  boxSetPend(boxPend().filter(x=>!mids.includes(x.id)));BOX_ONLY=new Set(mids);let R=null;try{R=await boxPull(true)}finally{BOX_ONLY=null;try{localStorage.setItem(BOX_SEQ,String(Math.max(prev,0)))}catch(e){}}return R}
+async function openBoxDiag(){const L=document.getElementById('layer');let D={steps:[],msgs:[],fix:[],srv:null};
+  const st=(ok,t,d,act)=>D.steps.push({ok,t,d:d||'',act:act||''});
+  const draw=()=>{L.innerHTML=`${sheetTop('فحص الصندوق')}<h2 style="margin-top:0">🩺 فحص صندوق رسائل البنك</h2>
+   <p class="note" style="margin-top:-4px">أفحص كل حلقة في السلسلة: رسالة البنك ← الاختصار في الآيفون ← صندوقك في Google ← التطبيق ← التسجيل والرصيد.</p>
+   ${D.run?'<div class="panel"><b>⏳ جارٍ الفحص…</b></div>':''}
+   <div class="stack">${D.steps.map(s=>`<div class="panel bd-st bd-${s.ok===true?'ok':s.ok===false?'bad':'warn'}"><b>${s.ok===true?'✅':s.ok===false?'❌':'⚠️'} ${s.t}</b>${s.d?`<small>${s.d}</small>`:''}${s.act||''}</div>`).join('')}</div>
+   ${D.msgs.length?`<h3>آخر الرسائل التي وصلت للصندوق</h3><div class="stack">${D.msgs.map(x=>`<div class="panel bd-msg"><div class="sumrow"><span>${esc(x.when)}${x.from?' · '+esc(x.from):''}</span><b class="${x.cls}">${x.st}</b></div><small class="bxtxt">${esc(bdMask(x.text).slice(0,220))}</small>${x.why?`<small class="note">السبب: ${esc(x.why)}</small>`:''}</div>`).join('')}</div>`:''}
+   <div class="actions">${D.done?`<button class="btn" data-bdrun="1">🔄 أعد الفحص</button>${D.rescan&&D.rescan.length?`<button class="btn" data-bdre="1">🔁 أعد قراءة ${countWord(D.rescan.length,'رسالة','رسالتين','رسائل','رسالة')} لم تُسجل وسجّل الجاهز منها (بلا تكرار)</button>`:''}<button class="btn ghost" data-bdcopy="1">📋 انسخ تقرير الفحص</button>`:''}<button class="btn ghost" data-close>إغلاق</button></div></div></div>`};
+  const run=async()=>{D={steps:[],msgs:[],run:true};draw();const c=boxCfg();
+    st(true,'إصدار التطبيق '+APP_VERSION,'يجب أن يكون 2.133.4 أو أحدث. إن ظهر رقم أقدم: أغلق التطبيق تمامًا وافتحه مرتين.');
+    if(!boxOn()){st(false,'الصندوق غير مضبوط','افتح «صندوق رسائل البنك» والصق رابط Web app ثم «حفظ واختبار».');D.run=false;D.done=true;draw();return}
+    st(true,'الصندوق مضبوط','الرابط والمفتاح محفوظان في التطبيق.');
+    let j=null;try{j=await boxGet(0)}catch(e){const m=String(e&&e.message||e);st(false,'تعذّر الاتصال بالصندوق',/key/.test(m)?'المفتاح في السكربت لا يطابق التطبيق: انسخ السكربت من التطبيق والصقه ثم Deploy ← Manage deployments ← Edit ← New version ← Deploy.':/http 40|http 30/.test(m)?'الرابط غير صحيح أو الصلاحية ليست Anyone. تأكد من Who has access: Anyone.':'تحقق من الإنترنت ثم أعد الفحص. ('+esc(m)+')');D.run=false;D.done=true;draw();return}
+    const items=(j.items||[]).filter(m=>m&&m.text);const real=items.filter(m=>!/^MASAREEF-TEST/.test(m.text));D.srv={n:real.length,seq:j.seq};
+    st(true,'الاتصال بالصندوق سليم','في الصندوق '+countWord(real.length,'رسالة','رسالتان','رسائل','رسالة')+' من الاختصار.');
+    const ls=boxSeq();if(j.seq!=null&&+j.seq<ls){st(false,'عدّاد الرسائل في التطبيق متقدم على الصندوق','يحدث هذا إذا أنشأت سكربتًا جديدًا. صُحّح الآن تلقائيًا وستُقرأ الرسائل من جديد بلا تكرار.');try{localStorage.setItem(BOX_SEQ,'0')}catch(e){}}
+    const last=real[real.length-1];const ageMin=last?(Date.now()-new Date(last.at).getTime())/60000:null;
+    if(!last)st(false,'لم تصل أي رسالة من الاختصار بعد','المشكلة في الآيفون وليست في التطبيق. راجع خطوات «فحص الاختصار» بالأسفل، ثم اطلب رسالة من البنك (مثل شراء صغير) وأعد الفحص.');
+    else st(ageMin<24*60?true:null,'آخر رسالة وصلت من الاختصار '+boxAgo(last.at),ageMin<24*60?'إذا وصلتك رسالة بنك بعد هذا الوقت ولم تظهر هنا، فالاختصار لم يعمل لها: راجع «فحص الاختصار».':'آخر رسالة قديمة. إن كانت وصلتك رسائل بنك بعدها فالاختصار لا يعمل: راجع «فحص الاختصار».');
+    /* اختبار الإرسال والاستقبال بنفس طريق الاختصار */
+    try{const w=await boxSend('MASAREEF-TEST '+new Date().toISOString());const j2=await boxGet(Math.max(0,(w.id||1)-1));const got=(j2.items||[]).some(m=>m.id===w.id);st(got,got?'اختبار الإرسال والاستقبال ناجح':'الإرسال تم لكن الرسالة لم تعد','التطبيق أرسل رسالة اختبار للصندوق بنفس طريقة الاختصار وقرأها مرة أخرى'+(got?'، فالرابط والمفتاح يعملان.':'.'))}catch(e){st(false,'فشل اختبار الإرسال',esc(String(e&&e.message||e)))}
+    /* الإعدادات */
+    st(S.settings.smsAuto?true:false,S.settings.smsAuto?'الحفظ التلقائي مفعّل':'الحفظ التلقائي متوقف','بدونه تنتظر كل رسالة مراجعتك (الرصيد يتحدث في الحالتين).',S.settings.smsAuto?'':'<button class="chip pay" data-bdfix="auto">فعّله الآن</button>');
+    if(finOn())st(S.settings.boxTrust?true:null,S.settings.boxTrust?'رسائل الصندوق تُسجل رغم تأكيد البصمة':'تأكيد المصروف بالبصمة مفعّل','لذلك تنتظر العمليات مراجعتك وبصمتك، والرصيد يتحدث فورًا. يمكنك السماح بتسجيل رسائل الصندوق تلقائيًا.',S.settings.boxTrust?'':'<button class="chip pay" data-bdfix="trust">اسمح (بالبصمة)</button>');
+    const A=accList().filter(a=>a.kind!=='cash');const map=S.settings.card4Acc||{};const cards={};
+    /* آخر الرسائل: ماذا حدث ولماذا */
+    const LG=boxLog();D.rescan=[];
+    real.slice(-8).reverse().forEach(m=>{const t=String(m.text);const lg=LG.filter(e=>e.mid===m.id);const its=looksBank(t)?splitMsgs(t).map(parseSms):[];
+      its.forEach(it=>{if(it.card4&&!map[it.card4])cards[it.card4]=(cards[it.card4]||0)+1});
+      const s0=lg.length?lg[0].st:'';const saved=lg.some(e=>e.st==='saved')||its.some(it=>it.ok&&it.dup);
+      const stt=saved?['✓ سُجّلت','amt-inc']:s0==='pend'?['📩 تنتظر مراجعتك','warn']:s0==='skip'?['⏭️ تُجوهلت','muted']:s0==='dup'?['♻️ مكررة','muted']:['⏳ لم تُقرأ بعد','warn'];
+      const why=!looksBank(t)?(smsNonTx(t)||'لا تشبه رسالة عملية بنكية (لا مبلغ بالريال أو لا كلمة خصم/إيداع)'):its.map(boxWhyNot).filter(Boolean).join(' | ');
+      const ready=its.length&&boxAutoOk()&&its.every(it=>boxAutoItem(Object.assign({},it),m));
+      if(!saved&&!/^MASAREEF/.test(t)&&its.some(it=>it.ok&&!it.dup)&&(s0!=='pend'||ready))D.rescan.push(m.id);
+      D.msgs.push({when:fmtD(isoD(new Date(m.at)))+' '+new Date(m.at).toTimeString().slice(0,5),from:m.from||'',text:t,st:stt[0],cls:stt[1],why:saved?'':why})});
+    const U=Object.keys(cards);if(U.length)st(false,'بطاقات أو حسابات غير مربوطة: '+U.map(c=>'••'+c).join('، '),'رسائلها لا تُسجل تلقائيًا لأن التطبيق لا يعرف من أي حساب يخصم. اربط كل رقم بحسابه:',U.map(c=>`<div class="chips">${A.map(a=>`<button class="chip" data-bdmap="${esc(c)}|${esc(a.id)}">••${esc(c)} ← ${esc(a.name||accName(a.id))}</button>`).join('')}</div>`).join(''));
+    if(!last||ageMin>24*60)st(null,'فحص الاختصار في الآيفون','<ol class="steps"><li>Shortcuts ← <b>Automation</b> ← افتح أتمتة الرسائل.</li><li><b>Message</b> ← <b>Sender</b> = اسم البنك كما يظهر في الرسائل (مثل BankMuscat)، و<b>Message Contains</b> فارغ أو كلمة موجودة دائمًا مثل OMR.</li><li>اختر <b>Run Immediately</b> وأطفئ <b>Notify When Run</b>.</li><li>في الإجراء <b>Get Contents of URL</b>: الرابط = «نسخ رابط الاختصار» من التطبيق، <b>Method</b> = POST، <b>Request Body</b> = Form، حقل <b>text</b> قيمته <b>Shortcut Input</b> (المتغير الأزرق).</li><li>جرّب: افتح الأتمتة ← زر التشغيل ▶︎ بالأسفل، ثم أعد الفحص هنا.</li></ol>');
+    D.run=false;D.done=true;draw()};
+  draw();run();L.oninput=L.onchange=null;
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+   if(x.dataset.bdrun){run();return}
+   if(x.dataset.bdfix==='auto'){S.settings.smsAuto=true;await putSettings();toast('✓ فُعّل الحفظ التلقائي');run();return}
+   if(x.dataset.bdfix==='trust'){let r=true;try{r=await verifyUser()}catch(er){r=false}if(r!==true&&r!=='unavailable'){toast('لم يتم التحقق');return}S.settings.boxTrust=true;await putSettings();toast('✓ رسائل الصندوق ستُسجل تلقائيًا');run();return}
+   if(x.dataset.bdmap){const [c,a]=x.dataset.bdmap.split('|');S.settings.card4Acc=Object.assign({},S.settings.card4Acc||{},{[c]:a});await putSettings();toast('✓ رُبط ••'+c+' بحساب '+accName(a));run();return}
+   if(x.dataset.bdre){x.disabled=true;const R=await boxRescan(D.rescan);toast(R?('🔁 أُعيدت القراءة: سُجّلت '+(R.saved||0)+(R.pend?'، و'+R.pend+' للمراجعة':'')):'تعذّرت إعادة القراءة');render();run();return}
+   if(x.dataset.bdcopy){const T=['فحص صندوق رسائل البنك — '+new Date().toLocaleString('ar-OM'),...D.steps.map(s=>(s.ok===true?'✅ ':s.ok===false?'❌ ':'⚠️ ')+s.t+(s.d&&!/<ol/.test(s.d)?' — '+s.d.replace(/<[^>]+>/g,''):'')),'',...D.msgs.map(m=>m.when+' '+m.st+' :: '+bdMask(m.text).slice(0,200)+(m.why?' [السبب: '+m.why+']':''))].join('\n');
+     let okc=false;try{await navigator.clipboard.writeText(T);okc=true}catch(er){}if(!okc){try{const ta=document.createElement('textarea');ta.value=T;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();okc=document.execCommand('copy');ta.remove()}catch(er){}}
+     if(okc)toast('📋 نُسخ التقرير. أرسله لي (أرقام الحسابات مخفية)');else{const P=document.createElement('textarea');P.className='bd-rep';P.readOnly=true;P.value=T;x.after(P);P.select();toast('حدّد النص وانسخه')}window.__bdRep=T;return}}}
+
 function openBoxFeed(f){const L=document.getElementById('layer');let flt=f||'all';
   const draw=()=>{const all=boxLog().slice().reverse();const X=all.filter(x=>flt==='all'?true:flt.startsWith('bk:')?x.bank===flt.slice(3):flt==='warn'?x.diff!=null:flt==='pend'?x.st==='pend':x.st===flt);
    const td=today();const tdL=all.filter(x=>isoD(new Date(x.at))===td&&(x.st==='saved'||x.st==='done'));const tdOut=r3(tdL.filter(x=>x.type==='exp').reduce((a,x)=>a+x.amt,0)),tdIn=r3(tdL.filter(x=>x.type==='inc').reduce((a,x)=>a+x.amt,0));
@@ -7086,6 +7152,7 @@ function openBoxFeed(f){const L=document.getElementById('layer');let flt=f||'all
   L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
     if(x.dataset.bxstmt){openBoxStmt();return}
     if(x.dataset.beng){openBalEngine();return}
+    if(x.dataset.bxdiag){openBoxDiag();return}
     if(x.dataset.bxf){flt=x.dataset.bxf;draw();return}
     if(x.dataset.boxrev){boxReview();return}
     if(x.dataset.smsbox){openSmsBox();return}
@@ -7160,7 +7227,7 @@ function sDir(){const T=t=>()=>sGoTab(t);return [
  ['📅 الدفع والالتزامات',[['📅','الالتزامات الشهرية','الشهريه فواتير اقساط دفع',T('monthly')],['🗓️','تقويم الدفع','تقويم الدفع مواعيد',()=>openPayCalendar()],['📋','خطة الشهر','خطه الشهر اعتماد تاجيل',()=>openMonthPlan(S.month||curM())],['📊','مخطط السداد','خطه سداد قسط اختياري',()=>openPayPlanner()],['🧭','الأولويات والتخلص من الديون','اولويات ديون كرة الثلج',()=>openPriority()],['🗓️','الخطة المالية الاستثنائية','خطه استثنائيه تاجيل',()=>openXPlans()],['🔁','المصاريف المتكررة والاشتراكات','اشتراكات متكرر منسي',()=>openSubs()],['🛟','خطة الإنقاذ','انقاذ عجز',()=>openRescue()]]],
  ['🎯 الميزانية والادخار',[['🗓️','تجهيز شهر قادم','خطه الشهر القادم استراتيجيه دراسه جدوى اولويات تجهيز ميزانيه مستقبل',()=>openFuturePlan()],['🍩','الميزانية الشهرية','ميزانيه شهريه خطتي',T('mbud')],['🗓️','الميزانية الأسبوعية','ميزانيه اسبوعيه سقف',()=>openWkSet()],['💰','الادخار الذكي','ادخار ذكي اهداف',T('smartsav')],['🔒','الادخار المحمي','ادخار محمي',()=>openSvlSet()],['📆','المصاريف الموسمية','رمضان العيد مدارس موسمي',()=>openSeasonal()],['👧','حسابات الأبناء','ابناء ميرة ملهم حصالة تحدي',()=>openKids()],['🪙','الذهب','ذهب سعر زكاة',()=>openGold()],['✈️','وضع السفر','سفر رحلة عملة',()=>openTravel()]]],
  ['📊 التقارير والتحليل',[['📊','التقارير الشهرية والسنوية','تقرير احصائيات',T('reports')],['📅','تقويم المصروف','تقويم ايام اسابيع مقارنه توقع',()=>openSpendCal('month',curM())],['📈','التوقعات ومقارنة الأشهر','توقع مقارنه الاشهر',()=>openMonthFc()],['📬','التقارير الدورية','تقرير يومي اسبوعي شهري سنوي',()=>openPeriodRep('week')],['🗓️','مراجعة الأسبوع','مراجعه اسبوعيه',()=>openWkReview()],['📋','مراجعة الشهر','مراجعه نهايه الشهر اقفال',()=>openReview()],['🧠','عاداتي في الصرف','بلا صرف سبب الشراء انتظر',()=>openHabits('ns')],['📍','الجهات والمحلات','محلات محطه مطعم',()=>openMerch()],['🖨️','طباعة تقرير','طباعه pdf',()=>openPrintSheet()],['📧','إرسال التقارير بالإيميل','ايميل gmail',()=>openEmailRep()]]],
- ['🏦 البنك والرسائل',[['🧾','كشف الحساب من رسائل البنك','كشف حساب يومي شهري سنوي رسائل',()=>openBoxStmt()],['📩','سجل الرسائل المقروءة','سجل رسائل البنك مقروءه متابعه ارصده',()=>openBoxFeed()],['📮','صندوق رسائل البنك','صندوق اختصار تلقائي',()=>openSmsBox()],['💬','قراءة رسالة بنك (لصق)','رسالة sms لصق',()=>openImport()],['⚡','تسجيل الرسائل تلقائيًا','اتمتة اختصارات',()=>openShortcutGuide()],['🏦','استيراد كشف البنك PDF','كشف pdf excel استيراد مسقط الوطني',()=>openStmt()],['📊','تحليل كشوفات البنوك','تحليل كشف بنك',()=>openBankAnalysis()],['🧾','عمليات الكشوفات المستوردة','عمليات الكشف مستورده',()=>openStmtTx()]]],
+ ['🏦 البنك والرسائل',[['🩺','فحص صندوق رسائل البنك','فحص مشكلة الرسائل لا تخصم لا تسجل الاختصار تشخيص',()=>openBoxDiag()],['🧾','كشف الحساب من رسائل البنك','كشف حساب يومي شهري سنوي رسائل',()=>openBoxStmt()],['📩','سجل الرسائل المقروءة','سجل رسائل البنك مقروءه متابعه ارصده',()=>openBoxFeed()],['📮','صندوق رسائل البنك','صندوق اختصار تلقائي',()=>openSmsBox()],['💬','قراءة رسالة بنك (لصق)','رسالة sms لصق',()=>openImport()],['⚡','تسجيل الرسائل تلقائيًا','اتمتة اختصارات',()=>openShortcutGuide()],['🏦','استيراد كشف البنك PDF','كشف pdf excel استيراد مسقط الوطني',()=>openStmt()],['📊','تحليل كشوفات البنوك','تحليل كشف بنك',()=>openBankAnalysis()],['🧾','عمليات الكشوفات المستوردة','عمليات الكشف مستورده',()=>openStmtTx()]]],
  ['🏡 البيت والعائلة',[['🏡','البيت','البيت المنزل',T('house')],['🛒','السوبر ماركت','بقاله مشتريات قائمه',()=>openGrc(S.month)],['🤝','الأمانات','امانات',T('trusts')],['📁','مستنداتي','مستندات خزنه ضمان',T('docs')],['📖','التلاوات القرآنية','قران الملك الواقعه يس',()=>openQuranHub()]]],
  ['🚗 الممتلكات',[['🚗','السيارات','سياره تامين ملكيه',T('cars')],['🔧','خطة صيانة السيارات','صيانه زيت فحص',()=>openMplan({})],['🧭','المستشار المالي','مستشار نصائح',T('advisor')],['💼','مشروعي (الزمرة الملكية)','مشروع الزمرة',()=>openBiz()]]],
  ['⚙️ التطبيق والبيانات',[['⚙️','الضبط','اعدادات مزامنه قفل',T('settings')],['🗄️','إدارة البيانات','ديون حسابات اشخاص استيراد تصدير',T('budget')],['🎨','المظهر واللون','مظهر لون ليلي تصميم',()=>openLook()],['🖼️','صورة الرئيسية','صوره خلفيه',()=>openHeroPick()],['🏷️','التصنيف السريع','تصنيف فئه',()=>openCatQuick()],['🔍','فحص التكرار الشامل','تكرار مكرر',()=>openDupAll()],['🔍','فحص تكرار الكشوفات','تكرار كشف',()=>openDupScan()],['🧹','مسح وإعادة إدخال فترة','مسح حذف',()=>openPurge()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()],['📖','الشروحات التعليمية','شرح تعليم جولة',()=>tourWelcome(true)]]]]}
@@ -11412,7 +11479,7 @@ document.addEventListener('click',async e=>{
   if(b.dataset.grcopen){openGrc(S.month);return}
   if(e.target.closest('[data-clipx]')){clipChipHide();return}if(b.dataset.clipsms){clipRecord();return}
   if(b.dataset.scal){openSpendCal('month',S.month||curM());return}
-  if(b.dataset.bstmt){openBoxStmt();return}if(b.dataset.fplan){openFuturePlan(b.dataset.fplan);return}if(b.dataset.beadd&&!b.closest('#layer')){openBeAdd(b.dataset.beadd);return}if(b.dataset.beign&&!b.closest('#layer')){beIgnore(b.dataset.beign);return}if(b.dataset.beng){openBalEngine();return}if(b.dataset.leantog){S.settings.homeLean=!leanOn();putSettings();render();toast(leanOn()?'أُخفيت الاختصارات المكررة':'أُعيدت الاختصارات في الرئيسية');return}if(b.dataset.spg!==undefined&&!b.closest('#layer')){const pg=sPages()[+b.dataset.spg];if(pg)pg[3]();return}
+  if(b.dataset.bstmt){openBoxStmt();return}if(b.dataset.bxdiag){openBoxDiag();return}if(b.dataset.fplan){openFuturePlan(b.dataset.fplan);return}if(b.dataset.beadd&&!b.closest('#layer')){openBeAdd(b.dataset.beadd);return}if(b.dataset.beign&&!b.closest('#layer')){beIgnore(b.dataset.beign);return}if(b.dataset.beng){openBalEngine();return}if(b.dataset.leantog){S.settings.homeLean=!leanOn();putSettings();render();toast(leanOn()?'أُخفيت الاختصارات المكررة':'أُعيدت الاختصارات في الرئيسية');return}if(b.dataset.spg!==undefined&&!b.closest('#layer')){const pg=sPages()[+b.dataset.spg];if(pg)pg[3]();return}
   if(b.dataset.boxrev){boxReview();return}if(b.dataset.smsbox){openSmsBox();return}if(b.dataset.boxfeed){openBoxFeed();return}
   if(b.dataset.heropick){openHeroPick();return}
   if(b.dataset.tvexp){openTravelExp();return}if(b.dataset.tvl){openTravel();return}if(b.dataset.tvend){await travelEnd();return}
