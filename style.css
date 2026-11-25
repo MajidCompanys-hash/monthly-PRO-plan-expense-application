@@ -2958,3 +2958,12 @@ details.bxg[open]{padding-bottom:12px}
 .an-msg{margin:8px 0 0;font-size:13px;line-height:1.6}
 .an-help summary{cursor:pointer;color:var(--accent);font-size:13px;margin-top:10px}.an-help ul{margin:6px 0 0;padding-inline-start:18px;font-size:12.5px;line-height:1.8}
 .an-del{color:var(--exp);margin-top:6px}
+/* 2.137 إدارة قفل التطبيق (security/app-lock-manager.js) */
+.lm-st{display:flex;align-items:center;gap:12px;padding:14px;border-radius:16px;margin-bottom:12px}
+.lm-st>span{font-size:30px}.lm-st b{display:block;font-size:15px}.lm-st small{display:block;font-size:12.5px;opacity:.85;margin-top:2px;line-height:1.6}
+.lm-st.on{background:linear-gradient(135deg,var(--hero-a),var(--hero-b));color:#fff}
+.lm-st.off{background:var(--surface-2);border:1px dashed var(--line)}
+.lm-list{padding:4px 12px}.lm-list .setrow{padding:12px 0;border-bottom:1px solid var(--line)}
+.lm-after{padding:12px 0 8px}.lm-after b{display:block;margin-bottom:8px;font-size:14px}
+.lm-msg{margin:10px 2px 0;font-size:13px;color:var(--inc)}.lm-err{color:var(--exp);margin:0 0 6px;min-height:0}.lm-err:empty{display:none}
+.actions .btn.lm-off{color:var(--exp)}

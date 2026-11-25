@@ -5291,6 +5291,76 @@ async function openWipe(){const L=document.getElementById('layer');const uv=awai
         if(hasPin&&!document.getElementById('wUsePin')){const b=document.createElement('button');b.className='btn ghost block';b.id='wUsePin';b.textContent='استخدم رمز الخزنة بدل البصمة';x.after(b)}return}}
       L.innerHTML='';busy=false;await wipeAll()}}}
 
+/* ===================== 2.137: 🔐 إدارة قفل التطبيق (بصمة الوجه والرمز) =====================
+ * نافذة واحدة من ☰ ← «قفل التطبيق وبصمة الوجه» (ومن ⚙️ الضبط) لتفعيل القفل وإدارته:
+ * تفعيل/إيقاف بصمة الوجه، تغيير الرمز، متى يُقفل بعد الخروج، طلب البصمة تلقائيًا، القفل الآن، الإيقاف.
+ * الإعداد في localStorage (masareef:applock) على هذا الجهاز فقط ولا يُزامَن: {salt,hash,bio,after,auto}
+ * أي تغيير والقفل مفعّل يحتاج التحقق أولًا (بصمة الوجه أو الرمز الحالي) مرة واحدة لكل فتح للنافذة.
+ * شاشة القفل نفسها في tools/salary-forecast-lock.js (showLock). رمز «وضع المدير» منفصل عن رمز القفل. */
+const LOCK_AFTER=[[0,'فورًا'],[60,'بعد دقيقة'],[300,'بعد 5 دقائق'],[900,'بعد 15 دقيقة']];
+function lockAfterOf(c){return c&&c.after!=null?+c.after:60}
+function lockAfterLbl(c){const a=lockAfterOf(c);const f=LOCK_AFTER.find(x=>x[0]===a);return f?f[1]:'بعد '+Math.round(a/60)+' دقيقة'}
+function lockSummary(){const c=lockCfg();return c?'مفعّل · '+(c.bio?'بصمة الوجه أو الرمز':'بالرمز')+' · يُقفل '+lockAfterLbl(c):'متوقف: التطبيق يفتح بدون رمز'}
+async function lockNewPin(p1,p2){if(!/^\d{4,8}$/.test(p1))return {er:'الرمز من 4 إلى 8 أرقام'};if(p1!==p2)return {er:'الرمزان غير متطابقين'};
+  if(/^(\d)\1+$/.test(p1)||'0123456789'.includes(p1)||'9876543210'.includes(p1))return {er:'اختر رمزًا أصعب من أرقام متكررة أو متتالية'};
+  const salt=crypto.getRandomValues(new Uint8Array(16));return {salt:b64e(salt),hash:await admHash(p1,salt)}}
+function openLockMgr(){const L=document.getElementById('layer');let ok=!lockCfg();let mode='';let msg='';let uv=false;
+  const pinIn=(id,lbl)=>`<div class="field"><label for="${id}">${lbl}</label><input class="inp num pin" id="${id}" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></div>`;
+  const val=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
+  const draw=()=>{const c=lockCfg();let body;
+   if(!c){body=`<div class="lm-st off"><span aria-hidden="true">🔓</span><div><b>القفل متوقف</b><small>أي شخص يفتح هاتفك يستطيع فتح التطبيق.</small></div></div>
+     <div class="stack"><div class="row2">${pinIn('lm1','رمز من 4 إلى 8 أرقام')}${pinIn('lm2','أعد كتابته')}</div>
+      ${uv?`<label class="toggle"><input type="checkbox" id="lmBio" checked><span>الفتح ببصمة الوجه (Face ID) أيضًا</span></label>`:`<p class="note" style="margin:0">بصمة الوجه غير متاحة في هذا الجهاز أو المتصفح، فسيُفتح بالرمز.</p>`}
+      <div class="field"><label>متى يُقفل بعد الخروج من التطبيق؟</label><div class="seg segw">${LOCK_AFTER.map(([s,l])=>`<button class="n" data-lmafter="${s}" aria-pressed="${s===60}">${l}</button>`).join('')}</div></div>
+      <p class="note" style="margin:0">الرمز محفوظ مشفّرًا في هذا الجهاز فقط. إذا نسيته وليس عندك بصمة وجه، لا يُفتح التطبيق إلا بحذف بيانات الموقع من إعدادات Safari، فاحفظ نسخة احتياطية قبل ذلك.</p></div>
+     <div class="actions"><button class="btn block" id="lmOn">🔐 تفعيل القفل</button><button class="btn ghost block" data-close>إلغاء</button></div>`}
+   else if(!ok){body=`<div class="lm-st on"><span aria-hidden="true">🔐</span><div><b>القفل مفعّل</b><small>${esc(lockSummary().replace(/^مفعّل · /,''))}</small></div></div>
+     <p class="note">للتعديل، تحقّق أنك صاحب التطبيق أولًا.</p>
+     ${c.bio&&uv?'<button class="btn block" id="lmVBio">تحقّق ببصمة الوجه</button><p class="note" style="text-align:center;margin:8px 0">أو</p>':''}
+     ${pinIn('lmOld','الرمز الحالي')}
+     <div class="actions"><button class="btn ${c.bio&&uv?'ghost ':''}block" id="lmVPin">تحقّق بالرمز</button><button class="btn ghost block" data-close>إغلاق</button></div>`}
+   else if(mode==='pin'){body=`<h3 data-nofold style="margin-top:0">🔢 تغيير الرمز</h3><div class="stack"><div class="row2">${pinIn('lm1','الرمز الجديد')}${pinIn('lm2','أعد كتابته')}</div></div>
+     <div class="actions"><button class="btn block" id="lmPinSave">حفظ الرمز الجديد</button><button class="btn ghost block" data-lmback="1">رجوع</button></div>`}
+   else{const a=lockAfterOf(c);body=`<div class="lm-st on"><span aria-hidden="true">🔐</span><div><b>القفل مفعّل</b><small>${esc(lockSummary().replace(/^مفعّل · /,''))}</small></div></div>
+     <div class="panel lm-list">
+      <div class="setrow"><div><b>😊 الفتح ببصمة الوجه</b><small>${uv?(c.bio?'مفعّل: يفتح بوجهك، والرمز احتياطي':'متوقف: يفتح بالرمز فقط'):'غير متاحة في هذا الجهاز أو المتصفح'}</small></div>${uv?`<button class="chip${c.bio?'':' pay'}" id="lmBioT">${c.bio?'إيقاف':'تفعيل'}</button>`:''}</div>
+      ${c.bio?`<div class="setrow"><div><b>⚡ طلب البصمة تلقائيًا</b><small>${c.auto!==false?'تظهر البصمة فور فتح التطبيق':'تضغط زر البصمة بنفسك'}</small></div><button class="chip" id="lmAutoT">${c.auto!==false?'إيقاف':'تفعيل'}</button></div>`:''}
+      <div class="setrow"><div><b>🔢 الرمز السري</b><small>رمز من 4 إلى 8 أرقام، يُطلب إذا لم تعمل البصمة</small></div><button class="chip" id="lmPin">تغيير</button></div>
+      <div class="lm-after"><b>⏱️ يُقفل بعد الخروج من التطبيق</b><div class="seg segw">${LOCK_AFTER.map(([s,l])=>`<button class="n" data-lmafter="${s}" aria-pressed="${s===a}">${l}</button>`).join('')}</div></div></div>
+     ${msg?`<p class="lm-msg">${msg}</p>`:''}
+     <p class="note">رمز القفل يحمي فتح التطبيق. أما «وضع المدير» فله رمز مستقل يحمي التعديل والحذف.</p>
+     <div class="actions"><button class="btn block" id="lmNow">🔒 اقفل التطبيق الآن</button><button class="btn ghost block lm-off" id="lmOff">إيقاف القفل</button><button class="btn ghost block" data-close>إغلاق</button></div>`}
+   L.innerHTML=`${sheetTop('قفل التطبيق')}<h2 style="margin-top:0" data-nofold>🔐 قفل التطبيق وبصمة الوجه</h2><p class="lm-err note" id="lmErr" role="alert"></p>${body}</div></div>`};
+  const err=t=>{const e=document.getElementById('lmErr');if(e)e.textContent=t||''};
+  const save=(patch,note)=>{lockSave(Object.assign({},lockCfg(),patch));msg=note||'';draw();lockMenuBtn()};
+  uvAvailable().then(v=>{uv=!!v;draw()});draw();
+  L.oninput=L.onchange=null;
+  L.onkeydown=e=>{if(e.key!=='Enter')return;const id=e.target.id;const b=id==='lmOld'?'lmVPin':id==='lm2'?(document.getElementById('lmPinSave')?'lmPinSave':'lmOn'):null;if(b){e.preventDefault();const x=document.getElementById(b);if(x)x.click()}};
+  let after=60;
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+   const c=lockCfg();
+   if(x.dataset.lmafter!==undefined){const s=+x.dataset.lmafter;if(!c){after=s;L.querySelectorAll('[data-lmafter]').forEach(b=>b.setAttribute('aria-pressed',String(b===x)));return}save({after:s},'✓ يُقفل التطبيق '+(LOCK_AFTER.find(z=>z[0]===s)||[0,''])[1]+' من الخروج.');return}
+   if(x.dataset.lmback){mode='';msg='';draw();return}
+   if(x.id==='lmOn'){const r=await lockNewPin(val('lm1'),val('lm2'));if(r.er){err(r.er);return}let bio=false;const bx=document.getElementById('lmBio');if(bx&&bx.checked)bio=(await verifyUser())==='ok';
+     lockSave({salt:r.salt,hash:r.hash,bio,after,auto:true});ok=true;msg='✓ فُعّل القفل'+(bx&&bx.checked&&!bio?' بالرمز فقط (لم تكتمل بصمة الوجه، فعّلها من هنا لاحقًا)':bio?' ببصمة الوجه والرمز':' بالرمز')+'.';draw();toast('فُعّل قفل التطبيق');lockMenuBtn();return}
+   if(x.id==='lmVBio'){const r=await verifyUser();if(r==='ok'){ok=true;draw()}else err('لم يكتمل التحقق ببصمة الوجه. استعمل الرمز.');return}
+   if(x.id==='lmVPin'){if(Date.now()<LockS.wait){err('انتظر '+Math.ceil((LockS.wait-Date.now())/1000)+' ثانية');return}
+     if(await lockPinOk(val('lmOld'))){LockS.fails=0;ok=true;draw();return}LockS.fails++;if(LockS.fails>=5){LockS.wait=Date.now()+30000;LockS.fails=0}err('الرمز غير صحيح');const i=document.getElementById('lmOld');if(i)i.value='';return}
+   if(!ok||!c)return;
+   if(x.id==='lmBioT'){if(c.bio){save({bio:false},'✓ أُوقفت بصمة الوجه. يُفتح التطبيق بالرمز.');return}
+     const r=await verifyUser();if(r==='ok')save({bio:true,auto:true},'✓ فُعّلت بصمة الوجه.');else err('لم تكتمل بصمة الوجه، فبقي الفتح بالرمز.');return}
+   if(x.id==='lmAutoT'){save({auto:c.auto===false},c.auto===false?'✓ تظهر البصمة فور فتح التطبيق.':'✓ ستضغط زر البصمة بنفسك.');return}
+   if(x.id==='lmPin'){mode='pin';msg='';draw();setTimeout(()=>{const i=document.getElementById('lm1');if(i)i.focus()},50);return}
+   if(x.id==='lmPinSave'){const r=await lockNewPin(val('lm1'),val('lm2'));if(r.er){err(r.er);return}mode='';save({salt:r.salt,hash:r.hash},'✓ تغيّر الرمز السري.');toast('تغيّر رمز القفل');return}
+   if(x.id==='lmNow'){L.innerHTML='';showLock();return}
+   if(x.id==='lmOff'){if(x.dataset.sure!=='1'){x.dataset.sure='1';x.textContent='اضغط مرة ثانية لإيقاف القفل';return}lockSave(null);lockMenuBtn();L.innerHTML='';render();toast('أُوقف قفل التطبيق');return}}}
+/* زر في قائمة ☰ (القائمة تنقله إلى داخلها وترتّبه) */
+function lockMenuBtn(){const h=document.querySelector('.hdr-actions');let g=document.getElementById('lockBtn');
+  if(!g){if(!h)return;g=document.createElement('button');g.id='lockBtn';g.type='button';g.className='iconbtn';g.dataset.lockmgr='1';
+   g.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.3"/></svg>';h.appendChild(g)}
+  const lbl='قفل التطبيق وبصمة الوجه'+(lockCfg()?' · مفعّل':'');if(g.getAttribute('aria-label')!==lbl){g.setAttribute('aria-label',lbl);g.title=lbl}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-lockmgr]');if(!b)return;e.preventDefault();openLockMgr()});
+setTimeout(lockMenuBtn,0);
 /* ---------- 21. قراءة رسائل البنك ---------- */
 const KW={
  food:['lulu','لولو','carrefour','كارفور','nesto','نستو','al fair','الفير','hypermarket','supermarket','سوبرماركت','هايبر','بقالة','grocery','safeer','سفير','khimji','ramez','رامز','bakery','مخبز'],
@@ -5682,8 +5752,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.136.0';
+const APP_VERSION='2.137.0';
 const CHANGELOG=[
+ {v:'2.137.0',date:'2026-11-25',items:['🔐 «قفل التطبيق وبصمة الوجه» في قائمة ☰: نافذة واحدة لتفعيل القفل وإدارته. فيها تشغيل وإيقاف الفتح ببصمة الوجه (Face ID)، وطلب البصمة تلقائيًا، وتغيير الرمز السري، ومتى يُقفل بعد الخروج (فورًا، بعد دقيقة، بعد 5 أو 15 دقيقة)، و«اقفل التطبيق الآن»، وإيقاف القفل.','🛡️ أي تغيير في القفل يحتاج التحقق أولًا ببصمة الوجه أو الرمز الحالي، بما فيه وقت القفل والطلب التلقائي اللذان كانا يتغيران بدون تحقق. الرموز السهلة مثل 1111 أو 1234 مرفوضة، وإيقاف القفل يحتاج ضغطتين.','⚙️ الضبط يعرض حالة القفل ويفتح النافذة نفسها، فخيارات القفل صارت في مكان واحد. وتجده أيضًا في البحث والدليل والكتالوج.']},
  {v:'2.136.0',date:'2026-11-25',items:['🔢 تعديل الحساب من «حساباتي وأرصدتي»: زر «✏️ تعديل» في كل بطاقة حساب، وزر «➕ إضافة حساب بنكي». تعدّل الاسم والبنك والنوع والرصيد الآن، وتضيف أرقام الحساب والبطاقات.','🔗 أرقام الحساب بثلاثة أشكال: كما تظهر في رسالة البنك (1051**017 أو 0311XXXXXXXX0016)، أو الرقم الكامل أو IBAN (يُحفظ ويُنسخ بضغطة)، أو آخر 3–4 أرقام. أي رسالة تحمل الرقم تُسجّل في الحساب تلقائيًا، والرسائل المنتظرة تُسجّل فور الحفظ. الرقم المربوط بحساب آخر لا يُنقل إلا بتأكيدك، ورقم الأبناء المشترك يبقى منفصلًا.','🛠️ نافذة واحدة لتعديل الحساب في كل التطبيق، وإصلاح ضغطة كانت قد تُنفَّذ مرتين عند إعادة رسم النوافذ.']},
  {v:'2.135.0',date:'2026-11-25',items:['🗂️ إعادة ترتيب التطبيق هندسيًا: الكود مقسّم إلى 121 وحدة مرتبة حسب الأقسام (البنك، الأبناء، الالتزامات، التقارير…) مع أداة بناء تفحص كل شيء قبل النشر، واختبارات آلية لكل الأقسام. لا تغيير في بياناتك ولا في طريقة عمل التطبيق.','📖 جديد: «كتالوج التطبيق» — كل مهام التطبيق في صفحات مرتبة وسهلة للمبتدئين: صفحة البداية فيها «ابدأ من هنا» والبحث وكل المجموعات، ثم صفحة لكل مجموعة. لكل مهمة شرح بسيط و«كيف أستخدمها؟»، والضغط على المهمة ينقلك إليها مباشرة. تفتحه من ☰ ← «كتالوج التطبيق» أو من أعلى «كل أقسام التطبيق». تنقّل بالسحب يمينًا ويسارًا أو بزرّي التالي والسابق.','ℹ️ رقم إصدار التطبيق ظاهر دائمًا في آخر قائمة ☰، فتعرف مباشرة أي تحديث عندك. والضغط عليه يفتح «ما الجديد».']},
  {v:'2.134.2',date:'2026-11-24',items:['🛠️ إصلاح مهم: البنك يخفي وسط رقم الحساب، فحسابك «1051**017» وحساب ابنك «1050**017» كانا يُعاملان حسابًا واحدًا لأن نهايتهما متشابهة، فتُسجَّل إيداعات الأبناء في حسابك. صار التطبيق يميّز الحساب بأول الرقم وآخره، ويسألك إذا ظهر رقمان متشابهان','حساب واحد مشترك الإخفاء لأكثر من ابن («أحد الأبناء»): يُحدَّد الابن من رسالة رمز التحقق التي تسبق التحويل («Fund transfer to Mira Majid»)، أو يسألك مرة ويتعلم الاسم','خصم من حسابك بلا اسم مستلم يأخذ اسمه من رسالة رمز التحقق السابقة له، فيُربط بحساب الابن ولا يُحسب مصروفًا','عند ربط رقم الابن: تُنقل الإيداعات التي سُجلت في حسابك خطأ إلى حساب الابن، ويُصحَّح رصيد حسابك إن كان مأخوذًا منها','رقم حساب الابن يُكتب كما في رسالة البنك (مثل 1050**017)']},
@@ -6516,16 +6587,11 @@ function applyHideAmt(){document.body.classList.toggle('hide-amt',hideAmtOn());c
 function privBtnInit(){const h=document.querySelector('.hdr-actions');if(!h||document.getElementById('privBtn'))return;
   {const g=document.createElement('button');g.id='setBtn';g.type='button';g.className='iconbtn';g.dataset.tab='settings';g.setAttribute('aria-label','الضبط');g.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>';h.appendChild(g)}const b=document.createElement('button');b.id='privBtn';b.type='button';b.className='iconbtn privbtn';h.insertBefore(b,document.getElementById('lookBtn'));applyHideAmt()}
 /* ===== صفحة ⚙️ الضبط: كل إعدادات التطبيق في مكان واحد، وتُفتح من زر ⚙️ أعلى الشاشة ===== */
-const LOCK_AFTER=[[0,'فورًا'],[60,'بعد دقيقة'],[300,'بعد 5 دقائق'],[900,'بعد 15 دقيقة']];
-function vSettings(){const c=lockCfg(),af=c&&c.after!=null?+c.after:60;setTimeout(()=>Sync.prime(),0);
+function vSettings(){const c=lockCfg();setTimeout(()=>Sync.prime(),0);
   return `<div class="backrow" style="margin-top:4px"><h2 style="margin:0">⚙️ الضبط</h2></div>
   <h2>🔐 قفل التطبيق وبصمة الوجه</h2>
   <div class="panel stack setbox">
-   <div class="setrow"><div><b>قفل التطبيق</b><small>${c?'مفعّل: يطلب '+(c.bio?'بصمة الوجه أو الرمز':'الرمز')+' عند فتح التطبيق':'متوقف: التطبيق يفتح بدون رمز'}</small></div><button class="chip${c?'':' pay'}" id="lockSet">${c?'إيقاف':'تفعيل'}</button></div>
-   ${c?`<div class="setrow"><div><b>فتح القفل ببصمة الوجه</b><small>${c.bio?'مفعّل: انظر إلى الهاتف ويُفتح التطبيق، والرمز يبقى احتياطيًا':'متوقف: الفتح بالرمز فقط'}</small></div><button class="tgl${c.bio?' on':''}" id="lockBio" role="switch" aria-checked="${!!c.bio}" aria-label="فتح القفل ببصمة الوجه"><i></i></button></div>
-   ${c.bio?`<div class="setrow"><div><b>طلب البصمة تلقائيًا</b><small>تظهر بصمة الوجه فور فتح التطبيق بدون ضغط زر</small></div><button class="tgl${c.auto!==false?' on':''}" id="lockAuto" role="switch" aria-checked="${c.auto!==false}" aria-label="طلب البصمة تلقائيًا"><i></i></button></div>`:''}
-   <div class="setrow col"><div><b>يُقفل بعد الخروج من التطبيق</b></div><div class="seg">${LOCK_AFTER.map(([v,n])=>`<button class="n" data-lockafter="${v}" aria-pressed="${af===v}">${n}</button>`).join('')}</div></div>
-   <div class="setrow"><div><b>رمز القفل</b><small>من 4 إلى 8 أرقام، محفوظ مشفّرًا في هذا الجهاز</small></div><button class="chip" id="lockPinChange">تغيير الرمز</button></div>`:''}
+   <div class="setrow"><div><b>${c?'🔒 القفل مفعّل':'🔓 القفل متوقف'}</b><small>${esc(lockSummary().replace(/^مفعّل · /,''))}</small></div><button class="chip${c?'':' pay'}" id="lockSet">${c?'إدارة':'تفعيل'}</button></div>
    <div class="setrow"><div><b>إخفاء المبالغ</b><small>زر 👁 في الأعلى يخفيها أمام الآخرين</small></div><button class="tgl${hideAmtOn()?' on':''}" id="hideAmt" role="switch" aria-checked="${hideAmtOn()}" aria-label="إخفاء المبالغ"><i></i></button></div>
    <span class="note">الإعدادات هنا خاصة بهذا الجهاز، ولا تدخل في المزامنة ولا في النسخة الاحتياطية. إعدادات الآيفون لا تعرض خيارات تطبيقات الويب، لذلك كل ضبط التطبيق هنا.</span></div>
   <h2>🏠 الصفحة الرئيسية</h2><div class="panel stack setbox">
@@ -6559,45 +6625,8 @@ function payLockHtml(){const c=payLockCfg();
    <div class="setrow col"><div><b>يُفتح الدفع</b></div><div class="seg">${[['cycle','مع نزول الراتب'],[0,'يوم الموعد'],[3,'قبله بـ3 أيام'],[7,'قبله بأسبوع']].map(([v,n])=>`<button class="n" data-plbefore="${v}" aria-pressed="${String(c.before)===String(v)}">${n}</button>`).join('')}</div></div>`:''}
    <span class="note">«مع نزول الراتب»: تُفتح التزامات كل شهر من يوم نزول الراتب (بداية الشهر)، وقبل ذلك الدفع من وضع المدير فقط. المتأخرات لا تُضاف للشهر التالي إلا إذا فات موعد السداد ولم تُدفع. وموعد كل بند تغيّره من «تعديل» البند نفسه.</span></div>`}
 function payLockSet(o){S.settings.payLock=Object.assign(payLockCfg(),o);putSettings();render()}
-/* التحقق بالرمز الحالي (أو بصمة الوجه إن كانت مفعّلة) قبل تغيير إعدادات القفل */
-function lockAsk(title,why,done){const L=document.getElementById('layer');const c=lockCfg();
-  L.innerHTML=`${sheetTop(title)}<h2 style="margin-top:0">${title}</h2><p class="note">${why}</p><div class="stack">
-   <div class="field"><label for="laPin">رمز القفل الحالي</label><input class="inp num pin" id="laPin" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></div><p class="note" id="laErr" style="color:var(--exp);margin:0"></p></div>
-   <div class="actions"><button class="btn block" id="laGo">متابعة</button>${c&&c.bio?'<button class="btn ghost block" id="laBio">ببصمة الوجه</button>':''}<button class="btn ghost block" data-close>إلغاء</button></div></div></div>`;
-  L.oninput=L.onchange=null;L.onkeydown=e=>{if(e.key==='Enter'&&e.target.id==='laPin')document.getElementById('laGo').click()};
-  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';L.onkeydown=null;return}
-    if(x.id==='laBio'){const r=await verifyUser();if(r==='ok'){L.innerHTML='';L.onkeydown=null;done()}else document.getElementById('laErr').textContent=r==='cancel'?'أُلغيت بصمة الوجه':'تعذّرت بصمة الوجه، استخدم الرمز';return}
-    if(x.id==='laGo'){if(Date.now()<LockS.wait){document.getElementById('laErr').textContent='انتظر '+Math.ceil((LockS.wait-Date.now())/1000)+' ثانية';return}
-      if(await lockPinOk(document.getElementById('laPin').value)){LockS.fails=0;L.innerHTML='';L.onkeydown=null;done()}
-      else{LockS.fails++;if(LockS.fails>=5){LockS.wait=Date.now()+30000;LockS.fails=0}document.getElementById('laErr').textContent='الرمز غير صحيح';document.getElementById('laPin').value=''}}}}
-async function lockBioToggle(){const c=lockCfg();if(!c)return;
-  if(c.bio){lockSave(Object.assign({},c,{bio:false}));render();toast('أُوقف فتح القفل ببصمة الوجه، والفتح بالرمز فقط');return}
-  if(!await uvAvailable()){toast('بصمة الوجه غير متاحة في هذا الجهاز أو المتصفح. افتح التطبيق من أيقونته على الشاشة الرئيسية');return}
-  lockAsk('تفعيل بصمة الوجه','اكتب رمز القفل الحالي، ثم أكّد ببصمة الوجه لتفعيل فتح التطبيق بها.',async()=>{const r=await verifyUser();
-    if(r==='ok'){lockSave(Object.assign({},lockCfg(),{bio:true}));render();toast('فُعّل فتح القفل ببصمة الوجه')}else toast(r==='cancel'?'أُلغيت بصمة الوجه، لم يتغيّر شيء':'تعذّرت بصمة الوجه، لم يتغيّر شيء')})}
-function lockPinChange(){lockAsk('تغيير رمز القفل','للتأكد أنك صاحب الجهاز.',()=>{const L=document.getElementById('layer');
-  L.innerHTML=`${sheetTop('رمز جديد')}<h2 style="margin-top:0">رمز القفل الجديد</h2><div class="row2"><div class="field"><label for="lp1">رمز من 4 إلى 8 أرقام</label><input class="inp num pin" id="lp1" type="password" inputmode="numeric" maxlength="8"></div><div class="field"><label for="lp2">أعد كتابته</label><input class="inp num pin" id="lp2" type="password" inputmode="numeric" maxlength="8"></div></div><p class="note" id="lpErr" style="color:var(--exp)"></p>
-   <div class="actions"><button class="btn block" id="lpSave">حفظ الرمز</button><button class="btn ghost block" data-close>إلغاء</button></div></div></div>`;
-  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
-    if(x.id==='lpSave'){const p1=document.getElementById('lp1').value.trim(),p2=document.getElementById('lp2').value.trim(),er=document.getElementById('lpErr');
-      if(!/^\d{4,8}$/.test(p1)){er.textContent='الرمز من 4 إلى 8 أرقام';return}if(p1!==p2){er.textContent='الرمزان غير متطابقين';return}
-      const salt=crypto.getRandomValues(new Uint8Array(16));lockSave(Object.assign({},lockCfg(),{salt:b64e(salt),hash:await admHash(p1,salt)}));L.innerHTML='';render();toast('تغيّر رمز القفل')}}})}
-function openLockSetup(){const L=document.getElementById('layer');const c=lockCfg();
-  if(c){L.innerHTML=`${sheetTop('القفل')}<h2 style="margin-top:0">إيقاف قفل التطبيق</h2><div class="field"><label for="lsOld">الرمز الحالي</label><input class="inp num pin" id="lsOld" type="password" inputmode="numeric" maxlength="8"></div><p class="note" id="lsErr" style="color:var(--exp)"></p>
-    <div class="actions">${c.bio?'<button class="btn ghost block" id="lsBioOff">إيقاف ببصمة الوجه</button>':''}<button class="btn block" id="lsOff">إيقاف القفل</button><button class="btn ghost block" data-close>إلغاء</button></div></div></div>`;
-    L.oninput=L.onchange=null;L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
-      if(x.id==='lsBioOff'){if(await verifyUser()==='ok'){lockSave(null);L.innerHTML='';render();toast('أُوقف قفل التطبيق')}return}
-      if(x.id==='lsOff'){if(await lockPinOk(document.getElementById('lsOld').value)){lockSave(null);L.innerHTML='';render();toast('أُوقف قفل التطبيق')}else document.getElementById('lsErr').textContent='الرمز غير صحيح'}};return}
-  uvAvailable().then(uv=>{L.innerHTML=`${sheetTop('القفل')}<h2 style="margin-top:0">تفعيل قفل التطبيق</h2><div class="stack">
-    <div class="row2"><div class="field"><label for="ls1">رمز من 4 إلى 8 أرقام</label><input class="inp num pin" id="ls1" type="password" inputmode="numeric" maxlength="8"></div><div class="field"><label for="ls2">أعد كتابته</label><input class="inp num pin" id="ls2" type="password" inputmode="numeric" maxlength="8"></div></div>
-    ${uv?'<label class="toggle"><input type="checkbox" id="lsBio" checked><span>الفتح ببصمة الوجه أيضًا</span></label>':''}
-    <p class="note" style="margin:0">الرمز محفوظ مشفّرًا في هذا الهاتف فقط. إذا نسيته وليس عندك بصمة وجه، لا يمكن فتح التطبيق إلا بحذف بيانات الموقع من إعدادات Safari، فاحفظ نسخة احتياطية قبلها.</p><p class="note" id="lsErr" style="color:var(--exp)"></p></div>
-    <div class="actions"><button class="btn block" id="lsSave">تفعيل</button><button class="btn ghost block" data-close>إلغاء</button></div></div></div>`;
-    L.oninput=L.onchange=null;L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
-      if(x.id==='lsSave'){const p1=document.getElementById('ls1').value.trim(),p2=document.getElementById('ls2').value.trim(),er=document.getElementById('lsErr');
-        if(!/^\d{4,8}$/.test(p1)){er.textContent='الرمز من 4 إلى 8 أرقام';return}if(p1!==p2){er.textContent='الرمزان غير متطابقين';return}
-        const salt=crypto.getRandomValues(new Uint8Array(16));const hash=await admHash(p1,salt);let bio=false;const bx=document.getElementById('lsBio');if(bx&&bx.checked)bio=(await verifyUser())==='ok';
-        lockSave({salt:b64e(salt),hash,bio});L.innerHTML='';render();toast('فُعّل قفل التطبيق'+(bx&&bx.checked&&!bio?' بالرمز فقط':''))}}})}
+/* 2.137: نافذة واحدة لإدارة القفل (security/app-lock-manager.js) */
+function openLockSetup(){openLockMgr()}
 /* ===== نسخة احتياطية مشفّرة بكلمة سر ===== */
 async function encBackupText(pass){const salt=crypto.getRandomValues(new Uint8Array(16));const key=await vDerive(pass,salt);const o=await vEnc(key,te(backupText()));
   return JSON.stringify({app:'masareef',enc:'aes-gcm-pbkdf2',v:2,name:'إدارة شؤوني - نسخة احتياطية مشفّرة',at:new Date().toISOString(),appVersion:APP_VERSION,salt:b64e(salt),iv:b64e(o.iv),ct:b64e(o.ct)})}
@@ -7495,7 +7524,7 @@ function sDir(){const T=t=>()=>sGoTab(t);return [
  ['🏦 البنك والرسائل',[['🩺','فحص صندوق رسائل البنك','فحص مشكلة الرسائل لا تخصم لا تسجل الاختصار تشخيص',()=>openBoxDiag()],['🧾','كشف الحساب من رسائل البنك','كشف حساب يومي شهري سنوي رسائل',()=>openBoxStmt()],['📩','سجل الرسائل المقروءة','سجل رسائل البنك مقروءه متابعه ارصده',()=>openBoxFeed()],['📮','رسائل البنك التلقائية: الإعداد والدليل','صندوق اختصار تلقائي اتمتة دليل شرح خطوات تعليمات ربط الاختصارات تسجيل رسائل البنك تلقائيا',()=>openSmsBox()],['💬','قراءة رسالة بنك (لصق)','رسالة sms لصق',()=>openImport()],['⚡','تسجيل الرسائل تلقائيًا','اتمتة اختصارات',()=>openShortcutGuide()],['🏦','استيراد كشف البنك PDF','كشف pdf excel استيراد مسقط الوطني',()=>openStmt()],['📊','تحليل كشوفات البنوك','تحليل كشف بنك',()=>openBankAnalysis()],['🧾','عمليات الكشوفات المستوردة','عمليات الكشف مستورده',()=>openStmtTx()]]],
  ['🏡 البيت والعائلة',[['🏡','البيت','البيت المنزل',T('house')],['🛒','السوبر ماركت','بقاله مشتريات قائمه',()=>openGrc(S.month)],['🤝','الأمانات','امانات',T('trusts')],['📁','مستنداتي','مستندات خزنه ضمان',T('docs')],['📖','التلاوات القرآنية','قران الملك الواقعه يس',()=>openQuranHub()]]],
  ['🚗 الممتلكات',[['🚗','السيارات','سياره تامين ملكيه',T('cars')],['🔧','خطة صيانة السيارات','صيانه زيت فحص',()=>openMplan({})],['🧭','المستشار المالي','مستشار نصائح',T('advisor')],['💼','مشروعي (الزمرة الملكية)','مشروع الزمرة',()=>openBiz()]]],
- ['⚙️ التطبيق والبيانات',[['📖','كتالوج التطبيق','كتالوج دليل المهام شرح مبتدئ كل المميزات ماذا استطيع',()=>openCatalog(0)],['⚙️','الضبط','اعدادات مزامنه قفل',T('settings')],['🗄️','إدارة البيانات','ديون حسابات اشخاص استيراد تصدير',T('budget')],['🎨','المظهر واللون','مظهر لون ليلي تصميم',()=>openLook()],['🖼️','صورة الرئيسية','صوره خلفيه',()=>openHeroPick()],['🏷️','التصنيف السريع','تصنيف فئه',()=>openCatQuick()],['🔍','فحص التكرار الشامل','تكرار مكرر',()=>openDupAll()],['🔍','فحص تكرار الكشوفات','تكرار كشف',()=>openDupScan()],['🧹','مسح وإعادة إدخال فترة','مسح حذف',()=>openPurge()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()],['📖','الشروحات التعليمية','شرح تعليم جولة',()=>tourWelcome(true)]]]]}
+ ['⚙️ التطبيق والبيانات',[['📖','كتالوج التطبيق','كتالوج دليل المهام شرح مبتدئ كل المميزات ماذا استطيع',()=>openCatalog(0)],['🔐','قفل التطبيق وبصمة الوجه','قفل رمز سري بصمة الوجه face id حماية كلمة السر',()=>openLockMgr()],['⚙️','الضبط','اعدادات مزامنه قفل',T('settings')],['🗄️','إدارة البيانات','ديون حسابات اشخاص استيراد تصدير',T('budget')],['🎨','المظهر واللون','مظهر لون ليلي تصميم',()=>openLook()],['🖼️','صورة الرئيسية','صوره خلفيه',()=>openHeroPick()],['🏷️','التصنيف السريع','تصنيف فئه',()=>openCatQuick()],['🔍','فحص التكرار الشامل','تكرار مكرر',()=>openDupAll()],['🔍','فحص تكرار الكشوفات','تكرار كشف',()=>openDupScan()],['🧹','مسح وإعادة إدخال فترة','مسح حذف',()=>openPurge()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()],['📖','الشروحات التعليمية','شرح تعليم جولة',()=>tourWelcome(true)]]]]}
 function leanOn(){return !S.settings||S.settings.homeLean!==false}
 function sDirHtml(noH){let i=0;const P=sPages();return `${noH?'':'<h3 class="sdir-h">كل أقسام التطبيق</h3>'}<button class="cat-banner" data-catalog="1"><span aria-hidden="true">📖</span><span><b>كتالوج التطبيق</b><small>كل المهام بشرح بسيط للمبتدئين، اضغط أي مهمة لتنتقل إليها</small></span><i aria-hidden="true">‹</i></button><div class="sdir">${sDir().map(([g,items])=>`<div class="sdir-g"><b class="sdir-t">${esc(g)}</b><div class="sdir-items">${items.filter(it=>it[1]!==CAT_SELF).map(it=>{const k=P.findIndex(p=>p[1]===it[1]);return `<button class="sdir-i" data-spg="${k}"><span aria-hidden="true">${it[0]}</span><small>${esc(it[1])}</small></button>`}).join('')}</div></div>`).join('')}</div>`}
 /* تسجيل رسالة البنك من الحافظة */
@@ -7600,6 +7629,7 @@ const CAT_INFO={
  'خطة صيانة السيارات':['جدول الصيانة (زيت، فحص…) بالمواعيد والكيلومترات.','علّم البند عند تنفيذه.'],
  'المستشار المالي':['نصائح ذكية من بياناتك، داخل جهازك فقط.','اقرأ النصيحة واضغط زرها للتنفيذ.'],
  'مشروعي (الزمرة الملكية)':['إدارة مشروعك التجاري في قسم منفصل.','افتح القسم وتابع المبيعات والمصاريف.'],
+ 'قفل التطبيق وبصمة الوجه':['يحمي التطبيق برمز سري وبصمة الوجه عند فتحه.','فعّله برمز من 4 إلى 8 أرقام، واختر متى يُقفل.'],
  'الضبط':['كل إعدادات التطبيق: المزامنة والقفل والإشعارات.','غيّر الإعداد الذي تحتاجه فقط.'],
  'إدارة البيانات':['الديون والحسابات والأشخاص، والاستيراد والتصدير.','اختر القسم الذي تريد تعديله.'],
  'المظهر واللون':['ألوان التطبيق والوضع الليلي وحجم الخط.','اختر اللون الذي يريح عينك.'],
@@ -9004,7 +9034,7 @@ function hdrMenuSync(){const h=document.querySelector('.hdr-actions');if(!h)retu
   [...h.children].forEach(c=>{if(c===mb||c===mn||c.id==='sync'||c.id==='srchBtn'||c.id==='ntBtn')return;mn.appendChild(c)});
   {const nb=document.getElementById('ntBtn');if(nb){if(nb.parentElement!==h)h.insertBefore(nb,mb);nb.removeAttribute('role');const sb=document.getElementById('srchBtn');if(sb&&sb.parentElement===h&&nb.nextElementSibling!==sb)h.insertBefore(nb,sb)}}
   {const sb=document.getElementById('srchBtn');if(sb&&sb.parentElement!==h)h.insertBefore(sb,mb);else if(sb&&sb.nextElementSibling!==mb)h.insertBefore(sb,mb);if(sb&&!sb.classList.contains('srchfab'))sb.classList.add('srchfab');setTimeout(()=>{try{hdrHSet()}catch(e){}},0)}
-  const order=['catBtn','admChip','prBtn','privBtn','lookBtn','setBtn'];[...mn.children].sort((a,b)=>{const i=order.indexOf(a.id),j=order.indexOf(b.id);return(i<0?99:i)-(j<0?99:j)}).forEach(c=>mn.appendChild(c));
+  const order=['catBtn','lockBtn','admChip','prBtn','privBtn','lookBtn','setBtn'];[...mn.children].sort((a,b)=>{const i=order.indexOf(a.id),j=order.indexOf(b.id);return(i<0?99:i)-(j<0?99:j)}).forEach(c=>mn.appendChild(c));
   /* 2.135: رقم الإصدار دائمًا في آخر القائمة، والضغط عليه يفتح «ما الجديد» */
   {let hv=document.getElementById('hmVer');if(!hv){hv=document.createElement('button');hv.id='hmVer';hv.type='button';hv.className='hm-ver';hv.dataset.hmver='1'}
    const lbl='إصدار التطبيق '+APP_VERSION+' · ما الجديد';if(hv.getAttribute('aria-label')!==lbl){hv.setAttribute('aria-label',lbl);hv.innerHTML='<span aria-hidden="true">ℹ️</span><span><b>إصدار التطبيق</b><small dir="ltr">v'+APP_VERSION+'</small></span><i aria-hidden="true">ما الجديد ‹</i>'}
@@ -11724,10 +11754,6 @@ document.addEventListener('click',async e=>{
   if(b.id==='hqTgl'){S.settings.homeQuick=!hqOn();await putSettings();render();toast(hqOn()?'ظهر صف الأزرار السريعة في الرئيسية':'أُخفي صف الأزرار السريعة. تعيده من ⚙️ الضبط ← الصفحة الرئيسية');return}
   if(b.id==='privBtn'||b.id==='hideAmt'){try{localStorage.setItem('masareef:hideamt',hideAmtOn()?'0':'1')}catch(e){}applyHideAmt();render();return}
   if(b.id==='lockSet'){openLockSetup();return}
-  if(b.id==='lockBio'){lockBioToggle();return}
-  if(b.id==='lockAuto'){const c=lockCfg();if(c){lockSave(Object.assign({},c,{auto:c.auto===false}));render()}return}
-  if(b.id==='lockPinChange'){lockPinChange();return}
-  if(b.dataset.lockafter!==undefined){const c=lockCfg();if(c){lockSave(Object.assign({},c,{after:+b.dataset.lockafter}));render();toast('يُقفل التطبيق '+LOCK_AFTER.find(x=>x[0]===+b.dataset.lockafter)[1]+' من الخروج منه')}return}
   if(b.id==='lookBtn2'){openLook();return}
   if(b.dataset.mdx){mdExport(b.dataset.mdx);return}
   if(b.dataset.mdi){S.mdOnly=b.dataset.mdi;const f=document.getElementById('mdFile');if(f)f.click();return}
