@@ -5680,8 +5680,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.134.2';
+const APP_VERSION='2.135.0';
 const CHANGELOG=[
+ {v:'2.135.0',date:'2026-11-25',items:['🗂️ إعادة ترتيب التطبيق هندسيًا: الكود مقسّم إلى 121 وحدة مرتبة حسب الأقسام (البنك، الأبناء، الالتزامات، التقارير…) مع أداة بناء تفحص كل شيء قبل النشر، واختبارات آلية لكل الأقسام. لا تغيير في بياناتك ولا في طريقة عمل التطبيق.','📖 جديد: «كتالوج التطبيق» — كل مهام التطبيق في صفحات مرتبة وسهلة للمبتدئين: صفحة البداية فيها «ابدأ من هنا» والبحث وكل المجموعات، ثم صفحة لكل مجموعة. لكل مهمة شرح بسيط و«كيف أستخدمها؟»، والضغط على المهمة ينقلك إليها مباشرة. تفتحه من ☰ ← «كتالوج التطبيق» أو من أعلى «كل أقسام التطبيق». تنقّل بالسحب يمينًا ويسارًا أو بزرّي التالي والسابق.','ℹ️ رقم إصدار التطبيق ظاهر دائمًا في آخر قائمة ☰، فتعرف مباشرة أي تحديث عندك. والضغط عليه يفتح «ما الجديد».']},
  {v:'2.134.2',date:'2026-11-24',items:['🛠️ إصلاح مهم: البنك يخفي وسط رقم الحساب، فحسابك «1051**017» وحساب ابنك «1050**017» كانا يُعاملان حسابًا واحدًا لأن نهايتهما متشابهة، فتُسجَّل إيداعات الأبناء في حسابك. صار التطبيق يميّز الحساب بأول الرقم وآخره، ويسألك إذا ظهر رقمان متشابهان','حساب واحد مشترك الإخفاء لأكثر من ابن («أحد الأبناء»): يُحدَّد الابن من رسالة رمز التحقق التي تسبق التحويل («Fund transfer to Mira Majid»)، أو يسألك مرة ويتعلم الاسم','خصم من حسابك بلا اسم مستلم يأخذ اسمه من رسالة رمز التحقق السابقة له، فيُربط بحساب الابن ولا يُحسب مصروفًا','عند ربط رقم الابن: تُنقل الإيداعات التي سُجلت في حسابك خطأ إلى حساب الابن، ويُصحَّح رصيد حسابك إن كان مأخوذًا منها','رقم حساب الابن يُكتب كما في رسالة البنك (مثل 1050**017)']},
 {v:'2.134.1',date:'2026-11-24',items:['📩 حسابات الأبناء من رسائل البنك: اربط آخر أرقام حساب الابن (أو اختره عند سؤال «أي حساب هو؟») فتُسجَّل الإيداعات والخصومات في حسابه ويتحدث رصيده البنكي، حتى الرسالة التي لا تذكر الرصيد','⚖️ إذا اختلف رصيد البنك عن مجموع صناديق الابن: تنبيه في صفحته وفي الرئيسية مع زر «اعتمد رصيد البنك» والرقم معبأ من آخر رسالة','تذكير في صفحة الابن بربط رقم حسابه إن لم يُربط']},
 {v:'2.134.0',date:'2026-11-24',items:['👨‍👧 حسابات الأبناء كأنها حساباتك: في نافذة أي عملية سطر «↔️ تحويل» تختار فيه «إلى حساب ملهم» أو «من حساب ميرة» أو «بين حساباتي». يُخصم من حسابك ويُضاف لحساب الابن موزعًا على صناديقه، ولا يُحسب مصروفًا ولا دخلًا','«＋ ابن جديد» من نفس النافذة، وتعديل الابن (الاسم، الرمز، البنك، آخر أرقام حسابه البنكي) من حسابه','تعديل مبلغ التحويل يعدّل حركة الابن، وتغييره إلى «لا» أو حذف العملية يحذفها، فلا يبقى فرق بين حسابك وحسابه','رسائل البنك: إذا ربطت تحويلًا «تحويل إلى MIRA» بحساب ميرة مرة، تُربط تحويلاتك القادمة لها وحدها. وإذا ربطت رقم حساب الابن البنكي، تُسجَّل رسائل بنكه في حسابه ويتحدث رصيده البنكي، وتُطابق مع تحويلك فلا تتكرر','«حساباتي وأرصدتي» يعرض حسابات الأبناء ومجموع العائلة','🏠 بطاقة «حساباتي وحسابات الأبناء» في الرئيسية: كل حساباتك ثم حسابات الأبناء في قائمة عمودية بأرصدتها ومصدر كل رصيد، ومجموع العائلة. اضغط أي سطر لفتحه وتعديله، ومنها: ＋ ابن / ابنة، تعديل حسابات الأبناء، و↔️ تحويل لابن']},
@@ -7408,9 +7409,9 @@ function sDir(){const T=t=>()=>sGoTab(t);return [
  ['🏦 البنك والرسائل',[['🩺','فحص صندوق رسائل البنك','فحص مشكلة الرسائل لا تخصم لا تسجل الاختصار تشخيص',()=>openBoxDiag()],['🧾','كشف الحساب من رسائل البنك','كشف حساب يومي شهري سنوي رسائل',()=>openBoxStmt()],['📩','سجل الرسائل المقروءة','سجل رسائل البنك مقروءه متابعه ارصده',()=>openBoxFeed()],['📮','رسائل البنك التلقائية: الإعداد والدليل','صندوق اختصار تلقائي اتمتة دليل شرح خطوات تعليمات ربط الاختصارات تسجيل رسائل البنك تلقائيا',()=>openSmsBox()],['💬','قراءة رسالة بنك (لصق)','رسالة sms لصق',()=>openImport()],['⚡','تسجيل الرسائل تلقائيًا','اتمتة اختصارات',()=>openShortcutGuide()],['🏦','استيراد كشف البنك PDF','كشف pdf excel استيراد مسقط الوطني',()=>openStmt()],['📊','تحليل كشوفات البنوك','تحليل كشف بنك',()=>openBankAnalysis()],['🧾','عمليات الكشوفات المستوردة','عمليات الكشف مستورده',()=>openStmtTx()]]],
  ['🏡 البيت والعائلة',[['🏡','البيت','البيت المنزل',T('house')],['🛒','السوبر ماركت','بقاله مشتريات قائمه',()=>openGrc(S.month)],['🤝','الأمانات','امانات',T('trusts')],['📁','مستنداتي','مستندات خزنه ضمان',T('docs')],['📖','التلاوات القرآنية','قران الملك الواقعه يس',()=>openQuranHub()]]],
  ['🚗 الممتلكات',[['🚗','السيارات','سياره تامين ملكيه',T('cars')],['🔧','خطة صيانة السيارات','صيانه زيت فحص',()=>openMplan({})],['🧭','المستشار المالي','مستشار نصائح',T('advisor')],['💼','مشروعي (الزمرة الملكية)','مشروع الزمرة',()=>openBiz()]]],
- ['⚙️ التطبيق والبيانات',[['⚙️','الضبط','اعدادات مزامنه قفل',T('settings')],['🗄️','إدارة البيانات','ديون حسابات اشخاص استيراد تصدير',T('budget')],['🎨','المظهر واللون','مظهر لون ليلي تصميم',()=>openLook()],['🖼️','صورة الرئيسية','صوره خلفيه',()=>openHeroPick()],['🏷️','التصنيف السريع','تصنيف فئه',()=>openCatQuick()],['🔍','فحص التكرار الشامل','تكرار مكرر',()=>openDupAll()],['🔍','فحص تكرار الكشوفات','تكرار كشف',()=>openDupScan()],['🧹','مسح وإعادة إدخال فترة','مسح حذف',()=>openPurge()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()],['📖','الشروحات التعليمية','شرح تعليم جولة',()=>tourWelcome(true)]]]]}
+ ['⚙️ التطبيق والبيانات',[['📖','كتالوج التطبيق','كتالوج دليل المهام شرح مبتدئ كل المميزات ماذا استطيع',()=>openCatalog(0)],['⚙️','الضبط','اعدادات مزامنه قفل',T('settings')],['🗄️','إدارة البيانات','ديون حسابات اشخاص استيراد تصدير',T('budget')],['🎨','المظهر واللون','مظهر لون ليلي تصميم',()=>openLook()],['🖼️','صورة الرئيسية','صوره خلفيه',()=>openHeroPick()],['🏷️','التصنيف السريع','تصنيف فئه',()=>openCatQuick()],['🔍','فحص التكرار الشامل','تكرار مكرر',()=>openDupAll()],['🔍','فحص تكرار الكشوفات','تكرار كشف',()=>openDupScan()],['🧹','مسح وإعادة إدخال فترة','مسح حذف',()=>openPurge()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()],['📖','الشروحات التعليمية','شرح تعليم جولة',()=>tourWelcome(true)]]]]}
 function leanOn(){return !S.settings||S.settings.homeLean!==false}
-function sDirHtml(noH){let i=0;const P=sPages();return `${noH?'':'<h3 class="sdir-h">كل أقسام التطبيق</h3>'}<div class="sdir">${sDir().map(([g,items])=>`<div class="sdir-g"><b class="sdir-t">${esc(g)}</b><div class="sdir-items">${items.map(it=>{const k=P.findIndex(p=>p[1]===it[1]);return `<button class="sdir-i" data-spg="${k}"><span aria-hidden="true">${it[0]}</span><small>${esc(it[1])}</small></button>`}).join('')}</div></div>`).join('')}</div>`}
+function sDirHtml(noH){let i=0;const P=sPages();return `${noH?'':'<h3 class="sdir-h">كل أقسام التطبيق</h3>'}<button class="cat-banner" data-catalog="1"><span aria-hidden="true">📖</span><span><b>كتالوج التطبيق</b><small>كل المهام بشرح بسيط للمبتدئين، اضغط أي مهمة لتنتقل إليها</small></span><i aria-hidden="true">‹</i></button><div class="sdir">${sDir().map(([g,items])=>`<div class="sdir-g"><b class="sdir-t">${esc(g)}</b><div class="sdir-items">${items.filter(it=>it[1]!==CAT_SELF).map(it=>{const k=P.findIndex(p=>p[1]===it[1]);return `<button class="sdir-i" data-spg="${k}"><span aria-hidden="true">${it[0]}</span><small>${esc(it[1])}</small></button>`}).join('')}</div></div>`).join('')}</div>`}
 /* تسجيل رسالة البنك من الحافظة */
 function looksBank(t){return !!t&&t.length<1200&&/(OMR|ر\.?\s?ع|ريال)/i.test(t)&&/\d/.test(t)&&/(debit|credit|transaction|txn|transfer|remittance|purchase|withdraw|balance|\bbal\b|payment|paid|spent|received|خصم|إيداع|ايداع|سحب|شراء|تحويل|رصيد|حوالة|دفع|استلام|مدين|دائن)/i.test(t)}
 async function clipRecord(){let t='';try{t=(await navigator.clipboard.readText()||'').trim()}catch(e){IMP={text:'',items:[]};openImport();toast('لم أستطع قراءة الحافظة، الصق الرسالة هنا يدويًا');return}
@@ -7455,6 +7456,119 @@ capAlerts().slice(0,2).forEach(a=>add(a.pct>=100?86:66,'budget',(a.pct>=100?'ت�
   const F=forecast(3);const neg=F.ok?F.rows.find(r=>r.left<0&&r.m!==curM()):null;if(neg)add(74,'warn','شهر '+esc(mShort(neg.m))+' متوقع بالسالب','المتوقع <b class="num">−'+amtH(Math.abs(neg.left))+'</b> بعد الالتزامات والأقساط والخطط. جهّز له من الآن.',['التوقّعات','data-tab="reports"'],'','متوسط دخلك ومصاريفك المتغيرة في آخر 3 أشهر، ناقص الالتزامات والأقساط المسجّلة لذلك الشهر وحصص الخطط.');
   const m=accList().find(a=>a.id==='main');if(m&&m.anchor&&m.anchor.date<addDays(today(),-30))add(45,'cal','طابق رصيد حسابك الجاري','آخر مطابقة كانت '+fmtD(m.anchor.date)+'. المطابقة الشهرية تكشف أي مصروف نسيت تسجيله.',['حساباتي','data-accopen="1"'])}
 
+/* ===================== 2.135: 📖 كتالوج التطبيق =====================
+ * كل مهام التطبيق في صفحات مرتبة للمبتدئين: صفحة البداية ثم صفحة لكل مجموعة.
+ * المصدر الوحيد للمهام هو sDir() (نفس قائمة البحث والدليل)، فأي ميزة تضاف هناك تظهر هنا تلقائيًا.
+ * الشرح لكل مهمة في CAT_INFO بالاسم نفسه: [ماذا تفعل، كيف تستخدمها]. المهمة بلا شرح تظهر باسمها فقط.
+ * الضغط على أي مهمة ينقلك إليها مباشرة. يفتح من ☰ ← «كتالوج التطبيق» أو من أعلى «كل أقسام التطبيق». */
+const CAT_SELF='كتالوج التطبيق';
+const CAT_INFO={
+ 'الرئيسية':['ملخص يومك: رصيدك، ما صرفته، والقادم عليك.','اضغط 🏠 في الشريط السفلي في أي وقت للعودة.'],
+ 'سجل العمليات':['كل مصاريفك ودخلك مرتبة بالتاريخ، مع البحث والفرز.','اضغط أي عملية لتعديلها، واسحبها لحذفها.'],
+ 'إضافة مصروف أو دخل':['تسجّل مصروفًا أو دخلًا جديدًا في ثوانٍ.','اكتب المبلغ، اختر الفئة، ثم «حفظ».'],
+ 'كم أستطيع أن أنفق اليوم؟':['يحسب لك المبلغ الآمن لصرفه اليوم حتى نزول الراتب.','افتحها صباحًا والتزم بالرقم الظاهر.'],
+ 'حساباتي وأرصدتي':['رصيد كل حساب بنكي ومحفظة، والمجموع الحقيقي بدون تكرار.','طابق رصيد أي حساب برصيد البنك بضغطة.'],
+ 'اختيار الشهر':['تنتقل لأي شهر سابق أو قادم لترى بياناته.','اضغط الشهر ثم «اذهب».'],
+ 'الالتزامات الشهرية':['فواتيرك وأقساطك الشهرية وما دُفع منها وما بقي.','اضغط الالتزام ثم «دفعت» عند السداد.'],
+ 'تقويم الدفع':['مواعيد كل الدفعات على تقويم واضح.','الأيام الملوّنة فيها دفعات، اضغطها للتفاصيل.'],
+ 'خطة الشهر':['تقرر ما تدفعه هذا الشهر وما تؤجله.','اعتمد البنود المهمة، وأجّل الباقي.'],
+ 'مخطط السداد':['يراجع ديونك والتزاماتك ويقترح مبالغ السداد.','غيّر المبلغ وشاهد متى تنتهي من الدين.'],
+ 'الأولويات والتخلص من الديون':['يرتب ديونك ويقترح أسرع طريقة للتخلص منها.','اتبع الترتيب: ادفع الأول ثم انتقل للتالي.'],
+ 'الخطة المالية الاستثنائية':['لشهر صعب: تعيد توزيع الدفعات وتؤجل بعضها.','اختر الشهر، وحدد ما يؤجَّل، ثم احفظ.'],
+ 'المصاريف المتكررة والاشتراكات':['يكتشف الاشتراكات والمصاريف المتكررة التي قد تنساها.','ألغِ ما لا تحتاجه وسجّل الباقي كالتزام.'],
+ 'خطة الإنقاذ':['خطة مؤقتة لثلاثين يومًا عندما يكون هناك عجز.','فعّلها والتزم بالسقف اليومي المقترح.'],
+ 'تجهيز شهر قادم':['تجهّز ميزانية أي شهر قادم مسبقًا مع دراسة جدوى، وتُطبَّق في أوله.','اختر الشهر، راجع المقترح، ثم «اعتماد».'],
+ 'الميزانية الشهرية':['توزّع دخلك على أوجه الإنفاق وترى ما تبقى من كل بند.','حدد مبلغ كل فئة، وتابع الأشرطة الملونة.'],
+ 'الميزانية الأسبوعية':['سقف صرف لكل أسبوع يساعدك على الانضباط.','حدد السقف، والتطبيق ينبهك عند الاقتراب منه.'],
+ 'الادخار الذكي':['أهداف ادخار بمبالغ شهرية محسوبة لك.','أضف هدفًا ومبلغه وموعده، والتطبيق يقسّمه.'],
+ 'الادخار المحمي':['مبلغ ادخار شهري لا يُنقص إلا بموافقتك.','حدد المبلغ مرة واحدة، ويُحجز كل شهر.'],
+ 'المصاريف الموسمية':['رمضان والعيد والمدارس: تجهز لها قبل موعدها.','أضف الموسم ومبلغه، ويُقسَّم على الأشهر.'],
+ 'حسابات الأبناء':['حساب لكل ابن بصناديق (عيد، ادخار…) وتحويلاتك لهم.','افتح حساب الابن، وأضف إيداعًا أو صرفًا.'],
+ 'الذهب':['ذهبك وقيمته بسعر اليوم ومقارنته بالأمس.','أضف القطعة ووزنها وعيارها.'],
+ 'وضع السفر':['تسجيل المصاريف بعملة البلد الذي تسافر إليه.','فعّله واختر العملة، وأوقفه عند العودة.'],
+ 'التقارير الشهرية والسنوية':['أين ذهبت أموالك: رسوم وأرقام لكل فئة.','اختر الشهر أو السنة، واضغط الفئة للتفاصيل.'],
+ 'تقويم المصروف':['صرفك يومًا بيوم على تقويم، مع المقارنة والتوقع.','اضغط أي يوم لترى عملياته.'],
+ 'التوقعات ومقارنة الأشهر':['توقّع الأشهر القادمة ومقارنة شهر بآخر.','اختر الشهرين للمقارنة.'],
+ 'التقارير الدورية':['تقرير يومي وأسبوعي وشهري وسنوي جاهز.','اختر الفترة وشاهد الملخص.'],
+ 'مراجعة الأسبوع':['مراجعة سريعة لأسبوعك وما يمكن تحسينه.','افتحها نهاية كل أسبوع.'],
+ 'مراجعة الشهر':['إقفال الشهر: ما تحقق، وما تجاوزته، ونصائح للقادم.','افتحها في آخر يوم من الشهر.'],
+ 'عاداتي في الصرف':['أيام بلا صرف، وسبب الشراء، وقاعدة «انتظر قبل الشراء».','سجّل يومك بلا صرف لتبني عادة جيدة.'],
+ 'الجهات والمحلات':['أين تصرف أكثر: المحلات والمحطات والمطاعم.','اضغط المحل لترى كل عملياته.'],
+ 'طباعة تقرير':['تقرير مرتب للطباعة أو حفظه PDF.','اختر نوع التقرير ثم «طباعة».'],
+ 'إرسال التقارير بالإيميل':['ترسل التقرير إلى بريدك.','اكتب بريدك واختر الفترة.'],
+ 'فحص صندوق رسائل البنك':['يكشف لماذا لم تُسجَّل رسالة بنك ويصلحها بضغطة.','افتحه عندما لا تُخصم رسالة وصلتك.'],
+ 'كشف الحساب من رسائل البنك':['كشف حساب يومي وشهري وسنوي من رسائل البنك.','اختر الحساب والفترة.'],
+ 'سجل الرسائل المقروءة':['كل رسالة بنك قرأها التطبيق وما فعله بها.','راجع الرسائل التي تحتاج تأكيدك.'],
+ 'رسائل البنك التلقائية: الإعداد والدليل':['تُسجَّل مصاريفك تلقائيًا من رسائل البنك دون أن تفعل شيئًا.','اتبع الخطوات المصورة مرة واحدة فقط.'],
+ 'قراءة رسالة بنك (لصق)':['تلصق رسالة البنك فيقرأ المبلغ والمحل والتاريخ.','انسخ الرسالة، افتح هنا، ثم «قراءة».'],
+ 'تسجيل الرسائل تلقائيًا':['ربط تطبيق الاختصارات بالتطبيق لتسجيل الرسائل.','انسخ الرابط وضعه في الاختصار.'],
+ 'استيراد كشف البنك PDF':['تستورد كشف حسابك من البنك (PDF أو Excel) بدون تكرار.','اختر ملف الكشف، راجع العمليات، ثم «حفظ».'],
+ 'تحليل كشوفات البنوك':['تحليل كشوفاتك وخطة مقترحة للشهر القادم.','استورد الكشف أولًا ثم افتح التحليل.'],
+ 'عمليات الكشوفات المستوردة':['العمليات التي جاءت من الكشوفات: عرض وتعديل وحذف.','صنّف أي عملية بضغطة.'],
+ 'البيت':['مصاريف البيت والإيجار والخدمات في مكان واحد.','أضف بند البيت ومبلغه.'],
+ 'السوبر ماركت':['قائمة مشترياتك الشهرية وما صرفته عليها.','أضف الأصناف، وعلّم ما اشتريته.'],
+ 'الأمانات':['أموال الآخرين التي عندك، حتى لا تُخلط بمالك.','سجّل صاحب الأمانة ومبلغها.'],
+ 'مستنداتي':['خزنة مشفرة لصور مستنداتك المهمة.','أضف صورة المستند وتاريخ انتهائه.'],
+ 'التلاوات القرآنية':['قراءة واستماع: الملك والواقعة ويس.','اختر السورة واضغط ▶︎ للاستماع.'],
+ 'السيارات':['التأمين والملكية والوقود والتنبيهات لكل سيارة.','أضف سيارتك وتواريخ التأمين والملكية.'],
+ 'خطة صيانة السيارات':['جدول الصيانة (زيت، فحص…) بالمواعيد والكيلومترات.','علّم البند عند تنفيذه.'],
+ 'المستشار المالي':['نصائح ذكية من بياناتك، داخل جهازك فقط.','اقرأ النصيحة واضغط زرها للتنفيذ.'],
+ 'مشروعي (الزمرة الملكية)':['إدارة مشروعك التجاري في قسم منفصل.','افتح القسم وتابع المبيعات والمصاريف.'],
+ 'الضبط':['كل إعدادات التطبيق: المزامنة والقفل والإشعارات.','غيّر الإعداد الذي تحتاجه فقط.'],
+ 'إدارة البيانات':['الديون والحسابات والأشخاص، والاستيراد والتصدير.','اختر القسم الذي تريد تعديله.'],
+ 'المظهر واللون':['ألوان التطبيق والوضع الليلي وحجم الخط.','اختر اللون الذي يريح عينك.'],
+ 'صورة الرئيسية':['صور متحركة أعلى الرئيسية من صورك.','اختر حتى 8 صور وحجم العرض.'],
+ 'التصنيف السريع':['تصنيف العمليات غير المصنفة بضغطة، ويتذكر اختيارك.','اختر الفئة لكل عملية.'],
+ 'فحص التكرار الشامل':['يكشف العمليات المكررة في كل التطبيق.','راجع المكرر واحذف الزائد.'],
+ 'فحص تكرار الكشوفات':['يكشف تكرار عمليات الكشوفات المستوردة.','شغّله بعد كل استيراد.'],
+ 'مسح وإعادة إدخال فترة':['تمسح بيانات فترة لتعيد إدخالها من كشف البنك.','استعمله بحذر، فهو يحتاج تأكيد المدير.'],
+ 'ما الجديد':['كل التحديثات الجديدة في التطبيق.','اقرأ آخر إصدار لتعرف المميزات الجديدة.'],
+ 'الشروحات التعليمية':['جولة تعليمية خطوة بخطوة داخل التطبيق.','اضغط «التالي» لتنتقل بين الخطوات.']};
+/* البداية السريعة للمبتدئ: ثلاث مهام بالترتيب */
+const CAT_START=['إضافة مصروف أو دخل','الالتزامات الشهرية','الميزانية الشهرية'];
+let CAT={pg:0,q:''};
+function catGroups(){let G=[];try{G=sDir().map(([g,items])=>[g,items.filter(it=>it[1]!==CAT_SELF)]).filter(g=>g[1].length)}catch(e){}return G}
+function catSplit(g){const m=/^(\S+)\s+(.*)$/.exec(g);return m?[m[1],m[2]]:['📁',g]}
+function catKey(gi,ii){return gi+'.'+ii}
+function catItemHtml(it,gi,ii){const inf=CAT_INFO[it[1]];return `<div class="cat-it"><button class="cat-go" data-catgo="${catKey(gi,ii)}"><span class="cat-ic" aria-hidden="true">${it[0]}</span><span class="cat-m"><b>${esc(it[1])}</b>${inf?`<small>${esc(inf[0])}</small>`:''}</span><span class="cat-arw" aria-hidden="true">‹</span></button>${inf&&inf[1]?`<details class="cat-how"><summary>كيف أستخدمها؟</summary><p>${esc(inf[1])}</p></details>`:''}</div>`}
+function catFind(title){const G=catGroups();for(let gi=0;gi<G.length;gi++){const ii=G[gi][1].findIndex(it=>it[1]===title);if(ii>=0)return [gi,ii,G[gi][1][ii]]}return null}
+function catPageHtml(){const G=catGroups(),N=G.length+1;const pg=Math.max(0,Math.min(CAT.pg,N-1));CAT.pg=pg;
+  const dots=`<div class="cat-dots" role="tablist">${Array.from({length:N},(_,i)=>`<button class="cat-dot${i===pg?' on':''}" data-catpg="${i}" aria-label="${i?esc(catSplit(G[i-1][0])[1]):'البداية'}"></button>`).join('')}</div>`;
+  const nav=`<div class="cat-nav"><button class="btn ghost" data-catpg="${pg-1}"${pg?'':' disabled'}>→ السابق</button><span class="cat-n">${pg+1} / ${N}</span><button class="btn" data-catpg="${pg+1}"${pg<N-1?'':' disabled'}>التالي ←</button></div>`;
+  let body;
+  if(pg===0){const q=sNorm(CAT.q||'').trim();
+    const hits=q?G.flatMap((g,gi)=>g[1].map((it,ii)=>[it,gi,ii])).filter(([it])=>{const s=sNorm(it[1]+' '+(it[2]||'')+' '+((CAT_INFO[it[1]]||[])[0]||''));return q.split(/\s+/).every(w=>s.includes(w))}):null;
+    const start=CAT_START.map(catFind).filter(Boolean);
+    body=`<div class="cat-hero"><div class="cat-hero-ic" aria-hidden="true">📖</div><h2 data-nofold>كتالوج التطبيق</h2><p>كل ما تستطيع فعله في «إدارة شؤوني»، مرتب في ${G.length} مجموعات. <b>اضغط أي مهمة لتنتقل إليها مباشرة.</b></p></div>
+     <input class="cat-q" id="catQ" type="search" placeholder="🔍 ابحث عن مهمة… مثل: ادخار، رسالة البنك، دين" value="${esc(CAT.q||'')}" aria-label="ابحث عن مهمة">
+     ${hits?`<div class="cat-list">${hits.length?hits.map(([it,gi,ii])=>catItemHtml(it,gi,ii)).join(''):'<p class="note">لم أجد مهمة بهذا الاسم. جرّب كلمة أخرى.</p>'}</div>`:`
+     <h3 class="cat-sh" data-nofold>🌱 ابدأ من هنا</h3><div class="cat-list cat-start">${start.map(([gi,ii,it],k)=>`<div class="cat-step"><i>${k+1}</i>${catItemHtml(it,gi,ii)}</div>`).join('')}</div>
+     <h3 class="cat-sh" data-nofold>📚 المجموعات</h3><div class="cat-groups">${G.map((g,gi)=>{const [ic,nm]=catSplit(g[0]);return `<button class="cat-gb" data-catpg="${gi+1}"><span aria-hidden="true">${ic}</span><b>${esc(nm)}</b><small>${countWord(g[1].length,'مهمة واحدة','مهمتان','مهام','مهمة')}</small></button>`}).join('')}</div>
+     <p class="note cat-tip">💡 تنقّل بين الصفحات بالسحب يمينًا ويسارًا أو بزرّي «التالي» و«السابق».</p>`}`}
+  else{const g=G[pg-1];const [ic,nm]=catSplit(g[0]);
+    body=`<div class="cat-ph"><span class="cat-ph-ic" aria-hidden="true">${ic}</span><div><h2 data-nofold>${esc(nm)}</h2><small>${countWord(g[1].length,'مهمة واحدة','مهمتان','مهام','مهمة')} · اضغط المهمة لتفتحها</small></div></div>
+     <div class="cat-list">${g[1].map((it,ii)=>catItemHtml(it,pg-1,ii)).join('')}</div>`}
+  return `${dots}<div class="cat-body" id="catBody">${body}</div>${nav}`}
+function openCatalog(pg){if(pg!==undefined)CAT.pg=pg;const L=document.getElementById('layer');
+  L.innerHTML=`${sheetTop('كتالوج التطبيق')}<div class="cat-wrap" id="catWrap">${catPageHtml()}</div><div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
+  const sh=L.querySelector('.sheet');if(sh)sh.classList.add('cat-sheet');
+  const redraw=(focusQ)=>{const w=document.getElementById('catWrap');if(!w)return;w.innerHTML=catPageHtml();const b=document.getElementById('catBody');if(b)b.scrollTop=0;if(!focusQ){const s=L.querySelector('.sheet .in');if(s)s.scrollTop=0}
+    if(focusQ){const q=document.getElementById('catQ');if(q){q.focus();const n=q.value.length;try{q.setSelectionRange(n,n)}catch(e){}}}};
+  const goPg=n=>{const N=catGroups().length+1;if(n<0||n>=N)return;CAT.pg=n;redraw()};
+  L.oninput=e=>{if(e.target.id==='catQ'){CAT.q=e.target.value;redraw(true)}};L.onchange=null;
+  L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+    if(x.dataset.catpg!==undefined){goPg(+x.dataset.catpg);return}
+    if(x.dataset.catgo){const [gi,ii]=x.dataset.catgo.split('.').map(Number);const g=catGroups()[gi];const it=g&&g[1][ii];if(!it)return;
+      L.innerHTML='';try{it[3]()}catch(er){toast('تعذّر فتح «'+it[1]+'»')}return}};
+  // السحب يمينًا ويسارًا بين الصفحات (الواجهة من اليمين لليسار: السحب لليسار = التالي)
+  const w=document.getElementById('catWrap');let x0=null,y0=0;
+  w.addEventListener('touchstart',e=>{if(e.target.closest('input,details'))return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+  w.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)goPg(CAT.pg+(dx<0?1:-1))},{passive:true})}
+/* زر الكتالوج في قائمة ☰ (تنقله القائمة تلقائيًا إلى داخلها) */
+function catMenuBtn(){try{if(document.getElementById('catBtn'))return;const h=document.querySelector('.hdr-actions');if(!h)return;const g=document.createElement('button');g.id='catBtn';g.type='button';g.className='iconbtn';g.dataset.catalog='1';g.setAttribute('aria-label','كتالوج التطبيق');g.title='كتالوج التطبيق';
+  g.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 7h7M9 11h5"/></svg>';h.appendChild(g)}catch(e){}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-catalog]');if(!b)return;e.preventDefault();openCatalog(0)});
+setTimeout(catMenuBtn,0);
 /* ---------- 28ب. البيانات الأساسية: إدخال الأسماء والجهات والحسابات مرة واحدة، ثم الاختيار منها في كل مكان ---------- */
 const PAYEE_T={bank:'بنك / جهة تمويل',shop:'محل / متجر',gov:'جهة حكومية / خدمات',person:'شخص',other:'أخرى'};
 function payees(){return S.settings.payees||[]}
@@ -8804,13 +8918,18 @@ function hdrMenuSync(){const h=document.querySelector('.hdr-actions');if(!h)retu
   [...h.children].forEach(c=>{if(c===mb||c===mn||c.id==='sync'||c.id==='srchBtn'||c.id==='ntBtn')return;mn.appendChild(c)});
   {const nb=document.getElementById('ntBtn');if(nb){if(nb.parentElement!==h)h.insertBefore(nb,mb);nb.removeAttribute('role');const sb=document.getElementById('srchBtn');if(sb&&sb.parentElement===h&&nb.nextElementSibling!==sb)h.insertBefore(nb,sb)}}
   {const sb=document.getElementById('srchBtn');if(sb&&sb.parentElement!==h)h.insertBefore(sb,mb);else if(sb&&sb.nextElementSibling!==mb)h.insertBefore(sb,mb);if(sb&&!sb.classList.contains('srchfab'))sb.classList.add('srchfab');setTimeout(()=>{try{hdrHSet()}catch(e){}},0)}
-  const order=['admChip','prBtn','privBtn','lookBtn','setBtn'];[...mn.children].sort((a,b)=>{const i=order.indexOf(a.id),j=order.indexOf(b.id);return(i<0?99:i)-(j<0?99:j)}).forEach(c=>mn.appendChild(c));
+  const order=['catBtn','admChip','prBtn','privBtn','lookBtn','setBtn'];[...mn.children].sort((a,b)=>{const i=order.indexOf(a.id),j=order.indexOf(b.id);return(i<0?99:i)-(j<0?99:j)}).forEach(c=>mn.appendChild(c));
+  /* 2.135: رقم الإصدار دائمًا في آخر القائمة، والضغط عليه يفتح «ما الجديد» */
+  {let hv=document.getElementById('hmVer');if(!hv){hv=document.createElement('button');hv.id='hmVer';hv.type='button';hv.className='hm-ver';hv.dataset.hmver='1'}
+   const lbl='إصدار التطبيق '+APP_VERSION+' · ما الجديد';if(hv.getAttribute('aria-label')!==lbl){hv.setAttribute('aria-label',lbl);hv.innerHTML='<span aria-hidden="true">ℹ️</span><span><b>إصدار التطبيق</b><small dir="ltr">v'+APP_VERSION+'</small></span><i aria-hidden="true">ما الجديد ‹</i>'}
+   if(mn.lastElementChild!==hv)mn.appendChild(hv)}
   [...mn.children].forEach(c=>c.setAttribute('role','menuitem'));
   const ad=document.getElementById('admChip');const dot=mb.querySelector('.mb-dot');if(dot)dot.hidden=!(ad&&ad.classList.contains('on'))}
 function hdrMenuOpen(v){const mn=document.getElementById('hdrMenu'),mb=document.getElementById('menuBtn');if(!mn||!mb)return;hdrMenuSync();hmY=window.scrollY;mn.hidden=!v;mb.setAttribute('aria-expanded',v?'true':'false');mb.classList.toggle('on',!!v)}
 document.addEventListener('click',e=>{const mb=e.target.closest('#menuBtn');if(mb){e.stopPropagation();const mn=document.getElementById('hdrMenu');hdrMenuOpen(mn&&mn.hidden);return}
   const mn=document.getElementById('hdrMenu');if(!mn||mn.hidden)return;if(e.target.closest('#hdrMenu button'))setTimeout(()=>hdrMenuOpen(false),0);else if(!e.target.closest('#hdrMenu'))hdrMenuOpen(false)},true);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')hdrMenuOpen(false)});
+document.addEventListener('click',e=>{if(e.target.closest('[data-hmver]'))openChangelog()});
 let hmY=0;window.addEventListener('scroll',()=>{const mn=document.getElementById('hdrMenu');if(mn&&!mn.hidden&&Math.abs(window.scrollY-hmY)>60)hdrMenuOpen(false)},{passive:true});
 try{new MutationObserver(()=>{const h=document.querySelector('.hdr-actions');if(h&&[...h.children].some(c=>c.id!=='sync'&&c.id!=='menuBtn'&&c.id!=='hdrMenu'&&c.id!=='srchBtn'&&c.id!=='ntBtn'))hdrMenuSync();const ad=document.getElementById('admChip'),dot=document.querySelector('#menuBtn .mb-dot');if(dot)dot.hidden=!(ad&&ad.classList.contains('on'))}).observe(document.querySelector('header.top')||document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']})}catch(e){}
 setTimeout(hdrMenuSync,0);
