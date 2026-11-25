@@ -1407,8 +1407,10 @@ let BL_SYNCING=false;
 function blSync(){if(BL_SYNCING||!blAutoOn())return;const td=today();const cur=blAll()[td];if(cur&&cur.src!=='acc')return;const v=blStartTotal();
   if(cur&&Math.abs(+cur.v-v)<0.0005)return;BL_SYNCING=true;try{const A=Object.assign({},blAll());A[td]={v,at:new Date().toISOString(),src:'acc'};S.settings.balLog=A;putSettings()}finally{BL_SYNCING=false}}
 /* بطاقة الصباح في الرئيسية */
+/* رصيد صباح اليوم التلقائي وآخر فترة مغلقة: مصدر واحد لـ blHomeHtml وبطاقة «رصيدي الآن» */
+function blTodayAuto(){const td=today();if(!(blHas(td)&&blAll()[td].src==='acc'))return null;const R=blRows(addDays(td,-7),td).filter(r=>!r.open&&r.to===addDays(td,-1));return {v:blAll()[td].v,y:R[R.length-1]||null}}
 function blHomeHtml(){if(S.month!==curM())return '';const td=today();
-  if(blHas(td)&&blAll()[td].src==='acc'){const R=blRows(addDays(td,-7),td).filter(r=>!r.open&&r.to===addDays(td,-1));const y=R[R.length-1];
+  if(blHas(td)&&blAll()[td].src==='acc'){const y=blTodayAuto().y;
     return `<div class="panel bl-auto"><button class="bl-ah" data-ballog="1"><span>📒 رصيد صباح اليوم <small class="note">تلقائي من أرصدة حساباتك</small></span><b class="num">${money(blAll()[td].v)}</b></button>
      <small class="note bl-accs">${blAccLine()}</small>
      ${y?`<div class="bl-ay"><span>${y.days>1?'آخر '+countWord(y.days,'يوم','يومين','أيام','يومًا'):'أمس'} صرفت حسب أرصدتك</span><b class="num ${y.spent<0?'amt-inc':'amt-exp'}">${money(Math.abs(y.spent))}</b>${y.diff>0.5?`<small class="amt-exp">منها ${money(y.diff)} لم تسجّلها</small>`:y.spent>=0?'<small class="note">✓ مطابق لما سجّلته</small>':''}</div>`:''}
@@ -1565,35 +1567,34 @@ function homeV2Html(m){const H=homeFin(),B=H.B,dp=H.dp;const td=today(),dt=new D
   const dayP=dp&&dp.has?(dp.daily>0.0005?(dp.spentToday||0)/dp.daily*100:100):0;
   const ws=addDays(td,-dt.getDay());const wsA=ws<mStart(m)?mStart(m):ws;const wkSpent=r3(varSpend(inRange(wsA,td).filter(t=>!t.own)));const wkCap=dp&&dp.has?r3(Math.max(0,dp.daily)*(dDiff(wsA,td)+1)+0):0;const wkP=wkCap>0.0005?wkSpent/wkCap*100:(wkSpent>0?100:0);
   const MF=monthFlow(m);const Bud=+S.settings.monthlyBudget||0;const mBase=Bud||MF.inc;const mP=mBase>0?MF.exp/mBase*100:0;
-  const att=hv2Attn();const recent=list().filter(t=>!t.own&&t.date&&t.date<=td).sort((x,y)=>(y.date+(y.createdAt||'')).localeCompare(x.date+(x.createdAt||''))).slice(0,5);
+  const att=hv2Attn();
   const Q=[['exp','minus','مصروف','q-exp'],['inc','plus','دخل','q-inc'],['pay','card','دفع التزام','q-pay'],['stmt','bank','كشف البنك','q-bank'],['print','print','طباعة PDF','q-pr']];
   return `<section${heroSecAttrs()}>${heroBgHtml()}<div class="hv2-ht"><div><h1>إدارة شؤوني</h1><span>تنظيم مالي .. لحياة أفضل</span></div><span class="hv2-btns"><button class="hv2-set" data-heropick="1" aria-label="تغيير صورة الرئيسية"><svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21"><rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg></button><button class="hv2-set" data-tab="settings" aria-label="الضبط"><svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></span></div></section>
   <div class="hv2-info"><div class="hv2-date"><b>${esc(DAYS[dt.getDay()])} ${dt.getDate()} ${esc(MONTHS[dt.getMonth()])}</b><small>${esc(hv2Hijri())}</small></div>
    ${W.adhkar!==false?(()=>{const k=adhkarKind(),zd=adhkarDone(k),zt=ADHKAR[k].length;return `<button class="hv2-chip" data-adhkar="1"><b>${k==='M'?'أذكار الصباح':'أذكار المساء'}</b><small>${zd===zt?'أتممتها ✓':zd?zd+' من '+zt:'حصن المسلم'}</small></button>`})():''}
    ${W.pos!=='hide'?`<button class="hv2-chip dark" data-wird="1"><b>${esc(qTitle(W))}</b><small>${esc(qHubSub(W))}</small></button>`:''}</div>
   ${homeDuaHtml()}${rzHtml('top')}
-  <div class="hv2-main"><button class="hv2-bal" data-realbal="1"><span class="hv2-bl">${hv2i('wallet',16)} ${B.man?'رصيدك الفعلي المتاح':'الرصيد المتاح'}</span><b class="num hv2-big">${money(B.v)} <small>${CUR}</small></b>
-     <small class="hv2-bs">${B.acc?'مجموع أرصدة حساباتك (نفس صافي ثروتي)':B.man?'من رصيدك المكتوب '+esc(odoWhenFull(B.at))+' مع العمليات بعده':'الدخل '+money(B.inc)+' − المصروف '+money(B.exp)}</small>${B.est?`<small class="hv2-est">≈ يشمل تقدير ${money(B.est)} لأيام لم يصل كشفها</small>`:''}
+  <section class="hm-bal"><div class="hv2-main"><button class="hv2-bal" data-realbal="1"><span class="hv2-bl">${hv2i('wallet',16)} ${B.man?'رصيدك الفعلي المتاح':'الرصيد المتاح'}</span><b class="num hv2-big">${money(B.v)} <small>${CUR}</small></b>
+     <small class="hv2-bs">${B.acc?'مجموع أرصدة حساباتك':B.man?'من رصيدك المكتوب '+esc(odoWhenFull(B.at))+' مع العمليات بعده':'الدخل '+money(B.inc)+' − المصروف '+money(B.exp)}</small>${B.est?`<small class="hv2-est">≈ يشمل تقدير ${money(B.est)} لأيام لم يصل كشفها</small>`:''}
      <span class="hv2-pill">${hv2i('cal',14)} ${H.cyc?'الراتب بعد '+countWord(H.payIn,'يوم واحد','يومين','أيام','يومًا'):'نهاية الشهر بعد '+countWord(H.days,'يوم واحد','يومين','أيام','يومًا')}</span></button>
-   <div class="hv2-rbig">${hv2Ring(incP,'w')}<small>باقٍ من الدخل</small></div></div>
-  ${S.month===curM()?safe('حساباتي',()=>homeAccHtml())+safe('رسائل البنك',()=>boxHomeHtml())+safe('حساب غير مسجل',()=>kidAskHtml()+beUnkHtml(true))+safe('خطة الشهر القادم',()=>fpHomeHtml())+safe('وضع السفر',()=>travelHomeHtml())+safe('مراجعة الأسبوع',()=>wrHomeHtml()):''}${S.month===curM()?safe('سعر الذهب',()=>gdHomeHtml()):''}
+   <div class="hv2-rbig">${hv2Ring(incP,'w')}<small>باقٍ من الدخل</small></div></div>${S.month===curM()?safe('حساباتي',()=>hmAccsHtml()):''}</section>
+  ${S.month===curM()?safe('رسائل البنك',()=>boxHomeHtml())+safe('حساب غير مسجل',()=>kidAskHtml()+beUnkHtml(true))+safe('خطة الشهر القادم',()=>fpHomeHtml())+safe('وضع السفر',()=>travelHomeHtml())+safe('مراجعة الأسبوع',()=>wrHomeHtml()):''}${S.month===curM()?safe('سعر الذهب',()=>gdHomeHtml()):''}
   <div class="hv2-3"><button class="hv2-t t-inc" data-tab="log"><span class="hv2-ti">${hv2i('up')}</span><span class="hv2-tl">الدخل</span><b class="num">${money(B.inc)}</b><small>${H.cyc?'هذه الدورة':'هذا الشهر'}</small></button>
    <button class="hv2-t t-exp" data-tab="monthly"><span class="hv2-ti">${hv2i('due')}</span><span class="hv2-tl">الالتزامات القادمة</span><b class="num">${money(H.up)}</b><small>${H.nUp?countWord(H.nUp,'بند واحد','بندان','بنود','بندًا')+(H.cyc?' قبل الراتب':''):'لا شيء متبقٍ'}</small></button>
    <button class="hv2-t t-pr" data-hfexp="1"><span class="hv2-ti">${hv2i('trend')}</span><span class="hv2-tl">المتوقع قبل الراتب</span><b class="num ${H.proj<0?'amt-exp':''}">${money(H.proj)}</b><small>${H.proj<0?'⚠️ عجز متوقع':'بعد الالتزامات والادخار'}</small></button></div>
   ${dp&&dp.has?`<div class="hv2-3 hv2-rings"><button class="hv2-r r-day" data-hfday="1"><b>خطة اليوم</b><small>${esc(DAYS[dt.getDay()])} ${dt.getDate()}/${dt.getMonth()+1}</small>${hv2Ring(dayP,'g'+(dayP>100?' over':''))}<b class="num">${money(dp.spentToday||0)}</b><small>${dp.daily>0.0005?'من حد '+money(dp.daily):'لا حد يومي متاح'}</small></button>
    <button class="hv2-r r-wk" data-tab="log"><b>هذا الأسبوع</b><small>${+wsA.slice(8)}/${+wsA.slice(5,7)} – ${dt.getDate()}/${dt.getMonth()+1}</small>${hv2Ring(wkP,'b'+(wkP>100?' over':''))}<b class="num">${money(wkSpent)}</b><small>${wkCap>0.0005?'من '+money(wkCap):'المصروف المتغير'}</small></button>
    <button class="hv2-r r-mo" data-tab="mbud"><b>هذا الشهر</b><small>${esc(mShort(m))}</small>${hv2Ring(mP,'v'+(mP>100?' over':''))}<b class="num">${money(MF.exp)}</b><small>${mBase>0?'من '+(Bud?'الميزانية ':'الدخل ')+money(mBase):'سجّل دخلك'}</small></button></div><button class="hv2-link" data-spend="1">🏦 كم أستطيع أن أنفق حسب أرصدة حساباتي ‹</button>`:''}
-  ${safe('الرصيد اليومي',()=>blHomeHtml())}
+  ${safe('معاملات الشهر',()=>hmTxHtml())}${safe('حسب البند',()=>hmCatsHtml())}
   ${hqOn()?`<section class="hv2-card hv2-q"><div class="hv2-h">${hv2i('bolt',16)} العمليات السريعة</div><div class="hv2-qg">${Q.map(([k,ic,n,c])=>`<button class="hv2-qb" data-hq="${k}"><span class="${c}">${hv2i(ic)}</span>${n}</button>`).join('')}</div></section>`:''}
-  <div class="hv2-2"><section class="hv2-card hv2-att"><div class="hv2-h">تحتاج انتباهك ${att.length?`<span class="hv2-n">${att.length}</span>`:''}</div>${att.length?att.slice(0,4).map(x=>`<button class="hv2-ar${x.late?' late':''}" ${x.at}><span class="hv2-ai">${hv2i(x.ic,15)}</span><span><b>${esc(x.t)}</b><small>${esc(x.s)}</small></span></button>`).join('')+(att.length>4?`<button class="linkbtn" data-tab="monthly">+${att.length-4} أخرى</button>`:''):'<p class="note" style="margin:0">✓ لا شيء عاجل خلال أسبوع</p>'}</section>
-   <section class="hv2-card hv2-rc"><div class="hv2-h">آخر العمليات</div>${recent.length?recent.map(t=>`<button class="hv2-tx" data-edit="${esc(t.id)}"><span>${esc(t.note||catOf(t.cat).n)} <small>${+t.date.slice(8)}/${+t.date.slice(5,7)}</small></span><b class="num ${t.type==='inc'?'amt-inc':'amt-exp'}">${t.type==='inc'?'+':'−'}${money(t.amount)}</b></button>`).join(''):'<p class="note" style="margin:0">لا عمليات بعد</p>'}<button class="linkbtn" data-tab="log">عرض كل العمليات</button></section></div>`}
+  <div class="hv2-1"><section class="hv2-card hv2-att"><div class="hv2-h">تحتاج انتباهك ${att.length?`<span class="hv2-n">${att.length}</span>`:''}</div>${att.length?att.slice(0,4).map(x=>`<button class="hv2-ar${x.late?' late':''}" ${x.at}><span class="hv2-ai">${hv2i(x.ic,15)}</span><span><b>${esc(x.t)}</b><small>${esc(x.s)}</small></span></button>`).join('')+(att.length>4?`<button class="linkbtn" data-tab="monthly">+${att.length-4} أخرى</button>`:''):'<p class="note" style="margin:0">✓ لا شيء عاجل خلال أسبوع</p>'}</section></div>`}
 
 /* صفحة الرئيسية الجديدة: الجزء العلوي الجديد ثم بقية الأقسام كما هي */
 function hv2Page(m,pc,inc,exp,left,lastInc,empty){
   return `<div class="hv2">${homeV2Html(m)}</div>${safe('الادخار المحمي',()=>svlHtml(m,'home'))}${safe('ميزانية الأسبوع',()=>wkHtml('home'))}${m===curM()?safe('أيام بلا صرف',()=>nsHomeHtml()):''}${(()=>{try{return odoBannerHtml()}catch(e){return ''}})()}
    ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}
    <div class="srchpin hv2-srch"><button class="srchbar" data-search="1" aria-label="بحث في التطبيق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>ابحث في عملياتك وديونك والتزاماتك…</span></button></div>
-   ${safe('البطاقات',()=>homeCarHtml(m,pc,inc,exp,left))}${safe('الرسم',()=>homeChartHtml(m,pc))}${rescueHomeHtml()}${homeAttnHtml(true)}${homeTiles([bizKnown()?'<button class="xphome" data-biz=""><span>💼</span><span><b>مشروعي</b><small>مبيعات وأرباح ومخزون «الزمرة الملكية» في مكان واحد</small></span><span class="xph-go">‹</span></button>':'',(()=>{try{return fuelQuickHtml('home')}catch(e){return ''}})(),(leanOn()?'':'<button class="xphome" data-merch=""><span>📍</span><span><b>الجهات والمحلات</b><small>كم صرفت في كل محطة ومحل: أسبوع، شهر، سنة</small></span><span class="xph-go">‹</span></button>'),(leanOn()?'':'<button class="xphome" data-prio="1"><span>🧭</span><span><b>الأولويات وخطة الديون</b><small>ماذا أدفع أولًا، وأسرع طريق للتحرر من الديون</small></span><span class="xph-go">‹</span></button>'),revHomeHtml(),safe('التصنيف',()=>ckHomeHtml()),xpHomeHtml(),ppHomeHtml(),safe('التوقعات',()=>fcHomeHtml()),seasHomeHtml(),subsHomeHtml(),list().some(t=>t.src==='stmt')&&!leanOn()?'<button class="stbtn sm" data-bana="1"><span>📊</span><span><b>تحليل الكشوفات</b><small>كل بنوكك · خطة الشهر القادم</small></span><span class="xph-go">‹</span></button>':(hqOn()||leanOn()?'':'<button class="stbtn sm" data-stmt="1"><span>🏦</span><span><b>استيراد كشف البنك</b><small>أضف عمليات الشهر بضغطة</small></span><span class="xph-go">‹</span></button>')])}
+   ${safe('الرسم',()=>homeChartHtml(m,pc))}${rescueHomeHtml()}${homeAttnHtml(true)}${homeTiles([bizKnown()?'<button class="xphome" data-biz=""><span>💼</span><span><b>مشروعي</b><small>مبيعات وأرباح ومخزون «الزمرة الملكية» في مكان واحد</small></span><span class="xph-go">‹</span></button>':'',(()=>{try{return fuelQuickHtml('home')}catch(e){return ''}})(),(leanOn()?'':'<button class="xphome" data-merch=""><span>📍</span><span><b>الجهات والمحلات</b><small>كم صرفت في كل محطة ومحل: أسبوع، شهر، سنة</small></span><span class="xph-go">‹</span></button>'),(leanOn()?'':'<button class="xphome" data-prio="1"><span>🧭</span><span><b>الأولويات وخطة الديون</b><small>ماذا أدفع أولًا، وأسرع طريق للتحرر من الديون</small></span><span class="xph-go">‹</span></button>'),revHomeHtml(),safe('التصنيف',()=>ckHomeHtml()),xpHomeHtml(),ppHomeHtml(),safe('التوقعات',()=>fcHomeHtml()),seasHomeHtml(),subsHomeHtml(),list().some(t=>t.src==='stmt')&&!leanOn()?'<button class="stbtn sm" data-bana="1"><span>📊</span><span><b>تحليل الكشوفات</b><small>كل بنوكك · خطة الشهر القادم</small></span><span class="xph-go">‹</span></button>':(hqOn()||leanOn()?'':'<button class="stbtn sm" data-stmt="1"><span>🏦</span><span><b>استيراد كشف البنك</b><small>أضف عمليات الشهر بضغطة</small></span><span class="xph-go">‹</span></button>')])}
    ${spiritHtml('mid')}${rzHtml('mid')}${empty}${debtsBrowseHtml()}${plansHomeHtml()}${finStatusHtml()}${advHomeHtml()}${repHomeHtml()}${spiritHtml('bottom')}${rzHtml('bottom')}
    <div class="hv2-back"><button class="chip" data-hstyle="classic">↩️ العودة لتصميم الرئيسية السابق</button></div>`}
 function vHome(){
@@ -1608,6 +1609,83 @@ function vHome(){
    ${recent.length?`<h2>آخر العمليات</h2><div class="panel" style="padding:6px 10px">${recent.map(txRow).join('')}</div><div style="margin-top:8px"><button class="chip" data-tab="log">عرض كل العمليات</button></div>`:''}${debtsBrowseHtml()}${plansHomeHtml()}${finStatusHtml()}${advHomeHtml()}${repHomeHtml()}${spiritHtml('bottom')}${rzHtml('bottom')}`;
 }
 
+/* ===================== 2.138: الرئيسية المالية =====================
+ * ثلاث خانات في الرئيسية الجديدة (للشهر الحالي):
+ *  1) 💰 رصيدي الآن (hmBalHtml): الرصيد مرة واحدة فقط مع كل حساب والأبناء ورصيد الصباح وصافي الثروة.
+ *     تحل محل: «حساباتي وحسابات الأبناء»، و«رصيد صباح اليوم»، وبطاقة «صافي ثروتك» في الرئيسية.
+ *  2) 📒 معاملات الشهر (hmTxHtml): مربع يتمرر داخله، فيه كل السحوبات والإيداعات مجمّعة باليوم، ويُفتح في نافذة كاملة (openHmTx).
+ *     يحل محل «آخر العمليات».
+ *  3) 🧾 مصاريف الشهر حسب البند (hmCatsHtml): وقود، بقالة، الالتزامات… تتحدّث تلقائيًا مع كل عملية أو رسالة بنك.
+ * الأرقام كلها من نفس المصادر: monthFlow (الفترة)، inRange (العمليات)، accTotals/beAll (الأرصدة)، recStatus (الالتزامات).
+ * الصفوف بـ txRowBase نفسها في السجل، فالضغط على أي عملية يفتح تعديلها كالمعتاد. */
+const HM={f:'all'};
+const HM_PIN=['fuel','food','rest'];// تظهر أولًا متى صُرف فيها خلال 3 أشهر
+function hmRange(){const MF=monthFlow(S.month);return {from:MF.from,to:MF.to,pc:MF.pc,lbl:MF.pc?'دورة الراتب '+fmtDs(MF.pc.start)+' – '+fmtDs(MF.pc.end):mShort(S.month)}}
+function fmtDs(iso){const d=new Date(iso+'T12:00');return d.getDate()+'/'+(d.getMonth()+1)}
+function hmTxAll(){const R=hmRange();return inRange(R.from,R.to,true).sort((x,y)=>(y.date+(y.createdAt||'')).localeCompare(x.date+(x.createdAt||'')))}
+function hmPass(t,f,cat,q){if(cat&&(t.cat!==cat||t.own||t.type!=='exp'))return false;if(f==='exp'&&(t.type!=='exp'||t.own))return false;if(f==='inc'&&(t.type!=='inc'||t.own))return false;
+  if(q){const s=sNorm((t.note||'')+' '+catOf(t.cat).n+' '+(t.acc?accName(t.acc):'')+' '+t.amount);if(!sNorm(q).split(/\s+/).every(w=>s.includes(w)))return false}return true}
+function hmSums(A){const o=A.filter(t=>!t.own);const ex=o.filter(t=>t.type==='exp'),inc=o.filter(t=>t.type==='inc');return {out:r3(sum(ex,'exp')),nOut:ex.length,in:r3(sum(inc,'inc')),nIn:inc.length}}
+function hmDayLbl(d){const td=today();if(d===td)return 'اليوم';if(d===addDays(td,-1))return 'أمس';const x=new Date(d+'T12:00');return DAYS[x.getDay()]+' '+x.getDate()+' '+MONTHS[x.getMonth()]}
+/* القائمة مجمّعة باليوم، لكل يوم مجموع سحوباته وإيداعاته */
+function hmListHtml(A){if(!A.length)return '<p class="note hm-empty">لا معاملات هنا بعد.</p>';const G=new Map();A.forEach(t=>{if(!G.has(t.date))G.set(t.date,[]);G.get(t.date).push(t)});
+  return [...G].map(([d,L])=>{const s=hmSums(L);return `<div class="hm-day"><div class="hm-dh"><b>${esc(hmDayLbl(d))}</b>${L.length>1?`<span>${s.nOut?`<i class="amt-exp num">−${money(s.out)}</i>`:''}${s.nIn?`<i class="amt-inc num">+${money(s.in)}</i>`:''}</span>`:''}</div>${L.map(t=>{const r=txRowBase(t);return t.own?r.replace('class="tx"','class="tx hm-own"'):r}).join('')}</div>`}).join('')}
+function hmSegHtml(f,A){const s=hmSums(A);return `<div class="hm-sum" role="group" aria-label="تصفية المعاملات">
+  <button class="hm-s s-all" data-hmf="all" aria-pressed="${f==='all'}"><span>الكل</span><b class="num">${A.length}</b><small>عملية</small></button>
+  <button class="hm-s s-exp" data-hmf="exp" aria-pressed="${f==='exp'}"><span>⬆️ سحوبات</span><b class="num">−${money(s.out)}</b><small>${countWord(s.nOut,'عملية واحدة','عمليتان','عمليات','عملية')}</small></button>
+  <button class="hm-s s-inc" data-hmf="inc" aria-pressed="${f==='inc'}"><span>⬇️ إيداعات</span><b class="num">+${money(s.in)}</b><small>${countWord(s.nIn,'عملية واحدة','عمليتان','عمليات','عملية')}</small></button></div>`}
+function hmTxHtml(){const R=hmRange();const all=hmTxAll();const A=all.filter(t=>hmPass(t,HM.f));
+  return `<section class="hm-card hm-tx" id="hmTx"><div class="hm-h"><span class="hm-t"><b>📒 معاملات الشهر</b><small>${esc(R.lbl)}</small></span><button class="hm-x" data-hmfull="1" aria-label="فتح كل المعاملات في نافذة"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button></div>
+   ${hmSegHtml(HM.f,all)}<div class="hm-scroll" tabindex="0" aria-label="قائمة معاملات الشهر">${hmListHtml(A)}</div>
+   <div class="hm-foot"><button class="linkbtn" data-hmfull="1">فتح في نافذة كاملة ⤢</button><button class="linkbtn" data-open-add>＋ إضافة عملية</button></div></section>`}
+/* النافذة الكاملة: نفس القائمة بلا حد للارتفاع، مع البحث، وتصفية بند واحد عند فتحها من «حسب البند» */
+function openHmTx(f,cat){const L=document.getElementById('layer');let flt=f||HM.f,q='';const R=hmRange();
+  const draw=keepQ=>{const all=hmTxAll().filter(t=>!cat||hmPass(t,'exp',cat));const A=all.filter(t=>hmPass(t,cat?'exp':flt,cat,q));const c=cat?catOf(cat):null;
+   const body=`${cat?`<div class="hm-cath"><span class="ic" style="background:${c.c}1f;color:${c.c}">${catIcon(cat)}</span><span><b>${esc(c.n)}</b><small>${esc(R.lbl)} · ${countWord(A.length,'عملية واحدة','عمليتان','عمليات','عملية')}</small></span><b class="num amt-exp">−${money(sum(A,'exp'))}</b></div>`:hmSegHtml(flt,all)}
+    <input class="inp hm-q" id="hmQ" type="search" placeholder="🔍 ابحث: محل، بند، مبلغ…" value="${esc(q)}" aria-label="بحث في المعاملات">
+    <div class="hm-full">${hmListHtml(A)}</div>`;
+   if(keepQ){const w=document.getElementById('hmBody');if(w){w.innerHTML=body;const i=document.getElementById('hmQ');if(i){i.focus();const n=i.value.length;try{i.setSelectionRange(n,n)}catch(e){}}return}}
+   L.innerHTML=`${sheetTop(cat?catOf(cat).n:'معاملات الشهر')}<h2 style="margin-top:0" data-nofold>${cat?'🧾 '+esc(catOf(cat).n.split(' (')[0]):'📒 معاملات الشهر'}</h2><p class="note" style="margin-top:-6px">${esc(R.lbl)}</p><div id="hmBody">${body}</div><div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
+   const sh=L.querySelector('.sheet');if(sh)sh.classList.add('hm-sheet')};
+  draw();L.onchange=null;L.onkeydown=null;
+  L.oninput=e=>{if(e.target.id==='hmQ'){q=e.target.value;draw(true)}};
+  L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+   if(x.dataset.hmf){flt=x.dataset.hmf;draw(true);return}
+   if(x.dataset.edit){const t=S.tx[x.dataset.edit];if(t)openSheet(t);return}}}
+/* 🧾 حسب البند */
+function hmCatsHtml(){const R=hmRange();const A=inRange(R.from,R.to).filter(t=>t.type==='exp');
+  // نفس الفترة من الشهر الماضي للمقارنة العادلة (حتى نفس اليوم)
+  const days=dDiff(R.from,today()<R.to?today():R.to);const pF=R.pc?addDays(R.from,-(dDiff(R.from,R.to)+1)):mStart(shiftMonth(S.month,-1));const pT=addDays(pF,days);const P=inRange(pF,pT).filter(t=>t.type==='exp');
+  const recent=inRange(addDays(R.from,-92),R.to).filter(t=>t.type==='exp');
+  const by={};A.forEach(t=>{(by[t.cat]=by[t.cat]||[]).push(t)});
+  const ids=[...new Set([...HM_PIN.filter(id=>recent.some(t=>t.cat===id)),...Object.keys(by).sort((a,b)=>sum(by[b],'exp')-sum(by[a],'exp'))])];
+  const bud=S.settings.budgets||{};
+  const tile=id=>{const L=by[id]||[];const v=r3(sum(L,'exp'));const c=catOf(id);const pv=r3(sum(P.filter(t=>t.cat===id),'exp'));const b=+bud[id]||0;const last=L.slice().sort((x,y)=>(y.date+(y.createdAt||'')).localeCompare(x.date+(x.createdAt||'')))[0];
+   const ch=pv>0.0005?Math.round((v-pv)/pv*100):null;const bp=b>0?Math.min(100,v/b*100):null;
+   return `<button class="hm-ct" data-hmcat="${esc(id)}" style="--cc:${c.c}"><span class="hm-ci">${catIcon(id)}</span><span class="hm-cn">${esc(c.n.split(' (')[0])}</span>
+    <b class="num">${money(v)}</b><small>${L.length?countWord(L.length,'عملية واحدة','عمليتان','عمليات','عملية'):'لا شيء بعد'}${ch!==null&&L.length&&Math.abs(ch)>=1?` · <i class="${ch>0?'amt-exp':'amt-inc'}" title="مقارنة بنفس الفترة من الشهر الماضي"><bdi dir="ltr">${ch>0?'▲':'▼'} ${Math.abs(ch)}%</bdi> عن الماضي</i>`:''}</small>
+    ${bp!==null?`<i class="hm-cb${v>b?' over':''}"><em style="width:${bp}%"></em></i><small class="hm-cl">من ميزانية ${money(b)}</small>`:last?`<small class="hm-cl">آخرها: ${esc((last.note||'').slice(0,18)||hmDayLbl(last.date))}</small>`:''}</button>`};
+  let rec='';try{const st=recStatus(S.month);if(st.R.length){const pct=st.total?Math.min(100,Math.round(st.paidAmt/st.total*100)):0;const late=st.R.some(i=>!i.isPaid&&i.date&&i.date<today());
+   rec=`<button class="hm-ct hm-rec${late?' late':''}" data-tab="monthly" style="--cc:#8A4F7D"><span class="hm-ci">🔁</span><span class="hm-cn">الالتزامات الشهرية</span><b class="num">${money(st.paidAmt)}</b><small>دُفع من ${money(st.total)}${st.left?' · باقٍ '+st.left:' · ✓ كلها'}</small><i class="hm-cb"><em style="width:${pct}%"></em></i><small class="hm-cl">${late?'⚠️ يوجد متأخر':st.left?'باقٍ '+money(st.dueLeft):'لا شيء متبقٍ'}</small></button>`}}catch(e){}
+  if(!ids.length&&!rec)return '';const tot=r3(sum(A,'exp'));
+  return `<section class="hm-card hm-cats"><div class="hm-h"><span class="hm-t"><b>🧾 مصاريف الشهر حسب البند</b><small>${esc(R.lbl)} · المجموع ${money(tot)} ${CUR}</small></span><button class="linkbtn" data-tab="reports">التقارير ‹</button></div>
+   <div class="hm-cg">${rec}${ids.map(tile).join('')}</div><p class="note hm-tip">تتحدّث تلقائيًا مع كل عملية أو رسالة بنك. البند يُعرف من اسم المحل (مثل Shell أو لولو)، وإذا غيّرت بند عملية يتذكّره التطبيق للمرات القادمة.</p></section>`}
+/* 💰 رصيدي الآن: يُلحق ببطاقة الرصيد العلوية (hv2-main) فيصيران خانة واحدة */
+function hmAccsHtml(){const D=haData();let bl=null;try{bl=blTodayAuto()}catch(e){}let N=null;try{N=netWorthData()}catch(e){}
+  /* الرصيد يظهر مرة واحدة فقط في الأعلى؛ هنا ما يضيف معلومة: التغيّر منذ الصباح، صافي الثروة إن اختلف، الأبناء */
+  const cells=[];if(bl&&D){const dv=r3(D.E.total-bl.v);cells.push(`<button class="hm-st" data-ballog="1"><span>☀️ منذ الصباح</span><b class="num ${dv<-0.0005?'amt-exp':dv>0.0005?'amt-inc':''}">${dv>0.0005?'+':dv<-0.0005?'−':''}${money(Math.abs(dv))}</b><small>${Math.abs(dv)>0.0005?'كان '+money(bl.v):'لم يتغيّر'}</small></button>`)}
+  if(N&&(N.debt>0.0005||N.gold>0.0005)){const H=N.hist;const ch=H.length>1?r3(H[H.length-1].v-H[0].v):0;cells.push(`<button class="hm-st" data-acc="1"><span>💎 صافي الثروة</span><b class="num ${N.net<0?'amt-exp':''}">${N.net<0?'−':''}${money(Math.abs(N.net))}</b><small class="${ch>=0?'amt-inc':'amt-exp'}">${ch>=0?'▲':'▼'} ${money(Math.abs(ch))} في 6 أشهر</small></button>`)}
+  if(D&&D.K.length)cells.push(`<button class="hm-st" data-kidsopen="1"><span>👨‍👧 الأبناء</span><b class="num">${money(D.kt)}</b><small>العائلة ${money(r3(D.E.total+D.kt))}</small></button>`);
+  const y=bl&&bl.y&&bl.y.diff>0.5?`<button class="hm-warn" data-ballog="1">⚠️ ${bl.y.days>1?'آخر '+countWord(bl.y.days,'يوم','يومين','أيام','يومًا'):'أمس'} نقصت أرصدتك ${money(bl.y.diff)} أكثر مما سجّلت. اضغط للمراجعة</button>`:'';
+  const has=D&&(D.A.length||D.K.length);
+  return `<div class="hm-accs">${cells.length?`<div class="hm-sts">${cells.join('')}</div>`:''}${y}
+   ${has?`${D.A.length?`<div class="hm-gh"><span>حساباتي (${D.A.length})</span></div>${D.mine}`:''}${D.K.length?`<div class="hm-gh"><span>حسابات الأبناء</span><b class="num">${money(D.kt)}</b></div>${D.kids}`:''}`:`<p class="note" style="margin:6px 0">أضف حساباتك البنكية ليُحسب رصيدك منها تلقائيًا.</p>`}
+   <div class="chips hm-act"><button class="chip" data-beng="1">🏦 حساباتي وأرصدتي</button><button class="chip" data-haxfer="1">↔️ تحويل لابن</button><button class="chip" data-kidsopen="new">＋ ابن / ابنة</button>${D&&D.K.length?'<button class="chip" data-kidsopen="1">✏️ تعديل حسابات الأبناء</button>':''}<button class="chip" data-ballog="1">📒 سجل الرصيد</button></div></div>`}
+/* أزرار التصفية والنافذة والبنود (في الرئيسية؛ داخل النوافذ تعالجها النافذة نفسها) */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-hmf],[data-hmfull],[data-hmcat]');if(!b||!b.isConnected||b.closest('#layer'))return;
+  if(b.dataset.hmf){HM.f=b.dataset.hmf;const box=document.getElementById('hmTx');if(box){const w=document.createElement('div');w.innerHTML=hmTxHtml();box.replaceWith(w.firstElementChild)}return}
+  if(b.dataset.hmfull){openHmTx(HM.f);return}
+  if(b.dataset.hmcat){openHmTx('exp',b.dataset.hmcat);return}});
 /* ===== الفرز الموحّد: الأحدث، الأقدم، الأكبر، الأصغر، أ–ي، الفئة ===== */
 const AR_COLL=new Intl.Collator('ar',{sensitivity:'base',numeric:true});
 const azCmp=(a,b)=>AR_COLL.compare(String(a||''),String(b||''));
@@ -5363,9 +5441,9 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-lockmgr]')
 setTimeout(lockMenuBtn,0);
 /* ---------- 21. قراءة رسائل البنك ---------- */
 const KW={
- food:['lulu','لولو','carrefour','كارفور','nesto','نستو','al fair','الفير','hypermarket','supermarket','سوبرماركت','هايبر','بقالة','grocery','safeer','سفير','khimji','ramez','رامز','bakery','مخبز'],
+ food:['al meera','الميرة','sultan center','مركز سلطان','megamart','ميجامارت','km trading','choithram','mini market','ميني ماركت','baqala','dukan','lulu','لولو','carrefour','كارفور','nesto','نستو','al fair','الفير','hypermarket','supermarket','سوبرماركت','هايبر','بقالة','grocery','safeer','سفير','khimji','ramez','رامز','bakery','مخبز'],
  rest:['cafe','café','coffee','كافيه','مقهى','قهوة','restaurant','مطعم','starbucks','mcdonald','kfc','talabat','طلبات','akeed','pizza','burger','tim hortons','costa','shawarma','شاورما','karak','كرك'],
- fuel:['shell','شل','oman oil','omanoil','al maha','المها','petrol','fuel','وقود','بترول','otaxi','mwasalat','مواصلات','parking','موقف'],
+ fuel:['oomco','اوكمو','oq fuel','oq station','almaha','petrol station','محطة وقود','محطة بترول','shell','شل','oman oil','omanoil','al maha','المها','petrol','fuel','وقود','بترول','otaxi','mwasalat','مواصلات','parking','موقف'],
  bills:['nama','نماء','omantel','عمانتل','ooredoo','اوريدو','أوريدو','vodafone','فودافون','awasr','أوامر','electric','كهرباء','water','مياه','internet','انترنت','إنترنت','mazoon','مزون','majan','مجان','بلدية','municipality'],
  health:['pharmacy','صيدلية','hospital','مستشفى','clinic','عيادة','medical','طبي','dental','أسنان'],
  shop:['amazon','noon','نون','centrepoint','shein','zara','mall','مول','ikea','sharaf','lifestyle','نمشي','namshi','splash','shoes','ملابس'],
@@ -5752,8 +5830,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.137.0';
+const APP_VERSION='2.138.0';
 const CHANGELOG=[
+ {v:'2.138.0',date:'2026-11-25',items:['💰 «رصيدي الآن» في خانة واحدة: رصيدك يظهر مرة واحدة فقط، وتحته حساباتك وحسابات الأبناء، والتغيّر منذ الصباح، وصافي الثروة (حين تختلف عن الرصيد بسبب ديون أو ذهب). حلّت محل أربع خانات كانت تكرر الرقم نفسه.','📒 «معاملات الشهر» في الرئيسية: مربع يتمرر داخله، فيه كل السحوبات والإيداعات مجمّعة باليوم مع مجموع كل يوم. تضغط «سحوبات» أو «إيداعات» للتصفية، و⤢ لفتحها في نافذة كاملة فيها بحث. والضغط على أي عملية يفتح تعديلها.','🧾 «مصاريف الشهر حسب البند»: خانة لكل بند (وقود، بقالة، مطاعم…) وخانة للالتزامات الشهرية (المدفوع والباقي والمتأخر). تتحدّث تلقائيًا مع كل رسالة بنك، وفيها المقارنة بنفس الفترة من الشهر الماضي وشريط الميزانية إن حدّدتها. والضغط على البند يعرض عملياته.','🏷️ يتعرّف على متاجر ومحطات عُمانية أكثر: الميرة، مركز سلطان، ميجامارت، أوكمو، OQ، المها وغيرها.']},
  {v:'2.137.0',date:'2026-11-25',items:['🔐 «قفل التطبيق وبصمة الوجه» في قائمة ☰: نافذة واحدة لتفعيل القفل وإدارته. فيها تشغيل وإيقاف الفتح ببصمة الوجه (Face ID)، وطلب البصمة تلقائيًا، وتغيير الرمز السري، ومتى يُقفل بعد الخروج (فورًا، بعد دقيقة، بعد 5 أو 15 دقيقة)، و«اقفل التطبيق الآن»، وإيقاف القفل.','🛡️ أي تغيير في القفل يحتاج التحقق أولًا ببصمة الوجه أو الرمز الحالي، بما فيه وقت القفل والطلب التلقائي اللذان كانا يتغيران بدون تحقق. الرموز السهلة مثل 1111 أو 1234 مرفوضة، وإيقاف القفل يحتاج ضغطتين.','⚙️ الضبط يعرض حالة القفل ويفتح النافذة نفسها، فخيارات القفل صارت في مكان واحد. وتجده أيضًا في البحث والدليل والكتالوج.']},
  {v:'2.136.0',date:'2026-11-25',items:['🔢 تعديل الحساب من «حساباتي وأرصدتي»: زر «✏️ تعديل» في كل بطاقة حساب، وزر «➕ إضافة حساب بنكي». تعدّل الاسم والبنك والنوع والرصيد الآن، وتضيف أرقام الحساب والبطاقات.','🔗 أرقام الحساب بثلاثة أشكال: كما تظهر في رسالة البنك (1051**017 أو 0311XXXXXXXX0016)، أو الرقم الكامل أو IBAN (يُحفظ ويُنسخ بضغطة)، أو آخر 3–4 أرقام. أي رسالة تحمل الرقم تُسجّل في الحساب تلقائيًا، والرسائل المنتظرة تُسجّل فور الحفظ. الرقم المربوط بحساب آخر لا يُنقل إلا بتأكيدك، ورقم الأبناء المشترك يبقى منفصلًا.','🛠️ نافذة واحدة لتعديل الحساب في كل التطبيق، وإصلاح ضغطة كانت قد تُنفَّذ مرتين عند إعادة رسم النوافذ.']},
  {v:'2.135.0',date:'2026-11-25',items:['🗂️ إعادة ترتيب التطبيق هندسيًا: الكود مقسّم إلى 121 وحدة مرتبة حسب الأقسام (البنك، الأبناء، الالتزامات، التقارير…) مع أداة بناء تفحص كل شيء قبل النشر، واختبارات آلية لكل الأقسام. لا تغيير في بياناتك ولا في طريقة عمل التطبيق.','📖 جديد: «كتالوج التطبيق» — كل مهام التطبيق في صفحات مرتبة وسهلة للمبتدئين: صفحة البداية فيها «ابدأ من هنا» والبحث وكل المجموعات، ثم صفحة لكل مجموعة. لكل مهمة شرح بسيط و«كيف أستخدمها؟»، والضغط على المهمة ينقلك إليها مباشرة. تفتحه من ☰ ← «كتالوج التطبيق» أو من أعلى «كل أقسام التطبيق». تنقّل بالسحب يمينًا ويسارًا أو بزرّي التالي والسابق.','ℹ️ رقم إصدار التطبيق ظاهر دائمًا في آخر قائمة ☰، فتعرف مباشرة أي تحديث عندك. والضغط عليه يفتح «ما الجديد».']},
@@ -7416,15 +7495,19 @@ function kdFamilyHtml(){const K=kdList();if(!K.length)return `<div class="panel 
    <div class="chips"><button class="chip" data-kidsopen="1">إدارة حسابات الأبناء</button><button class="chip" data-kidsopen="new">＋ ابن / ابنة</button></div></div>`}
 
 /* 2.134: بطاقة «حساباتي وحسابات الأبناء» في الرئيسية — قائمة عمودية بكل الأرصدة، وكل سطر يفتح للتعديل */
-function homeAccHtml(){let E;try{E=beAll()}catch(e){return ''}const K=kdList();const A=E.A.filter(x=>x.b!==null||x.a.kind!=='main');if(!A.length&&!K.length)return '';
+/* صفوف الحسابات والأبناء: مصدر واحد للبطاقة القديمة homeAccHtml وبطاقة «رصيدي الآن» (home/home-money.js) */
+function haData(){let E;try{E=beAll()}catch(e){return null}const K=kdList();const A=E.A.filter(x=>x.b!==null||x.a.kind!=='main');
   const kt=r3(K.reduce((s,k)=>s+kdBal(k).tot,0));
   const row=(ic,nm,sub,v,attr,muted)=>`<button class="ha-row" ${attr}><span class="ha-ic">${ic}</span><span class="ha-n"><b>${esc(nm)}</b>${sub?`<small>${sub}</small>`:''}</span><b class="num ha-v${muted?' muted':''}">${v}</b><span class="ha-go">‹</span></button>`;
+  const mine=A.map(x=>row(x.a.kind==='cash'?'💵':'🏦',x.a.name||accName(x.a.id),x.b===null?'لم يصل رصيد بعد':x.A&&x.A.src==='sms'?'من رسالة البنك · '+esc(beTime(x.A)):x.A?'آخر تحديث '+esc(fmtD(x.A.date)):'',x.b===null?'—':money(x.b),'data-haacc="'+esc(x.a.id)+'"',x.b===null)).join('')+(E.svb!==null?row('🐷','حساب الادخار','',money(E.svb),'data-beng="1"'):'');
+  const kids=K.map(k=>{const X=kdStats(k);const mis=X.bank!=null&&Math.abs(X.bank-X.tot)>=0.0005;return row(k.ic,k.name,(k.bank?esc(k.bank)+' · ':'')+(X.bank!=null?(mis?'⚖️ البنك '+money(X.bank)+' · اضغط للمطابقة':'✓ مطابق للبنك'):'أودعت هذا الشهر '+money(X.depM)),money(X.tot),(mis?'data-hakrec="':'data-hakid="')+esc(k.id)+'"')}).join('');
+  return {E,A,K,kt,mine,kids}}
+function homeAccHtml(){const D=haData();if(!D)return '';const {E,A,K,kt}=D;if(!A.length&&!K.length)return '';
   return `<section class="panel ha"><div class="ha-h"><b>🏦 حساباتي وحسابات الأبناء</b><button class="chip" data-beng="1">التفاصيل</button></div>
    <div class="ha-g"><div class="ha-gh"><span>حساباتي</span><b class="num">${money(E.total)}</b></div>
-    ${A.map(x=>row(x.a.kind==='cash'?'💵':'🏦',x.a.name||accName(x.a.id),x.b===null?'لم يصل رصيد بعد':x.A&&x.A.src==='sms'?'من رسالة البنك · '+esc(beTime(x.A)):x.A?'آخر تحديث '+esc(fmtD(x.A.date)):'',x.b===null?'—':money(x.b),'data-haacc="'+esc(x.a.id)+'"',x.b===null)).join('')}
-    ${E.svb!==null?row('🐷','حساب الادخار','',money(E.svb),'data-beng="1"'):''}</div>
+    ${D.mine}</div>
    <div class="ha-g"><div class="ha-gh"><span>حسابات الأبناء</span><b class="num">${money(kt)}</b></div>
-    ${K.map(k=>{const X=kdStats(k);const mis=X.bank!=null&&Math.abs(X.bank-X.tot)>=0.0005;return row(k.ic,k.name,(k.bank?esc(k.bank)+' · ':'')+(X.bank!=null?(mis?'⚖️ البنك '+money(X.bank)+' · اضغط للمطابقة':'✓ مطابق للبنك'):'أودعت هذا الشهر '+money(X.depM)),money(X.tot),(mis?'data-hakrec="':'data-hakid="')+esc(k.id)+'"')}).join('')||'<small class="note">لا حسابات أبناء بعد.</small>'}
+    ${D.kids||'<small class="note">لا حسابات أبناء بعد.</small>'}
     <div class="chips ha-act"><button class="chip" data-kidsopen="new">＋ ابن / ابنة</button>${K.length?'<button class="chip" data-kidsopen="1">✏️ تعديل حسابات الأبناء</button>':''}<button class="chip" data-haxfer="1">↔️ تحويل لابن</button></div></div>
    ${K.length?`<div class="ha-tot"><span>👨‍👩‍👧 مجموع العائلة</span><b class="num">${money(r3(E.total+kt))}</b></div>`:''}</section>`}
 
@@ -7517,7 +7600,7 @@ function bsPrint(){const [a,b]=bsRange();const nm=accName(bsS.acc)||'الحسا�
 /* ===================== 2.131: دليل التطبيق داخل البحث =====================
  * كل أقسام التطبيق وأدواته مرتبة في مجموعات، تضغط أي خانة فتنتقل لها مباشرة. يظهر أعلى صفحة البحث (اسحب الصفحة للأسفل أو زر 🔍). */
 function sDir(){const T=t=>()=>sGoTab(t);return [
- ['💵 أموالي اليومية',[['🏠','الرئيسية','home الرئيسيه',T('home')],['☰','سجل العمليات','سجل العمليات المصاريف',T('log')],['➕','إضافة مصروف أو دخل','اضافه مصروف دخل جديد',()=>openSheet(null,{type:'exp'})],['💰','كم أستطيع أن أنفق اليوم؟','صرف امن انفق اليوم',()=>openSpendToday()],['🏦','حساباتي وأرصدتي','حساب بنك محفظه رصيد ارصده اجمالي المتوفر مطابقه محرك',()=>openBalEngine()],['📆','اختيار الشهر','تقويم شهر',()=>openMonthPicker()]]],
+ ['💵 أموالي اليومية',[['🏠','الرئيسية','home الرئيسيه',T('home')],['☰','سجل العمليات','سجل العمليات المصاريف',T('log')],['📒','معاملات الشهر','سحوبات إيداعات معاملات الشهر كشف حركة الحساب',()=>openHmTx('all')],['➕','إضافة مصروف أو دخل','اضافه مصروف دخل جديد',()=>openSheet(null,{type:'exp'})],['💰','كم أستطيع أن أنفق اليوم؟','صرف امن انفق اليوم',()=>openSpendToday()],['🏦','حساباتي وأرصدتي','حساب بنك محفظه رصيد ارصده اجمالي المتوفر مطابقه محرك',()=>openBalEngine()],['📆','اختيار الشهر','تقويم شهر',()=>openMonthPicker()]]],
  ['📅 الدفع والالتزامات',[['📅','الالتزامات الشهرية','الشهريه فواتير اقساط دفع',T('monthly')],['🗓️','تقويم الدفع','تقويم الدفع مواعيد',()=>openPayCalendar()],['📋','خطة الشهر','خطه الشهر اعتماد تاجيل',()=>openMonthPlan(S.month||curM())],['📊','مخطط السداد','خطه سداد قسط اختياري',()=>openPayPlanner()],['🧭','الأولويات والتخلص من الديون','اولويات ديون كرة الثلج',()=>openPriority()],['🗓️','الخطة المالية الاستثنائية','خطه استثنائيه تاجيل',()=>openXPlans()],['🔁','المصاريف المتكررة والاشتراكات','اشتراكات متكرر منسي',()=>openSubs()],['🛟','خطة الإنقاذ','انقاذ عجز',()=>openRescue()]]],
  ['🎯 الميزانية والادخار',[['🗓️','تجهيز شهر قادم','خطه الشهر القادم استراتيجيه دراسه جدوى اولويات تجهيز ميزانيه مستقبل',()=>openFuturePlan()],['🍩','الميزانية الشهرية','ميزانيه شهريه خطتي',T('mbud')],['🗓️','الميزانية الأسبوعية','ميزانيه اسبوعيه سقف',()=>openWkSet()],['💰','الادخار الذكي','ادخار ذكي اهداف',T('smartsav')],['🔒','الادخار المحمي','ادخار محمي',()=>openSvlSet()],['📆','المصاريف الموسمية','رمضان العيد مدارس موسمي',()=>openSeasonal()],['👧','حسابات الأبناء','ابناء ميرة ملهم حصالة تحدي',()=>openKids()],['🪙','الذهب','ذهب سعر زكاة',()=>openGold()],['✈️','وضع السفر','سفر رحلة عملة',()=>openTravel()]]],
  ['📊 التقارير والتحليل',[['📊','التقارير الشهرية والسنوية','تقرير احصائيات',T('reports')],['📅','تقويم المصروف','تقويم ايام اسابيع مقارنه توقع',()=>openSpendCal('month',curM())],['📈','التوقعات ومقارنة الأشهر','توقع مقارنه الاشهر',()=>openMonthFc()],['📬','التقارير الدورية','تقرير يومي اسبوعي شهري سنوي',()=>openPeriodRep('week')],['🗓️','مراجعة الأسبوع','مراجعه اسبوعيه',()=>openWkReview()],['📋','مراجعة الشهر','مراجعه نهايه الشهر اقفال',()=>openReview()],['🧠','عاداتي في الصرف','بلا صرف سبب الشراء انتظر',()=>openHabits('ns')],['📍','الجهات والمحلات','محلات محطه مطعم',()=>openMerch()],['🖨️','طباعة تقرير','طباعه pdf',()=>openPrintSheet()],['📧','إرسال التقارير بالإيميل','ايميل gmail',()=>openEmailRep()]]],
@@ -7580,6 +7663,7 @@ const CAT_SELF='كتالوج التطبيق';
 const CAT_INFO={
  'الرئيسية':['ملخص يومك: رصيدك، ما صرفته، والقادم عليك.','اضغط 🏠 في الشريط السفلي في أي وقت للعودة.'],
  'سجل العمليات':['كل مصاريفك ودخلك مرتبة بالتاريخ، مع البحث والفرز.','اضغط أي عملية لتعديلها، واسحبها لحذفها.'],
+ 'معاملات الشهر':['كل سحوباتك وإيداعاتك هذا الشهر مجمّعة باليوم، مع البحث.','اضغط «سحوبات» أو «إيداعات» للتصفية، وأي عملية لتعديلها.'],
  'إضافة مصروف أو دخل':['تسجّل مصروفًا أو دخلًا جديدًا في ثوانٍ.','اكتب المبلغ، اختر الفئة، ثم «حفظ».'],
  'كم أستطيع أن أنفق اليوم؟':['يحسب لك المبلغ الآمن لصرفه اليوم حتى نزول الراتب.','افتحها صباحًا والتزم بالرقم الظاهر.'],
  'حساباتي وأرصدتي':['رصيد كل حساب بنكي ومحفظة، والمجموع الحقيقي بدون تكرار.','طابق رصيد أي حساب برصيد البنك بضغطة.'],

@@ -2967,3 +2967,57 @@ details.bxg[open]{padding-bottom:12px}
 .lm-after{padding:12px 0 8px}.lm-after b{display:block;margin-bottom:8px;font-size:14px}
 .lm-msg{margin:10px 2px 0;font-size:13px;color:var(--inc)}.lm-err{color:var(--exp);margin:0 0 6px;min-height:0}.lm-err:empty{display:none}
 .actions .btn.lm-off{color:var(--exp)}
+/* 2.138 الرئيسية المالية (home/home-money.js): رصيدي الآن · معاملات الشهر · حسب البند */
+/* 💰 بطاقة الرصيد والحسابات خانة واحدة */
+.hm-bal{border-radius:24px;background:var(--surface);box-shadow:0 10px 24px rgb(0 0 0 / .14);overflow:hidden}
+.hm-bal>.hv2-main{border-radius:24px 24px 18px 18px;box-shadow:none}
+.hm-accs{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px}
+.hm-sts{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:6px;margin-bottom:2px}
+.hm-st{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--fg);font:inherit;text-align:start;min-width:0}
+.hm-st span{font-size:11.5px;color:var(--muted);white-space:nowrap}.hm-st b{font-size:15px}.hm-st small{font-size:10.5px}
+.hm-warn{border:0;border-radius:12px;padding:8px 10px;background:color-mix(in srgb,var(--exp) 12%,transparent);color:var(--exp);font:inherit;font-size:12.5px;text-align:start;line-height:1.6}
+.hm-gh{display:flex;justify-content:space-between;align-items:baseline;padding:6px 4px 2px;font-size:12.5px;color:var(--muted)}.hm-gh b{color:var(--fg);font-size:13.5px}
+.hm-accs .ha-row{padding:8px 10px}
+.hm-act{margin-top:6px}
+/* بطاقات الخانات */
+.hm-card{background:var(--surface);border-radius:20px;padding:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;min-width:0}
+.hm-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.hm-t{display:flex;flex-direction:column;min-width:0}.hm-t b{font-size:15px}.hm-t small{color:var(--muted);font-size:12px}
+.hm-x{flex:none;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--fg)}
+/* 📒 معاملات الشهر */
+.hm-sum{display:grid;grid-template-columns:.8fr 1fr 1fr;gap:6px}
+.hm-s{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:8px 10px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface-2);color:var(--fg);font:inherit;text-align:start;min-width:0;transition:border-color .15s,background .15s}
+.hm-s span{font-size:11.5px;color:var(--muted);white-space:nowrap}.hm-s b{font-size:14px;white-space:nowrap}.hm-s small{font-size:10.5px;color:var(--muted)}
+.hm-s.s-exp b{color:var(--exp)}.hm-s.s-inc b{color:var(--inc)}
+.hm-s[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.hm-scroll{height:340px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:0 8px;scroll-snap-type:none}
+.hm-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hm-day+.hm-day{margin-top:2px}
+.hm-dh{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 4px 6px;background:var(--bg);font-size:12.5px}
+.hm-dh b{font-weight:700}.hm-dh span{display:flex;gap:10px}.hm-dh i{font-style:normal;font-size:12px}
+.hm-day .tx:first-of-type{border-top:0}
+.hm-own{opacity:.62}
+.hm-empty{text-align:center;padding:40px 0}
+.hm-foot{display:flex;justify-content:space-between}
+/* النافذة الكاملة */
+.hm-sheet .in{min-height:min(88vh,760px)}
+.hm-q{width:100%;box-sizing:border-box;margin:10px 0;font-size:16px}
+.hm-full{padding:0 4px}
+.hm-cath{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:var(--surface-2)}
+.hm-cath .ic{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;font-size:20px}
+.hm-cath>span:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column}.hm-cath small{color:var(--muted);font-size:12px}
+/* 🧾 حسب البند */
+.hm-cg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.hm-ct{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:11px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(160deg,color-mix(in srgb,var(--cc) 11%,var(--surface)),var(--surface) 70%);color:var(--fg);font:inherit;text-align:start;min-width:0;overflow:hidden}
+.hm-ct:active{transform:scale(.98)}
+.hm-ci{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:color-mix(in srgb,var(--cc) 18%,transparent);color:var(--cc);font-size:18px}
+.hm-ci svg{width:19px;height:19px}
+.hm-cn{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.hm-ct>b{font-size:17px}.hm-ct>small{font-size:11px;color:var(--muted)}.hm-ct>small i{font-style:normal;font-weight:700}
+.hm-cl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.hm-cb{display:block;width:100%;height:5px;border-radius:9px;background:var(--line);overflow:hidden;margin-top:3px}
+.hm-cb em{display:block;height:100%;border-radius:9px;background:var(--cc)}.hm-cb.over em{background:var(--exp)}
+.hm-rec.late{border-color:color-mix(in srgb,var(--exp) 45%,var(--line))}
+.hm-tip{margin:0;font-size:11.5px}
+.hv2-1{display:grid;grid-template-columns:1fr;gap:8px}
+@media (max-width:350px){.hm-sum{grid-template-columns:1fr 1fr}.hm-sum .s-all{grid-column:1/-1;flex-direction:row;gap:6px;align-items:baseline}}
