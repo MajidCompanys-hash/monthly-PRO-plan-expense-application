@@ -5359,8 +5359,10 @@ function smsNonTx(t){const s=String(t||'');
 function c4Key(t){const s=String(t||'');const m=/(?:a\/c|account|acct|card|حساب|بطاقة)?[^\d\n]{0,25}?\b(\d{2,8})[*xX•#]{2,}(\d{3,4})\b/i.exec(s);return m?m[1]+'*'+m[2]:''}
 function c4Tail(k){return String(k||'').includes('*')?String(k).split('*')[1]:String(k||'')}
 function c4Lbl(k){k=String(k||'');return k.includes('*')?k.replace('*','**'):'••'+k}
+/* للعرض داخل HTML: الرقم بعزل اتجاه حتى لا ينقلب داخل النص العربي («1050**017» وليس «017**1050»). لا تستعمله داخل value أو title */
+function c4H(k){return '<bdi class="num" dir="ltr">'+esc(c4Lbl(k))+'</bdi>'}
 function c4Seen(k){if(!String(k).includes('*'))return;const [p,t]=k.split('*');const S0=S.settings.c4seen||{};const L=S0[t]||[];if(!L.includes(p)){S.settings.c4seen=Object.assign({},S0,{[t]:L.concat([p]).slice(-6)})}}
-function c4Map(k){if(!k)return null;const M=S.settings.card4Acc||{};if(M[k])return M[k];k=String(k);if(!k.includes('*'))return M[k]||null;const [p,t]=k.split('*');
+function c4Map(k){if(!k)return null;const M=S.settings.card4Acc||{};if(M[k])return M[k];k=String(k);{const f=c4Full(k);if(f)return f}/* 2.136: الرقم الكامل المحفوظ في الحساب */if(!k.includes('*'))return M[k]||null;const [p,t]=k.split('*');
   const seenP=[...new Set(((S.settings.c4seen||{})[t]||[]).concat([p]))];const unres=seenP.filter(x=>!M[x+'*'+t]);
   /* الربط القديم بآخر الأرقام يبقى صالحًا فقط إذا كان هذا الرقم هو الوحيد بهذه النهاية الذي لم يُربط صراحة */
   const used=Object.keys(M).some(x=>x.includes('*')&&x.split('*')[1]===t&&M[x]===M[t]);/* الربط القديم استُعمل صراحة لرقم آخر */
@@ -5378,7 +5380,7 @@ const KASK_K='masareef:kidAsk';
 function kidAsks(){try{return JSON.parse(localStorage.getItem(KASK_K)||'[]')}catch(e){return []}}
 function kidAskSet(L){try{localStorage.setItem(KASK_K,JSON.stringify(L.slice(-30)))}catch(e){}}
 function kdResolve(it,atIso){const h=otpFor(parseAmt(it.amount),atIso);if(h){const k=kdByName(h.name);if(k)return {k,h}}if(kdList().length===1)return {k:kdList()[0],h};return {k:null,h}}
-function kidAskHtml(){const L=kidAsks();if(!L.length)return '';const a=L[0];return `<div class="infobox be-unk"><span>👨‍👧 ${a.type==='inc'?'إيداع':'خصم'} <b class="num">${money(a.amount)}</b> في حساب أحد الأبناء (${esc(c4Lbl(a.card4))})${a.hint?' · تحويل إلى <b>'+esc(a.hint)+'</b>':''}. لمن هذا الحساب؟</span><div class="chips">${kdList().map(k=>`<button class="chip pay" data-kask="${esc(a.key)}|${esc(k.id)}">${k.ic} ${esc(k.name)}</button>`).join('')}</div>${L.length>1?`<small class="note">و${countWord(L.length-1,'رسالة أخرى','رسالتان أخريان','رسائل أخرى','رسالة أخرى')}</small>`:''}</div>`}
+function kidAskHtml(){const L=kidAsks();if(!L.length)return '';const a=L[0];return `<div class="infobox be-unk"><span>👨‍👧 ${a.type==='inc'?'إيداع':'خصم'} <b class="num">${money(a.amount)}</b> في حساب أحد الأبناء (${c4H(a.card4)})${a.hint?' · تحويل إلى <b>'+esc(a.hint)+'</b>':''}. لمن هذا الحساب؟</span><div class="chips">${kdList().map(k=>`<button class="chip pay" data-kask="${esc(a.key)}|${esc(k.id)}">${k.ic} ${esc(k.name)}</button>`).join('')}</div>${L.length>1?`<small class="note">و${countWord(L.length-1,'رسالة أخرى','رسالتان أخريان','رسائل أخرى','رسالة أخرى')}</small>`:''}</div>`}
 async function kidAskAnswer(key,kid){const L=kidAsks();const a=L.find(x=>x.key===key);if(!a)return;const k=kdGet(kid);if(!k)return;kdFromSms(a,kid);
   if(a.hint){const P=Object.assign({},S.settings.kidPayees||{});P[sNorm(a.hint).toLowerCase().trim()]=kid;S.settings.kidPayees=P}
   kidAskSet(L.filter(x=>x.key!==key));await putSettings();render();toast('✓ سُجّل في حساب '+k.name+(a.hint?'. سأتعرف على «'+a.hint+'» وحدي بعدها':''))}
@@ -5680,8 +5682,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.135.0';
+const APP_VERSION='2.136.0';
 const CHANGELOG=[
+ {v:'2.136.0',date:'2026-11-25',items:['🔢 تعديل الحساب من «حساباتي وأرصدتي»: زر «✏️ تعديل» في كل بطاقة حساب، وزر «➕ إضافة حساب بنكي». تعدّل الاسم والبنك والنوع والرصيد الآن، وتضيف أرقام الحساب والبطاقات.','🔗 أرقام الحساب بثلاثة أشكال: كما تظهر في رسالة البنك (1051**017 أو 0311XXXXXXXX0016)، أو الرقم الكامل أو IBAN (يُحفظ ويُنسخ بضغطة)، أو آخر 3–4 أرقام. أي رسالة تحمل الرقم تُسجّل في الحساب تلقائيًا، والرسائل المنتظرة تُسجّل فور الحفظ. الرقم المربوط بحساب آخر لا يُنقل إلا بتأكيدك، ورقم الأبناء المشترك يبقى منفصلًا.','🛠️ نافذة واحدة لتعديل الحساب في كل التطبيق، وإصلاح ضغطة كانت قد تُنفَّذ مرتين عند إعادة رسم النوافذ.']},
  {v:'2.135.0',date:'2026-11-25',items:['🗂️ إعادة ترتيب التطبيق هندسيًا: الكود مقسّم إلى 121 وحدة مرتبة حسب الأقسام (البنك، الأبناء، الالتزامات، التقارير…) مع أداة بناء تفحص كل شيء قبل النشر، واختبارات آلية لكل الأقسام. لا تغيير في بياناتك ولا في طريقة عمل التطبيق.','📖 جديد: «كتالوج التطبيق» — كل مهام التطبيق في صفحات مرتبة وسهلة للمبتدئين: صفحة البداية فيها «ابدأ من هنا» والبحث وكل المجموعات، ثم صفحة لكل مجموعة. لكل مهمة شرح بسيط و«كيف أستخدمها؟»، والضغط على المهمة ينقلك إليها مباشرة. تفتحه من ☰ ← «كتالوج التطبيق» أو من أعلى «كل أقسام التطبيق». تنقّل بالسحب يمينًا ويسارًا أو بزرّي التالي والسابق.','ℹ️ رقم إصدار التطبيق ظاهر دائمًا في آخر قائمة ☰، فتعرف مباشرة أي تحديث عندك. والضغط عليه يفتح «ما الجديد».']},
  {v:'2.134.2',date:'2026-11-24',items:['🛠️ إصلاح مهم: البنك يخفي وسط رقم الحساب، فحسابك «1051**017» وحساب ابنك «1050**017» كانا يُعاملان حسابًا واحدًا لأن نهايتهما متشابهة، فتُسجَّل إيداعات الأبناء في حسابك. صار التطبيق يميّز الحساب بأول الرقم وآخره، ويسألك إذا ظهر رقمان متشابهان','حساب واحد مشترك الإخفاء لأكثر من ابن («أحد الأبناء»): يُحدَّد الابن من رسالة رمز التحقق التي تسبق التحويل («Fund transfer to Mira Majid»)، أو يسألك مرة ويتعلم الاسم','خصم من حسابك بلا اسم مستلم يأخذ اسمه من رسالة رمز التحقق السابقة له، فيُربط بحساب الابن ولا يُحسب مصروفًا','عند ربط رقم الابن: تُنقل الإيداعات التي سُجلت في حسابك خطأ إلى حساب الابن، ويُصحَّح رصيد حسابك إن كان مأخوذًا منها','رقم حساب الابن يُكتب كما في رسالة البنك (مثل 1050**017)']},
 {v:'2.134.1',date:'2026-11-24',items:['📩 حسابات الأبناء من رسائل البنك: اربط آخر أرقام حساب الابن (أو اختره عند سؤال «أي حساب هو؟») فتُسجَّل الإيداعات والخصومات في حسابه ويتحدث رصيده البنكي، حتى الرسالة التي لا تذكر الرصيد','⚖️ إذا اختلف رصيد البنك عن مجموع صناديق الابن: تنبيه في صفحته وفي الرئيسية مع زر «اعتمد رصيد البنك» والرقم معبأ من آخر رسالة','تذكير في صفحة الابن بربط رقم حسابه إن لم يُربط']},
@@ -6444,18 +6447,8 @@ function openAccRec(id){const L=document.getElementById('layer');const A=accList
       const now=new Date().toISOString();a.log=(a.log||[]).concat([{date:today(),app,actual:v}]).slice(-24);a.anchor={bal:v,date:today(),at:now};
       if(a.id==='main'){const m=mainAcc();m.balance=v;m.at=today();S.settings.mainAcc=m}
       await accSaveList(A);toast(app!==null&&Math.abs(v-app)>=0.0005?'حُفظ الرصيد، والفرق '+money(Math.abs(v-app)):'حُفظ الرصيد');openAccounts()}}}
-function openAccEdit(id){const L=document.getElementById('layer');const A=accList();const ex=id?A.find(x=>x.id===id):null;const a=ex?Object.assign({},ex):{id:uidGen(),kind:'other',name:''};
-  const draw=()=>{L.innerHTML=`${sheetTop('حساب')}<h2 style="margin-top:0">${ex?'تعديل الحساب':'حساب جديد'}</h2><div class="stack">
-   <div class="field"><label for="aeName">اسم الحساب</label><input class="inp" id="aeName" value="${esc(a.name)}" maxlength="30" placeholder="مثال: بطاقة بنك مسقط"></div>
-   ${a.id==='main'||a.id==='cash'?'':`<div class="seg segw">${['other','wallet','card','reserve','project'].map(k=>`<button class="n" data-aek="${k}" aria-pressed="${a.kind===k}">${ACC_KIND[k]}</button>`).join('')}</div>
-   ${a.kind==='card'?`<label class="toggle"><input type="checkbox" id="aeCard" ${a.forCard?'checked':''}><span>مشتريات «البطاقة» تُخصم من هذا الحساب</span></label>`:''}`}
-   </div><div class="actions"><button class="btn block" id="aeSave">حفظ</button>${ex&&a.id!=='main'&&a.id!=='cash'?'<button class="btn ghost block" id="aeDel" style="color:var(--exp)">حذف الحساب</button>':''}<button class="btn ghost block" data-close>إلغاء</button></div></div></div>`};
-  draw();L.oninput=L.onchange=null;
-  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){openAccounts();return}
-    if(x.dataset.aek){a.name=document.getElementById('aeName').value;a.kind=x.dataset.aek;draw();return}
-    if(x.id==='aeDel'){const used=list().some(t=>t.acc===a.id)||transfers().some(t=>t.from===a.id||t.to===a.id);if(used){toast('مرتبط بعمليات أو تحويلات، فلا يُحذف. يمكنك تغيير اسمه');return}await accSaveList(A.filter(y=>y.id!==a.id));openAccounts();return}
-    if(x.id==='aeSave'){a.name=document.getElementById('aeName').value.trim();if(!a.name){toast('اكتب اسم الحساب');return}const c=document.getElementById('aeCard');a.forCard=!!(c&&c.checked&&a.kind==='card');
-      let B=A.map(y=>y.id===a.id?a:a.forCard?Object.assign({},y,{forCard:false}):y);if(!ex)B.push(a);await accSaveList(B);if(a.id==='main'){const m=mainAcc();m.name=a.name;S.settings.mainAcc=m;await putSettings()}openAccounts()}}}
+/* 2.136: نموذج واحد لتعديل الحساب (accounts/account-numbers.js) */
+function openAccEdit(id){openBeEdit(id,openAccounts)}
 function openTransfer(){const L=document.getElementById('layer');const A=accList();let from='main',to=A.find(a=>a.id!=='main')?A.find(a=>a.id!=='main').id:'cash';
   const opt=(sel)=>A.map(a=>`<option value="${esc(a.id)}" ${sel===a.id?'selected':''}>${esc(a.name)}</option>`).join('');
   L.innerHTML=`${sheetTop('تحويل')}<h2 style="margin-top:0">⇄ تحويل بين حساباتي</h2><div class="stack">
@@ -6937,15 +6930,16 @@ function beAll(){const A=accList().filter(a=>a.kind!=='cash'||a.anchor).map(beAc
   return{A,K,svb,sv,total,score,ok,fresh}}
 function beTime(A){const t=A.msgT||(A.at||'').slice(11,16);return fmtD(A.date)+(t?' · '+t:'')}
 function beCard(x){const a=x.a;const bk=(()=>{try{return boxBank(a.name||'')}catch(e){return ''}})();
-  if(x.b===null)return `<div class="be-acc be-none"><div class="be-top"><b>${esc(a.name||accName(a.id))}</b><span class="be-st warn">لم يصل رصيد بعد</span></div><small class="note">لن يدخل في الإجمالي حتى تصل رسالة بنك فيها «الرصيد المتاح» أو تدخل رصيده يدويًا.</small><button class="chip" data-accmgr="1">أدخل الرصيد</button></div>`;
+  if(x.b===null)return `<div class="be-acc be-none"><div class="be-top"><b>${esc(a.name||accName(a.id))}</b><span class="be-st warn">لم يصل رصيد بعد</span></div>${numChipsHtml(a)}<small class="note">لن يدخل في الإجمالي حتى تصل رسالة بنك فيها «الرصيد المتاح» أو تدخل رصيده يدويًا.</small><div class="chips be-act"><button class="chip" data-acedit="${esc(a.id)}">✏️ تعديل الحساب والرصيد والأرقام</button></div></div>`;
   const st=x.diff!==null&&Math.abs(x.diff)>=0.01?`<span class="be-st bad">⚠️ فرق ${x.diff>0?'+':'−'}${money(Math.abs(x.diff))}</span>`:x.age>7?`<span class="be-st warn">⏳ آخر رصيد قبل ${daysWord(x.age)}</span>`:`<span class="be-st ok">✓ مطابق للبنك</span>`;
   return `<div class="be-acc"><div class="be-top"><b>${esc(a.name||accName(a.id))}</b>${st}</div>
-   <div class="be-big num">${amtH(x.b)}</div>
+   <div class="be-big num">${amtH(x.b)}</div>${numChipsHtml(a)}
    <div class="be-math"><span><small>آخر رصيد من ${x.sms?'رسالة البنك':'إدخالك'}</small><b class="num">${money(+x.A.bal)}</b><em>${esc(beTime(x.A))}</em></span>
     ${x.inn>0.0005?`<span><small>+ إيداعات بعده</small><b class="num amt-inc">${money(x.inn)}</b></span>`:''}
     <span><small>− مصروفات بعده</small><b class="num ${x.out>0.0005?'amt-exp':''}">${money(x.out)}</b><em>${countWord(x.n,'عملية','عمليتان','عمليات','عملية')}</em></span>
     <span class="be-eq"><small>= الرصيد الآن</small><b class="num">${money(x.b)}</b></span></div>
    ${x.diff!==null&&Math.abs(x.diff)>=0.01?`<small class="note">آخر رسالة قالت ${money(x.last.actual)} وكان التطبيق يتوقع ${money(x.last.app)}. ${x.diff<0?'غالبًا عملية لم تصلك رسالتها (رسوم، تحويل، شراء).':'غالبًا إيداع أو استرجاع لم يُسجل.'} صُحّح الرصيد تلقائيًا على رقم البنك.</small><button class="chip" data-befix="${esc(a.id)}">${x.diff<0?'سجّل الفرق كمصروف':'سجّل الفرق كدخل'}</button>`:''}
+   <div class="chips be-act"><button class="chip" data-acedit="${esc(a.id)}">✏️ تعديل الحساب والأرقام</button></div>
   </div>`}
 function openBalEngine(){const L=document.getElementById('layer');
   const draw=()=>{const E=beAll();const lg=[];accList().forEach(a=>(a.log||[]).forEach(l=>lg.push(Object.assign({acc:a.name},l))));lg.sort((p,q)=>(q.date||'').localeCompare(p.date||''));
@@ -6962,7 +6956,7 @@ function openBalEngine(){const L=document.getElementById('layer');
      <li>قبل كل تحديث يقارن رصيده المتوقع برقم البنك، ويظهر لك أي فرق لتعرف العملية الناقصة.</li>
      <li>الإجمالي = مجموع الحسابات المعروفة + حساب الادخار، بدون تكرار.</li></ol></details>
     ${lg.length?`<h3>سجل تحديثات الأرصدة</h3><div class="panel">${lg.slice(0,12).map(l=>{const d=l.app!=null&&isFinite(+l.app)?r3(+l.actual-(+l.app)):null;return `<div class="sumrow"><span>${esc(l.acc||'')}<small class="note"> ${esc(fmtD(l.date))}${l.src==='sms'?' · رسالة':''}</small></span><b class="num">${money(l.actual)}${d!==null&&Math.abs(d)>=0.01?` <small class="amt-exp">(${d>0?'+':'−'}${money(Math.abs(d))})</small>`:' <small class="amt-inc">✓</small>'}</b></div>`}).join('')}</div>`:''}
-    <div class="row2"><button class="btn ghost" data-accmgr="1">⚙️ إدارة الحسابات والتحويلات</button><button class="btn ghost" data-befeed="1">📩 سجل الرسائل</button></div>
+    <button class="btn block be-addacc" id="acAdd">➕ إضافة حساب بنكي</button><div class="row2"><button class="btn ghost" data-accmgr="1">⚙️ إدارة الحسابات والتحويلات</button><button class="btn ghost" data-befeed="1">📩 سجل الرسائل</button></div>
     <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`};
   draw();L.oninput=L.onchange=null;
   L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
@@ -6974,6 +6968,7 @@ function openBalEngine(){const L=document.getElementById('layer');
    if(x.dataset.beadd){openBeAdd(x.dataset.beadd);return}
    if(x.dataset.beign){beIgnore(x.dataset.beign);draw();return}
    if(x.dataset.accmgr){openAccounts();return}
+   if(x.dataset.acedit||x.id==='acAdd'){openBeEdit(x.dataset.acedit||null);return}
    if(x.dataset.befix){const a=accList().find(z=>z.id===x.dataset.befix);const X=a&&beAcc(a);if(!X||X.diff===null)return;
      /* الفرق حدث قبل رسالة المرجع، فيُسجل بتاريخها ووقت أبكر حتى لا يغيّر الرصيد المصحّح */
      openSheet(null,{type:X.diff<0?'exp':'inc',amount:Math.abs(X.diff),date:X.A.date,acc:a.id,note:X.diff<0?'فرق رصيد البنك':'إيداع لم يُسجل',time:'00:00'});return}}}
@@ -6993,7 +6988,7 @@ function beUnkHtml(home){let U=[];try{U=beUnknown()}catch(e){return ''}if(!U.len
   const nm=(u.bk?bankName(u.bk):'حساب')+(u.c4?' '+c4Lbl(u.c4):'');
   if(home)return `<div class="infobox be-unk"><span>🏦 لاحظت عمليات من <b>${esc(nm)}</b> (${countWord(u.n,'رسالة','رسالتان','رسائل','رسالة')}) وهو غير مسجل في حساباتك${U.length>1?'، و'+countWord(U.length-1,'حساب آخر','حسابان آخران','حسابات أخرى','حسابًا آخر'):''}، فرصيده لا يدخل في الإجمالي.</span>${u.c4&&accList().some(a=>a.kind!=='cash')?`<small class="note" style="display:block;margin-top:6px">هل هو أحد حساباتك أو حساب أحد أبنائك؟ اختره مرة واحدة وتُسجَّل رسائله تلقائيًا:</small><div class="chips">${accList().filter(a=>a.kind!=='cash').map(a=>`<button class="chip pay" data-bemap="${esc(u.c4)}|${esc(a.id)}">${esc(a.name||accName(a.id))}</button>`).join('')}${kdList().map(k=>`<button class="chip" data-bemap="${esc(u.c4)}|kid:${esc(k.id)}">${k.ic} ${esc(k.name)}</button>`).join('')}${kdList().length>1?`<button class="chip" data-bemap="${esc(u.c4)}|kid:*">👨‍👧 أحد الأبناء (أكثر من ابن بنفس الرقم)</button>`:''}</div>`:''}<div class="chips"><button class="chip" data-beadd="${esc(u.k)}">➕ حساب جديد</button><button class="chip" data-beign="${esc(u.k)}">ليس لي</button></div></div>`;
   return `<div class="panel be-unkl"><b>🏦 حسابات تستخدمها وغير مسجلة</b><small class="note">وصلت منها رسائل لكن لا يوجد لها حساب في التطبيق، فلا يدخل رصيدها في الإجمالي. أضفها بضغطة: يأخذ التطبيق اسم البنك ورقم البطاقة وآخر رصيد من الرسالة.</small>
-   ${U.map(u=>`<div class="sumrow"><span><b>${esc((u.bk?bankName(u.bk):'بنك غير معروف')+(u.c4?' '+c4Lbl(u.c4):''))}</b><small class="note"> ${countWord(u.n,'رسالة','رسالتان','رسائل','رسالة')}${u.last&&u.last.bal!=null?' · آخر رصيد '+money(u.last.bal):''}</small></span><span class="chips">${u.c4?accList().filter(a=>a.kind!=='cash').map(a=>`<button class="chip pay" data-bemap="${esc(u.c4)}|${esc(a.id)}">= ${esc(a.name||accName(a.id))}</button>`).join('')+kdList().map(k=>`<button class="chip" data-bemap="${esc(u.c4)}|kid:${esc(k.id)}">= ${k.ic} ${esc(k.name)}</button>`).join(''):''}<button class="chip" data-beadd="${esc(u.k)}">➕ جديد</button><button class="chip" data-beign="${esc(u.k)}">ليس لي</button></span></div>`).join('')}</div>`}
+   ${U.map(u=>`<div class="sumrow"><span><b>${esc(u.bk?bankName(u.bk):'بنك غير معروف')}${u.c4?' '+c4H(u.c4):''}</b><small class="note"> ${countWord(u.n,'رسالة','رسالتان','رسائل','رسالة')}${u.last&&u.last.bal!=null?' · آخر رصيد '+money(u.last.bal):''}</small></span><span class="chips">${u.c4?accList().filter(a=>a.kind!=='cash').map(a=>`<button class="chip pay" data-bemap="${esc(u.c4)}|${esc(a.id)}">= ${esc(a.name||accName(a.id))}</button>`).join('')+kdList().map(k=>`<button class="chip" data-bemap="${esc(u.c4)}|kid:${esc(k.id)}">= ${k.ic} ${esc(k.name)}</button>`).join(''):''}<button class="chip" data-beadd="${esc(u.k)}">➕ جديد</button><button class="chip" data-beign="${esc(u.k)}">ليس لي</button></span></div>`).join('')}</div>`}
 function openBeAdd(k){const u=beUnknown().find(x=>x.k===k);if(!u){toast('لم أجد هذا الحساب');return}const L=document.getElementById('layer');
   const nm0=(u.bk?bankName(u.bk):'حساب بنكي')+(u.c4?' '+c4Lbl(u.c4):'');const bal0=u.last&&u.last.bal!=null?u.last.bal:'';
   const nTx=list().filter(t=>u.c4&&t.card4===u.c4&&(!t.acc||t.acc==='main')).length;
@@ -7025,6 +7020,97 @@ async function beMapCard(c4,id){if(!c4||!id)return;S.settings.card4Acc=Object.as
   render();toast('✓ رُبط '+c4Lbl(c4)+' بـ«'+(id==='kid:*'?'حسابات الأبناء':accName(id))+'»'+(rep0?'، ونُقلت '+countWord(rep0,'عملية','عمليتان','عمليات','عملية')+' كانت مسجلة في حسابك خطأ':'')+(R&&R.saved?'، وسُجّلت '+countWord(R.saved,'رسالة','رسالتان','رسائل','رسالة')+' كانت تنتظر':'')+'. كل رسائله القادمة تُسجل تلقائيًا')}
 function beIgnore(k){S.settings.accIgnore=(S.settings.accIgnore||[]).concat([k]).slice(-40);putSettings();render();toast('لن أذكّرك بهذا الحساب. تجده في «حساباتي وأرصدتي» إن غيّرت رأيك')}
 
+/* ===================== 2.136: تعديل الحساب وأرقامه من «حساباتي وأرصدتي» =====================
+ * من بطاقة أي حساب: الاسم، البنك، النوع، الرصيد الآن، وأرقام الحساب والبطاقات.
+ * الأرقام ثلاثة أشكال، وكلها تربط رسائل البنك بهذا الحساب:
+ *   1) كما تظهر في الرسالة «1051**017» أو «0311XXXXXXXX0016» ← مفتاح في card4Acc (نفس جدول قراءة الرسائل)
+ *   2) آخر 3–4 أرقام «017» ← مفتاح قديم بآخر الأرقام (لا يُستعمل إذا ظهر رقم آخر بنفس النهاية، كما في 2.134.2)
+ *   3) الرقم الكامل أو IBAN ← يُحفظ في a.nums، وأي رسالة يطابق أولها وآخرها هذا الرقم تتبع الحساب (c4Full)
+ * الربط الصريح في card4Acc يغلب دائمًا (مثل رقم الأبناء المشترك).
+ * فتح التعديل والإضافة يمر من وضع المدير (data-acedit و #acAdd ضمن ADM_SEL). */
+const BANK_PICK=['البنك الوطني','بنك مسقط','صحار الدولي','بنك ظفار','بنك نزوى','الأهلي','HSBC'];
+function numDigits(s){return String(s||'').replace(/\D/g,'')}
+/* يقرأ ما كتبه المستخدم: مفتاح رسالة، أو آخر الأرقام، أو رقم كامل */
+function numParse(raw){let s=String(raw||'').trim().replace(/[\s\-]/g,'');if(!s)return null;
+  s=s.replace(/(\d)\*(\d)/,'$1**$2');
+  if(/\d[*xX•#]{2,}\d/.test(s)){const k=c4Key(s);return k?{t:'key',key:k}:null}
+  if(/^[A-Za-z]{2}\d{2}[A-Za-z0-9]{6,30}$/.test(s))return {t:'full',num:s.toUpperCase(),d:numDigits(s)};
+  const d=numDigits(s);if(d!==s)return null;if(d.length>=3&&d.length<=4)return {t:'key',key:d};if(d.length>=6&&d.length<=34)return {t:'full',num:d,d};return null}
+/* هل يطابق الرقم الكامل D مفتاح الرسالة (أول p وآخر t)؟ */
+function numFits(D,p,t){if(!D.endsWith(t))return 0;if(!p)return 1;if(D.startsWith(p))return 2;const i=D.indexOf(p);return i>=0&&i+p.length<=D.length-t.length?1:0}
+/* الحساب صاحب الرقم الكامل المطابق لمفتاح الرسالة، إذا كان واحدًا فقط */
+function c4Full(k){k=String(k||'');if(!k)return null;const [p,t]=k.includes('*')?k.split('*'):['',k];if(!t||t.length<3)return null;
+  const C=[];(S.settings.accounts||[]).forEach(a=>(a.nums||[]).forEach(n=>{const f=numFits(numDigits(n),p,t);if(f)C.push([a.id,f])}));if(!C.length)return null;
+  const best=Math.max(...C.map(c=>c[1]));const ids=[...new Set(C.filter(c=>c[1]===best).map(c=>c[0]))];return ids.length===1?ids[0]:null}
+function numKeysOf(id){return Object.entries(S.settings.card4Acc||{}).filter(([k,v])=>v===id).map(([k])=>k)}
+function numShort(n){const d=String(n||'');return d.length>8?d.slice(0,4)+'…'+d.slice(-4):d}
+function numOwner(v){if(!v)return '';if(v==='kid:*')return 'أحد الأبناء';if(String(v).startsWith('kid:')){const k=kdGet(v.slice(4));return k?'حساب '+k.name:'حساب ابن'}return accName(v)}
+/* سطر الأرقام في بطاقة الحساب */
+function numChipsHtml(a){const K=numKeysOf(a.id),N=a.nums||[];const bk=a.bank||(()=>{try{const b=BANKS.find(x=>x[0]===boxBank(a.name||''));return b?b[1]:''}catch(e){return ''}})();
+  if(!K.length&&!N.length&&!bk)return '';
+  return `<div class="an-row">${bk?`<span class="an-bk">🏦 ${esc(bk)}</span>`:''}${N.map(n=>`<span class="an-n num" dir="ltr">${esc(numShort(n))}</span>`).join('')}${K.map(k=>`<span class="an-n num" dir="ltr" title="كما يظهر في رسائل البنك">${esc(c4Lbl(k))}</span>`).join('')}</div>`}
+/* ربط مفتاح رسالة بالحساب: يعيد فحص الرسائل المعلقة ويصلح ما سُجّل خطأ (عبر beMapCard) */
+async function numLinkKey(key,id){await beMapCard(key,id)}
+/* بعد إضافة رقم كامل: كل مفاتيح الرسائل التي ظهرت ويطابقها الرقم تُربط صراحة بالحساب، إلا المربوط صراحة بغيره */
+async function numLinkSeen(D,id){const seen=S.settings.c4seen||{};const M=S.settings.card4Acc||{};let n=0;
+  for(const t of Object.keys(seen))for(const p of seen[t]){const k=p+'*'+t;if(M[k]&&M[k]!==id)continue;if(M[k]===id)continue;if(numFits(D,p,t)){await numLinkKey(k,id);n++}}return n}
+function openBeEdit(id,back){const done=typeof back==='function'?back:openBalEngine;const L=document.getElementById('layer');const A=accList();const ex=id?A.find(x=>x.id===id):null;
+  const a=ex?JSON.parse(JSON.stringify(ex)):{id:uidGen(),kind:'other',name:'',bank:''};a.nums=(a.nums||[]).slice();
+  const fixed=a.id==='main'||a.id==='cash';let keys=ex?numKeysOf(a.id):[];const addK=[],delK=[];let msg='',mv=null;
+  const draw=()=>{const app=ex?accBalance(ex):null;
+   L.innerHTML=`${sheetTop(ex?'تعديل الحساب':'حساب جديد')}<h2 style="margin-top:0" data-nofold>${ex?'✏️ تعديل الحساب':'➕ حساب بنكي جديد'}</h2><div class="stack">
+    <div class="field"><label for="beN">اسم الحساب</label><input class="inp" id="beN" value="${esc(a.name||'')}" maxlength="30" placeholder="مثال: حسابي في البنك الوطني"></div>
+    ${a.id==='cash'?'':`<div class="field"><label for="beB">البنك</label><input class="inp" id="beB" value="${esc(a.bank||'')}" maxlength="30" placeholder="اختر أو اكتب اسم البنك" list="beBL"><datalist id="beBL">${BANK_PICK.map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
+     <div class="chips an-bks">${BANK_PICK.map(b=>`<button class="chip" data-anbk="${esc(b)}" aria-pressed="${a.bank===b}">${esc(b)}</button>`).join('')}</div></div>`}
+    ${fixed?'':`<div class="field"><label>نوع الحساب</label><div class="seg segw">${['other','wallet','card','reserve','project'].map(k=>`<button class="n" data-aek="${k}" aria-pressed="${a.kind===k}">${ACC_KIND[k]}</button>`).join('')}</div></div>
+     ${a.kind==='card'?`<label class="toggle"><input type="checkbox" id="beCard" ${a.forCard?'checked':''}><span>مشتريات «البطاقة» تُخصم من هذا الحساب</span></label>`:''}`}
+    ${a.id==='cash'?'':`<div class="panel an-box"><b>🔢 أرقام الحساب والبطاقات</b>
+     <p class="note" style="margin:4px 0 8px">أي رسالة بنك تحمل أحد هذه الأرقام تُسجَّل في هذا الحساب تلقائيًا.</p>
+     <div class="an-list">${[...a.nums.map(n=>['n',n]),...keys.map(k=>['k',k])].map(([t,v])=>`<div class="an-it"><span class="num" dir="ltr">${esc(t==='n'?v:c4Lbl(v))}</span><small>${t==='n'?'الرقم الكامل':'كما في رسائل البنك'}</small>${t==='n'?`<button class="chip" data-ancopy="${esc(v)}" aria-label="نسخ الرقم">📋</button>`:''}<button class="chip" data-andel="${t}|${esc(v)}" aria-label="حذف الرقم">✕</button></div>`).join('')||'<small class="note">لا توجد أرقام بعد.</small>'}</div>
+     <div class="an-add"><input class="inp num" id="beNum" dir="ltr" maxlength="40" placeholder="1051**017" aria-label="رقم الحساب أو البطاقة"><button class="btn" id="beNumAdd">إضافة</button></div>
+     ${msg?`<p class="an-msg">${msg}</p>`:''}
+     <details class="an-help"><summary>ماذا أكتب؟</summary><ul>
+      <li><b>كما يظهر في رسالة البنك</b>: <span class="num" dir="ltr">1051**017</span> (الوطني) أو <span class="num" dir="ltr">0311XXXXXXXX0016</span> (بنك مسقط). هذا الأدق.</li>
+      <li><b>الرقم الكامل</b> من تطبيق البنك أو البطاقة (أو IBAN). يُحفظ للرجوع إليه ونسخه، ويتعرف التطبيق منه على رسائل الحساب.</li>
+      <li><b>آخر 3–4 أرقام</b> فقط إذا لم تعرف غيرها.</li>
+      <li>رقم حساب الأبناء المشترك يُربط من صفحة الابن، فلا تضفه هنا.</li></ul></details></div>`}
+    ${a.id==='cash'&&!ex?'':`<div class="field"><label for="beBal">${ex&&ex.anchor?'الرصيد الآن (اختياري، للتصحيح)':'الرصيد الآن (اختياري)'}</label><div class="amtbox"><input id="beBal" inputmode="decimal" placeholder="${app!==null?esc(money(app)):'0.000'}" aria-label="الرصيد الآن"><span>${CUR}</span></div>
+     <small class="note">${app!==null?'حسب التطبيق '+money(app)+'. اكتب رصيد البنك فقط إذا كان مختلفًا.':'اكتبه مرة، وبعدها تحدّثه رسائل البنك تلقائيًا.'}</small></div>`}
+    ${ex&&!fixed?'<button class="btn ghost block an-del" id="beDel">🗑️ حذف هذا الحساب</button>':''}
+   </div><div class="actions"><button class="btn block" id="beSave">حفظ</button><button class="btn ghost block" data-close>إلغاء</button></div></div></div>`;
+   const sh=L.querySelector('.sheet');if(sh)sh.classList.add('an-sheet')};
+  const keep=()=>{const g=i=>{const e=document.getElementById(i);return e?e.value:null};const n=g('beN');if(n!==null)a.name=n;const b=g('beB');if(b!==null)a.bank=b.trim();const c=document.getElementById('beCard');if(c)a.forCard=c.checked;const v=g('beBal');a._bal=v};
+  draw();L.oninput=L.onchange=null;
+  L.onkeydown=e=>{if(e.key==='Enter'&&e.target.id==='beNum'){e.preventDefault();const b=document.getElementById('beNumAdd');if(b)b.click()}};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){done();return}
+   if(x.dataset.anbk){keep();a.bank=x.dataset.anbk;if(!a.name.trim())a.name='حسابي في '+a.bank;draw();return}
+   if(x.dataset.aek){keep();a.kind=x.dataset.aek;draw();return}
+   if(x.dataset.ancopy){try{await navigator.clipboard.writeText(x.dataset.ancopy);toast('نُسخ الرقم')}catch(er){toast(x.dataset.ancopy)}return}
+   if(x.dataset.andel){keep();const [t,v]=x.dataset.andel.split(/\|(.*)/s);if(t==='n')a.nums=a.nums.filter(n=>n!==v);else{keys=keys.filter(k=>k!==v);if(!addK.includes(v))delK.push(v);else addK.splice(addK.indexOf(v),1)}msg='';draw();return}
+   if(x.id==='beNumAdd'){keep();const raw=document.getElementById('beNum').value;const P=numParse(raw);
+     if(!P){msg='⚠️ لم أفهم الرقم. اكتبه كما في رسالة البنك (1051**017) أو الرقم كاملًا أو آخر 3–4 أرقام.';draw();return}
+     if(P.t==='full'){if(a.nums.some(n=>numDigits(n)===P.d)){msg='هذا الرقم مضاف.';draw();return}
+       const o=(S.settings.accounts||[]).find(z=>z.id!==a.id&&(z.nums||[]).some(n=>numDigits(n)===P.d));if(o){msg='⚠️ هذا الرقم محفوظ في حساب «'+esc(o.name)+'». احذفه من هناك أولًا.';draw();return}
+       a.nums.push(P.num);msg='✓ أُضيف الرقم الكامل.'}
+     else{const k=P.key;if(keys.includes(k)){msg='هذا الرقم مضاف.';draw();return}const cur=(S.settings.card4Acc||{})[k];
+       if(cur&&cur!==a.id&&mv!==k){mv=k;msg='⚠️ هذا الرقم مربوط الآن بـ «'+esc(numOwner(cur))+'». اضغط «إضافة» مرة ثانية لنقله إلى هذا الحساب.';draw();document.getElementById('beNum').value=raw;return}
+       mv=null;keys.push(k);addK.push(k);const i=delK.indexOf(k);if(i>=0)delK.splice(i,1);msg='✓ أُضيف '+esc(c4Lbl(k))+'. رسائله القادمة تُسجَّل هنا.'}
+     draw();return}
+   if(x.id==='beDel'){const used=list().some(t=>t.acc===a.id)||transfers().some(t=>t.from===a.id||t.to===a.id);if(used){toast('مرتبط بعمليات أو تحويلات، فلا يُحذف. يمكنك تغيير اسمه');return}
+     const M=Object.assign({},S.settings.card4Acc||{});numKeysOf(a.id).forEach(k=>delete M[k]);S.settings.card4Acc=M;await accSaveList(accList().filter(y=>y.id!==a.id));toast('حُذف الحساب');done();return}
+   if(x.id==='beSave'){keep();a.name=(a.name||'').trim();if(!a.name){toast('اكتب اسم الحساب');return}
+     const pend=(document.getElementById('beNum')||{}).value;if(pend&&pend.trim()){toast('اضغط «إضافة» للرقم المكتوب أو امسحه');return}
+     const raw=a._bal;delete a._bal;let bal=null;if(raw&&raw.trim()){bal=parseAmt(raw)*(/^\s*[-−]/.test(raw)?-1:1);if(!isFinite(bal)){toast('الرصيد غير صحيح');return}}
+     if(a.kind!=='card')a.forCard=false;
+     const base=accList();const app=ex?accBalance(ex):null;
+     if(bal!==null&&!(app!==null&&Math.abs(bal-app)<0.0005)){const now=new Date().toISOString();a.log=(a.log||[]).concat([{date:today(),app,actual:bal}]).slice(-24);a.anchor={bal,date:today(),at:now,src:'man'}}
+     if(!a.nums.length)delete a.nums;
+     let B=base.map(y=>y.id===a.id?a:a.forCard?Object.assign({},y,{forCard:false}):y);if(!ex)B.push(a);await accSaveList(B);
+     if(a.id==='main'){const m=mainAcc();m.name=a.name;if(bal!==null){m.balance=bal;m.at=today()}S.settings.mainAcc=m;await putSettings()}
+     if(delK.length){const M=Object.assign({},S.settings.card4Acc||{});delK.forEach(k=>{if(M[k]===a.id)delete M[k]});S.settings.card4Acc=M;await putSettings()}
+     for(const k of addK)await numLinkKey(k,a.id);
+     let n=0;for(const d of (a.nums||[]).map(numDigits))n+=await numLinkSeen(d,a.id);
+     toast(ex?'حُفظ الحساب'+(n?' وربطت '+countWord(n,'رقمًا','رقمين','أرقام','رقمًا')+' من رسائلك':''):'أُضيف الحساب');done();render()}}}
 /* ===================== 🗓️ تجهيز شهر قادم (2.132) =====================
  * تختار شهرًا قادمًا (التالي أو بعد عدة أشهر) وتجهّز له: دراسة جدوى (الدخل المتوقع − الالتزامات − المصروف المعتاد − المصاريف الإضافية
  * والموسمية − الادخار)، واستراتيجية مقترحة (ما تؤجله، ما تتخلص منه، أي دين تنهيه)، وترتيب الأولويات وخطة الدفع، وميزانية الشهر.
@@ -7244,7 +7330,7 @@ async function openBoxDiag(){const L=document.getElementById('layer');let D={ste
       const ready=its.length&&boxAutoOk()&&its.every(it=>boxAutoItem(Object.assign({},it),m));
       if(!saved&&!/^MASAREEF/.test(t)&&its.some(it=>it.ok&&!it.dup)&&(s0!=='pend'||ready))D.rescan.push(m.id);
       D.msgs.push({when:fmtD(isoD(new Date(m.at)))+' '+new Date(m.at).toTimeString().slice(0,5),from:m.from||'',text:t,st:stt[0],cls:stt[1],why:saved?'':why})});
-    const U=Object.keys(cards);if(U.length)st(false,'بطاقات أو حسابات غير مربوطة: '+U.map(c=>c4Lbl(c)).join('، '),'رسائلها لا تُسجل تلقائيًا لأن التطبيق لا يعرف من أي حساب يخصم. اربط كل رقم بحسابه:',U.map(c=>`<div class="chips">${A.map(a=>`<button class="chip" data-bdmap="${esc(c)}|${esc(a.id)}">${esc(c4Lbl(c))} ← ${esc(a.name||accName(a.id))}</button>`).join('')}${kdList().map(k=>`<button class="chip" data-bdmap="${esc(c)}|kid:${esc(k.id)}">${esc(c4Lbl(c))} ← ${k.ic} ${esc(k.name)}</button>`).join('')}${kdList().length>1?`<button class="chip" data-bdmap="${esc(c)}|kid:*">${esc(c4Lbl(c))} ← 👨‍👧 أحد الأبناء</button>`:''}</div>`).join(''));
+    const U=Object.keys(cards);if(U.length)st(false,'بطاقات أو حسابات غير مربوطة: '+U.map(c=>c4Lbl(c)).join('، '),'رسائلها لا تُسجل تلقائيًا لأن التطبيق لا يعرف من أي حساب يخصم. اربط كل رقم بحسابه:',U.map(c=>`<div class="chips">${A.map(a=>`<button class="chip" data-bdmap="${esc(c)}|${esc(a.id)}">${c4H(c)} ← ${esc(a.name||accName(a.id))}</button>`).join('')}${kdList().map(k=>`<button class="chip" data-bdmap="${esc(c)}|kid:${esc(k.id)}">${c4H(c)} ← ${k.ic} ${esc(k.name)}</button>`).join('')}${kdList().length>1?`<button class="chip" data-bdmap="${esc(c)}|kid:*">${c4H(c)} ← 👨‍👧 أحد الأبناء</button>`:''}</div>`).join(''));
     if(!last||ageMin>24*60)st(null,'فحص الاختصار في الآيفون','<ol class="steps"><li>Shortcuts ← <b>Automation</b> ← افتح أتمتة الرسائل.</li><li><b>Message</b> ← <b>Sender</b> = اسم البنك كما يظهر في الرسائل (مثل BankMuscat)، و<b>Message Contains</b> فارغ أو كلمة موجودة دائمًا مثل OMR.</li><li>اختر <b>Run Immediately</b> وأطفئ <b>Notify When Run</b>.</li><li>في الإجراء <b>Get Contents of URL</b>: الرابط = «نسخ رابط الاختصار» من التطبيق، <b>Method</b> = POST، <b>Request Body</b> = Form، حقل <b>text</b> قيمته <b>Shortcut Input</b> (المتغير الأزرق).</li><li>جرّب: افتح الأتمتة ← زر التشغيل ▶︎ بالأسفل، ثم أعد الفحص هنا.</li></ol>');
     D.run=false;D.done=true;draw()};
   draw();run();L.oninput=L.onchange=null;
@@ -11526,7 +11612,7 @@ function openDupAll(){const L=document.getElementById('layer');let G=dupAll();co
 /* ---------- 29. الأحداث (الضغط والكتابة) ---------- */
 document.addEventListener('keydown',e=>{if(((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k')||(e.key==='/'&&!e.target.closest('input,textarea,select,[contenteditable]'))){e.preventDefault();openSearch()}});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-premonthsl]');if(!b)return;e.preventDefault();e.stopPropagation();const [k,i]=b.dataset.premonthsl.split('|');openPreMonths(k,i)},true);
-document.addEventListener('click',e=>{const c=e.target.closest('div[data-chlog]');if(c&&!c.closest('#layer'))openChangelog()});document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches&&e.target.matches('div[data-chlog]'))openChangelog()});
+document.addEventListener('click',e=>{const c=e.target.closest('div[data-chlog]');if(c&&c.isConnected&&!c.closest('#layer'))openChangelog()});document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches&&e.target.matches('div[data-chlog]'))openChangelog()});
 /* في الآيفون لا ينتقل التركيز إلى الزر عند الضغط عليه، فيبقى الحقل الذي كتبت فيه «نشطًا» وتتوقف الصفحة عن التحديث.
  * لذلك نُخرج التركيز من الحقل عند الضغط على أي زر (ويُحفظ ما كتبته كما هو) */
 let lastTap=0;
@@ -11534,7 +11620,8 @@ document.addEventListener('click',e=>{memoClear();const b=e.target.closest&&e.ta
   const a=document.activeElement;if(a&&a!==b&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&!b.contains(a)){try{a.blur()}catch(x){}}},true);
 document.addEventListener('click',async e=>{
   {const rt=e.target.closest('[data-rtog]');if(rt&&!e.target.closest('button,a,summary,details')){const row=rt.closest('.recrow');const on=!row.classList.contains('open');row.classList.toggle('open',on);rt.setAttribute('aria-expanded',on);S.recOpen=S.recOpen||{};if(on)S.recOpen[rt.dataset.rtog]=1;else delete S.recOpen[rt.dataset.rtog];return}}
-  const b=e.target.closest('button');if(!b||b.closest('#layer'))return;
+  /* زر داخل نافذة أعادت رسم نفسها يصير منفصلًا عن الصفحة، فلا يُعامل كزر في الرئيسية (2.136) */
+  const b=e.target.closest('button');if(!b||!b.isConnected||b.closest('#layer'))return;
   if(b.dataset.early&&!(admOn()&&admOpen())){toast('الدفع يُفتح في '+dmy(b.dataset.early)+'. للدفع الآن: وضع المدير، أو غيّر «قفل الدفع» من ⚙️ الضبط',null,6000);return}
   if(b.dataset.mdgo){S.tab='budget';S.mdSec='debt';render();setTimeout(()=>{const h=[...document.querySelectorAll('#view h2')].find(x=>x.textContent.trim().startsWith('🏦'));if(!h){window.scrollTo(0,0);return}if(h.classList.contains('fold-closed'))h.click();h.scrollIntoView({block:'start'});window.scrollBy(0,-70)},60);return}
   if(b.dataset.tab){if(b.dataset.tab==='debts'){S.tab='home';render();setTimeout(()=>{const h=document.getElementById('homeDebts');if(h){h.scrollIntoView({block:'start'});window.scrollBy(0,-70)}},60);return}S.tab=b.dataset.tab;render();window.scrollTo(0,0);return}
@@ -11648,8 +11735,8 @@ document.addEventListener('click',async e=>{
   if(b.id==='payAdd'){openPayee();return}
   if(b.dataset.icoedit){const k=b.dataset.icoedit;const tmp=document.createElement('div');tmp.innerHTML=b.innerHTML;const e=tmp.querySelector('.mdico-e');if(e)e.remove();const sm=tmp.querySelector('small');if(sm)sm.remove();if(icoOv(k)){const [ty,id]=k.split(':');tmp.innerHTML=ty==='cat'?`<span class="cbadge" style="background:${catOf(id).c}1f;color:${catOf(id).c}">${catIcon(id)}</span>`:tmp.innerHTML}openIconPick(k,b.dataset.iconame,tmp.innerHTML);return}
   if(b.dataset.payedit){openPayee(b.dataset.payedit);return}
-  if(b.id==='acAdd'&&!b.closest('#layer')){openAccEdit(null);return}
-  if(b.dataset.acedit&&!b.closest('#layer')){openAccEdit(b.dataset.acedit);return}
+  if(b.id==='acAdd'&&b.isConnected&&!b.closest('#layer')){openAccEdit(null);return}
+  if(b.dataset.acedit&&b.isConnected&&!b.closest('#layer')){openAccEdit(b.dataset.acedit);return}
   if(b.dataset.rizq){openRizq();return}
   if(b.id==='rzOn'){const c=rzCfg();S.settings.rizqBtn=Object.assign({},c,{pos:c.pos==='hide'?(c.last||'with'):'hide',last:c.pos==='hide'?c.last:c.pos});putSettings();render();return}
   if(b.dataset.rzpos){S.settings.rizqBtn=Object.assign({},rzCfg(),{pos:b.dataset.rzpos});putSettings();render();toast('نُقل زر أدعية الرزق: '+RZ_POS.find(x=>x[0]===b.dataset.rzpos)[1]);return}

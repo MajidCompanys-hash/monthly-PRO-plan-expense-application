@@ -2944,3 +2944,17 @@ details.bxg[open]{padding-bottom:12px}
 .hm-ver>span:nth-child(2){display:flex;flex-direction:column;align-items:flex-start;line-height:1.3;flex:1;min-width:0}
 .hm-ver b{font-size:13px;font-weight:600;color:var(--fg)}.hm-ver small{font-family:var(--f-num);font-size:12.5px;color:var(--accent);font-weight:700}
 .hm-ver i{font-style:normal;font-size:11.5px;color:var(--muted);white-space:nowrap}
+/* 2.136 تعديل الحساب وأرقامه (accounts/account-numbers.js) */
+.an-row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.an-bk,.an-n{display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);font-size:12px;color:var(--muted)}
+.an-n{font-family:var(--f-num);letter-spacing:.3px;color:var(--fg)}
+.be-act{margin-top:8px}.be-addacc{margin:12px 0 8px}
+.an-bks{margin-top:6px}.an-bks .chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.an-box{padding:12px}
+.an-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.an-it{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.an-it>span{font-family:var(--f-num);font-size:14px;font-weight:600;direction:ltr;overflow-wrap:anywhere}.an-it>small{flex:1;color:var(--muted);font-size:11.5px}
+.an-add{display:flex;gap:8px}.an-add .inp{flex:1;min-width:0;font-size:16px}.an-add .btn{flex:none}
+.an-msg{margin:8px 0 0;font-size:13px;line-height:1.6}
+.an-help summary{cursor:pointer;color:var(--accent);font-size:13px;margin-top:10px}.an-help ul{margin:6px 0 0;padding-inline-start:18px;font-size:12.5px;line-height:1.8}
+.an-del{color:var(--exp);margin-top:6px}
