@@ -1376,6 +1376,37 @@ function openCatGoal(c){const L=document.getElementById('layer');const g=catGoal
     if(x.id==='cgSave'){grab();if(!(st.target>=0)){toast('اكتب الرقم المستهدف');return}const G=Object.assign({},catGoals(),{[c]:{target:st.target,months:st.months,from:curM(),start:avg>st.target?avg:st.target,limit:st.limit}});S.settings.catGoal=G;
       if(st.limit){S.settings.budgets=Object.assign({},S.settings.budgets||{},{[c]:catStep(c,curM())})}S.settings.cgSync=curM();await putSettings();L.innerHTML='';render();toast('🎯 هدف «'+catOf(c).n+'»: '+money(st.target)+' شهريًا'+(st.months>1?' خلال '+countWord(st.months,'شهر','شهرين','أشهر','شهرًا'):''))}}}
 
+/* ===================== 2.139: 🎯 ميزانية تلقائية لكل بند =====================
+ * يقترح سقفًا شهريًا لكل بند من متوسط صرفك في آخر 3 أشهر (catAvg3)، بثلاثة خيارات:
+ *   كما أصرف عادةً، أو توفير 10%، أو توفير 20%. يُقرَّب لأعلى لأقرب 5 (أو 1 للمبالغ الصغيرة).
+ * تكتب في S.settings.budgets (نفس ميزانية البنود في التطبيق)، فتظهر أشرطتها في «حسب البند» وتنبيهات التجاوز.
+ * لا تمس البنود التي لها «هدف تدريجي» (catGoals)، ولا تغيّر ميزانية موجودة إلا إذا اخترتها بنفسك. */
+const AB_MODES=[[0,'كما أصرف عادةً'],[10,'وفّر 10%'],[20,'وفّر 20%']];
+function abRound(v){return v>=20?Math.ceil(v/5)*5:Math.ceil(v)}
+function abRows(cut){const B=S.settings.budgets||{};let CG={};try{CG=catGoals()}catch(e){}
+  return EXP_CATS.filter(c=>c.id!=='loan'&&c.id!=='other').map(c=>{const avg=catAvg3(c.id);return {c,avg,cur:+B[c.id]||0,goal:!!(CG[c.id]&&CG[c.id].limit),sug:avg>0.0005?abRound(avg*(1-cut/100)):0}}).filter(x=>x.avg>=3).sort((a,b)=>b.avg-a.avg)}
+function abNeeded(){try{const R=abRows(0);return R.length>=2&&R.filter(x=>!x.cur&&!x.goal).length>=2}catch(e){return false}}
+function openAutoBudget(){const L=document.getElementById('layer');let cut=10;let R=abRows(cut);const pick={};R.forEach(x=>{pick[x.c.id]=!x.cur&&!x.goal});const val={};
+  const draw=()=>{R=abRows(cut);const tot=r3(R.filter(x=>pick[x.c.id]).reduce((s,x)=>s+(val[x.c.id]!=null?val[x.c.id]:x.sug),0));const avgT=r3(R.reduce((s,x)=>s+x.avg,0));
+   L.innerHTML=`${sheetTop('ميزانية لكل بند')}<h2 style="margin-top:0" data-nofold>🎯 ميزانية تلقائية لكل بند</h2>
+   <p class="note" style="margin-top:-4px">من متوسط صرفك في آخر 3 أشهر. اختر الهدف، وعدّل أي رقم، ثم اعتمد.</p>
+   ${R.length?`<div class="seg segw ab-seg">${AB_MODES.map(([k,l])=>`<button class="n" data-abcut="${k}" aria-pressed="${k===cut}">${l}</button>`).join('')}</div>
+   <div class="ab-list">${R.map(x=>{const v=val[x.c.id]!=null?val[x.c.id]:x.sug;return `<label class="ab-row${x.goal?' dis':''}"><input type="checkbox" data-abpick="${x.c.id}" ${pick[x.c.id]?'checked':''} ${x.goal?'disabled':''}>
+     <span class="ab-ic" style="color:${x.c.c}">${catIcon(x.c.id)}</span><span class="ab-n"><b>${esc(x.c.n.split(' (')[0])}</b><small>المتوسط ${money(x.avg)}${x.cur?' · الحالية '+money(x.cur):''}${x.goal?' · له هدف تدريجي':''}</small></span>
+     <span class="amtbox ab-v"><input inputmode="decimal" data-abval="${x.c.id}" value="${v}" aria-label="ميزانية ${esc(x.c.n)}" ${x.goal?'disabled':''}></span></label>`}).join('')}</div>
+   <div class="panel ab-sum"><span>مجموع ما اخترته شهريًا</span><b class="num">${money(tot)} ${CUR}</b><small>${cut?'توفير متوقع حوالي '+money(r3(avgT*cut/100))+' شهريًا':'بنفس مستوى صرفك'}</small></div>
+   <div class="actions"><button class="btn block" id="abSave">اعتمد الميزانية</button><button class="btn ghost block" data-close>إلغاء</button></div>`:
+   '<div class="panel empty"><b>لا توجد بيانات كافية بعد</b>تحتاج مصاريف شهر واحد على الأقل في البنود ليُحسب المتوسط.</div><div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div>'}</div></div>`};
+  draw();L.onkeydown=null;
+  L.oninput=e=>{const k=e.target.dataset.abval;if(k){const n=parseAmt(e.target.value);if(isFinite(n)&&n>=0)val[k]=r3(n);if(!pick[k]){pick[k]=true;const c=L.querySelector(`[data-abpick="${k}"]`);if(c)c.checked=true}
+    const s=L.querySelector('.ab-sum b');if(s){const tot=r3(R.filter(x=>pick[x.c.id]).reduce((a,x)=>a+(val[x.c.id]!=null?val[x.c.id]:x.sug),0));s.textContent=money(tot)+' '+CUR}}};
+  L.onchange=e=>{const k=e.target.dataset.abpick;if(k){pick[k]=e.target.checked;draw()}};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+   if(x.dataset.abcut!==undefined){cut=+x.dataset.abcut;Object.keys(val).forEach(k=>delete val[k]);draw();return}
+   if(x.id==='abSave'){const sel=R.filter(r=>pick[r.c.id]&&!r.goal);if(!sel.length){toast('اختر بندًا واحدًا على الأقل');return}
+     const B=Object.assign({},S.settings.budgets||{});sel.forEach(r=>{const v=val[r.c.id]!=null?val[r.c.id]:r.sug;if(v>0)B[r.c.id]=v;else delete B[r.c.id]});
+     S.settings.budgets=B;try{aud('budget','ميزانية تلقائية لـ '+countWord(sel.length,'بند','بندين','بنود','بندًا'),'',money(sel.reduce((s,r)=>s+(val[r.c.id]!=null?val[r.c.id]:r.sug),0)))}catch(er){}
+     await putSettings();memoClear();L.innerHTML='';render();toast('✓ اعتُمدت ميزانية '+countWord(sel.length,'بند واحد','بندين','بنود','بندًا'))}}}
 /* ===================== 📒 الرصيد اليومي (2.105) =====================
  * كل صباح تكتب المبلغ المتبقي في حسابك، فيحسب التطبيق كم صرفت بين كل قراءتين:
  * المصروف = رصيد الصباح + الدخل المسجّل − رصيد الصباح التالي (مع استبعاد التحويلات بين حساباتك)،
@@ -1560,7 +1591,8 @@ function hv2i(k,s){return `<svg class="hv2-i" aria-hidden="true" viewBox="0 0 24
 function hv2Ring(p,cls,label){p=Math.max(0,Math.min(100,Math.round(p)));return `<span class="hv2-ring ${cls||''}" style="--p:${p}"><span class="num">${label!=null?label:p+'%'}</span></span>`}
 function hv2Hijri(){try{return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-latn',{day:'numeric',month:'long',year:'numeric'}).format(new Date())}catch(e){return ''}}
 function hv2Attn(){const td=today();const out=[];
-  try{const H=homeFin();dueItems(mStart(curM()),H.end).filter(i=>!i.isPaid&&!i.pre).sort((a,b)=>a.date.localeCompare(b.date)).forEach(i=>{const o=dDiff(td,i.date);if(o>7)return;const rem=r3(i.amount-(i.paidAmt||0));out.push({ic:i.kind==='debt'?'bank':'bolt',t:i.kind==='debt'?i.ref.name:i.name,s:money(rem)+' · '+(o<0?'متأخر':o===0?'اليوم':'بعد '+countWord(o,'يوم','يومين','أيام','يومًا')),late:o<=0,o,at:'data-tab="monthly"'})})}catch(e){}
+  /* 2.139: هل يكفي رصيدك؟ (dueCover في alerts/due-ahead.js) */
+  try{dueCover().filter(x=>x.n<=7).forEach(x=>{const i=x.i,o=x.n;out.push({id:i.id,ic:i.kind==='debt'?'bank':'bolt',t:i.kind==='debt'?i.ref.name:i.name,s:money(x.need)+' · '+(o<0?'متأخر':o===0?'اليوم':'بعد '+countWord(o,'يوم','يومين','أيام','يومًا'))+(x.ok===null?'':x.ok?' · ✓ رصيدك يكفي':' · ⚠️ ينقصك '+money(x.short)),late:o<=0||x.ok===false,o,at:'data-tab="monthly"'})})}catch(e){}
   try{carAlertList().forEach(x=>out.push({ic:'car',t:plain(x.title),s:plain(x.when),late:x.level==='late',o:x.days,at:'data-tab="cars"'}))}catch(e){}
   try{docAlertList().forEach(x=>out.push({ic:'doc',t:plain(x.title),s:plain(x.when).split('،')[0],late:x.level==='late',o:x.days,at:'data-tab="docs"'}))}catch(e){}
   return out.sort((a,b)=>a.o-b.o)}
@@ -1590,14 +1622,14 @@ function homeV2Html(m){const H=homeFin(),B=H.B,dp=H.dp;const td=today(),dt=new D
    <button class="hv2-r r-mo" data-tab="mbud"><b>هذا الشهر</b><small>${esc(mShort(m))}</small>${hv2Ring(mP,'v'+(mP>100?' over':''))}<b class="num">${money(MF.exp)}</b><small>${mBase>0?'من '+(Bud?'الميزانية ':'الدخل ')+money(mBase):'سجّل دخلك'}</small></button></div><button class="hv2-link" data-spend="1">🏦 كم أستطيع أن أنفق حسب أرصدة حساباتي ‹</button>`:''}
   ${safe('معاملات الشهر',()=>hmTxHtml())}${safe('حسب البند',()=>hmCatsHtml())}
   ${hqOn()?`<section class="hv2-card hv2-q"><div class="hv2-h">${hv2i('bolt',16)} العمليات السريعة</div><div class="hv2-qg">${Q.map(([k,ic,n,c])=>`<button class="hv2-qb" data-hq="${k}"><span class="${c}">${hv2i(ic)}</span>${n}</button>`).join('')}</div></section>`:''}
-  <div class="hv2-1"><section class="hv2-card hv2-att"><div class="hv2-h">تحتاج انتباهك ${att.length?`<span class="hv2-n">${att.length}</span>`:''}</div>${att.length?att.slice(0,4).map(x=>`<button class="hv2-ar${x.late?' late':''}" ${x.at}><span class="hv2-ai">${hv2i(x.ic,15)}</span><span><b>${esc(x.t)}</b><small>${esc(x.s)}</small></span></button>`).join('')+(att.length>4?`<button class="linkbtn" data-tab="monthly">+${att.length-4} أخرى</button>`:''):'<p class="note" style="margin:0">✓ لا شيء عاجل خلال أسبوع</p>'}</section></div>`}
+  <div class="hv2-1"><section class="hv2-card hv2-att"><div class="hv2-h">تحتاج انتباهك ${att.length?`<span class="hv2-n">${att.length}</span>`:''}</div>${att.length?att.slice(0,4).map(x=>`<button class="hv2-ar${x.late?' late':''}" ${x.at}><span class="hv2-ai">${hv2i(x.ic,15)}</span><span><b>${esc(x.t)}</b><small>${esc(x.s)}</small></span></button>`).join('')+(att.length>4?`<button class="linkbtn" data-tab="monthly">+${att.length-4} أخرى</button>`:''):''}${(()=>{const more=homeAttnHtml(true,new Set(att.map(x=>x.id).filter(Boolean)),true);return !att.length&&!more?'<p class="note" style="margin:0">✓ لا شيء عاجل خلال أسبوع</p>':more})()}</section></div>`}
 
 /* صفحة الرئيسية الجديدة: الجزء العلوي الجديد ثم بقية الأقسام كما هي */
 function hv2Page(m,pc,inc,exp,left,lastInc,empty){
   return `<div class="hv2">${homeV2Html(m)}</div>${safe('الادخار المحمي',()=>svlHtml(m,'home'))}${safe('ميزانية الأسبوع',()=>wkHtml('home'))}${m===curM()?safe('أيام بلا صرف',()=>nsHomeHtml()):''}${(()=>{try{return odoBannerHtml()}catch(e){return ''}})()}
    ${!+S.settings.payday&&list().some(t=>t.type==='inc'&&t.cat==='salary')&&!lastInc?`<div class="infobox"><span>📅 حدّد يوم نزول الراتب ليصير الشهر في كل الصفحات من الراتب إلى الراتب.</span><button class="chip pay" data-dayplan="pay">حدّد يوم الراتب</button></div>`:''}${salaryDueHtml()}
    <div class="srchpin hv2-srch"><button class="srchbar" data-search="1" aria-label="بحث في التطبيق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span>ابحث في عملياتك وديونك والتزاماتك…</span></button></div>
-   ${safe('الرسم',()=>homeChartHtml(m,pc))}${rescueHomeHtml()}${homeAttnHtml(true)}${homeTiles([bizKnown()?'<button class="xphome" data-biz=""><span>💼</span><span><b>مشروعي</b><small>مبيعات وأرباح ومخزون «الزمرة الملكية» في مكان واحد</small></span><span class="xph-go">‹</span></button>':'',(()=>{try{return fuelQuickHtml('home')}catch(e){return ''}})(),(leanOn()?'':'<button class="xphome" data-merch=""><span>📍</span><span><b>الجهات والمحلات</b><small>كم صرفت في كل محطة ومحل: أسبوع، شهر، سنة</small></span><span class="xph-go">‹</span></button>'),(leanOn()?'':'<button class="xphome" data-prio="1"><span>🧭</span><span><b>الأولويات وخطة الديون</b><small>ماذا أدفع أولًا، وأسرع طريق للتحرر من الديون</small></span><span class="xph-go">‹</span></button>'),revHomeHtml(),safe('التصنيف',()=>ckHomeHtml()),xpHomeHtml(),ppHomeHtml(),safe('التوقعات',()=>fcHomeHtml()),seasHomeHtml(),subsHomeHtml(),list().some(t=>t.src==='stmt')&&!leanOn()?'<button class="stbtn sm" data-bana="1"><span>📊</span><span><b>تحليل الكشوفات</b><small>كل بنوكك · خطة الشهر القادم</small></span><span class="xph-go">‹</span></button>':(hqOn()||leanOn()?'':'<button class="stbtn sm" data-stmt="1"><span>🏦</span><span><b>استيراد كشف البنك</b><small>أضف عمليات الشهر بضغطة</small></span><span class="xph-go">‹</span></button>')])}
+   ${safe('الرسم',()=>homeChartHtml(m,pc))}${rescueHomeHtml()}${homeTiles([bizKnown()?'<button class="xphome" data-biz=""><span>💼</span><span><b>مشروعي</b><small>مبيعات وأرباح ومخزون «الزمرة الملكية» في مكان واحد</small></span><span class="xph-go">‹</span></button>':'',(()=>{try{return fuelQuickHtml('home')}catch(e){return ''}})(),(leanOn()?'':'<button class="xphome" data-merch=""><span>📍</span><span><b>الجهات والمحلات</b><small>كم صرفت في كل محطة ومحل: أسبوع، شهر، سنة</small></span><span class="xph-go">‹</span></button>'),(leanOn()?'':'<button class="xphome" data-prio="1"><span>🧭</span><span><b>الأولويات وخطة الديون</b><small>ماذا أدفع أولًا، وأسرع طريق للتحرر من الديون</small></span><span class="xph-go">‹</span></button>'),revHomeHtml(),safe('التصنيف',()=>ckHomeHtml()),xpHomeHtml(),ppHomeHtml(),safe('التوقعات',()=>fcHomeHtml()),seasHomeHtml(),subsHomeHtml(),list().some(t=>t.src==='stmt')&&!leanOn()?'<button class="stbtn sm" data-bana="1"><span>📊</span><span><b>تحليل الكشوفات</b><small>كل بنوكك · خطة الشهر القادم</small></span><span class="xph-go">‹</span></button>':(hqOn()||leanOn()?'':'<button class="stbtn sm" data-stmt="1"><span>🏦</span><span><b>استيراد كشف البنك</b><small>أضف عمليات الشهر بضغطة</small></span><span class="xph-go">‹</span></button>')])}
    ${spiritHtml('mid')}${rzHtml('mid')}${empty}${debtsBrowseHtml()}${plansHomeHtml()}${finStatusHtml()}${advHomeHtml()}${repHomeHtml()}${spiritHtml('bottom')}${rzHtml('bottom')}
    <div class="hv2-back"><button class="chip" data-hstyle="classic">↩️ العودة لتصميم الرئيسية السابق</button></div>`}
 function vHome(){
@@ -1677,7 +1709,7 @@ function hmCatsHtml(){const R=hmRange();const A=inRange(R.from,R.to).filter(t=>t
    rec=`<button class="hm-ct hm-rec${late?' late':''}" data-tab="monthly" style="--cc:#8A4F7D"><span class="hm-ci">🔁</span><span class="hm-cn">الالتزامات الشهرية</span><b class="num">${money(st.paidAmt)}</b><small>دُفع من ${money(st.total)}${st.left?' · باقٍ '+st.left:' · ✓ كلها'}</small><i class="hm-cb"><em style="width:${pct}%"></em></i><small class="hm-cl">${late?'⚠️ متأخر: '+esc(U.find(([d])=>d<today())[1].name)+' ('+hmDM(U.find(([d])=>d<today())[0])+')':nx?'التالي: '+esc(nx[1].name)+' · '+hmDM(nx[0]):'لا شيء متبقٍ'}</small></button>`}}catch(e){}
   if(!ids.length&&!rec)return '';const tot=r3(sum(A,'exp'));
   return `<section class="hm-card hm-cats"><div class="hm-h"><span class="hm-t"><b>🧾 مصاريف الشهر حسب البند</b><small>${esc(R.lbl)} · المجموع ${money(tot)} ${CUR}</small></span><button class="linkbtn" data-tab="reports">التقارير ‹</button></div>
-   <div class="hm-cg">${rec}${ids.map(tile).join('')}</div><p class="note hm-tip">تتحدّث تلقائيًا مع كل عملية أو رسالة بنك. البند يُعرف من اسم المحل (مثل Shell أو لولو)، وإذا غيّرت بند عملية يتذكّره التطبيق للمرات القادمة.</p></section>`}
+   <div class="hm-cg">${rec}${ids.map(tile).join('')}</div>${abNeeded()?'<button class="btn ghost block hm-ab" data-abopen="1">🎯 اقترح ميزانية لكل بند من متوسط صرفك</button>':Object.keys(S.settings.budgets||{}).length?'<button class="linkbtn hm-ab" data-abopen="1">🎯 تعديل ميزانية البنود</button>':''}<p class="note hm-tip">تتحدّث تلقائيًا مع كل عملية أو رسالة بنك. البند يُعرف من اسم المحل (مثل Shell أو لولو)، وإذا غيّرت بند عملية يتذكّره التطبيق للمرات القادمة.</p></section>`}
 /* 💰 رصيدي الآن: يُلحق ببطاقة الرصيد العلوية (hv2-main) فيصيران خانة واحدة */
 function hmAccsHtml(){const D=haData();let bl=null;try{bl=blTodayAuto()}catch(e){}let N=null;try{N=netWorthData()}catch(e){}
   /* الرصيد يظهر مرة واحدة فقط في الأعلى؛ هنا ما يضيف معلومة: التغيّر منذ الصباح، صافي الثروة إن اختلف، الأبناء */
@@ -1690,7 +1722,8 @@ function hmAccsHtml(){const D=haData();let bl=null;try{bl=blTodayAuto()}catch(e)
    ${has?`${D.A.length?`<div class="hm-gh"><span>حساباتي (${D.A.length})</span></div>${D.mine}`:''}${D.K.length?`<div class="hm-gh"><span>حسابات الأبناء</span><b class="num">${money(D.kt)}</b></div>${D.kids}`:''}`:`<p class="note" style="margin:6px 0">أضف حساباتك البنكية ليُحسب رصيدك منها تلقائيًا.</p>`}
    <div class="chips hm-act"><button class="chip" data-beng="1">🏦 حساباتي وأرصدتي</button><button class="chip" data-haxfer="1">↔️ تحويل لابن</button><button class="chip" data-kidsopen="new">＋ ابن / ابنة</button>${D&&D.K.length?'<button class="chip" data-kidsopen="1">✏️ تعديل حسابات الأبناء</button>':''}<button class="chip" data-ballog="1">📒 سجل الرصيد</button></div></div>`}
 /* أزرار التصفية والنافذة والبنود (في الرئيسية؛ داخل النوافذ تعالجها النافذة نفسها) */
-document.addEventListener('click',e=>{const b=e.target.closest('[data-hmf],[data-hmfull],[data-hmcat]');if(!b||!b.isConnected||b.closest('#layer'))return;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-hmf],[data-hmfull],[data-hmcat],[data-abopen]');if(!b||!b.isConnected||b.closest('#layer'))return;
+  if(b.dataset.abopen){openAutoBudget();return}
   if(b.dataset.hmf){HM.f=b.dataset.hmf;const box=document.getElementById('hmTx');if(box){const w=document.createElement('div');w.innerHTML=hmTxHtml();box.replaceWith(w.firstElementChild)}return}
   if(b.dataset.hmfull){openHmTx(HM.f);return}
   if(b.dataset.hmcat){openHmTx('exp',b.dataset.hmcat);return}});
@@ -1932,11 +1965,13 @@ function openKid(id){const L=document.getElementById('layer');const k=kdGet(id);
    <div class="row2"><button class="btn" data-kdm="dep"><span class="lk">🔒 </span>💰 إيداع</button><button class="btn ghost" data-kdm="wd"><span class="lk">🔒 </span>↩️ صرف من صندوق</button></div>
    <div class="stack" style="margin-top:10px">${X.J.map(x=>`<div class="kd-jar"><div class="kd-jh"><span>${x.j.ic} <b>${esc(x.j.n)}</b>${x.due?` <small class="note">· ${fmtD(x.due)} (${kdDueTxt(x)})</small>`:''}</span><b class="num">${money(x.bal)}</b></div>
      ${x.tgt?`<div class="mp-bar"><i style="width:${x.pct}%"></i></div><small class="note">${x.pct}% من ${money(x.tgt)}${x.need?' · باقٍ '+money(x.need)+(x.perM?' · '+money(x.perM)+' شهريًا':''):' · ✓ اكتمل الهدف'}</small>`:`<small class="note">بلا هدف · <button class="linkbtn" data-kdj="1">حدّد هدفًا</button></small>`}</div>`).join('')}</div>
+   <button class="btn ghost block km-open" data-kmode="1">👧 افتح صفحة ${esc(k.name)} (يراها بنفسه)</button>
    <div class="chips" style="margin-top:10px"><button class="chip" data-kdmv="1">⇄ نقل بين الصناديق</button><button class="chip" data-kdj="1">✏️ الصناديق والأهداف</button><button class="chip" data-kdrec="1">⚖️ مطابقة رصيد البنك</button><button class="chip" data-kdpr1="1">🖨️ طباعة</button><button class="chip" data-kded="1">⚙️ الحساب</button></div>
    ${T.length?`<h3>آخر الحركات</h3><div class="panel">${T.slice(0,20).map(t=>{const j=k.jars.find(z=>z.id===t.jar)||{ic:'📦',n:'—'};return `<div class="sumrow"><span>${fmtD(t.d)} · ${j.ic} ${esc(j.n)}${t.note?' <small class="note">· '+esc(t.note)+'</small>':''}</span><span><b class="num ${t.amt<0?'amt-exp':'amt-inc'}">${t.amt<0?'−':'+'}${money(Math.abs(t.amt))}</b> <button class="chip" data-kdx="${esc(t.id)}" aria-label="حذف">✕</button></span></div>`}).join('')}</div>`:''}
    <div class="actions"><button class="btn ghost block" data-kdback="1">رجوع</button></div></div></div>`;
   L.oninput=L.onchange=null;
   L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')||x.dataset.kdback){openKids();return}
+    if(x.dataset.kmode){openKidModeSetup(id);return}
     if(x.dataset.kdm){openKidMove(id,x.dataset.kdm);return}if(x.dataset.kdmv){openKidXfer(id);return}if(x.dataset.kdj){openKidJars(id);return}if(x.dataset.kdrec){openKidRec(id);return}if(x.dataset.kdpr1){kdPrint(id);return}if(x.dataset.kdch){openKidCh(id);return}if(x.dataset.kded){openKidEdit(id);return}
     if(x.dataset.kdx){const t=k.tx.find(z=>z.id===x.dataset.kdx);if(!t)return;if(t.src&&S.tx[t.src]){const o=S.tx[t.src];toast('هذه الحركة مرتبطة بعملية «'+(o.note||'تحويل')+'» في حسابك. افتحها وعدّلها أو احذفها من هناك',()=>{L.innerHTML='';openSheet(o)},8000);return}k.tx=k.tx.filter(z=>z!==t);let tr=null;if(t.trf){tr=transfers().find(z=>z.id===t.trf);S.settings.transfers=transfers().filter(z=>z.id!==t.trf)}await putSettings();openKid(id);
       toast('حُذفت الحركة',async()=>{k.tx.push(t);if(tr)S.settings.transfers=transfers().concat([tr]);await putSettings();openKid(id)},8000)}}}
@@ -5447,6 +5482,72 @@ function lockMenuBtn(){const h=document.querySelector('.hdr-actions');let g=docu
   const lbl='قفل التطبيق وبصمة الوجه'+(lockCfg()?' · مفعّل':'');if(g.getAttribute('aria-label')!==lbl){g.setAttribute('aria-label',lbl);g.title=lbl}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-lockmgr]');if(!b)return;e.preventDefault();openLockMgr()});
 setTimeout(lockMenuBtn,0);
+/* ===================== 2.139: 🛡️ حماية بياناتي وسلامتها =====================
+ * نافذة واحدة (openDataCare) فيها:
+ *  1) النسخ الاحتياطي: حالة مزامنة Google Drive وآخر مزامنة وأخطاؤها، وآخر نسخة في الملفات/iCloud،
+ *     و«تحقّق من سلامة النسخة» (يبني النسخة ويقرؤها ويطابق عدد العمليات والبصمة fnv مع بياناتك الحالية).
+ *  2) فحص السلامة (dcChecks): مكرر، فرق رصيد البنك، رسائل تنتظر، حسابات مجهولة، الأبناء غير مطابقين، بلا بند، تاريخ بعيد، مبلغ غير صحيح.
+ *     لكل ملاحظة زر يفتح مكان إصلاحها. لا يُصلح شيئًا وحده، فلا يتغيّر شيء من بياناتك بدون قرارك.
+ * التذكير في «تحتاج انتباهك» (backupNudgeHtml): النسخة إن تأخرت، وفحص الشهر في أول 5 أيام منه إن وُجدت ملاحظات. */
+const DC_SEEN='masareef:dcSeen';
+function dcAgo(ms){if(!ms)return '';const d=Math.floor((Date.now()-ms)/864e5);if(d<=0){const h=Math.floor((Date.now()-ms)/36e5);return h<1?'قبل دقائق':'قبل '+countWord(h,'ساعة','ساعتين','ساعات','ساعة')}return 'قبل '+countWord(d,'يوم','يومين','أيام','يومًا')}
+/* حالة النسخ: good | warn | bad */
+function bkHealth(){let lk=false,cfg={},st='off';try{lk=Sync.linked();cfg=Sync.cfg()||{};st=Sync.state()}catch(e){}
+  const last=+cfg.last||0;const dDays=last?(Date.now()-last)/864e5:999;const err=lk&&(st==='error'||st==='needtap'||st==='needpass');
+  const fb=advLastBackup();const fDays=fb?Math.max(0,-daysTo(fb)):999;
+  const driveOk=lk&&!err&&dDays<3,fileOk=fDays<7;
+  const lvl=driveOk||fileOk?'good':(lk&&dDays<14)||fDays<30?'warn':'bad';
+  return {lk,last,dDays,err,st,lastErr:cfg.lastErr||'',fb,fDays,lvl,driveOk,fileOk}}
+/* بناء النسخة وقراءتها ومطابقتها */
+function dcVerify(){try{const txt=backupText();const o=JSON.parse(txt);const n=(o.data&&o.data.tx||[]).length;const {tx,...rest}=o.data||{};
+  const okSum=fnv(JSON.stringify(o.data))===o.check;const okN=n===list().length;const okS=Object.keys(rest).length>0;
+  return {ok:okSum&&okN&&okS,n,kb:Math.round(txt.length/1024),okSum,okN}}catch(e){return {ok:false,err:e.message}}}
+function dcChecks(){const out=[];const add=(k,ic,t,n,s,act)=>{if(n>0)out.push({k,ic,t,n,s,act})};const td=today();
+  try{add('dup','👯','عمليات مكررة',dupAll().length,'نفس النوع والمبلغ والتاريخ والوصف',['راجعها',()=>openDupAll()])}catch(e){}
+  try{const A=beAll().A.filter(x=>x.diff!=null&&Math.abs(x.diff)>=0.005&&x.last&&dDiff(x.last.date||x.A.date,td)<=31);add('bal','⚖️','فرق بين رصيد البنك والتطبيق',A.length,A.map(x=>(x.a.name||accName(x.a.id))+' '+(x.diff>0?'+':'−')+money(Math.abs(x.diff))).join('، ')+'. عملية لم تُسجّل غالبًا',['حساباتي وأرصدتي',()=>openBalEngine()])}catch(e){}
+  try{add('pend','📩','رسائل بنك تنتظر قرارك',boxPend().length,'لم تُسجّل بعد',['افحصها',()=>openBoxDiag()])}catch(e){}
+  try{add('unk','🏦','رسائل من حسابات غير مسجلة',beUnknown().length,'أضف الحساب أو اربط رقمه',['حساباتي وأرصدتي',()=>openBalEngine()])}catch(e){}
+  try{const K=kdList().filter(k=>{const X=kdStats(k);return X.bank!=null&&Math.abs(X.bank-X.tot)>=0.0005});add('kid','👨‍👧','حساب ابن لا يطابق البنك',K.length,K.map(k=>k.name).join('، '),['طابق',()=>openKidRec(K[0].id)])}catch(e){}
+  try{const m=curM();const U=list().filter(t=>t.type==='exp'&&!t.own&&!t.sample&&(t.cat==='other'||!t.cat)&&(mOf(t.date)===m||mOf(t.date)===shiftMonth(m,-1)));add('cat','🏷️','مصاريف بلا بند',U.length,'تظهر في «أخرى» فلا تدخل في «حسب البند»',['صنّفها',()=>openDcCat()])}catch(e){}
+  try{const F=list().filter(t=>t.date&&t.date>addDays(td,31)&&!t.sample);add('fut','📅','عمليات بتاريخ بعيد في المستقبل',F.length,'ربما خطأ في السنة أو الشهر',['افتح الأولى',()=>openSheet(F[0])])}catch(e){}
+  try{const B=list().filter(t=>!(+t.amount>0)||!isFinite(+t.amount));add('amt','❗','عمليات بمبلغ غير صحيح',B.length,'صفر أو سالب أو ليس رقمًا',['افتح الأولى',()=>openSheet(B[0])])}catch(e){}
+  return out}
+/* المصاريف بلا بند في نافذة، والضغط على العملية يفتحها لتختار بندها (ويتذكّره التطبيق للمحل نفسه) */
+function openDcCat(){const L=document.getElementById('layer');const m=curM();
+  const U=list().filter(t=>t.type==='exp'&&!t.own&&!t.sample&&(t.cat==='other'||!t.cat)&&(mOf(t.date)===m||mOf(t.date)===shiftMonth(m,-1))).sort((a,b)=>b.date.localeCompare(a.date));
+  L.innerHTML=`${sheetTop('مصاريف بلا بند')}<h2 style="margin-top:0" data-nofold>🏷️ مصاريف بلا بند</h2><p class="note">اضغط العملية واختر بندها. يتذكّر التطبيق بند المحل للمرات القادمة.</p>${U.length?hmListHtml(U):'<p class="note">✓ كل مصاريفك لها بند.</p>'}<div class="actions"><button class="btn ghost block" data-dcback="1">رجوع</button></div></div></div>`;
+  L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}if(x.dataset.dcback){openDataCare();return}if(x.dataset.edit){const t=S.tx[x.dataset.edit];if(t)openSheet(t)}}}
+function openDataCare(){const L=document.getElementById('layer');let ver=null,busy=false;
+  const draw=()=>{const H=bkHealth();const C=dcChecks();const lv={good:['✅','بياناتك محمية'],warn:['⚠️','النسخة الاحتياطية متأخرة'],bad:['⛔','بياناتك بلا نسخة احتياطية']}[H.lvl];
+   L.innerHTML=`${sheetTop('حماية بياناتي')}<h2 style="margin-top:0" data-nofold>🛡️ حماية بياناتي وسلامتها</h2>
+   <div class="dc-st ${H.lvl}"><span aria-hidden="true">${lv[0]}</span><div><b>${lv[1]}</b><small>بياناتك محفوظة في هذا الجهاز. النسخة الاحتياطية تحميها إذا ضاع الهاتف أو حُذف التطبيق.</small></div></div>
+   <h3 class="dc-h" data-nofold>💾 النسخ الاحتياطي</h3>
+   <div class="panel dc-list">
+    <div class="setrow"><div><b>☁️ Google Drive (تلقائي)</b><small>${H.lk?(H.err?'⚠️ متوقف: '+esc(H.st==='needpass'?'اكتب كلمة سر التشفير':H.st==='needtap'?'اضغط لإعادة الاتصال':'خطأ في الاتصال'):H.last?'آخر مزامنة '+esc(dcAgo(H.last)):'لم يُزامَن بعد'):'غير مربوط. اربطه من ⚙️ الضبط لتُحفظ بياناتك تلقائيًا'}</small></div>${H.lk?`<button class="chip${H.driveOk?'':' pay'}" id="dcSync"${busy?' disabled':''}>${busy?'⏳':'🔄 زامن الآن'}</button>`:'<button class="chip pay" data-tab="settings" data-dcgo="1">اربط</button>'}</div>
+    <div class="setrow"><div><b>📁 نسخة في الملفات أو iCloud</b><small>${H.fb?'آخر نسخة '+esc(H.fDays===0?'اليوم':'قبل '+daysWord(H.fDays)):'لم تحفظ نسخة بعد'}${!H.lk?' · بدون Drive هذه حمايتك الوحيدة':''}</small></div><button class="chip${H.fileOk?'':' pay'}" id="dcFile">💾 احفظ الآن</button></div>
+    <div class="setrow"><div><b>🔍 سلامة النسخة</b><small>${ver?ver.ok?'✓ سليمة: '+ver.n.toLocaleString('en')+' عملية، '+ver.kb+' ك.ب، والبصمة مطابقة':'⚠️ فيها مشكلة'+(ver.err?': '+esc(ver.err):ver.okN?'':' (عدد العمليات لا يطابق)'):'تبني النسخة وتقرؤها وتطابقها مع بياناتك'}</small></div><button class="chip" id="dcVer">تحقّق</button></div>
+   </div>
+   <h3 class="dc-h" data-nofold>🩺 فحص سلامة البيانات</h3>
+   ${C.length?`<div class="panel dc-list">${C.map((c,i)=>`<div class="setrow dc-c"><div><b>${c.ic} ${esc(c.t)} <span class="pill late">${c.n}</span></b><small>${esc(c.s)}</small></div><button class="chip pay" data-dcfix="${i}">${esc(c.act[0])}</button></div>`).join('')}</div>`:'<div class="panel dc-ok">✅ لا ملاحظات: لا تكرار، والأرصدة مطابقة، وكل المصاريف لها بند.</div>'}
+   <p class="note">الفحص لا يغيّر شيئًا وحده. كل إصلاح بقرارك.</p>
+   <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
+   try{localStorage.setItem(DC_SEEN,curM())}catch(e){}};
+  draw();L.oninput=L.onchange=L.onkeydown=null;
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';render();return}
+   if(x.dataset.dcgo){L.innerHTML='';S.tab='settings';render();return}
+   if(x.id==='dcSync'){busy=true;draw();try{await Sync.now()}catch(er){}busy=false;draw();const H=bkHealth();toast(H.err?'تعذّرت المزامنة':'تمت المزامنة');return}
+   if(x.id==='dcFile'){await saveBackupFile();draw();return}
+   if(x.id==='dcVer'){ver=dcVerify();draw();return}
+   if(x.dataset.dcfix!==undefined){const c=dcChecks()[+x.dataset.dcfix];if(c){L.innerHTML='';c.act[1]()}return}}}
+/* التذكير في «تحتاج انتباهك» */
+function dcNudgeHtml(){if(list().length<10)return '';const out=[];const H=bkHealth();
+  let sn='';try{sn=localStorage.getItem('masareef:bksnooze')||''}catch(e){}
+  if(H.lvl!=='good'&&!(sn&&sn>=today()))out.push(`<div class="infobox dc-nudge ${H.lvl}"><span>💾 ${H.lk&&H.err?'مزامنة Google Drive متوقفة. ':''}${H.fb||H.last?'آخر نسخة احتياطية '+(H.last&&H.dDays<H.fDays?dcAgo(H.last):H.fb?'قبل '+daysWord(H.fDays):''):'لم تحفظ نسخة احتياطية بعد'}. احفظ نسخة حتى لا تضيع بياناتك.</span><button class="chip pay" data-bknow="1">حفظ</button><button class="chip" data-datacare="1">التفاصيل</button><button class="chip" data-bklater="1">لاحقًا</button></div>`);
+  let seen='';try{seen=localStorage.getItem(DC_SEEN)||''}catch(e){}
+  if(seen!==curM()&&+today().slice(8)<=5){const C=dcChecks();if(C.length)out.push(`<div class="infobox dc-nudge"><span>🩺 فحص بداية الشهر: ${countWord(C.reduce((s,c)=>s+1,0),'ملاحظة واحدة','ملاحظتان','ملاحظات','ملاحظة')} على بياناتك (${C.slice(0,2).map(c=>esc(c.t)).join('، ')}${C.length>2?'…':''}).</span><button class="chip pay" data-datacare="1">افحص</button><button class="chip" data-dcseen="1">تم</button></div>`)}
+  return out.join('')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-datacare],[data-dcseen]');if(!b||!b.isConnected)return;
+  if(b.dataset.datacare){openDataCare();return}if(b.dataset.dcseen){try{localStorage.setItem(DC_SEEN,curM())}catch(er){}render()}});
 /* ---------- 21. قراءة رسائل البنك ---------- */
 const KW={
  food:['al meera','الميرة','sultan center','مركز سلطان','megamart','ميجامارت','km trading','choithram','mini market','ميني ماركت','baqala','dukan','lulu','لولو','carrefour','كارفور','nesto','نستو','al fair','الفير','hypermarket','supermarket','سوبرماركت','هايبر','بقالة','grocery','safeer','سفير','khimji','ramez','رامز','bakery','مخبز'],
@@ -5838,8 +5939,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.138.1';
+const APP_VERSION='2.139.0';
 const CHANGELOG=[
+ {v:'2.139.0',date:'2026-11-25',items:['🗣️ «رصيدي» عبر Siri: تقول «Hey Siri، رصيدي» فيقرأ لك مجموع أرصدتك ورصيد كل حساب والأبناء والباقي من الالتزامات ووقت التحديث، دون فتح التطبيق. يحتاج تحديث السكربت مرة واحدة، وهو متوقف حتى تفعّله. الخطوات في ☰ ← الكتالوج ← «رصيدي عبر Siri».','🔔 «تحتاج انتباهك» صارت خانة واحدة: المواعيد في الأعلى، ثم بقية التنبيهات بلا تكرار.','🛡️ «حماية بياناتي وسلامتها»: حالة مزامنة Google Drive وآخر نسخة، وزر «تحقّق» يقرأ النسخة ويطابقها مع بياناتك. وفحص للتكرار، وفرق رصيد البنك، والرسائل المنتظرة، والمصاريف بلا بند، والتواريخ والمبالغ الخاطئة، لكل منها زر إصلاح. ويذكّرك في أول كل شهر.','🔁 الاشتراكات تُكتشف من شهرين متتاليين بنفس المبلغ (كانت تحتاج 3 أشهر)، وتُضاف كالتزام بنوعها الصحيح (اتصالات، كهرباء، مياه).','⏰ قبل موعد كل التزام: هل يكفي رصيدك؟ (✓ يكفي أو ⚠️ ينقصك كذا، محسوبًا مع ما قبله)، مع إشعار قبل الموعد بيومين.','🎯 «ميزانية تلقائية لكل بند» من متوسط آخر 3 أشهر، بخيارات: كما أصرف، أو وفّر 10%، أو وفّر 20%. تعدّل أي رقم ثم تعتمد، فتظهر الأشرطة في «حسب البند».','👧 «صفحة الابن»: شاشة مبسطة يرى فيها ابنك رصيده وصناديقه وأهدافه وآخر حركاته فقط. تبقى مفتوحة حتى لو أُغلق التطبيق، والخروج برمز القفل أو بصمة وجهك.']},
  {v:'2.138.1',date:'2026-11-25',items:['📅 التواريخ في «معاملات الشهر»: كل يوم بتاريخه الكامل (اليوم · الأربعاء 25 نوفمبر)، وكل عملية بوقتها 🕒 من رسالة البنك أو وقت تسجيلها، وعلامة 📩 لما جاء من رسائل البنك، وفترة الشهر بالتاريخ (من 1 نوفمبر إلى 30 نوفمبر).','🔁 خانة الالتزامات تعرض الالتزام المتأخر باسمه وتاريخ استحقاقه، أو الالتزام التالي وتاريخه. وأصلحت فحص التأخر فيها، فقد كان لا يكتشف المتأخر. وخانات البنود تعرض تاريخ آخر عملية.']},
  {v:'2.138.0',date:'2026-11-25',items:['💰 «رصيدي الآن» في خانة واحدة: رصيدك يظهر مرة واحدة فقط، وتحته حساباتك وحسابات الأبناء، والتغيّر منذ الصباح، وصافي الثروة (حين تختلف عن الرصيد بسبب ديون أو ذهب). حلّت محل أربع خانات كانت تكرر الرقم نفسه.','📒 «معاملات الشهر» في الرئيسية: مربع يتمرر داخله، فيه كل السحوبات والإيداعات مجمّعة باليوم مع مجموع كل يوم. تضغط «سحوبات» أو «إيداعات» للتصفية، و⤢ لفتحها في نافذة كاملة فيها بحث. والضغط على أي عملية يفتح تعديلها.','🧾 «مصاريف الشهر حسب البند»: خانة لكل بند (وقود، بقالة، مطاعم…) وخانة للالتزامات الشهرية (المدفوع والباقي والمتأخر). تتحدّث تلقائيًا مع كل رسالة بنك، وفيها المقارنة بنفس الفترة من الشهر الماضي وشريط الميزانية إن حدّدتها. والضغط على البند يعرض عملياته.','🏷️ يتعرّف على متاجر ومحطات عُمانية أكثر: الميرة، مركز سلطان، ميجامارت، أوكمو، OQ، المها وغيرها.']},
  {v:'2.137.0',date:'2026-11-25',items:['🔐 «قفل التطبيق وبصمة الوجه» في قائمة ☰: نافذة واحدة لتفعيل القفل وإدارته. فيها تشغيل وإيقاف الفتح ببصمة الوجه (Face ID)، وطلب البصمة تلقائيًا، وتغيير الرمز السري، ومتى يُقفل بعد الخروج (فورًا، بعد دقيقة، بعد 5 أو 15 دقيقة)، و«اقفل التطبيق الآن»، وإيقاف القفل.','🛡️ أي تغيير في القفل يحتاج التحقق أولًا ببصمة الوجه أو الرمز الحالي، بما فيه وقت القفل والطلب التلقائي اللذان كانا يتغيران بدون تحقق. الرموز السهلة مثل 1111 أو 1234 مرفوضة، وإيقاف القفل يحتاج ضغطتين.','⚙️ الضبط يعرض حالة القفل ويفتح النافذة نفسها، فخيارات القفل صارت في مكان واحد. وتجده أيضًا في البحث والدليل والكتالوج.']},
@@ -6734,9 +6836,8 @@ function openDecrypt(o,label){const L=document.getElementById('layer');
   L.oninput=L.onchange=null;L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
     if(x.id==='dcGo'){x.disabled=true;try{const key=await vDerive(document.getElementById('dcP').value,b64d(o.salt));const txt=td(await vDec(key,{iv:b64d(o.iv),ct:b64d(o.ct)}));openRestore(txt,label||'نسخة مشفّرة')}
       catch(er){x.disabled=false;document.getElementById('dcErr').textContent='كلمة السر غير صحيحة أو الملف تالف'}}}}
-function backupNudgeHtml(){if(list().length<10)return '';const lb=advLastBackup();const days=lb?Math.max(0,-daysTo(lb)):999;if(days<7)return '';
-  try{const sn=localStorage.getItem('masareef:bksnooze');if(sn&&sn>=today())return ''}catch(e){}
-  return `<div class="infobox"><span>💾 ${lb?'مرّ '+daysWord(days)+' على آخر نسخة احتياطية.':'لم تحفظ نسخة احتياطية بعد.'} احفظ نسخة في iCloud حتى لا تضيع بياناتك.</span><button class="chip pay" data-bknow="1">حفظ</button><button class="chip" data-bklater="1">لاحقًا</button></div>`}
+/* 2.139: التذكير صار يعرف حالة Google Drive وفحص بداية الشهر (security/data-care.js) */
+function backupNudgeHtml(){return dcNudgeHtml()}
 /* ===== تقويم المدفوعات ===== */
 function openPayCalendar(m){m=m||S.month;const L=document.getElementById('layer');let sel=null;
   const draw=()=>{const I=calItems(m);const a0=mStart(m),b0=mEnd(m);const first=new Date(a0+'T12:00').getDay();const td=today();
@@ -6841,11 +6942,16 @@ function boxShortcutUrl(){const c=boxCfg();return c&&c.url?c.url+'?key='+encodeU
 function boxScript(key){return `/* صندوق رسائل البنك لتطبيق «إدارة شؤوني» — يحفظ الرسائل في حسابك أنت فقط */
 var KEY = "${key}";
 var MAX = 300;
+var VER = 2; /* 2: «رصيدي» عبر Siri */
 function out_(o){return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);}
 function doPost(e){
   var p = (e && e.parameter) || {}, b = {};
   try { b = JSON.parse(e.postData.contents); } catch (x) {}
   if ((b.key || p.key) !== KEY) return out_({ok:false, err:"key"});
+  if (b.kind === "bal") { /* الرصيد الجاهز من التطبيق لاختصار «رصيدي» */
+    PropertiesService.getScriptProperties().setProperty("bal", JSON.stringify({at:new Date().toISOString(), txt:String(b.txt || "").slice(0, 3000)}));
+    return out_({ok:true, ver:VER});
+  }
   var t = String(b.text || p.text || "").trim().slice(0, 1500);
   var f = String(b.from || p.from || "").trim().slice(0, 80);
   if (!t) return out_({ok:false, err:"empty"});
@@ -6862,6 +6968,12 @@ function doPost(e){
 function doGet(e){
   var p = (e && e.parameter) || {};
   if (p.key !== KEY) return out_({ok:false, err:"key"});
+  if (p.action === "ver") return out_({ok:true, ver:VER});
+  if (p.action === "bal") { /* نص يقرؤه Siri أو يعرضه الاختصار */
+    var s = PropertiesService.getScriptProperties().getProperty("bal"), o = null;
+    try { o = JSON.parse(s); } catch (x) {}
+    return ContentService.createTextOutput(o && o.txt ? o.txt : "لا يوجد رصيد بعد. افتح تطبيق إدارة شؤوني مرة واحدة.").setMimeType(ContentService.MimeType.TEXT);
+  }
   var since = Number(p.since) || 0, all = PropertiesService.getScriptProperties().getProperties(), items = [];
   for (var k in all) if (k.indexOf("m_") === 0) { try { var m = JSON.parse(all[k]); if (m.id > since) items.push(m); } catch (x) {} }
   items.sort(function(a,b){return a.id - b.id;});
@@ -7461,6 +7573,65 @@ async function openBoxDiag(){const L=document.getElementById('layer');let D={ste
      let okc=false;try{await navigator.clipboard.writeText(T);okc=true}catch(er){}if(!okc){try{const ta=document.createElement('textarea');ta.value=T;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();okc=document.execCommand('copy');ta.remove()}catch(er){}}
      if(okc)toast('📋 نُسخ التقرير. أرسله لي (أرقام الحسابات مخفية)');else{const P=document.createElement('textarea');P.className='bd-rep';P.readOnly=true;P.value=T;x.after(P);P.select();toast('حدّد النص وانسخه')}window.__bdRep=T;return}}}
 
+/* ===================== 2.139: 🗣️ «رصيدي» عبر Siri والاختصارات =====================
+ * التطبيق يرسل نص الرصيد جاهزًا إلى صندوق Apps Script الخاص بالمستخدم (kind:'bal')، والاختصار يقرؤه من
+ *   <رابط الصندوق>?key=…&action=bal   ← نص عادي يقرؤه Siri أو يعرضه.
+ * لا يحتاج تحديث السكربت إذا تغيّرت صياغة النص، فالصياغة هنا في التطبيق (sbText).
+ * متوقف افتراضيًا (S.settings.siriBal)، لأنه يرسل الأرصدة إلى صندوق المستخدم على Google.
+ * يُرسل فقط إذا تغيّرت الأرقام (بصمة المحتوى في masareef:sbLast)، كل دقيقة على الأكثر، وعند الخروج من التطبيق. */
+const SB_LAST='masareef:sbLast',SB_OLD='masareef:sbOld';
+function sbOn(){return S.settings.siriBal===true&&boxOn()}
+function sbUrl(){const c=boxCfg();return c&&c.url?c.url+'?key='+encodeURIComponent(c.key)+'&action=bal':''}
+function sbGet(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
+function sbSet(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function sbWhen(iso){if(!iso)return '';const d=new Date(iso);if(isNaN(d))return '';const day=isoD(d);const hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  return (day===today()?'اليوم':day===addDays(today(),-1)?'أمس':d.getDate()+' '+MONTHS[d.getMonth()])+' '+hm}
+/* وقت آخر رصيد للحساب بصيغة قصيرة يسهل سماعها: «اليوم 15:20»، «أمس»، «24 نوفمبر» */
+function sbAnc(A){if(!A||!A.date)return '';const d=A.date===today()?'اليوم':A.date===addDays(today(),-1)?'أمس':hmDM(A.date);const m=/(\d{1,2}):(\d{2})/.exec(A.msgT||'');return d+(m?' '+m[1].padStart(2,'0')+':'+m[2]:'')}
+/* السطور بلا وقت الإرسال (لمعرفة هل تغيّر شيء) */
+function sbLines(){let E;try{E=beAll()}catch(e){return null}const L=[];
+  L.push('💰 رصيدي: '+money(E.total)+' '+CUR);
+  E.A.filter(x=>x.b!==null).forEach(x=>{const w=sbAnc(x.A);L.push('• '+(x.a.name||accName(x.a.id))+': '+money(x.b)+(w?' ('+w+')':''))});
+  if(E.svb!==null)L.push('• حساب الادخار: '+money(E.svb));
+  const K=kdList();if(K.length){const kt=r3(K.reduce((s,k)=>s+kdBal(k).tot,0));L.push('👨‍👧 الأبناء: '+money(kt)+' ('+K.map(k=>k.name+' '+money(kdBal(k).tot)).join('، ')+')')}
+  try{const st=recStatus(curM());if(st.left)L.push('🔁 باقٍ من الالتزامات: '+money(st.dueLeft)+' ('+countWord(st.left,'التزام واحد','التزامان','التزامات','التزامًا')+')')}catch(e){}
+  return L}
+function sbText(){const L=sbLines();if(!L)return '';return L.join('\n')+'\n🕒 آخر تحديث: '+sbWhen(new Date().toISOString())}
+function sbHash(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return h}
+let SB_BUSY=false;
+async function sbPush(force){if(!sbOn()||SB_BUSY)return null;if(navigator.onLine===false)return null;if(sbGet(SB_OLD)&&!force)return null;
+  const L=sbLines();if(!L)return null;const h=sbHash(L.join('\n'));const last=sbGet(SB_LAST);if(!force&&last&&last.h===h)return 'same';
+  const c=boxCfg();SB_BUSY=true;
+  try{const r=await fetch(c.url,{method:'POST',cache:'no-store',credentials:'omit',redirect:'follow',referrerPolicy:'no-referrer',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({key:c.key,kind:'bal',txt:sbText()})});
+    const j=await r.json().catch(()=>null);
+    if(j&&j.ok&&j.ver>=2){sbSet(SB_LAST,{h,at:new Date().toISOString()});sbSet(SB_OLD,null);return 'ok'}
+    if(j&&(j.err==='empty'||(j.ok&&!j.ver))){sbSet(SB_OLD,1);return 'old'}// سكربت قديم لا يعرف «رصيدي»
+    return j&&j.err==='key'?'key':'err'}catch(e){return 'net'}finally{SB_BUSY=false}}
+setInterval(()=>{if(sbOn()&&document.visibilityState==='visible')sbPush()},60000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&sbOn())sbPush()});
+setTimeout(()=>{if(sbOn())sbPush()},6000);
+function openSiriBal(){const L=document.getElementById('layer');let res='';
+  const draw=()=>{const on=S.settings.siriBal===true;const last=sbGet(SB_LAST);const old=sbGet(SB_OLD);const bx=boxOn();
+   const step=(n,t,b)=>`<details class="bxg sb-step"${n===1&&old?' open':''}><summary><i>${n}</i>${t}</summary><div class="bxg-b">${b}</div></details>`;
+   L.innerHTML=`${sheetTop('رصيدي عبر Siri')}<h2 style="margin-top:0" data-nofold>🗣️ «رصيدي» عبر Siri</h2>
+   <p class="note" style="margin-top:-4px">تقول «Hey Siri، رصيدي»، فيقرأ لك مجموع أرصدتك ورصيد كل حساب ووقت آخر تحديث، دون فتح التطبيق.</p>
+   ${!bx?`<div class="panel sb-warn">⚠️ يحتاج «صندوق رسائل البنك» مفعّلًا أولًا.<button class="btn block" data-sbbox="1" style="margin-top:8px">📮 إعداد صندوق رسائل البنك</button></div>`:`
+   <div class="sb-st ${on&&!old?'on':'off'}"><span aria-hidden="true">${on&&!old?'✅':old?'⚠️':'⏸️'}</span><div><b>${old?'السكربت يحتاج تحديثًا (الخطوة 1)':on?'يعمل':'متوقف'}</b><small>${last&&on?'آخر إرسال للرصيد: '+esc(sbWhen(last.at)):'لم يُرسل الرصيد بعد'}</small></div></div>
+   ${step(1,'حدّث السكربت في صندوقك (مرة واحدة)',`<ol><li>اضغط «نسخ السكربت الجديد».</li><li>افتح مشروعك في <b>script.google.com</b>، واحذف الكود القديم كله، والصق الجديد، ثم <b>Save</b> 💾.</li><li><b>Deploy</b> ← <b>Manage deployments</b> ← ✏️ <b>Edit</b> ← في <b>Version</b> اختر <b>New version</b> ← <b>Deploy</b>.</li></ol><p class="note">الرابط لا يتغيّر، والرسائل تعمل كما هي.</p><button class="btn block" data-sbcopy="script">📋 نسخ السكربت الجديد</button>`)}
+   ${step(2,'فعّل إرسال الرصيد',`<label class="toggle"><input type="checkbox" id="sbOn" ${on?'checked':''}><span>أرسل رصيدي إلى صندوقي عند تغيّره</span></label><p class="note">يُرسل إلى صندوقك أنت فقط على Google، ولا يذهب لأي جهة أخرى.</p>`)}
+   ${step(3,'اصنع الاختصار في الآيفون',`<ol><li>افتح تطبيق <b>Shortcuts</b> ← <b>+</b>.</li><li><b>Add Action</b> ← ابحث عن <b>Get Contents of URL</b> ← الصق الرابط (من الزر تحت).</li><li><b>Add Action</b> ← <b>Speak Text</b> ليقرأه Siri، أو <b>Show Result</b> ليعرضه.</li><li>اضغط اسم الاختصار في الأعلى ← <b>Rename</b> ← اكتب <b>رصيدي</b> ← <b>Done</b>.</li><li>قل: <b>«Hey Siri، رصيدي»</b>. ويمكنك إضافته للشاشة الرئيسية أو كويدجت.</li></ol><button class="btn block" data-sbcopy="url">🔗 نسخ رابط الاختصار</button>`)}
+   <div class="actions"><button class="btn block" id="sbTest">🧪 جرّب الآن</button></div>
+   ${res?`<div class="panel sb-res"><b>هذا ما سيقوله Siri:</b><pre>${esc(res)}</pre></div>`:''}`}
+   <div class="actions"><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`};
+  draw();L.oninput=null;L.onkeydown=null;
+  L.onchange=async e=>{if(e.target.id==='sbOn'){S.settings.siriBal=e.target.checked;await putSettings();if(e.target.checked){const r=await sbPush(true);toast(r==='ok'?'✓ أُرسل رصيدك':r==='old'?'حدّث السكربت أولًا (الخطوة 1)':'سيُرسل عند توفر الإنترنت')}else{sbSet(SB_LAST,null)}draw()}};
+  L.onclick=async e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+   if(x.dataset.sbbox){openSmsBox();return}
+   if(x.dataset.sbcopy){const v=x.dataset.sbcopy==='script'?boxScript(boxCfg().key):sbUrl();try{await navigator.clipboard.writeText(v);toast(x.dataset.sbcopy==='script'?'نُسخ السكربت':'نُسخ الرابط')}catch(er){prompt('انسخ:',v)}if(x.dataset.sbcopy==='script')sbSet(SB_OLD,null);return}
+   if(x.id==='sbTest'){if(S.settings.siriBal!==true){S.settings.siriBal=true;await putSettings()}x.disabled=true;x.textContent='⏳ أجرّب…';const r=await sbPush(true);
+    if(r==='old'){res='';toast('السكربت قديم. حدّثه من الخطوة 1');draw();return}
+    if(r!=='ok'){res='';toast(r==='key'?'المفتاح لا يطابق السكربت':'تعذّر الاتصال بالصندوق');draw();return}
+    try{const t=await (await fetch(sbUrl()+'&t='+Date.now(),{cache:'no-store',credentials:'omit',redirect:'follow',referrerPolicy:'no-referrer'})).text();res=/^\s*{/.test(t)?'':t;if(!res){sbSet(SB_OLD,1);toast('السكربت قديم. حدّثه من الخطوة 1')}}catch(er){res='';toast('تعذّر قراءة الرصيد')}draw()}}}
 /* ===================== 2.134: حسابات الأبناء كأنها حساباتك =====================
  * - من نافذة أي عملية: «↔️ تحويل: إلى حساب ملهم / من حساب ميرة / بين حساباتي». المبلغ يُخصم من حسابك ويُضاف لحساب الابن (موزعًا على صناديقه)،
  *   ولا يُحسب مصروفًا ولا دخلًا. تعديل العملية يعدّل حركة الابن، وحذفها يحذفها.
@@ -7557,6 +7728,59 @@ const BANKS=[['muscat','بنك مسقط',/bank\s*muscat|bankmuscat|\bBM\b|بنك
 function boxBank(s){s=String(s||'');const b=BANKS.find(x=>x[2].test(s));return b?b[0]:''}
 function bankName(k){const b=BANKS.find(x=>x[0]===k);return b?b[1]:''}
 function bankAcc(k){if(!k)return '';const b=BANKS.find(x=>x[0]===k);const A=accList().filter(a=>!['cash','reserve','project'].includes(a.kind));const f=A.find(a=>b[3].test((a.name||'')+' '+(a.bank||'')));return f?f.id:''}
+/* ===================== 2.139: 👧 صفحة الابن (وضع الطفل) =====================
+ * شاشة كاملة مبسطة لابن واحد فوق التطبيق: رصيده، صناديقه وأهدافها، وآخر حركاته بلغة سهلة. للعرض فقط.
+ * لا يرى منها شيئًا من بياناتك، ولا يستطيع الإضافة أو التعديل.
+ * تبقى بعد إعادة فتح التطبيق (masareef:kidMode على هذا الجهاز فقط، لا يُزامَن)، فلا يخرج منها الطفل بإغلاق التطبيق.
+ * الخروج للوالدين فقط: رمز قفل التطبيق أو بصمة الوجه، وإلا رمز وضع المدير، وإلا ضغطة مطوّلة 3 ثوانٍ.
+ * تتحدّث وحدها كل 30 ثانية (مثلًا بعد رسالة بنك الابن). */
+const KM_KEY='masareef:kidMode';
+function kmId(){try{return localStorage.getItem(KM_KEY)||''}catch(e){return ''}}
+function kmTxt(t){if(t.note)return t.note;return +t.amt>=0?'إيداع':'صرف'}
+function kmHtml(k){const X=kdStats(k);const T=(k.tx||[]).slice().sort((a,b)=>(b.d+(b.at||'')).localeCompare(a.d+(a.at||''))).slice(0,8);const H=new Date().getHours();
+  const hi=H<12?'صباح الخير':H<18?'مرحبًا':'مساء الخير';
+  const msg=X.depM>0.0005?'🌟 أحسنت! زاد رصيدك هذا الشهر '+money(X.depM)+' '+CUR:X.J.some(x=>x.tgt&&!x.need)?'🎉 وصلت إلى هدفك! أنت رائع':'💡 كل ريال تدّخره يقرّبك من هدفك';
+  const lock=lockCfg(),adm=admOn();
+  return `<div class="km-in"><div class="km-top"><span class="km-av" aria-hidden="true">${k.ic}</span><div><small>${hi}</small><h1>${esc(k.name)}</h1></div></div>
+   <div class="km-bal"><span>رصيدك</span><b class="num">${X.tot<0?'−':''}${money(Math.abs(X.tot))}</b><small>${CUR}</small></div>
+   <div class="km-msg">${msg}</div>
+   ${X.J.length?`<h2>🏺 صناديقي</h2><div class="km-jars">${X.J.map(x=>`<div class="km-jar"><div class="km-jh"><span class="km-ji">${x.j.ic}</span><b>${esc(x.j.n)}</b></div><b class="num km-jb${x.bal<0?' amt-exp':''}">${x.bal<0?'−':''}${money(Math.abs(x.bal))}</b>
+     ${x.tgt?`<div class="km-bar" role="progressbar" aria-valuenow="${x.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${x.pct}%"></i></div><small>${x.need?'هدفك '+money(x.tgt)+' · باقٍ '+money(x.need):'🎉 اكتمل الهدف!'}</small>`:'<small>بدون هدف</small>'}</div>`).join('')}</div>`:''}
+   ${T.length?`<h2>📒 آخر حركاتي</h2><div class="km-tx">${T.map(t=>{const j=k.jars.find(z=>z.id===t.jar)||{ic:'📦'};const inc=+t.amt>=0;return `<div class="km-t"><span class="km-ti ${inc?'in':'out'}">${inc?'⬇️':'⬆️'}</span><span class="km-tn"><b>${esc(kmTxt(t))}</b><small>${j.ic} ${esc(hmDayLbl(t.d))}</small></span><b class="num ${inc?'amt-inc':'amt-exp'}">${inc?'+':'−'}${money(Math.abs(+t.amt))}</b></div>`}).join('')}</div>`:''}
+   <div class="km-exit"><button class="km-x" id="kmExit">${lock||adm?'🔒 خروج (للوالدين)':'🔒 اضغط مطوّلًا 3 ثوانٍ للخروج'}</button>
+    <div class="km-pin" id="kmPin" hidden><input class="inp num pin" id="kmPinIn" type="password" inputmode="numeric" maxlength="8" placeholder="رمز ${lock?'القفل':'المدير'}" aria-label="رمز الخروج"><button class="btn" id="kmGo">خروج</button>${lock&&lock.bio?'<button class="btn ghost" id="kmBio">😊 بصمة الوجه</button>':''}<p class="km-err" id="kmErr" role="alert"></p></div></div></div>`}
+let KM_T=null;
+function kmShow(){const id=kmId();const k=id&&kdGet(id);let el=document.getElementById('kidMode');
+  if(!k){if(el)el.remove();if(id&&S.settings&&Array.isArray(S.settings.kids))try{localStorage.removeItem(KM_KEY)}catch(e){}return false}
+  if(!el){el=document.createElement('div');el.id='kidMode';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','صفحة '+k.name);document.body.appendChild(el);kmWire(el)}
+  const pinOpen=!!(document.getElementById('kmPin')&&!document.getElementById('kmPin').hidden);if(pinOpen)return true;// لا نعيد الرسم والوالد يكتب الرمز
+  el.innerHTML=kmHtml(k);document.documentElement.classList.add('km-on');return true}
+function kmExit(){try{localStorage.removeItem(KM_KEY)}catch(e){}const el=document.getElementById('kidMode');if(el)el.remove();document.documentElement.classList.remove('km-on');clearInterval(KM_T);KM_T=null;render();toast('خرجت من صفحة الابن')}
+function kmWire(el){let hold=null;
+  const start=e=>{if(!e.target.closest('#kmExit')||lockCfg()||admOn())return;const b=e.target.closest('#kmExit');b.classList.add('holding');hold=setTimeout(()=>{hold=null;kmExit()},3000)};
+  const stop=()=>{if(hold){clearTimeout(hold);hold=null}const b=el.querySelector('#kmExit');if(b)b.classList.remove('holding')};
+  el.addEventListener('pointerdown',start);['pointerup','pointerleave','pointercancel'].forEach(t=>el.addEventListener(t,stop));
+  el.addEventListener('click',async e=>{const x=e.target.closest('button');if(!x)return;e.stopPropagation();const err=t=>{const p=el.querySelector('#kmErr');if(p)p.textContent=t};
+   if(x.id==='kmExit'){if(!lockCfg()&&!admOn())return;const p=el.querySelector('#kmPin');p.hidden=!p.hidden;if(!p.hidden)setTimeout(()=>{const i=el.querySelector('#kmPinIn');if(i)i.focus()},50);return}
+   if(x.id==='kmBio'){if((await verifyUser())==='ok')kmExit();else err('لم تكتمل بصمة الوجه');return}
+   if(x.id==='kmGo'){const v=(el.querySelector('#kmPinIn')||{}).value||'';if(Date.now()<LockS.wait){err('انتظر قليلًا');return}
+     const ok=lockCfg()?await lockPinOk(v):await admPinOk(v);if(ok){LockS.fails=0;kmExit();return}LockS.fails++;if(LockS.fails>=5){LockS.wait=Date.now()+30000;LockS.fails=0}err('الرمز غير صحيح');const i=el.querySelector('#kmPinIn');if(i)i.value=''}});
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='kmPinIn'){e.preventDefault();const b=el.querySelector('#kmGo');if(b)b.click()}})}
+function kmStart(id){const k=kdGet(id);if(!k)return;try{localStorage.setItem(KM_KEY,id)}catch(e){}const L=document.getElementById('layer');if(L)L.innerHTML='';kmShow();kmTick()}
+function kmTick(){clearInterval(KM_T);KM_T=setInterval(()=>{if(!kmId()){clearInterval(KM_T);return}if(document.visibilityState==='visible')kmShow()},30000)}
+/* قبل الدخول: من يفتح، وكيف يخرج */
+function openKidModeSetup(id){const L=document.getElementById('layer');const K=kdList();if(!K.length){toast('أضف حساب ابن أولًا');openKids();return}let sel=id||K[0].id;const lock=lockCfg(),adm=admOn();
+  const draw=()=>{L.innerHTML=`${sheetTop('صفحة الابن')}<h2 style="margin-top:0" data-nofold>👧 صفحة الابن</h2>
+   <p class="note" style="margin-top:-4px">شاشة بسيطة يرى فيها ابنك رصيده وصناديقه وأهدافه وآخر حركاته فقط، دون الوصول لبقية بياناتك. أعطه الهاتف وهي مفتوحة.</p>
+   ${K.length>1?`<div class="chips">${K.map(k=>`<button class="chip" data-kmsel="${esc(k.id)}" aria-pressed="${k.id===sel}">${k.ic} ${esc(k.name)}</button>`).join('')}</div>`:''}
+   <div class="panel" style="margin-top:10px;line-height:1.8"><b>🔒 الخروج منها</b><br><small>${lock?'برمز قفل التطبيق'+(lock.bio?' أو بصمة الوجه':''):adm?'برمز وضع المدير':'بضغطة مطوّلة 3 ثوانٍ. لحماية أقوى فعّل «قفل التطبيق» من ☰ ليُطلب الرمز.'}</small><br><small>إذا أُغلق التطبيق وفُتح من جديد، يعود إلى صفحة الابن.</small></div>
+   <p class="note">💡 أهداف الصناديق (مثل دراجة بـ 50) تُضاف من صفحة حساب الابن ← ✏️ الصناديق والأهداف.</p>
+   <div class="actions"><button class="btn block" id="kmStart">افتح صفحة ${esc((kdGet(sel)||{}).name||'')}</button>${!lock?'<button class="btn ghost block" id="kmLock">🔐 فعّل قفل التطبيق أولًا</button>':''}<button class="btn ghost block" data-close>إلغاء</button></div></div></div>`};
+  draw();L.oninput=L.onchange=L.onkeydown=null;
+  L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
+   if(x.dataset.kmsel){sel=x.dataset.kmsel;draw();return}if(x.id==='kmLock'){openLockMgr();return}if(x.id==='kmStart')kmStart(sel)}}
+/* عند فتح التطبيق: إن كانت صفحة الابن مفتوحة قبل الإغلاق تعود كما هي (ننتظر تحميل البيانات) */
+(function kmBoot(){let n=0;const t=setInterval(()=>{n++;if(!kmId()||n>60){clearInterval(t);return}if(S.settings&&Array.isArray(S.settings.kids)&&S.settings.kids.length&&kmShow()){clearInterval(t);kmTick()}},250)})();
 /* ===================== 2.131: كشوفات الحساب من رسائل البنك =====================
  * كشف يومي وشهري وسنوي لكل حساب، مثل كشف البنك: التاريخ والوقت، البيان، الخصم، الإيداع، ورصيد البنك بعد كل عملية كما ورد في رسالته.
  * المصدر: العمليات المقروءة من رسائل البنك (أو كل عمليات الحساب إن اخترت)، مع علامة ⚠️ على أي فرق رصيد اكتشفه التطبيق. للطباعة وPDF. */
@@ -7611,12 +7835,12 @@ function bsPrint(){const [a,b]=bsRange();const nm=accName(bsS.acc)||'الحسا�
 function sDir(){const T=t=>()=>sGoTab(t);return [
  ['💵 أموالي اليومية',[['🏠','الرئيسية','home الرئيسيه',T('home')],['☰','سجل العمليات','سجل العمليات المصاريف',T('log')],['📒','معاملات الشهر','سحوبات إيداعات معاملات الشهر كشف حركة الحساب',()=>openHmTx('all')],['➕','إضافة مصروف أو دخل','اضافه مصروف دخل جديد',()=>openSheet(null,{type:'exp'})],['💰','كم أستطيع أن أنفق اليوم؟','صرف امن انفق اليوم',()=>openSpendToday()],['🏦','حساباتي وأرصدتي','حساب بنك محفظه رصيد ارصده اجمالي المتوفر مطابقه محرك',()=>openBalEngine()],['📆','اختيار الشهر','تقويم شهر',()=>openMonthPicker()]]],
  ['📅 الدفع والالتزامات',[['📅','الالتزامات الشهرية','الشهريه فواتير اقساط دفع',T('monthly')],['🗓️','تقويم الدفع','تقويم الدفع مواعيد',()=>openPayCalendar()],['📋','خطة الشهر','خطه الشهر اعتماد تاجيل',()=>openMonthPlan(S.month||curM())],['📊','مخطط السداد','خطه سداد قسط اختياري',()=>openPayPlanner()],['🧭','الأولويات والتخلص من الديون','اولويات ديون كرة الثلج',()=>openPriority()],['🗓️','الخطة المالية الاستثنائية','خطه استثنائيه تاجيل',()=>openXPlans()],['🔁','المصاريف المتكررة والاشتراكات','اشتراكات متكرر منسي',()=>openSubs()],['🛟','خطة الإنقاذ','انقاذ عجز',()=>openRescue()]]],
- ['🎯 الميزانية والادخار',[['🗓️','تجهيز شهر قادم','خطه الشهر القادم استراتيجيه دراسه جدوى اولويات تجهيز ميزانيه مستقبل',()=>openFuturePlan()],['🍩','الميزانية الشهرية','ميزانيه شهريه خطتي',T('mbud')],['🗓️','الميزانية الأسبوعية','ميزانيه اسبوعيه سقف',()=>openWkSet()],['💰','الادخار الذكي','ادخار ذكي اهداف',T('smartsav')],['🔒','الادخار المحمي','ادخار محمي',()=>openSvlSet()],['📆','المصاريف الموسمية','رمضان العيد مدارس موسمي',()=>openSeasonal()],['👧','حسابات الأبناء','ابناء ميرة ملهم حصالة تحدي',()=>openKids()],['🪙','الذهب','ذهب سعر زكاة',()=>openGold()],['✈️','وضع السفر','سفر رحلة عملة',()=>openTravel()]]],
+ ['🎯 الميزانية والادخار',[['🗓️','تجهيز شهر قادم','خطه الشهر القادم استراتيجيه دراسه جدوى اولويات تجهيز ميزانيه مستقبل',()=>openFuturePlan()],['🍩','الميزانية الشهرية','ميزانيه شهريه خطتي',T('mbud')],['🎯','ميزانية تلقائية لكل بند','ميزانية بند سقف حد متوسط اقتراح وقود بقالة مطاعم',()=>openAutoBudget()],['🗓️','الميزانية الأسبوعية','ميزانيه اسبوعيه سقف',()=>openWkSet()],['💰','الادخار الذكي','ادخار ذكي اهداف',T('smartsav')],['🔒','الادخار المحمي','ادخار محمي',()=>openSvlSet()],['📆','المصاريف الموسمية','رمضان العيد مدارس موسمي',()=>openSeasonal()],['👧','حسابات الأبناء','ابناء ميرة ملهم حصالة تحدي',()=>openKids()],['👧','صفحة الابن','صفحة الطفل وضع الطفل ابن ابنة يرى رصيده هدف',()=>openKidModeSetup()],['🪙','الذهب','ذهب سعر زكاة',()=>openGold()],['✈️','وضع السفر','سفر رحلة عملة',()=>openTravel()]]],
  ['📊 التقارير والتحليل',[['📊','التقارير الشهرية والسنوية','تقرير احصائيات',T('reports')],['📅','تقويم المصروف','تقويم ايام اسابيع مقارنه توقع',()=>openSpendCal('month',curM())],['📈','التوقعات ومقارنة الأشهر','توقع مقارنه الاشهر',()=>openMonthFc()],['📬','التقارير الدورية','تقرير يومي اسبوعي شهري سنوي',()=>openPeriodRep('week')],['🗓️','مراجعة الأسبوع','مراجعه اسبوعيه',()=>openWkReview()],['📋','مراجعة الشهر','مراجعه نهايه الشهر اقفال',()=>openReview()],['🧠','عاداتي في الصرف','بلا صرف سبب الشراء انتظر',()=>openHabits('ns')],['📍','الجهات والمحلات','محلات محطه مطعم',()=>openMerch()],['🖨️','طباعة تقرير','طباعه pdf',()=>openPrintSheet()],['📧','إرسال التقارير بالإيميل','ايميل gmail',()=>openEmailRep()]]],
- ['🏦 البنك والرسائل',[['🩺','فحص صندوق رسائل البنك','فحص مشكلة الرسائل لا تخصم لا تسجل الاختصار تشخيص',()=>openBoxDiag()],['🧾','كشف الحساب من رسائل البنك','كشف حساب يومي شهري سنوي رسائل',()=>openBoxStmt()],['📩','سجل الرسائل المقروءة','سجل رسائل البنك مقروءه متابعه ارصده',()=>openBoxFeed()],['📮','رسائل البنك التلقائية: الإعداد والدليل','صندوق اختصار تلقائي اتمتة دليل شرح خطوات تعليمات ربط الاختصارات تسجيل رسائل البنك تلقائيا',()=>openSmsBox()],['💬','قراءة رسالة بنك (لصق)','رسالة sms لصق',()=>openImport()],['⚡','تسجيل الرسائل تلقائيًا','اتمتة اختصارات',()=>openShortcutGuide()],['🏦','استيراد كشف البنك PDF','كشف pdf excel استيراد مسقط الوطني',()=>openStmt()],['📊','تحليل كشوفات البنوك','تحليل كشف بنك',()=>openBankAnalysis()],['🧾','عمليات الكشوفات المستوردة','عمليات الكشف مستورده',()=>openStmtTx()]]],
+ ['🏦 البنك والرسائل',[['🩺','فحص صندوق رسائل البنك','فحص مشكلة الرسائل لا تخصم لا تسجل الاختصار تشخيص',()=>openBoxDiag()],['🗣️','رصيدي عبر Siri','سيري siri رصيدي اختصار shortcut صوت كم رصيدي',()=>openSiriBal()],['🧾','كشف الحساب من رسائل البنك','كشف حساب يومي شهري سنوي رسائل',()=>openBoxStmt()],['📩','سجل الرسائل المقروءة','سجل رسائل البنك مقروءه متابعه ارصده',()=>openBoxFeed()],['📮','رسائل البنك التلقائية: الإعداد والدليل','صندوق اختصار تلقائي اتمتة دليل شرح خطوات تعليمات ربط الاختصارات تسجيل رسائل البنك تلقائيا',()=>openSmsBox()],['💬','قراءة رسالة بنك (لصق)','رسالة sms لصق',()=>openImport()],['⚡','تسجيل الرسائل تلقائيًا','اتمتة اختصارات',()=>openShortcutGuide()],['🏦','استيراد كشف البنك PDF','كشف pdf excel استيراد مسقط الوطني',()=>openStmt()],['📊','تحليل كشوفات البنوك','تحليل كشف بنك',()=>openBankAnalysis()],['🧾','عمليات الكشوفات المستوردة','عمليات الكشف مستورده',()=>openStmtTx()]]],
  ['🏡 البيت والعائلة',[['🏡','البيت','البيت المنزل',T('house')],['🛒','السوبر ماركت','بقاله مشتريات قائمه',()=>openGrc(S.month)],['🤝','الأمانات','امانات',T('trusts')],['📁','مستنداتي','مستندات خزنه ضمان',T('docs')],['📖','التلاوات القرآنية','قران الملك الواقعه يس',()=>openQuranHub()]]],
  ['🚗 الممتلكات',[['🚗','السيارات','سياره تامين ملكيه',T('cars')],['🔧','خطة صيانة السيارات','صيانه زيت فحص',()=>openMplan({})],['🧭','المستشار المالي','مستشار نصائح',T('advisor')],['💼','مشروعي (الزمرة الملكية)','مشروع الزمرة',()=>openBiz()]]],
- ['⚙️ التطبيق والبيانات',[['📖','كتالوج التطبيق','كتالوج دليل المهام شرح مبتدئ كل المميزات ماذا استطيع',()=>openCatalog(0)],['🔐','قفل التطبيق وبصمة الوجه','قفل رمز سري بصمة الوجه face id حماية كلمة السر',()=>openLockMgr()],['⚙️','الضبط','اعدادات مزامنه قفل',T('settings')],['🗄️','إدارة البيانات','ديون حسابات اشخاص استيراد تصدير',T('budget')],['🎨','المظهر واللون','مظهر لون ليلي تصميم',()=>openLook()],['🖼️','صورة الرئيسية','صوره خلفيه',()=>openHeroPick()],['🏷️','التصنيف السريع','تصنيف فئه',()=>openCatQuick()],['🔍','فحص التكرار الشامل','تكرار مكرر',()=>openDupAll()],['🔍','فحص تكرار الكشوفات','تكرار كشف',()=>openDupScan()],['🧹','مسح وإعادة إدخال فترة','مسح حذف',()=>openPurge()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()],['📖','الشروحات التعليمية','شرح تعليم جولة',()=>tourWelcome(true)]]]]}
+ ['⚙️ التطبيق والبيانات',[['📖','كتالوج التطبيق','كتالوج دليل المهام شرح مبتدئ كل المميزات ماذا استطيع',()=>openCatalog(0)],['🛡️','حماية بياناتي وسلامتها','نسخة احتياطية backup مزامنة درايف فحص سلامة تكرار حماية البيانات',()=>openDataCare()],['🔐','قفل التطبيق وبصمة الوجه','قفل رمز سري بصمة الوجه face id حماية كلمة السر',()=>openLockMgr()],['⚙️','الضبط','اعدادات مزامنه قفل',T('settings')],['🗄️','إدارة البيانات','ديون حسابات اشخاص استيراد تصدير',T('budget')],['🎨','المظهر واللون','مظهر لون ليلي تصميم',()=>openLook()],['🖼️','صورة الرئيسية','صوره خلفيه',()=>openHeroPick()],['🏷️','التصنيف السريع','تصنيف فئه',()=>openCatQuick()],['🔍','فحص التكرار الشامل','تكرار مكرر',()=>openDupAll()],['🔍','فحص تكرار الكشوفات','تكرار كشف',()=>openDupScan()],['🧹','مسح وإعادة إدخال فترة','مسح حذف',()=>openPurge()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()],['📖','الشروحات التعليمية','شرح تعليم جولة',()=>tourWelcome(true)]]]]}
 function leanOn(){return !S.settings||S.settings.homeLean!==false}
 function sDirHtml(noH){let i=0;const P=sPages();return `${noH?'':'<h3 class="sdir-h">كل أقسام التطبيق</h3>'}<button class="cat-banner" data-catalog="1"><span aria-hidden="true">📖</span><span><b>كتالوج التطبيق</b><small>كل المهام بشرح بسيط للمبتدئين، اضغط أي مهمة لتنتقل إليها</small></span><i aria-hidden="true">‹</i></button><div class="sdir">${sDir().map(([g,items])=>`<div class="sdir-g"><b class="sdir-t">${esc(g)}</b><div class="sdir-items">${items.filter(it=>it[1]!==CAT_SELF).map(it=>{const k=P.findIndex(p=>p[1]===it[1]);return `<button class="sdir-i" data-spg="${k}"><span aria-hidden="true">${it[0]}</span><small>${esc(it[1])}</small></button>`}).join('')}</div></div>`).join('')}</div>`}
 /* تسجيل رسالة البنك من الحافظة */
@@ -7687,11 +7911,13 @@ const CAT_INFO={
  'خطة الإنقاذ':['خطة مؤقتة لثلاثين يومًا عندما يكون هناك عجز.','فعّلها والتزم بالسقف اليومي المقترح.'],
  'تجهيز شهر قادم':['تجهّز ميزانية أي شهر قادم مسبقًا مع دراسة جدوى، وتُطبَّق في أوله.','اختر الشهر، راجع المقترح، ثم «اعتماد».'],
  'الميزانية الشهرية':['توزّع دخلك على أوجه الإنفاق وترى ما تبقى من كل بند.','حدد مبلغ كل فئة، وتابع الأشرطة الملونة.'],
+ 'ميزانية تلقائية لكل بند':['يقترح سقفًا لكل بند من متوسط صرفك في آخر 3 أشهر.','اختر «وفّر 10%» أو غيرها، وعدّل ما تريد، ثم «اعتمد».'],
  'الميزانية الأسبوعية':['سقف صرف لكل أسبوع يساعدك على الانضباط.','حدد السقف، والتطبيق ينبهك عند الاقتراب منه.'],
  'الادخار الذكي':['أهداف ادخار بمبالغ شهرية محسوبة لك.','أضف هدفًا ومبلغه وموعده، والتطبيق يقسّمه.'],
  'الادخار المحمي':['مبلغ ادخار شهري لا يُنقص إلا بموافقتك.','حدد المبلغ مرة واحدة، ويُحجز كل شهر.'],
  'المصاريف الموسمية':['رمضان والعيد والمدارس: تجهز لها قبل موعدها.','أضف الموسم ومبلغه، ويُقسَّم على الأشهر.'],
  'حسابات الأبناء':['حساب لكل ابن بصناديق (عيد، ادخار…) وتحويلاتك لهم.','افتح حساب الابن، وأضف إيداعًا أو صرفًا.'],
+ 'صفحة الابن':['شاشة بسيطة يرى فيها ابنك رصيده وأهدافه فقط، دون بقية بياناتك.','افتحها وأعطه الهاتف. للخروج: رمز القفل أو بصمة وجهك.'],
  'الذهب':['ذهبك وقيمته بسعر اليوم ومقارنته بالأمس.','أضف القطعة ووزنها وعيارها.'],
  'وضع السفر':['تسجيل المصاريف بعملة البلد الذي تسافر إليه.','فعّله واختر العملة، وأوقفه عند العودة.'],
  'التقارير الشهرية والسنوية':['أين ذهبت أموالك: رسوم وأرقام لكل فئة.','اختر الشهر أو السنة، واضغط الفئة للتفاصيل.'],
@@ -7704,6 +7930,7 @@ const CAT_INFO={
  'الجهات والمحلات':['أين تصرف أكثر: المحلات والمحطات والمطاعم.','اضغط المحل لترى كل عملياته.'],
  'طباعة تقرير':['تقرير مرتب للطباعة أو حفظه PDF.','اختر نوع التقرير ثم «طباعة».'],
  'إرسال التقارير بالإيميل':['ترسل التقرير إلى بريدك.','اكتب بريدك واختر الفترة.'],
+ 'رصيدي عبر Siri':['تقول «Hey Siri، رصيدي» فيقرأ لك أرصدتك دون فتح التطبيق.','حدّث السكربت مرة، وفعّل الإرسال، واصنع الاختصار بالخطوات.'],
  'فحص صندوق رسائل البنك':['يكشف لماذا لم تُسجَّل رسالة بنك ويصلحها بضغطة.','افتحه عندما لا تُخصم رسالة وصلتك.'],
  'كشف الحساب من رسائل البنك':['كشف حساب يومي وشهري وسنوي من رسائل البنك.','اختر الحساب والفترة.'],
  'سجل الرسائل المقروءة':['كل رسالة بنك قرأها التطبيق وما فعله بها.','راجع الرسائل التي تحتاج تأكيدك.'],
@@ -7722,6 +7949,7 @@ const CAT_INFO={
  'خطة صيانة السيارات':['جدول الصيانة (زيت، فحص…) بالمواعيد والكيلومترات.','علّم البند عند تنفيذه.'],
  'المستشار المالي':['نصائح ذكية من بياناتك، داخل جهازك فقط.','اقرأ النصيحة واضغط زرها للتنفيذ.'],
  'مشروعي (الزمرة الملكية)':['إدارة مشروعك التجاري في قسم منفصل.','افتح القسم وتابع المبيعات والمصاريف.'],
+ 'حماية بياناتي وسلامتها':['حالة النسخة الاحتياطية، والتحقق منها، وفحص بياناتك من التكرار والأخطاء.','افتحها مرة في الشهر، واضغط زر كل ملاحظة لإصلاحها.'],
  'قفل التطبيق وبصمة الوجه':['يحمي التطبيق برمز سري وبصمة الوجه عند فتحه.','فعّله برمز من 4 إلى 8 أرقام، واختر متى يُقفل.'],
  'الضبط':['كل إعدادات التطبيق: المزامنة والقفل والإشعارات.','غيّر الإعداد الذي تحتاجه فقط.'],
  'إدارة البيانات':['الديون والحسابات والأشخاص، والاستيراد والتصدير.','اختر القسم الذي تريد تعديله.'],
@@ -8123,6 +8351,25 @@ function openWkHist(){const L=document.getElementById('layer');const td=today();
    ${cats.length?`<p class="note">التزمت بحدودك في <b>${okN}</b> من آخر 7 أسابيع مكتملة.</p><div class="mpr-wrap"><table class="mpr-t wktbl"><thead><tr><th>الأسبوع</th>${cats.map(c=>`<th>${esc(wkName(c))}<small> (${money(C.caps[c])})</small></th>`).join('')}</tr></thead><tbody>${Ws.map(W=>`<tr${W.cur?' class="cur"':''}><td class="nw">${wkRange(W.ws,W.we)}${W.cur?' <small>الحالي</small>':''}</td>${W.rows.map(r=>`<td class="num ${r.p>100?'amt-exp':r.p>=80?'wkw':''}">${money(r.s)}<small> <bdi dir="ltr">${r.p}%</bdi></small></td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<p class="note">لم تحدد حدودًا أسبوعية بعد.</p>'}
    <div class="actions"><button class="btn block" data-wkset2="1">تعديل الحدود</button><button class="btn ghost block" data-close>إغلاق</button></div></div></div>`;
   L.oninput=L.onchange=null;L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}if(x.dataset.wkset2){openWkSet();return}}}
+/* ===================== 2.139: ⏰ تنبيه قبل موعد الالتزام =====================
+ * dueCover(): الالتزامات والأقساط غير المدفوعة من بداية الشهر حتى نهاية الدورة، مرتبة بالتاريخ،
+ *   ولكل واحد: هل يكفي رصيد حساباتك لسداده مع ما قبله؟ (مجموع تراكمي مقابل accTotals().total)
+ *   ok:null إن لم تكن لحساباتك أرصدة بعد.
+ * يظهر في «تحتاج انتباهك» (hv2Attn)، وإشعار في الجهاز قبل الموعد بيومين (dueNotify) مرة لكل التزام في اليوم.
+ * ملاحظة: التطبيق بلا خادم، فالإشعار يظهر عند فتح التطبيق أو عودته للشاشة، لا وهو مغلق تمامًا. */
+const DUE_LEAD=2,DUE_NT='masareef:dueNt';
+function dueCover(){const td=today();const H=homeFin();const L=dueItems(mStart(curM()),H.end).filter(i=>!i.isPaid&&!i.pre).sort((a,b)=>a.date.localeCompare(b.date));
+  let bal=null;try{const T=accTotals();if(T.A.some(x=>x.b!==null))bal=r3(T.total-(T.svb||0))}catch(e){}
+  let cum=0;return L.map(i=>{const need=r3(i.amount-(i.paidAmt||0));cum=r3(cum+need);const ok=bal===null?null:cum<=bal+0.0005;return {i,n:dDiff(td,i.date),d:i.date,need,cum,ok,short:bal===null?0:r3(cum-bal)}})}
+async function dueNotify(){try{if(!('Notification' in window)||Notification.permission!=='granted')return 0;if(alertCfg().inst&&alertCfg().inst.on===false&&alertCfg().bills&&alertCfg().bills.on===false)return 0;
+  const td=today();let sent={};try{sent=JSON.parse(localStorage.getItem(DUE_NT)||'{}')||{}}catch(e){}
+  const X=dueCover().filter(x=>x.n>=0&&x.n<=DUE_LEAD&&sent[x.i.id+':'+x.d]!==td);if(!X.length)return 0;
+  const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
+  for(const x of X){const nm=x.i.kind==='debt'?x.i.ref.name:x.i.name;const title='⏰ '+nm+' '+money(x.need)+' '+CUR+' '+(x.n===0?'اليوم':'بعد '+countWord(x.n,'يوم','يومين','أيام','يومًا'));
+    const body=x.ok===null?'تأكد من توفر المبلغ قبل موعده':x.ok?'✓ رصيدك يكفي':'⚠️ رصيدك لا يكفي، ينقصك '+money(x.short)+' '+CUR;
+    const opt={body,icon:'icon-192.png',tag:'due:'+x.i.id+':'+x.d,lang:'ar',dir:'rtl',data:{url:'./'}};if(reg&&reg.showNotification)await reg.showNotification(title,opt);else new Notification(title,opt);sent[x.i.id+':'+x.d]=td}
+  const keep={};Object.entries(sent).forEach(([k,v])=>{if(v>=addDays(td,-7))keep[k]=v});localStorage.setItem(DUE_NT,JSON.stringify(keep));return X.length}catch(e){return 0}}
+setTimeout(dueNotify,4000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(dueNotify,1500)});
 /* ==================== 2.127: العملات الأجنبية ووضع السفر ==================== */
 /* [سعر الوحدة بالريال العماني، الاسم، 1 = عملة مربوطة بسعر ثابت (دقيقة)، 0 = سعر تقريبي عدّله] */
 const FX_DEF={USD:[0.3845,'دولار أمريكي',1],AED:[0.1047,'درهم إماراتي',1],SAR:[0.10253,'ريال سعودي',1],QAR:[0.10563,'ريال قطري',1],BHD:[1.02261,'دينار بحريني',1],JOD:[0.54231,'دينار أردني',1],KWD:[1.26,'دينار كويتي',0],EUR:[0.446,'يورو',0],GBP:[0.51,'جنيه إسترليني',0],EGP:[0.008,'جنيه مصري',0],INR:[0.0044,'روبية هندية',0],TRY:[0.0092,'ليرة تركية',0],THB:[0.0118,'بات تايلندي',0],MYR:[0.0915,'رينغيت ماليزي',0]};
@@ -8427,7 +8674,7 @@ function smartAlertList_(){const C=alertCfg(),m=curM(),td=today(),out=[];const d
   try{wishStats().due.forEach(w=>push({ref:'wish:'+w.id,kind:'budget',level:'warn',days:0,title:'انتهى انتظار «'+w.name+'»',when:'هل ما زلت تريده؟ ('+money(w.price)+' '+CUR+')',dis:1,act:['قرّر','data-habits="wish"']}))}catch(e){}
   {const a=gdAlert();if(a)push(a)}
   return out.sort((a,b)=>a.days-b.days)}
-function smartAlertsHtml(){if(S.month!==curM())return '';const A=smartAlertList();if(!A.length)return '';
+function smartAlertsHtml(skip){if(S.month!==curM())return '';const A=smartAlertList().filter(a=>!(skip&&skip.size&&/^(late|inst):/.test(a.ref)&&skip.has(a.ref.split(':')[1])));if(!A.length)return '';
   const lim=S.altAll?A.length:3;return `<div class="alertbox"><div class="alerthead"><b>🔔 التنبيهات</b><span class="pill ${A.some(a=>a.level==='late')?'late':'paid'}">${A.length}</span></div>${A.slice().sort((x,y)=>(x.level==='late'?0:x.level==='good'?2:1)-(y.level==='late'?0:y.level==='good'?2:1)).slice(0,lim).map(a=>`<div class="alertrow ${a.level==='late'?'late':a.level==='good'?'good':'warn'}"><span class="adot"></span><div style="min-width:0"><b>${esc(a.title)}</b><small>${esc(a.when)}</small></div><div class="aacts"><button class="chip${a.level==='good'?' pay':''}" ${a.act[1]}>${a.act[0]}</button>${a.dis?`<button class="chip adis" data-adis="${esc(a.ref)}" aria-label="إخفاء">✕</button>`:''}</div></div>`).join('')}${A.length>3?`<button class="chip altmore" data-altall="1">${S.altAll?'عرض أقل':'عرض كل التنبيهات ('+A.length+')'}</button>`:''}</div>`}
 function alertsSetHtml(){const C=alertCfg();const notif=('Notification' in window)?Notification.permission:'na';
   return `<div class="panel stack setbox">${ALERT_T.map(([k,n,d])=>`<div class="setrow"><div><b>${n}</b><small>${d}</small></div><button class="tgl${C[k].on?' on':''}" data-alt="${k}" role="switch" aria-checked="${C[k].on}" aria-label="${n}"></button></div>
@@ -9635,17 +9882,23 @@ function seasHomeHtml(){if(S.month!==curM())return '';const A=seas().filter(s=>d
 function subsFind(){return memo('subsF',()=>{const cm=curM(),from=mStart(shiftMonth(cm,-6)),td=today();const ign=new Set(S.settings.subIgnore||[]);const G={};
   list().filter(t=>t.type==='exp'&&!t.own&&!t.rec&&t.note&&t.date>=from&&!['loan'].includes(t.cat)).forEach(t=>{const k=sNorm(t.note).replace(/[0-9.,]+/g,'').replace(/\s+/g,' ').trim();if(k.length<2)return;(G[k]=G[k]||[]).push(t)});
   const R=recs().map(r=>sNorm(r.name));const out=[];
-  Object.entries(G).forEach(([k,T])=>{if(ign.has(k))return;const ms=new Set(T.map(t=>mOf(t.date)));if(ms.size<3)return;if(T.length/ms.size>1.35)return;
+  Object.entries(G).forEach(([k,T])=>{if(ign.has(k))return;const ms=new Set(T.map(t=>mOf(t.date)));
+    /* 2.139: شهران متتاليان بنفس المبلغ تمامًا وفي يوم متقارب = اشتراك «محتمل» (لا ننتظر الشهر الثالث) */
+    let maybe=false;if(ms.size===2&&T.length===2){const [a,b]=T.slice().sort((x,y)=>x.date.localeCompare(y.date));maybe=Math.abs(+a.amount-(+b.amount))<0.0005&&shiftMonth(mOf(a.date),1)===mOf(b.date)&&Math.abs(+a.date.slice(8,10)-(+b.date.slice(8,10)))<=4;if(!maybe)return}
+    else if(ms.size<3)return;if(T.length/ms.size>1.35)return;
     const last=T.map(t=>t.date).sort().pop();if(dDiff(last,td)>50)return;if(R.some(n=>n.includes(k)||k.includes(n)))return;
     const am=T.map(t=>+t.amount).sort((a,b)=>a-b),med=am[Math.floor(am.length/2)];if(am.some(a=>Math.abs(a-med)>Math.max(0.5,med*0.2)))return;
     const days=T.map(t=>+t.date.slice(8,10)).sort((a,b)=>a-b);const lt=T.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];
-    out.push({k,name:lt.note,amt:r3(med),day:days[Math.floor(days.length/2)],months:ms.size,count:T.length,yearly:r3(med*12),last,cat:lt.cat,paidNow:ms.has(cm),person:lt.person||''})});
+    out.push({k,name:lt.note,amt:r3(med),day:days[Math.floor(days.length/2)],months:ms.size,count:T.length,yearly:r3(med*12),last,cat:lt.cat,paidNow:ms.has(cm),person:lt.person||'',maybe})});
   return out.sort((a,b)=>b.yearly-a.yearly)})}
+/* نوع الالتزام من اسم الجهة (اتصالات، كهرباء، مياه)، وإلا «التزام آخر» */
+function subsKind(n){const s=sNorm(n||'').toLowerCase();if(/omantel|ooredoo|vodafone|awasr|عمانتل|اوريدو|فودافون|اوصر/.test(s))return /fiber|home|منزل|انترنت|internet/.test(s)?'wifi':'phone';
+  if(/nama|نماء|كهرباء|electric/.test(s))return 'elec';if(/مياه|water|diam|ديام/.test(s))return 'water';return 'custom'}
 function openSubs(){const L=document.getElementById('layer');const D=subsFind();const yr=r3(D.reduce((s,x)=>s+x.yearly,0));
   L.innerHTML=`${sheetTop('المصاريف المتكررة')}<h2 style="margin-top:0">🔁 مصاريف تتكرر كل شهر وغير مسجّلة</h2>
    <p class="note" style="margin-top:0">فحصت عملياتك في آخر 7 أشهر، فوجدت مبالغ متقاربة بنفس الاسم تتكرر شهرًا بعد شهر، وليست ضمن التزاماتك. قد تكون اشتراكات أو مصاريف ثابتة نسيتها.</p>
    ${D.length?`<div class="warnbox" style="margin:0 0 10px">تكلّفك معًا حوالي <b class="num">${money(r3(yr/12))}</b> شهريًا = <b class="num">${money(yr)}</b> في السنة.</div>
-   <div class="stack">${D.map((x,i)=>`<div class="panel subrow"><div class="seas-h"><span class="seas-ic">🔁</span><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><small class="note" style="display:block">${esc(catOf(x.cat).n)} · تكرر في ${monthsWord(x.months)} · حوالي يوم ${x.day} · آخرها ${fmtD(x.last)}</small></div><b class="num amt-exp seas-amt">${money(x.amt)}</b></div>
+   <div class="stack">${D.map((x,i)=>`<div class="panel subrow"><div class="seas-h"><span class="seas-ic">🔁</span><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><small class="note" style="display:block">${x.maybe?'<span class="pill warn">محتمل</span> ':''}${esc(catOf(x.cat).n)} · تكرر في ${monthsWord(x.months)}${x.maybe?' بنفس المبلغ تمامًا':''} · حوالي يوم ${x.day} · آخرها ${fmtD(x.last)}</small></div><b class="num amt-exp seas-amt">${money(x.amt)}</b></div>
      <div class="seas-n"><span>في السنة <b class="num amt-exp">${money(x.yearly)}</b></span><span>${x.paidNow?'<span class="amt-inc">دُفع هذا الشهر</span>':'لم يُدفع هذا الشهر بعد'}</span></div>
      <div class="chips"><button class="chip pay" data-sbadd="${i}">أضفه كالتزام شهري</button><button class="chip" data-sbign="${i}">ليس متكررًا / تجاهل</button></div></div>`).join('')}</div>`
    :'<div class="panel empty"><b>✓ لا مصاريف متكررة منسية</b>كل ما يتكرر شهريًا مسجّل ضمن التزاماتك. أفحص من جديد كلما أضفت عمليات.</div>'}
@@ -9656,7 +9909,7 @@ function openSubs(){const L=document.getElementById('layer');const D=subsFind();
     if(x.id==='subUnign'){S.settings.subIgnore=[];await putSettings();memoClear();openSubs();return}
     if(x.dataset.sbign){const d=D[+x.dataset.sbign];S.settings.subIgnore=(S.settings.subIgnore||[]).concat([d.k]);await putSettings();memoClear();openSubs();toast('لن يظهر «'+d.name+'» مرة أخرى');return}
     if(x.dataset.sbadd){const d=D[+x.dataset.sbadd];if(!confirm('إضافة «'+d.name+'» كالتزام شهري بمبلغ '+money(d.amt)+' يوم '+d.day+'؟'))return;const cm=curM();
-      const r={id:uidGen(),kind:'custom',name:d.name,amount:d.amt,cat:d.cat,day:Math.min(28,Math.max(1,d.day)),person:d.person,start:cm,since:cm,arrears:0,log:[{at:today(),t:'أُضيف من كاشف المصاريف المتكررة'}]};
+      const r={id:uidGen(),kind:subsKind(d.name),name:d.name,amount:d.amt,cat:d.cat,day:Math.min(28,Math.max(1,d.day)),person:d.person,start:cm,since:cm,arrears:0,log:[{at:today(),t:'أُضيف من كاشف المصاريف المتكررة'}]};
       S.settings.recurring=(S.settings.recurring||[]).concat([r]);
       const ks=d.k;list().filter(t=>t.type==='exp'&&!t.rec&&t.note&&t.date>=mStart(cm)&&sNorm(t.note).replace(/[0-9.,]+/g,'').replace(/\s+/g,' ').trim()===ks).forEach(t=>{t.rec=r.id;putTx(t)});
       try{aud('rec','إضافة التزام «'+d.name+'» من كاشف المتكررة','',money(d.amt))}catch(er){}await putSettings();memoClear();openSubs();toast('أُضيف «'+d.name+'» إلى التزاماتك الشهرية');return}}}
@@ -10633,8 +10886,9 @@ function todayCardHtml(){if(S.month!==curM())return '';let R=null,d=null;try{R=s
 function insAttnHtml(){if(S.month!==curM()||!list().length)return '';const I=insightsList(S.month,payCycle()).filter(x=>x.ic!=='🏁');if(!I.length)return '';
   return `<div class="ins ins-in">${I.map(x=>`<button class="ins-c lv${x.lv}" ${x.attr}><span class="ins-ic">${x.ic}</span><b>${esc(x.t)}</b><small>${esc(x.s)}</small></button>`).join('')}</div>`}
 function bfDipHtml(){const h=bfHomeHtml();return h&&/bfhome[^"]*neg/.test(h)?h:''}
-function homeAttnHtml(v2){const parts=(v2?[pendHtml,smartAlertsHtml,trustAlertsHtml,bfDipHtml,backupNudgeHtml,widgetNudgeHtml,insAttnHtml]:[pendHtml,billAlertsHtml,smartAlertsHtml,trustAlertsHtml,carAlertsHtml,docAlertsHtml,bfDipHtml,backupNudgeHtml,widgetNudgeHtml,insAttnHtml]).map(f=>{try{return f()||''}catch(e){return ''}}).filter(x=>String(x).trim());
-  if(!parts.length)return '';return `<div class="hlbl">تحتاج انتباهك</div><div class="hattn">${parts.join('')}</div>`}
+/* skip: معرّفات التزامات ظهرت في «تحتاج انتباهك» فلا تتكرر في التنبيهات. inner: داخل خانة «تحتاج انتباهك» بلا عنوان ثانٍ (2.139) */
+function homeAttnHtml(v2,skip,inner){const parts=(v2?[pendHtml,()=>smartAlertsHtml(skip),trustAlertsHtml,bfDipHtml,backupNudgeHtml,widgetNudgeHtml,insAttnHtml]:[pendHtml,billAlertsHtml,smartAlertsHtml,trustAlertsHtml,carAlertsHtml,docAlertsHtml,bfDipHtml,backupNudgeHtml,widgetNudgeHtml,insAttnHtml]).map(f=>{try{return f()||''}catch(e){return ''}}).filter(x=>String(x).trim());
+  if(!parts.length)return '';if(inner)return `<div class="hattn hattn-in">${parts.join('')}</div>`;return `<div class="hlbl">تحتاج انتباهك</div><div class="hattn">${parts.join('')}</div>`}
 
 /* ===================== الرئيسية الديناميكية =====================
  * بطاقات تُسحب أفقيًا (المتبقي من الراتب، تستطيع أن تنفق اليوم، ديوني، الالتزامات)، وأزرار سريعة،
