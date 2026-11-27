@@ -6276,8 +6276,9 @@ function openLook(){const L=document.getElementById('layer');
 
 /* ---------- 24. الإصدار وما الجديد ---------- */
 const DEV={name:'ماجد الرميمي',title:'مهندس ومطور تقنية معلومات',country:'سلطنة عُمان',phone:'95134234',intl:'96895134234'};
-const APP_VERSION='2.142.1';
+const APP_VERSION='2.143.0';
 const CHANGELOG=[
+ {v:'2.143.0',date:'2026-11-27',items:['📖 الرجوع إلى ما كنت تقرؤه: عند الضغط على أي ميزة من الكتالوج أو الدليل أو البحث، يظهر أعلى الشاشة زر يحمل اسم الصفحة التي كنت فيها (مثل «› كتالوج التطبيق»)، وبضغطة يعيدك إليها بنفس الصفحة الداخلية ونفس موضع القراءة','🧭 سجل التنقل: اضغط مطوّلًا على زر «رجوع» (أو بالزر الأيمن في الكمبيوتر) لتظهر قائمة بكل الصفحات السابقة وتنتقل مباشرة إلى أيّ منها، مع «مسح السجل»','النوافذ داخل النوافذ صارت ترجع أيضًا إلى موضع التمرير الذي تركته، وزر الرجوع في الفأرة والمتصفح يعمل بنفس الطريقة']},
  {v:'2.142.1',date:'2026-11-27',items:['🧭 واجهة واحدة لكل الأشهر: عند اختيار شهر سابق أو قادم تبقى الرئيسية بالتصميم الحديث نفسه وبنفس ترتيب خاناتك، وخانة «رصيدي الآن» تصير «ملخص الشهر» (الدخل، المصروف، الباقي، الالتزامات) مع زر العودة إلى الشهر الحالي','🧹 حُذف التصميم القديم للرئيسية نهائيًا مع زر التبديل إليه، بدون أي مساس ببياناتك؛ وسؤال «رصيد الصباح» انتقل إلى خانة الإشعارات حتى لا تضيع ميزة']},
  {v:'2.142.0',date:'2026-11-27',items:['🤝 قروضي للناس: عند تسجيل مصروف اختر «هذا قرض لشخص» ثم الشخص والمدة (نهاية الشهر، الشهر القادم، شهرين، أو تاريخ). لا يُحسب صرفًا لكنه يُخصم من رصيدك حتى يعود','صفحة «قروضي للناس»: لمن، كم بقي، الموعد، المتأخر، مع «استلمت مبلغًا» (سداد جزئي أو كامل) و«تمديد» و«سامحته»','بطاقة العملية: حوّل أي مصروف إلى قرض، واختر لأي إيداع أنه سداد قرض (مع اقتراح الشخص المطابق)','خانة «قروضي للناس» في الرئيسية، والمتأخر والقريب في «تحتاج انتباهك»، وقسم «قروض للناس» في «حسب القسم»، ووسم 🤝 على صف العملية']},
  {v:'2.141.0',date:'2026-11-27',items:['🧾 «بطاقة العملية» الذكية: اضغط أي عملية فتفتح بطاقة مرتبة: 1) سمّها، 2) البند بالأيقونات مع «＋ بند جديد»، 3) اربطها بفاتورة أو قسط من خطتك (الأقرب مبلغًا أولًا مع علامة «نفس المبلغ ✓»، فيصير الالتزام مدفوعًا)، 4) لمن مع «＋ شخص»، ولأي سيارة للوقود والصيانة. وفي آخرها أثر العملية على مخصص البند قبل الحفظ. لا يتغيّر شيء إلا بزر «حفظ».','📱 تذكّر التحويل برقم الهاتف: سمِّ تحويلًا إلى رقم هاتف مرة واحدة (مثل «أحمد (أخي)» + أهل)، فيحفظ التطبيق الرقم في إدارة البيانات، ويسمّي ويصنّف كل تحويلاته السابقة والقادمة وحده. ويقرأ الرقم كاملًا أو بـ 968 أو بمسافات أو مخفيًا (9•••4521).','🏷️ البنود الخاصة: تضيف بندًا جديدًا باسمه وأيقونته من البطاقة أو من إدارة البيانات، فيدخل في الميزانية والتقارير و«حسب القسم» ويُزامَن مع أجهزتك. وتعيد تسميته أو تحذفه، وعند الحذف تنتقل عملياته إلى «أخرى».','🗂️ إدارة البيانات ← الميزانية والأشخاص ← «البنود الخاصة وأرقام التحويل»: البنود التي أضفتها، والأرقام المحفوظة مع تسميتها أو حذفها.','🛡️ رسائل البنك: إذا طلبت التحديث (أو سحبت الشاشة) أثناء تحديث تلقائي، ينتظره التطبيق ثم يحدّث من جديد. كان طلبك يرجع أحيانًا قبل حفظ الرسالة، فيتأخر ظهور الرصيد الصحيح لحظات.']},
@@ -8345,7 +8346,7 @@ function openCatalog(pg){if(pg!==undefined)CAT.pg=pg;const L=document.getElement
   L.onclick=e=>{const x=e.target.closest('button,[data-close]');if(!x)return;if(x.hasAttribute('data-close')){L.innerHTML='';return}
     if(x.dataset.catpg!==undefined){goPg(+x.dataset.catpg);return}
     if(x.dataset.catgo){const [gi,ii]=x.dataset.catgo.split('.').map(Number);const g=catGroups()[gi];const it=g&&g[1][ii];if(!it)return;
-      L.innerHTML='';try{it[3]()}catch(er){toast('تعذّر فتح «'+it[1]+'»')}return}};
+      navJump();L.innerHTML='';try{it[3]()}catch(er){toast('تعذّر فتح «'+it[1]+'»')}return}};
   // السحب يمينًا ويسارًا بين الصفحات (الواجهة من اليمين لليسار: السحب لليسار = التالي)
   const w=document.getElementById('catWrap');let x0=null,y0=0;
   w.addEventListener('touchstart',e=>{if(e.target.closest('input,details'))return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
@@ -9680,16 +9681,26 @@ function openChangelog(){const L=document.getElementById('layer');S.showNew=fals
 /* ===== التنقل: زر «رجوع» للصفحة السابقة في كل صفحة ونافذة، ويعمل معه زر الرجوع وسحب الرجوع في المتصفح =====
  * الصفحات (التبويبات) تُحفظ في سجل مع موضع التمرير. النوافذ: إذا فتحت نافذة من نافذة، يرجعك «رجوع» إلى السابقة كما تركتها،
  * وإذا لم تكن قبلها نافذة يغلقها ويرجعك إلى الصفحة. فتح نافذة موجودة أصلًا في السجل يرجع إليها ولا يكرّرها. */
-const NAV={st:[],cur:null,busy:false,lastTab:null,lastMonth:null,y:0};
+const NAV={st:[],cur:null,busy:false,lastTab:null,lastMonth:null,y:0,jmp:0};
+/* 2.143: «الرجوع إلى ما كنت تقرؤه». إذا ضغطت داخل نافذة (الكتالوج، الدليل، البحث، أي صفحة قراءة) على شيء ينقلك إلى صفحة أخرى
+ * فأُغلقت النافذة، تُحفظ النافذة كما هي (نفس الصفحة الداخلية ونفس موضع التمرير) في السجل بنوع 'ret'،
+ * و«رجوع» يعيدك إلى الصفحة التي كانت تحتها ثم يفتح النافذة كما تركتها. navJump() تعلّم الإغلاق القادم بأنه انتقال
+ * (للانتقال داخل نفس الصفحة)؛ وتغيّر الصفحة مع إغلاق النافذة يُعرف تلقائيًا. */
+function navJump(){NAV.jmp=Date.now()}
+/* مواضع التمرير داخل النوافذ (أي عنصر يتمرر: النافذة، محتواها، صفحة الكتالوج…) تُحفظ أولًا بأول لأن العنصر المنفصل يفقدها */
+const NAV_SC=new WeakMap();
+document.addEventListener('scroll',e=>{const el=e.target;if(!NAV.busy&&el&&el.nodeType===1&&el.closest&&el.closest('#layer'))NAV_SC.set(el,el.scrollTop)},true);
+function navScRestore(L){const set=()=>{[L,...L.querySelectorAll('*')].forEach(el=>{const v=NAV_SC.get(el);if(v>0)el.scrollTop=v})};set();requestAnimationFrame(set);setTimeout(set,80)}
+function navRetEntry(tab,month){const c=NAV.cur;const chain=NAV.st.filter(x=>x.t==='sheet');return {t:'ret',k:c.k,nodes:c.nodes,h:c.h,sc:c.sc||0,chain,tab,month,y:NAV.y}}
 const NAV_TABN={home:'الرئيسية',monthly:'الدفع',log:'السجل',budget:'إدارة البيانات',reports:'التقارير',settings:'الضبط',advisor:'المستشار',debts:'الديون',house:'البيت',cars:'السيارات',trusts:'الأمانات',docs:'المستندات'};
 window.addEventListener('scroll',()=>{if(!NAV.busy)NAV.y=window.scrollY},{passive:true});
 function navPush(e){NAV.st.push(e);if(NAV.st.length>40)NAV.st.shift();try{history.pushState({nav:NAV.st.length},'')}catch(er){}navUI()}
 function navTabChanged(){const L=document.getElementById('layer');if(NAV.lastTab===null){NAV.lastTab=S.tab;NAV.lastMonth=S.month;return}
-  if(S.tab!==NAV.lastTab){try{const v=document.getElementById('view');if(v&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){v.classList.remove('pg-in','pg-back');void v.offsetWidth;v.classList.add(NAV.busy?'pg-back':'pg-in');setTimeout(()=>v.classList.remove('pg-in','pg-back'),320)}}catch(er){}if(!NAV.busy){const i=NAV.st.map(x=>x.t==='tab'&&x.tab).lastIndexOf(S.tab);if(S.tab==='home'&&!(L&&L.innerHTML)){NAV.st=NAV.st.filter(x=>x.t!=='tab')}else navPush({t:'tab',tab:NAV.lastTab,month:NAV.lastMonth,y:NAV.y})}NAV.lastTab=S.tab}NAV.lastMonth=S.month;navUI()}
+  if(S.tab!==NAV.lastTab){try{const v=document.getElementById('view');if(v&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)){v.classList.remove('pg-in','pg-back');void v.offsetWidth;v.classList.add(NAV.busy?'pg-back':'pg-in');setTimeout(()=>v.classList.remove('pg-in','pg-back'),320)}}catch(er){}if(!NAV.busy){const jumped=NAV.cur&&!(L&&L.querySelector('.sheet'));if(jumped){const e=navRetEntry(NAV.lastTab,NAV.lastMonth);NAV.st=NAV.st.filter(x=>x.t!=='sheet'&&x.t!=='open');NAV.cur=null;navPush(e)}else if(S.tab==='home'&&!(L&&L.innerHTML)&&!NAV.st.some(x=>x.t==='ret')){NAV.st=NAV.st.filter(x=>x.t!=='tab')}else navPush({t:'tab',tab:NAV.lastTab,month:NAV.lastMonth,y:NAV.y})}NAV.lastTab=S.tab}NAV.lastMonth=S.month;navUI()}
 function sheetKey(L){const sh=L.querySelector('.sheet');if(!sh)return '';const a=sh.getAttribute('aria-label')||'';if(a)return a;const h=L.querySelector('h2');return h?h.textContent.trim().slice(0,40):''}
 function navLayerChanged(){const L=document.getElementById('layer');if(!L)return;const has=!!L.querySelector('.sheet');
   if(NAV.busy){NAV.cur=has?{k:sheetKey(L),nodes:[...L.childNodes],h:[L.onclick,L.oninput,L.onchange]}:null;navInject();return}
-  if(!has){if(NAV.cur){NAV.st=NAV.st.filter(x=>x.t!=='sheet'&&x.t!=='open')}NAV.cur=null;navUI();return}
+  if(!has){if(NAV.cur){const jump=Date.now()-NAV.jmp<1500;const e=jump?navRetEntry(S.tab,S.month):null;NAV.st=NAV.st.filter(x=>x.t!=='sheet'&&x.t!=='open');if(e){NAV.jmp=0;navPush(e)}}NAV.cur=null;navUI();return}
   const k=sheetKey(L);
   if(!NAV.cur){navPush({t:'open'})}
   else if(k!==NAV.cur.k){const at=NAV.st.findIndex(x=>x.t==='sheet'&&x.k===k);if(at>=0){NAV.st.length=at;}else navPush({t:'sheet',k:NAV.cur.k,nodes:NAV.cur.nodes,h:NAV.cur.h,sc:NAV.cur.sc||0})}
@@ -9701,15 +9712,39 @@ function navInject(){const L=document.getElementById('layer');const sh=L&&L.quer
   if(sh.querySelector('.qhead,[data-noback]')){const o=sh.querySelector('.navback');if(o)o.remove();return}
   let bt=sh.querySelector(':scope .navback');if(!bt){const inn=sh.querySelector('.in')||sh;bt=document.createElement('button');bt.type='button';bt.className='navback';bt.dataset.navback='1';inn.insertBefore(bt,inn.firstChild)}
   bt.setAttribute('aria-label',prev?'رجوع إلى '+prev.k:'رجوع إلى الصفحة');bt.innerHTML='<span aria-hidden="true">›</span> '+lab}
-function navUI(){const b=document.getElementById('navBack');if(!b)return;const L=document.getElementById('layer');const open=L&&L.querySelector('.sheet');const tabs=NAV.st.filter(x=>x.t==='tab');
-  const show=!open&&(tabs.length>0||S.tab!=='home');b.hidden=!show;document.body.classList.toggle('has-navback',show);
-  if(show){const t=tabs.length?tabs[tabs.length-1].tab:'home';b.setAttribute('aria-label','رجوع إلى '+(NAV_TABN[t]||'الصفحة السابقة'))}}
+function navPageEntries(){return NAV.st.filter(x=>x.t==='tab'||x.t==='ret')}
+function navLbl(e){return e?(e.t==='ret'?e.k:(NAV_TABN[e.tab]||'الصفحة السابقة')):'الرئيسية'}
+function navUI(){const b=document.getElementById('navBack');if(!b)return;const L=document.getElementById('layer');const open=L&&L.querySelector('.sheet');const P=navPageEntries();
+  const show=!open&&(P.length>0||S.tab!=='home');b.hidden=!show;document.body.classList.toggle('has-navback',show);
+  if(show){const e=P[P.length-1];const n=navLbl(e);b.setAttribute('aria-label','رجوع إلى '+n);b.title='رجوع إلى '+n+(P.length>1?' · اضغط مطوّلًا لكل السجل':'');
+    b.innerHTML='<span aria-hidden="true">›</span> '+(e&&e.t==='ret'?'<em class="nb-to">'+esc(n)+'</em>':'رجوع')}}
 function navBack(){const L=document.getElementById('layer');const open=L&&L.querySelector('.sheet');
   if(open){let e=NAV.st[NAV.st.length-1];
-    if(e&&e.t==='sheet'){NAV.st.pop();NAV.busy=true;L.replaceChildren(...e.nodes);[L.onclick,L.oninput,L.onchange]=e.h;NAV.cur={k:e.k,nodes:e.nodes,h:e.h,sc:e.sc};const sh=L.querySelector('.sheet');if(sh)sh.scrollTop=e.sc||0;if(sh&&typeof sh._refresh==='function'){try{sh._refresh()}catch(er){}}setTimeout(()=>{NAV.busy=false;navInject();navUI()},0);return true}
+    if(e&&e.t==='sheet'){NAV.st.pop();NAV.busy=true;L.replaceChildren(...e.nodes);[L.onclick,L.oninput,L.onchange]=e.h;NAV.cur={k:e.k,nodes:e.nodes,h:e.h,sc:e.sc};const sh=L.querySelector('.sheet');if(sh)sh.scrollTop=e.sc||0;if(sh&&typeof sh._refresh==='function'){try{sh._refresh()}catch(er){}}navScRestore(L);setTimeout(()=>{NAV.busy=false;navInject();navUI()},120);return true}
     if(e&&e.t==='open')NAV.st.pop();L.innerHTML='';render();return true}
+  {const T=NAV.st.map(x=>x.t);const ri=T.lastIndexOf('ret');if(ri>=0&&ri>T.lastIndexOf('tab')){const e=NAV.st[ri];NAV.st.length=ri;navRestoreRet(e);return true}}
   const i=NAV.st.map(x=>x.t).lastIndexOf('tab');if(i<0){if(S.tab!=='home'){NAV.busy=true;S.tab='home';S.month=curM();render();window.scrollTo(0,0);NAV.busy=false;navUI();return true}return false}
   const e=NAV.st[i];NAV.st.length=i;NAV.busy=true;S.tab=e.tab;if(e.month)S.month=e.month;render();window.scrollTo(0,e.y||0);NAV.y=e.y||0;setTimeout(()=>{window.scrollTo(0,e.y||0);NAV.busy=false},60);navUI();return true}
+function navRestoreRet(e){const L=document.getElementById('layer');NAV.busy=true;
+  if(e.tab&&(S.tab!==e.tab||S.month!==e.month)){S.tab=e.tab;if(e.month)S.month=e.month;NAV.lastTab=S.tab;NAV.lastMonth=S.month;render()}
+  window.scrollTo(0,e.y||0);NAV.y=e.y||0;
+  NAV.st.push(...(e.chain||[]));L.replaceChildren(...e.nodes);[L.onclick,L.oninput,L.onchange]=e.h;NAV.cur={k:e.k,nodes:e.nodes,h:e.h,sc:e.sc};
+  const sh=L.querySelector('.sheet');if(sh){if(typeof sh._refresh==='function'){try{sh._refresh()}catch(er){}}}navScRestore(L);
+  setTimeout(()=>{window.scrollTo(0,e.y||0);NAV.busy=false;navInject();navUI()},120)}
+/* سجل التنقل: ضغطة مطوّلة على «رجوع» تعرض كل الصفحات السابقة للانتقال مباشرة إلى أيّ منها */
+function navHistOpen(){const P=NAV.st.map((x,i)=>({x,i})).filter(o=>o.x.t==='tab'||o.x.t==='ret').reverse();if(!P.length)return;
+  let m=document.getElementById('navHist');if(m)m.remove();m=document.createElement('div');m.id='navHist';m.className='nav-hist';m.setAttribute('role','menu');
+  m.innerHTML=`<b>🧭 رجوع إلى…</b>${P.slice(0,12).map(o=>`<button role="menuitem" data-navto="${o.i}">${o.x.t==='ret'?'📖':'📄'} ${esc(navLbl(o.x))}${o.x.t==='ret'&&NAV_TABN[o.x.tab]?' <small>فوق '+esc(NAV_TABN[o.x.tab])+'</small>':''}</button>`).join('')}<button class="nh-x" data-navto="x">إغلاق</button><button class="nh-x" data-navto="clr">مسح السجل</button>`;
+  document.body.appendChild(m)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-navto]');if(!b)return;e.preventDefault();e.stopPropagation();const m=document.getElementById('navHist');if(m)m.remove();const v=b.dataset.navto;
+  if(v==='x')return;if(v==='clr'){NAV.st=NAV.st.filter(x=>x.t==='sheet'||x.t==='open');navUI();toast('مُسح سجل التنقل');return}
+  const i=+v;if(!(i>=0&&i<NAV.st.length))return;NAV.st.length=i+1;navBack()},true);
+document.addEventListener('click',e=>{const m=document.getElementById('navHist');if(m&&!e.target.closest('#navHist'))m.remove()});
+(function(){let tm=null,fired=false;const on=(ev,f)=>document.addEventListener(ev,f,{passive:true,capture:true});
+  on('pointerdown',e=>{if(!e.target.closest('#navBack'))return;fired=false;clearTimeout(tm);tm=setTimeout(()=>{fired=true;navHistOpen()},550)});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>on(ev,()=>clearTimeout(tm)));
+  document.addEventListener('click',e=>{if(fired&&e.target.closest('#navBack')){fired=false;e.preventDefault();e.stopImmediatePropagation()}},true);
+  document.addEventListener('contextmenu',e=>{if(e.target.closest('#navBack')){e.preventDefault();navHistOpen()}})})();
 /* زر الرجوع في المتصفح وسحب الرجوع في iPhone */
 window.addEventListener('popstate',()=>{if(document.getElementById('admLayer')&&document.getElementById('admLayer').innerHTML)return;navBack()});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-navback],#navBack');if(!b)return;e.preventDefault();e.stopPropagation();let st=null;try{st=history.state}catch(er){}if(st&&st.nav)history.back();else navBack()},true);
@@ -9934,9 +9969,9 @@ function sPagesBase(){return [
   ['📊','مخطط السداد والالتزامات','خطه سداد قسط اختياري تقسيط معادله',()=>openPayPlanner()],['🗓️','الخطة المالية الاستثنائية','خطه استثنائيه تاجيل',()=>openXPlans()],['💰','كم أستطيع أن أنفق اليوم؟','صرف امن انفق اليوم',()=>openSpendToday()],
   ['📍','الجهات والمحلات: كم صرفت في كل محطة ومحل','جهات محلات محطة بترول وقود تجار مطعم سوبرماركت فروع',()=>openMerch()],['📖','الشروحات التعليمية: تعلّم استخدام التطبيق','شرح تعليم جولة مساعدة طريقة استخدام',()=>tourWelcome(true)],['🔍','فحص التكرار الشامل: عمليات وديون والتزامات مكررة','تكرار مكرر مكررة حذف المكرر duplicate',()=>openDupAll()],['💼','مشروعي: تقارير تطبيق الزمرة الملكية','مشروع الزمرة مبيعات ارباح مخزون زبائن فواتير موردين',()=>openBiz()],['📧','إرسال التقارير إلى الإيميل تلقائيًا','ايميل بريد gmail ارسال تقارير تلقائي',()=>openEmailRep()],['📬','التقارير الدورية: يومي أسبوعي شهري سنوي','تقرير يومي اسبوعي شهري سنوي ارسال مستوى تقدم اداء',()=>openPeriodRep('week')],['🧭','الأولويات وخطة التخلص من الديون','اولويات ترتيب ديون التزامات خطة تخلص سداد تقرير',()=>openPriority()],['🏷️','التصنيف السريع','تصنيف فئة مطاعم تسوق تذكر قواعد',()=>openCatQuick()],['🧾','عمليات الكشوفات المستوردة','عمليات الكشف كشوفات البنك تعديل حذف مستوردة مسقط الوطني',()=>openStmtTx()],['📈','التوقعات ومقارنة الأشهر','توقع توقعات مقارنه الاشهر معدل تعلم الاشهر الماضيه القادمه',()=>openMonthFc()],['🔍','فحص تكرار الكشوفات','تكرار مكرر كشف البنك',()=>openDupScan()],['🛟','خطة الإنقاذ','انقاذ تنظيم وضعي',()=>openRescue()],['📖','التلاوات القرآنية','قران الملك الواقعه يس',()=>openQuranHub()],['📆','اختيار الشهر','تقويم شهر',()=>openMonthPicker()],['🖨️','طباعة تقرير','طباعه pdf تقرير',()=>openPrintSheet()],
   ['📩','رسائل البنك (SMS)','رسالة رسائل البنك sms اس ام اس خصم ايداع لصق قراءة تلقائي اختصارات',()=>openImport()],['⚡','اختصارات أخرى (Siri والطريقة القديمة)','اختصارات siri سيري الطريقة القديمة safari',()=>openShortcutGuide()],['🏦','حساباتي وأرصدتي','حساب بنك محفظه رصيد ارصده اجمالي المتوفر مطابقه محرك',()=>openBalEngine()],['🆕','ما الجديد','تحديثات اصدار',()=>openChangelog()],['📆','المصاريف الموسمية','رمضان العيد عيد الفطر الاضحي مدارس تامين سفر موسمي سنوي',()=>openSeasonal()],['🔁','المصاريف المتكررة','اشتراكات اشتراك متكرر منسي',()=>openSubs()],['📋','مراجعة الشهر','مراجعه نهايه الشهر اقفال فائض',()=>openReview()],['🏦','استيراد كشف حساب البنك','كشف حساب بنك مسقط الوطني pdf استيراد',()=>openStmt()],['📊','تحليل كشوفات البنوك','تحليل كشف بنك مدمج خطه الشهر القادم',()=>openBankAnalysis()],['🧹','مسح وإعادة إدخال بيانات فترة','مسح حذف شهر سنه اعاده ادخال كشف',()=>openPurge()]]}
-function sGoTab(t){document.getElementById('layer').innerHTML='';S.tab=t;S.month=curM();render();window.scrollTo(0,0)}
+function sGoTab(t){navJump();document.getElementById('layer').innerHTML='';S.tab=t;S.month=curM();render();window.scrollTo(0,0)}
 /* التنقل إلى عنصر وإبرازه */
-function sFocus(tab,sel,prep){const L=document.getElementById('layer');L.innerHTML='';S.tab=tab;S.month=curM();if(prep)prep();render();
+function sFocus(tab,sel,prep){navJump();const L=document.getElementById('layer');L.innerHTML='';S.tab=tab;S.month=curM();if(prep)prep();render();
   setTimeout(()=>{const el=revealSel(sel);if(!el){window.scrollTo(0,0);return}let p=el.parentElement;while(p){if(p.tagName==='DETAILS')p.open=true;p.classList&&p.classList.remove('folded','closed');p=p.parentElement}
     const c=el.closest('.dcard,.recrow,.goal,.mdrow,.panel')||el;setTimeout(()=>{c.scrollIntoView({block:'center'});c.classList.add('sflash');setTimeout(()=>c.classList.remove('sflash'),1800)},60)},90)}
 function sClick(attrs){let box=document.getElementById('sGo');if(!box){box=document.createElement('div');box.id='sGo';box.hidden=true;document.body.appendChild(box)}box.innerHTML='';const b=document.createElement('button');Object.entries(attrs).forEach(([k,v])=>b.setAttribute(k,v));box.appendChild(b);document.getElementById('layer').innerHTML='';b.click()}

@@ -3173,3 +3173,12 @@ html.km-on,html.km-on body{overflow:hidden}
 .hm-mon>*{min-width:0}
 .hm-mon-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .hm-mon-h b{font-size:1.15em}.hm-mon-h small{opacity:.75}
+/* 2.143: الرجوع إلى ما كنت تقرؤه + سجل التنقل */
+.navbackhdr{max-width:52vw}
+.navbackhdr .nb-to{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:44vw;display:inline-block;vertical-align:bottom}
+.nav-hist{position:fixed;top:calc(env(safe-area-inset-top,0px) + 58px);inset-inline-start:12px;z-index:9999;background:var(--surface,#fff);border:1px solid var(--line,#ddd);border-radius:16px;box-shadow:0 14px 36px rgb(0 0 0 / .22);padding:8px;display:grid;gap:4px;min-width:220px;max-width:min(86vw,340px);max-height:70vh;overflow:auto}
+.nav-hist>b{padding:4px 8px}
+.nav-hist button{all:unset;cursor:pointer;padding:10px 12px;border-radius:12px;display:block;font-weight:600}
+.nav-hist button small{opacity:.65;font-weight:400}
+.nav-hist button:hover,.nav-hist button:focus-visible{background:color-mix(in srgb,var(--accent,#2f7d6d) 10%,transparent)}
+.nav-hist .nh-x{font-weight:400;opacity:.75;text-align:center}
