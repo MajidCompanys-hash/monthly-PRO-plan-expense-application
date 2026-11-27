@@ -3123,3 +3123,7 @@ html.km-on,html.km-on body{overflow:hidden}
 .tw-car[aria-pressed="true"],.tw-cats .chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .tw-car[aria-pressed="true"] span,.tw-cats .chip[aria-pressed="true"] span{color:inherit!important}
 .tw-note{margin:6px 2px 0}
+/* 2.140.2 طباعة يوم/أسبوع */
+.pr-quick{align-items:center;margin-top:8px}.pr-day{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}.pr-day .inp{width:auto;padding:6px 8px}
+.hm-vrow{display:flex;align-items:center;gap:6px;margin-bottom:6px}.hm-vrow .hm-view{flex:1;margin:0}
+.hm-sort{flex:none;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--fg);font:inherit;font-size:12px;padding:8px 10px;white-space:nowrap}
