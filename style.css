@@ -3149,3 +3149,22 @@ html.km-on,html.km-on body{overflow:hidden}
 .tc-plan>div{display:flex;justify-content:space-between;gap:8px;font-size:13px}.tc-plan small{color:var(--muted);font-size:12px}
 .tc-plan.over small,.tc-plan.over b{color:var(--exp)}.tc-plan.over .hg-pb em{background:var(--exp)}
 .xci{font-style:normal;line-height:1}
+/* 2.142: 🤝 القروض للناس */
+.lend-tg{margin-top:2px}
+.lend-box{border:1px solid color-mix(in srgb,var(--accent,#2f7d6d) 35%,transparent);background:color-mix(in srgb,var(--accent,#2f7d6d) 7%,transparent);border-radius:14px;padding:10px 12px;display:grid;gap:8px}
+.lend-h{display:flex;justify-content:space-between;align-items:center}
+.lendtag{color:var(--accent,#2f7d6d);font-weight:700}
+.ln-sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 12px}
+.ln-sum>div{background:var(--card,#fff);border:1px solid var(--line,#e5e5e5);border-radius:14px;padding:10px 12px;display:grid;gap:2px}
+.ln-sum b{font-size:1.15em}
+.ln-byp{margin-bottom:10px}
+.ln-c{background:var(--card,#fff);border:1px solid var(--line,#e5e5e5);border-radius:16px;padding:12px;margin-bottom:10px;display:grid;gap:8px}
+.ln-c.late{border-color:#d9534f;box-shadow:0 0 0 1px #d9534f33 inset}
+.ln-c.done{opacity:.7}
+.ln-h{display:flex;align-items:center;gap:10px}
+.ln-av{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent,#2f7d6d) 12%,transparent);font-size:20px;flex:none}
+.ln-n{flex:1;min-width:0;display:grid}.ln-n small{opacity:.75}
+.ln-v{text-align:left;display:grid}.ln-v small{opacity:.75}
+.ln-due{font-size:.92em}
+.ln-act{gap:6px}
+.ln-home .hv2-ar{width:100%}
