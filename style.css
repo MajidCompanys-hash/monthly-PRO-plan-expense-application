@@ -3071,3 +3071,55 @@ html.km-on,html.km-on body{overflow:hidden}
 .km-pin{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}.km-pin .inp{flex:1;min-width:140px;font-size:18px;text-align:center}
 .km-err{width:100%;margin:0;text-align:center;color:#C0392B;font-size:13px;min-height:1em}
 .km-open{margin-top:10px}
+/* 🧱 2.140 خانات الرئيسية (home/home-layout.js) */
+.hx{margin:10px 0;border-radius:20px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden}
+.hx-h{display:flex;align-items:center;gap:4px;padding-inline-end:6px}
+.hx-tg{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:12px 12px;border:0;background:transparent;color:var(--fg);font:inherit;text-align:start;cursor:pointer}
+.hx-ic{flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:var(--accent-soft);font-size:18px}
+.hx-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}.hx-t b{font-size:15px}
+.hx-t small{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hx.closed .hx-t small{color:var(--fg);opacity:.85}
+.hx-cv{flex:none;width:22px;height:22px;position:relative}.hx-cv::before{content:'';position:absolute;inset:5px;border:solid var(--muted);border-width:0 2px 2px 0;transform:rotate(45deg);transition:transform .2s}
+.hx.closed .hx-cv::before{transform:rotate(135deg)}
+.hx-a{flex:none;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--fg);font-size:16px}
+.hx-b{padding:0 10px 12px}
+.hx-b>.hm-card,.hx-b>.hm-bal,.hx-b>.hv2-card,.hx-b>section{margin:0;box-shadow:none}
+.hx-b>.hm-card{padding:0;background:transparent}
+.hx[data-hb="tx"] .hm-tx>.hm-h,.hx[data-hb="cats"] .hm-cats>.hm-h{display:none}
+.hx[data-hb="bal"]{background:transparent;box-shadow:none}.hx[data-hb="bal"] .hx-b{padding:0}
+.hx[data-hb="bal"]>.hx-h{background:var(--surface);border-radius:20px;margin-bottom:6px;box-shadow:var(--shadow)}
+.hx:not(.closed) .hx-t small{display:none}
+.hx-tools{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:14px 0 6px}
+.hl-list{display:flex;flex-direction:column;gap:6px}
+.hl-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.hl-row.hid{opacity:.5}.hl-ic{font-size:20px}.hl-n{flex:1;min-width:0;display:flex;flex-direction:column}.hl-n small{color:var(--muted);font-size:11.5px}
+.hl-btns{display:flex;gap:4px}.hl-b{width:34px;height:34px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);color:var(--fg);font:inherit;font-size:13px}.hl-b:disabled{opacity:.3}
+/* 🗂️ 2.140 المعاملات حسب القسم (home/tx-groups.js) */
+.hm-view{margin-bottom:6px}
+.hg{border:1px solid var(--line);border-radius:14px;background:var(--surface);margin:8px 0;overflow:hidden}
+.hg>summary{display:flex;align-items:center;gap:10px;padding:10px;cursor:pointer;list-style:none}.hg>summary::-webkit-details-marker{display:none}
+.hg[open]>summary{border-bottom:1px solid var(--line);background:var(--surface-2)}
+.hg-ic{flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:var(--accent-soft);font-size:19px}
+.hg-n{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.hg-n>b{font-size:14px}.hg-n>small{color:var(--muted);font-size:11.5px}
+.hg>summary>.num{flex:none;font-size:15px;align-self:flex-start;margin-top:2px}
+.hg-plan{display:flex;flex-direction:column;gap:3px;margin-top:4px;font-size:11.5px;color:var(--fg)}.hg-plan b{font-size:12px}.hg-plan small{color:var(--muted);font-size:10.5px}
+.hg-pb{display:block;height:6px;border-radius:9px;background:var(--line);overflow:hidden}.hg-pb em{display:block;height:100%;border-radius:9px;background:var(--inc)}
+.hg-plan.over .hg-pb em{background:var(--exp)}.hg-plan.over>span{color:var(--exp)}
+.hg-s{margin:0 8px;border-bottom:1px dashed var(--line)}.hg-s:last-child{border-bottom:0}
+.hg-s>summary{display:flex;align-items:center;gap:8px;padding:9px 4px;cursor:pointer;list-style:none;font-size:13.5px}.hg-s>summary::-webkit-details-marker{display:none}
+.hg-s>summary>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;unicode-bidi:plaintext;text-align:right}
+.hg-s>summary>small{color:var(--muted);background:var(--surface-2);border-radius:99px;padding:1px 7px;font-size:11px}
+.hg-s>summary::before{content:'';width:7px;height:7px;border:solid var(--muted);border-width:0 2px 2px 0;transform:rotate(135deg);transition:transform .15s;flex:none}
+.hg-s[open]>summary::before{transform:rotate(45deg)}
+.hg-bulk{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:4px 4px 8px}.hg-bulk small{color:var(--muted)}
+.hg-tip{margin:8px 10px 0;font-size:12px}
+/* 🎯 لمن؟ */
+.tw-h{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:var(--surface-2);margin-bottom:6px}
+.tw-ic{flex:none;width:44px;height:44px;display:grid;place-items:center;border-radius:14px}.tw-ic svg{width:22px;height:22px}
+.tw-n{flex:1;min-width:0;display:flex;flex-direction:column}.tw-n b{unicode-bidi:plaintext;text-align:right;overflow-wrap:anywhere}.tw-n small{color:var(--muted);font-size:12px}
+.tw-h>.num{font-size:17px}
+.tw-q{margin:14px 2px 8px;font-size:14.5px}
+.tw-cats .chip svg{width:15px;height:15px;vertical-align:-3px}
+.tw-car[aria-pressed="true"],.tw-cats .chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.tw-car[aria-pressed="true"] span,.tw-cats .chip[aria-pressed="true"] span{color:inherit!important}
+.tw-note{margin:6px 2px 0}
