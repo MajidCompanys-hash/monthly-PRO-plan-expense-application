@@ -3168,3 +3168,8 @@ html.km-on,html.km-on body{overflow:hidden}
 .ln-due{font-size:.92em}
 .ln-act{gap:6px}
 .ln-home .hv2-ar{width:100%}
+/* 2.142.1: ملخص الشهر غير الحالي بنفس تصميم الرئيسية */
+.hm-mon{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px;min-width:0;padding:14px}
+.hm-mon>*{min-width:0}
+.hm-mon-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hm-mon-h b{font-size:1.15em}.hm-mon-h small{opacity:.75}
